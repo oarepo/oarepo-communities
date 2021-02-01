@@ -40,7 +40,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    'invenio-communities>2.0.0,<2.1.1'
+    'invenio-communities>=2.0.0,<2.1.1'
 ]
 
 packages = find_packages()
