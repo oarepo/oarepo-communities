@@ -65,30 +65,22 @@ jobs:
 
           include:
           - db-service: postgresql9
-            DB_EXTRAS: "postgresql"
 
           - db-service: postgresql11
-            DB_EXTRAS: "postgresql"
 
           - db-service: mysql5
-            DB_EXTRAS: "mysql"
 
           - db-service: mysql8
-            DB_EXTRAS: "mysql"
 
           - search-service: elasticsearch6
-            SEARCH_EXTRAS: "elasticsearch6"
 
           - search-service: elasticsearch7
-            SEARCH_EXTRAS: "elasticsearch7"
 
     env:
       CACHE: ${{ matrix.cache-service }}
       DB: ${{ matrix.db-service }}
       MQ: ${{ matrix.mq-service }}
       SEARCH: ${{ matrix.search-service }}
-      EXTRAS: all${{ join( [matrix.DB_EXTRAS, matrix.SEARCH_EXTRAS, 'tests'], ',' ) }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -101,7 +93,7 @@ jobs:
       - name: Generate dependencies
         run: |
           python -m pip install --upgrade pip setuptools py wheel requirements-builder
-          requirements-builder -e "$EXTRAS" --level=${{ matrix.requirements-level }} setup.py > .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
+          requirements-builder -e "tests" --level=${{ matrix.requirements-level }} setup.py > .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
 
       - name: Cache pip
         uses: actions/cache@v2
@@ -112,7 +104,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r .${{matrix.requirements-level}}-${{ matrix.python-version }}-requirements.txt
-          pip install ".[$EXTRAS]"
+          pip install ".[tests]"
           pip freeze
           docker --version
           docker-compose --version
