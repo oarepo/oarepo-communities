@@ -8,7 +8,8 @@
 """OArepo module that adds support for communities"""
 import click
 from invenio_accounts.models import User
-from invenio_communities.api import Community
+from invenio_communities.api import Community as CommunityRecord
+from invenio_communities.members.api import CommunityMember
 from invenio_db import db
 
 
@@ -36,10 +37,12 @@ def create(community_id, members, curators, publishers, owner, description, poli
         "owner_email": owner,
         # TODO: "logo": "data/community-logos/ecfunded.jpg"
     }
-    c = Community.create(community_id, owner_id, **comm_data)
-    # TODO: support for community logo
+    c = CommunityRecord.create(community_id, owner_id, **comm_data)
+    # TODO: support community logo
     # if logo_path:
     #     logo = file_stream(logo_path)
     #     ext = save_and_validate_logo(logo, logo.name, community_id)
     #     c.logo_ext = ext
     db.session.commit()
+    CommunityMember.create()
+
