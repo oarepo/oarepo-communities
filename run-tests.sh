@@ -15,16 +15,7 @@ set -o errexit
 
 # Quit on unbound symbols
 set -o nounset
-
-# Always bring down docker services
-function cleanup() {
-    eval "$(docker-services-cli down --env)"
-}
-trap cleanup EXIT
-
 python -m check_manifest --ignore ".*-requirements.txt"
-# TODO: Remove services below that are not neeed (fix also the usage note).
-eval "$(docker-services-cli up --db ${DB:-postgresql} --search ${SEARCH:-elasticsearch} --cache ${CACHE:-redis} --mq ${MQ:-rabbitmq} --env)"
 python -m pytest
 tests_exit_code=$?
 exit "$tests_exit_code"
