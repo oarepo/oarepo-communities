@@ -10,15 +10,9 @@
 See https://pytest-invenio.readthedocs.io/ for documentation on which test
 fixtures are available.
 """
-
-import shutil
-import tempfile
+import os
 
 import pytest
-from flask import Flask
-from flask_babelex import Babel
-
-from oarepo_communities import OARepoCommunities
 
 
 @pytest.fixture(scope='module')
@@ -30,13 +24,20 @@ def celery_config():
     return {}
 
 
-@pytest.fixture(scope='module')
-def create_app(instance_path):
-    """Application factory fixture."""
-    def factory(**config):
-        app = Flask('testapp', instance_path=instance_path)
-        app.config.update(**config)
-        Babel(app)
-        OARepoCommunities(app)
-        return app
-    return factory
+@pytest.fixture(scope="module")
+def app_config(app_config):
+    """Flask application fixture."""
+    app_config.update(dict(
+        TESTING=True,
+        JSON_AS_ASCII=True,
+        SQLALCHEMY_TRACK_MODIFICATIONS=True,
+        SQLALCHEMY_DATABASE_URI=os.environ.get(
+            'SQLALCHEMY_DATABASE_URI',
+            'sqlite:///:memory:'),
+        SERVER_NAME='localhost',
+        CELERY_ALWAYS_EAGER=True,
+        CELERY_BROKER_URL='memory://localhost/',
+        CELERY_RESULT_BACKEND='rpc',
+        SEARCH_ELASTIC_HOSTS=None
+    ))
+    return app_config

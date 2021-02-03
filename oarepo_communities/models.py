@@ -12,16 +12,16 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy_utils import UUIDType, JSONType
 
 
-class OARepoCommunity(db.Model, Timestamp):
+class OARepoCommunityModel(db.Model, Timestamp):
     __tablename__ = 'oarepo_communities'
-    __table_args__ = {
+    __table_args__ = (
         db.Index(
             'uidx_members_id_curators_id_publishers_id',
             'members_id', 'curators_id', 'publishers_id',
             unique=True,
         ),
         {'extend_existing': True}
-    }
+    )
     __versioned__ = {'versioning': False}
 
     id = db.Column(
