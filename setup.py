@@ -83,10 +83,10 @@ setup(
         # 'invenio_celery.tasks': [],
         # 'invenio_db.models': [],
         'invenio_db.models': [
-            'oarepo_references = oarepo_communities.models',
+            'oarepo_communities = oarepo_communities.models',
         ],
         'invenio_db.alembic': [
-            'oarepo_references = oarepo_communities:alembic',
+            'oarepo_communities = oarepo_communities:alembic',
         ],
         # 'invenio_pidstore.minters': [],
         # 'invenio_records.jsonresolver': [],
