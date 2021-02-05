@@ -117,7 +117,7 @@ def sample_records(app, db, es_clear):
         'B': [
             make_sample_record(db, 'Test 4 in community B', 'B', 'published'),
             make_sample_record(db, 'Test 5 in community B', 'B'),
-            make_sample_record(db, 'Test 6 in community B', 'B'),
+            make_sample_record(db, 'Test 6 in community B', 'B', 'published', ['C']),
         ]
     }
     current_search.flush_and_refresh('records-record-v1.0.0')

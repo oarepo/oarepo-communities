@@ -92,11 +92,12 @@ def create_test_role(role, **kwargs):
 PIDRecord = namedtuple('PIDRecord', 'pid record')
 
 
-def make_sample_record(db, title, community_id, state='filling'):
+def make_sample_record(db, title, community_id, state='filling', secondary=None):
     rec = {
         'title': title,
         '_primary_community': community_id,
-        'state': state
+        'state': state,
+        '_communities': secondary
     }
     record_uuid = uuid.uuid4()
     pid = recid_minter(record_uuid, rec)
