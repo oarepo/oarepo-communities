@@ -17,21 +17,21 @@ def test_constructor(app, db):
 
 
 def test_schema_create(app, db):
-    pid, rec = make_sample_record('no-community', None, None)
+    pid, rec = make_sample_record(db, 'no-community', None, None)
     assert rec['_primary_community'] == 'A'
 
     with pytest.raises(AttributeError):
-        make_sample_record('invalid-community', 'C', None)
+        make_sample_record(db, 'invalid-community', 'C', None)
 
 
 def test_clear(app, db):
-    pid, rec = make_sample_record('clear-community', 'A', None)
+    pid, rec = make_sample_record(db, 'clear-community', 'A', None)
     rec.clear()
     assert rec['_primary_community'] == 'A'
 
 
 def test_update(app, db):
-    pid, rec = make_sample_record('update-community', 'A', None)
+    pid, rec = make_sample_record(db, 'update-community', 'A', None)
     with pytest.raises(AttributeError):
         rec.update({'_primary_community': 'B'})
 
@@ -40,7 +40,7 @@ def test_update(app, db):
 
 
 def test_set(app, db):
-    pid, rec = make_sample_record('set-community', 'A', None)
+    pid, rec = make_sample_record(db, 'set-community', 'A', None)
     with pytest.raises(AttributeError):
         rec['_primary_community'] = 'C'
 
@@ -49,13 +49,13 @@ def test_set(app, db):
 
 
 def test_delete(app, db):
-    pid, rec = make_sample_record('delete-community', 'A', None)
+    pid, rec = make_sample_record(db, 'delete-community', 'A', None)
     with pytest.raises(AttributeError):
         del rec['_primary_community']
 
 
 def test_patch(app, db):
-    pid, rec = make_sample_record('patch-community', 'A', None)
+    pid, rec = make_sample_record(db, 'patch-community', 'A', None)
     with pytest.raises(AttributeError):
         rec.patch([
             {
