@@ -19,11 +19,12 @@ from oarepo_enrollment_permissions import create_permission_factory, delete_perm
 from werkzeug.local import LocalProxy
 
 from oarepo_communities.api import OARepoCommunity
+from oarepo_communities.record import CommunityKeepingMixin
 
 _datastore = LocalProxy(lambda: current_app.extensions['security'].datastore)
 
 
-class TestRecord(Record):
+class TestRecord(CommunityKeepingMixin, Record):
     blueprint = 'tests.api/recid_item'
 
     @property
@@ -53,6 +54,7 @@ def gen_rest_endpoint(pid_type, search_class, record_class, path, custom_read_pe
         record_class=record_class,
         record_serializers={
             'application/json': ('invenio_records_rest.serializers'
+            
                                  ':json_v1_response'),
         },
         search_serializers={
@@ -91,7 +93,7 @@ def create_test_role(role, **kwargs):
 
 PIDRecord = namedtuple('PIDRecord', 'pid record')
 
-
+    
 def make_sample_record(db, title, community_id, state='filling', secondary=None):
     rec = {
         'title': title,
@@ -107,7 +109,7 @@ def make_sample_record(db, title, community_id, state='filling', secondary=None)
     indexer.index(rec)
     return PIDRecord(pid, rec)
 
-
+  
 def make_sample_community(db, comid):
     community = OARepoCommunity.create(
         {'title': f'{comid} Title',
