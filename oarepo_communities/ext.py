@@ -6,8 +6,19 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-
+from flask import request
 from flask_babelex import gettext as _
+from invenio_base.signals import app_loaded
+
+
+@app_loaded.connect
+def add_urlkwargs(sender, app, **kwargs):
+
+    def _community_urlkwargs(endpoint, values):
+        if 'community_id' not in values:
+            values['community_id'] = request.view_args['community_id']
+
+    app.url_default_functions.setdefault('invenio_records_rest', []).append(_community_urlkwargs)
 
 
 class OARepoCommunities(object):

@@ -6,6 +6,12 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """Module tests."""
+import uuid
+
+import pytest
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import FlushError
+
 from oarepo_communities.api import OARepoCommunity
 
 
@@ -14,6 +20,30 @@ def _check_community(comm, community_ext_groups):
     assert comm.curators_id == community_ext_groups['curators_id']
     assert comm.publishers_id == community_ext_groups['publishers_id']
     assert comm.json == {'title': 'Title', 'description': 'Community description'}
+
+
+def test_integrity(community, community_ext_groups):
+    # Community id code cannot be reused
+    with pytest.raises(FlushError):
+        OARepoCommunity.create({},
+                               uuid.uuid4(), uuid.uuid4(), uuid.uuid4(),
+                               id_=community[0])
+
+    # Single members group cannot be in multiple communities
+    with pytest.raises(IntegrityError):
+        OARepoCommunity.create({},
+                               community_ext_groups['members_id'], uuid.uuid4(), uuid.uuid4(),
+                               id_='another-community')
+
+    # Single group of curators can be assigned to multiple communities
+    OARepoCommunity.create({},
+                           uuid.uuid4(), community_ext_groups['curators_id'], uuid.uuid4(),
+                           id_='another-community')
+
+    # Single group of publishers can be assigned to multiple communities
+    OARepoCommunity.create({},
+                           uuid.uuid4(), uuid.uuid4(), community_ext_groups['publishers_id'],
+                           id_='just-another-community')
 
 
 def test_community_model(community, community_ext_groups):

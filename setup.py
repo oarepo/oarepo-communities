@@ -40,6 +40,7 @@ setup_requires = [
 ]
 
 install_requires = [
+    'oarepo-enrollment-permissions'
 ]
 
 packages = find_packages()
