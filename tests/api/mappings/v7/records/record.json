@@ -1,0 +1,15 @@
+{
+  "aliases": {
+    "test-records-record": {}
+  },
+  "mappings": {
+    "properties": {
+      "_primary_community": {
+        "type": "keyword"
+      },
+      "control_number": {
+        "type": "keyword"
+      }
+    }
+  }
+}

@@ -14,14 +14,7 @@ from sqlalchemy_utils import UUIDType, JSONType
 
 class OARepoCommunityModel(db.Model, Timestamp):
     __tablename__ = 'oarepo_communities'
-    __table_args__ = (
-        db.Index(
-            'uidx_members_id_curators_id_publishers_id',
-            'members_id', 'curators_id', 'publishers_id',
-            unique=True,
-        ),
-        {'extend_existing': True}
-    )
+    __table_args__ = {'extend_existing': True}
     __versioned__ = {'versioning': False}
 
     id = db.Column(
@@ -41,7 +34,7 @@ class OARepoCommunityModel(db.Model, Timestamp):
     curators_id = db.Column(
         UUIDType,
         nullable=False,
-        unique=True,
+        unique=False,
         index=True
     )
     """Community curators external group UUID."""
@@ -49,7 +42,7 @@ class OARepoCommunityModel(db.Model, Timestamp):
     publishers_id = db.Column(
         UUIDType,
         nullable=False,
-        unique=True,
+        unique=False,
         index=True
     )
     """Community publishers external group UUID."""

@@ -10,19 +10,47 @@
 See https://pytest-invenio.readthedocs.io/ for documentation on which test
 fixtures are available.
 """
+import logging
 import uuid
 
 import pytest
 from invenio_accounts.testutils import create_test_user
 from invenio_app.factory import create_api
-
+from invenio_search import current_search
 from oarepo_communities.api import OARepoCommunity
+from oarepo_communities.handlers import CommunityHandler
+from oarepo_communities.search import CommunitySearch
+from tests.api.helpers import gen_rest_endpoint, make_sample_record, LiteEntryPoint
+
+logging.basicConfig()
+logging.getLogger('elasticsearch').setLevel(logging.DEBUG)
 
 
 @pytest.fixture(scope='module')
 def create_app(instance_path):
     """Application factory fixture."""
     return create_api
+
+
+@pytest.fixture(scope="module")
+def app_config(app_config):
+    app_config['RECORDS_REST_ENDPOINTS'] = {
+        'recid': gen_rest_endpoint('recid', CommunitySearch, 'tests.api.helpers.TestRecord', '<community_id>/records-anonymous')
+    }
+    return app_config
+
+
+def extra_entrypoints(app, group=None, name=None):
+    data = {
+        'oarepo_enrollments.enrollments': [
+            LiteEntryPoint('communities', CommunityHandler),
+        ],
+    }
+
+    names = data.keys() if name is None else [name]
+    for key in names:
+        for entry_point in data[key]:
+            yield entry_point
 
 
 @pytest.fixture(scope='module')
@@ -68,3 +96,29 @@ def community(db, community_ext_groups):
         id_=comid)
     db.session.commit()
     yield comid, community
+
+
+@pytest.fixture()
+def sample_records(app, db, es_clear):
+    try:
+        current_search.client.indices.delete('records-record-v1.0.0')
+    except:
+        pass
+    if 'records-record' not in current_search.mappings:
+        current_search.register_mappings('records', 'tests.api.mappings')
+    list(current_search.delete())
+    list(current_search.create())
+    records = {
+        'A': [
+            make_sample_record(db, 'Test 1 in community A', 'A', 'published'),
+            make_sample_record(db, 'Test 2 in community A', 'A'),
+            make_sample_record(db, 'Test 3 in community A', 'A')
+        ],
+        'B': [
+            make_sample_record(db, 'Test 4 in community B', 'B', 'published'),
+            make_sample_record(db, 'Test 5 in community B', 'B'),
+            make_sample_record(db, 'Test 6 in community B', 'B', 'published', ['C']),
+        ]
+    }
+    current_search.flush_and_refresh('records-record-v1.0.0')
+    return records
