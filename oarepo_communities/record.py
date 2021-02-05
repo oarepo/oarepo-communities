@@ -15,10 +15,6 @@ class CommunityKeepingMixin(object):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.PRIMARY_COMMUNITY_FIELD not in self:
-            self[self.PRIMARY_COMMUNITY_FIELD] = ''  # TODO: what should be set here????
-        else:
-            self._check_primary_community(self)
 
     def clear(self):
         """Preserves the schema even if the record is cleared and all metadata wiped out."""
@@ -27,20 +23,21 @@ class CommunityKeepingMixin(object):
         if primary:
             self[self.PRIMARY_COMMUNITY_FIELD] = primary
 
+    def _check_community(self, data):
+        if self.PRIMARY_COMMUNITY_FIELD in data:
+            if data[self.PRIMARY_COMMUNITY_FIELD] != self[self.PRIMARY_COMMUNITY_FIELD]:
+                raise AttributeError('_primary_community cannot be changed')
+
     def update(self, e=None, **f):
         """Dictionary update."""
-        self._check_primary_community(e or f)
+        self._check_community(e or f)
         return super().update(e, **f)
-
-    @classmethod
-    def _check_primary_community(cls, data):
-        # TODO: check if primary community is valid for a record
-        return
 
     def __setitem__(self, key, value):
         """Dict's setitem."""
         if key == self.PRIMARY_COMMUNITY_FIELD:
-            self._check_primary_community(value)
+            if self.PRIMARY_COMMUNITY_FIELD in self and self[self.PRIMARY_COMMUNITY_FIELD] != value:
+                raise AttributeError('_primary_community cannot be changed')
         return super().__setitem__(key, value)
 
     def __delitem__(self, key):
@@ -55,18 +52,17 @@ class CommunityKeepingMixin(object):
         Creates a new record instance and store it in the database.
         For parameters see :py:class:invenio_records.api.Record
         """
-        if cls.PRIMARY_COMMUNITY_FIELD not in data:
-            data[cls.PRIMARY_COMMUNITY_FIELD] = ''  # TODO: what should be set here????
-        else:
-            cls._check_primary_community(data)
+        if not data.get(cls.PRIMARY_COMMUNITY_FIELD, None):
+            raise AttributeError('_primary_community is missing from record')
         ret = super().create(data, id_, **kwargs)
         return ret
 
     def patch(self, patch):
-        """Patch record metadata. Overrides invenio patch to check if schema has changed
+        """Patch record metadata. Overrides invenio patch to check if community has changed
         :params patch: Dictionary of record metadata.
         :returns: A new :class:`Record` instance.
         """
         data = apply_patch(dict(self), patch)
-        self._check_primary_community(data)
+        if self[self.PRIMARY_COMMUNITY_FIELD] != data[self.PRIMARY_COMMUNITY_FIELD]:
+            raise AttributeError('_primary_community cannot be changed')
         return self.__class__(data, model=self.model)

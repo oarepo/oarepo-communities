@@ -8,20 +8,15 @@
 """OArepo module that adds support for communities"""
 import pytest
 
-from tests.api.helpers import CommunityEnforcingRecord, make_sample_record
-
-
-def test_constructor(app, db):
-    rec = CommunityEnforcingRecord({})
-    assert rec['_primary_community'] == 'A'
+from tests.api.helpers import make_sample_record
 
 
 def test_schema_create(app, db):
-    pid, rec = make_sample_record(db, 'no-community', None, None)
+    pid, rec = make_sample_record(db, 'no-community', 'A', None)
     assert rec['_primary_community'] == 'A'
 
     with pytest.raises(AttributeError):
-        make_sample_record(db, 'invalid-community', 'C', None)
+        make_sample_record(db, 'invalid-community', None, None)
 
 
 def test_clear(app, db):
@@ -44,9 +39,6 @@ def test_set(app, db):
     with pytest.raises(AttributeError):
         rec['_primary_community'] = 'C'
 
-    # should pass as this is an existing community
-    rec['_primary_community'] = 'B'
-
 
 def test_delete(app, db):
     pid, rec = make_sample_record(db, 'delete-community', 'A', None)
@@ -64,11 +56,3 @@ def test_patch(app, db):
                 'value': 'invalid'
             }
         ])
-
-    rec.patch([
-        {
-            'op': 'replace',
-            'path': '/_primary_community',
-            'value': 'B'
-        }
-    ])
