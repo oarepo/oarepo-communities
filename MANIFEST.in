@@ -25,3 +25,5 @@ include LICENSE
 include babel.ini
 include pytest.ini
 recursive-include tests *.py
+include *.yml
+recursive-include tests *.json

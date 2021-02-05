@@ -13,7 +13,6 @@ import flask
 from flask import current_app, url_for
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.minters import recid_minter
-from invenio_pidstore.models import PersistentIdentifier
 from invenio_records import Record
 from oarepo_enrollment_permissions import create_permission_factory, delete_permission_factory, \
     update_permission_factory, read_permission_factory

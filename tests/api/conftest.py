@@ -14,11 +14,9 @@ import logging
 import uuid
 
 import pytest
-from flask import url_for
 from invenio_accounts.testutils import create_test_user
 from invenio_app.factory import create_api
-from invenio_records import Record
-from invenio_search import current_search, RecordsSearch
+from invenio_search import current_search
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.handlers import CommunityHandler
 from oarepo_communities.search import CommunitySearch

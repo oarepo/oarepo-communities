@@ -7,7 +7,6 @@
 
 """OArepo module that adds support for communities"""
 from flask import request
-from flask_babelex import gettext as _
 from invenio_base.signals import app_loaded
 
 
