@@ -19,8 +19,10 @@ def test_rest_list_anonymous(client, es, sample_records):
     print(resp.data)
     assert resp.status_code == 200
     assert resp.json['hits']['total'] == 3  # 1 published record in community A
+    assert 'B' not in [r['metadata']['_primary_community'] for r in resp.json['hits']['hits']]
 
     resp = client.get('/B/records-anonymous/')
     print(resp.data)
     assert resp.status_code == 200
     assert resp.json['hits']['total'] == 3  # 1 published record in community B
+    assert 'A' not in [r['metadata']['_primary_community'] for r in resp.json['hits']['hits']]

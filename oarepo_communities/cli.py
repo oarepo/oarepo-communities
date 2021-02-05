@@ -9,7 +9,6 @@
 import click
 from click import UUID
 from flask.cli import with_appcontext
-from invenio_accounts.models import User
 from invenio_app.factory import create_api
 from sqlalchemy.exc import IntegrityError
 
@@ -43,9 +42,11 @@ def create(community_id, members, curators, publishers, description, policy, tit
     api = create_api()
     with api.app_context():
         try:
-            comm = OARepoCommunity.create(comm_data,
-                                   id_=community_id,
-                                   members_id=members, curators_id=curators, publishers_id=publishers)
+            comm = OARepoCommunity.create(
+                comm_data,
+                id_=community_id,
+                members_id=members, curators_id=curators, publishers_id=publishers
+            )
 
         except IntegrityError:
             click.secho(f'Community {community_id} already exists', fg='red')

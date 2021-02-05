@@ -37,8 +37,7 @@ def create_app(instance_path):
 @pytest.fixture(scope="module")
 def app_config(app_config):
     app_config['RECORDS_REST_ENDPOINTS'] = {
-        'recid': gen_rest_endpoint('recid', RecordsSearch, 'tests.api.helpers.TestRecord', '<community_id>/records-no-security'),
-        'recid2': gen_rest_endpoint('recid2', CommunitySearch, 'tests.api.helpers.TestRecord', '<community_id>/records-anonymous')
+        'recid': gen_rest_endpoint('recid', CommunitySearch, 'tests.api.helpers.TestRecord', '<community_id>/records-anonymous')
     }
     return app_config
 

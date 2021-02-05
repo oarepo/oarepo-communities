@@ -31,7 +31,7 @@ class CommunitySearchMixin(RecordsSearchMixin):
 
     @staticmethod
     def community_filter():
-        return terms_filter('_communities.keyword')([request.view_args['community_id']])
+        return terms_filter('_primary_community.keyword')([request.view_args['community_id']])
 
 
 CommunitySearch = CommunitySearchMixin

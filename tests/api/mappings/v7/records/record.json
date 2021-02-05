@@ -4,7 +4,7 @@
   },
   "mappings": {
     "properties": {
-      "_communities": {
+      "_primary_community": {
         "type": "keyword"
       },
       "control_number": {

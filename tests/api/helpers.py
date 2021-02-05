@@ -96,13 +96,11 @@ PIDRecord = namedtuple('PIDRecord', 'pid record')
 def make_sample_record(db, title, community_id, state='filling'):
     rec = {
         'title': title,
-        '_communities': [community_id],
+        '_primary_community': community_id,
         'state': state
     }
     record_uuid = uuid.uuid4()
     pid = recid_minter(record_uuid, rec)
-    PersistentIdentifier.create('recid2', pid.pid_value, status=pid.status,
-                                object_type=pid.object_type, object_uuid=pid.object_uuid)
     rec = TestRecord.create(rec, id_=record_uuid)
     db.session.commit()
     indexer = RecordIndexer()
