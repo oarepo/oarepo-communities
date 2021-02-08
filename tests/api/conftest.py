@@ -17,6 +17,8 @@ import pytest
 from invenio_accounts.testutils import create_test_user
 from invenio_app.factory import create_api
 from invenio_search import current_search
+from oarepo_enrollments.config import allow_all
+
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.handlers import CommunityHandler
 from oarepo_communities.search import CommunitySearch
@@ -35,7 +37,11 @@ def create_app(instance_path):
 @pytest.fixture(scope="module")
 def app_config(app_config):
     app_config['RECORDS_REST_ENDPOINTS'] = {
-        'recid': gen_rest_endpoint('recid', CommunitySearch, 'tests.api.helpers.TestRecord', '<community_id>/records-anonymous')
+        'recid': gen_rest_endpoint('recid',
+                                   CommunitySearch,
+                                   'tests.api.helpers.TestRecord',
+                                   '<community_id>/records-anonymous',
+                                   custom_read_permission_factory=allow_all)
     }
     return app_config
 
