@@ -22,9 +22,6 @@ tests_require = [
 ]
 
 extras_require = {
-    'docs': [
-        'Sphinx>=3,<4',
-    ],
     'tests': [
         'oarepo[tests]~={version}'.format(version=OAREPO_VERSION),
         *tests_require
@@ -36,10 +33,10 @@ for reqs in extras_require.values():
     extras_require['all'].extend(reqs)
 
 setup_requires = [
-    'Babel>=2.8',
 ]
 
 install_requires = [
+    'oarepo-micro-api',
     'oarepo-enrollment-permissions'
 ]
 

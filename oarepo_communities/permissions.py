@@ -7,10 +7,3 @@
 
 """OArepo module that adds support for communities"""
 
-OAREPO_COMMUNITIES_TYPES = {
-    'wgroup': 'Working group',
-    'project': 'Project',
-    'research': 'Research field',
-    'other': 'Other'
-}
-"""Community types or focus."""

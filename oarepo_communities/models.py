@@ -8,8 +8,9 @@
 """OArepo module that adds support for communities"""
 from invenio_db import db
 from invenio_records.models import Timestamp
+from sqlalchemy import Integer, ForeignKey
 from sqlalchemy.dialects import postgresql
-from sqlalchemy_utils import UUIDType, JSONType
+from sqlalchemy_utils import JSONType
 
 
 class OARepoCommunityModel(db.Model, Timestamp):
@@ -23,29 +24,21 @@ class OARepoCommunityModel(db.Model, Timestamp):
     )
     """Primary Community identifier slug."""
 
-    members_id = db.Column(
-        UUIDType,
-        nullable=False,
-        unique=True,
-        index=True
-    )
-    """Community members external group UUID."""
+    members_id = db.Column(db.Integer(),
+                           db.ForeignKey('accounts_role.id'),
+                           nullable=False)
+    members = db.relationship('Role',
+                              foreign_keys=[members_id],
+                              backref=db.backref('oarepo_community', lazy='dynamic'))
+    """Community members role."""
 
-    curators_id = db.Column(
-        UUIDType,
-        nullable=False,
-        unique=False,
-        index=True
-    )
-    """Community curators external group UUID."""
+    curators_id = db.Column(Integer, ForeignKey('accounts_role.id'),
+                            nullable=False)
+    """Community curators role."""
 
-    publishers_id = db.Column(
-        UUIDType,
-        nullable=False,
-        unique=False,
-        index=True
-    )
-    """Community publishers external group UUID."""
+    publishers_id = db.Column(Integer, ForeignKey('accounts_role.id'),
+                              nullable=False)
+    """Community publishers role."""
 
     json = db.Column(
         db.JSON().with_variant(

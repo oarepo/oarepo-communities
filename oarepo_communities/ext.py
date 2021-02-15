@@ -8,6 +8,7 @@
 """OArepo module that adds support for communities"""
 from flask import request
 from invenio_base.signals import app_loaded
+from . import config
 
 
 @app_loaded.connect
@@ -37,6 +38,6 @@ class OARepoCommunities(object):
         """Initialize configuration."""
         # Use theme's base template if theme is installed
 
-        for k in dir(app.config):
+        for k in dir(config):
             if k.startswith('OAREPO_COMMUNITIES_'):
-                app.config.setdefault(k, getattr(app.config, k))
+                app.config.setdefault(k, getattr(config, k))

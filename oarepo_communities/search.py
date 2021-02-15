@@ -33,7 +33,7 @@ class CommunitySearchMixin(RecordsSearchMixin):
         request_community = request.view_args['community_id']
 
         return Bool(should=[
-            Q('term', **{'_primary_community.keyword': request_community}),
+            Q('term', **{'_primary_community': request_community}),
             terms_filter('_communities.keyword')([request_community])
         ], minimum_should_match=1)
 
