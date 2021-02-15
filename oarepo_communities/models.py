@@ -25,19 +25,33 @@ class OARepoCommunityModel(db.Model, Timestamp):
     """Primary Community identifier slug."""
 
     members_id = db.Column(db.Integer(),
-                           db.ForeignKey('accounts_role.id'),
+                           db.ForeignKey('accounts_role.id',
+                                         ondelete="CASCADE"),
                            nullable=False)
     members = db.relationship('Role',
+                              cascade="all, delete",
                               foreign_keys=[members_id],
                               backref=db.backref('oarepo_community', lazy='dynamic'))
     """Community members role."""
 
-    curators_id = db.Column(Integer, ForeignKey('accounts_role.id'),
+    curators_id = db.Column(Integer,
+                            db.ForeignKey('accounts_role.id',
+                                          ondelete="CASCADE"),
                             nullable=False)
+    curators = db.relationship('Role',
+                              cascade="all, delete",
+                              foreign_keys=[curators_id],
+                              backref=db.backref('curators_oarepo_community', lazy='dynamic'))
     """Community curators role."""
 
-    publishers_id = db.Column(Integer, ForeignKey('accounts_role.id'),
+    publishers_id = db.Column(Integer,
+                              db.ForeignKey('accounts_role.id',
+                                            ondelete="CASCADE"),
                               nullable=False)
+    publishers = db.relationship('Role',
+                               cascade="all, delete",
+                               foreign_keys=[publishers_id],
+                               backref=db.backref('publishers_oarepo_community', lazy='dynamic'))
     """Community publishers role."""
 
     json = db.Column(

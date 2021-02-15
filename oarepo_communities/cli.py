@@ -40,17 +40,17 @@ def create(community_id, members, curators, publishers, description, policy, tit
     ctypes = current_app.config['OAREPO_COMMUNITIES_TYPES']
     if ctype not in ctypes.keys():
         click.secho(f'Invalid Community type {ctype}. Choices: {ctypes}', fg='red')
-        exit(2)
+        exit(3)
 
-    mem_role: Role = current_datastore.find_or_create_role(members)
+    mem_role: Role = current_datastore.find_or_create_role(str(members))
     mem_role.description = 'member'
     current_datastore.put(mem_role)
 
-    cur_role: Role = current_datastore.find_or_create_role(curators)
+    cur_role: Role = current_datastore.find_or_create_role(str(curators))
     cur_role.description = 'curator'
     current_datastore.put(cur_role)
 
-    pub_role: Role = current_datastore.find_or_create_role(publishers)
+    pub_role: Role = current_datastore.find_or_create_role(str(publishers))
     pub_role.description = 'publisher'
     current_datastore.put(pub_role)
 
@@ -75,7 +75,7 @@ def create(community_id, members, curators, publishers, description, policy, tit
 
     except IntegrityError:
         click.secho(f'Community {community_id} already exists', fg='red')
-        exit(1)
+        exit(4)
 
     db.session.commit()
-    click.secho('Created community: ', comm, fg='green')
+    click.secho(f'Created community: {comm}', fg='green')

@@ -19,13 +19,16 @@ from invenio_accounts.models import Role
 from invenio_accounts.proxies import current_datastore
 from invenio_accounts.testutils import create_test_user
 from invenio_app.factory import create_api
+from invenio_db import db
 from invenio_search import current_search
 from oarepo_enrollments.config import allow_all
 from oarepo_enrollments.ext import OARepoEnrollmentsExt
+from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from oarepo_communities import OARepoCommunities
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.handlers import CommunityHandler
+from oarepo_communities.models import OARepoCommunityModel
 from oarepo_communities.search import CommunitySearch
 from tests.api.helpers import gen_rest_endpoint, make_sample_record, LiteEntryPoint
 
@@ -53,7 +56,7 @@ def app_config(app_config):
         SQLALCHEMY_DATABASE_URI=os.getenv('SQLALCHEMY_DATABASE_URI',
                                           'sqlite://'),
         SECURITY_DEPRECATED_PASSWORD_SCHEMES=[],
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        SQLALCHEMY_TRACK_MODIFICATIONS=True,
         SECURITY_PASSWORD_HASH='plaintext',
         SECURITY_PASSWORD_SCHEMES=['plaintext'],
         APP_ALLOWED_HOSTS=['localhost'],

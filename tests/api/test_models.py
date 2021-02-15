@@ -11,10 +11,12 @@ import uuid
 import pytest
 from invenio_accounts.models import Role
 from invenio_accounts.proxies import current_datastore
+from invenio_db import db
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import FlushError
 
 from oarepo_communities.api import OARepoCommunity
+from oarepo_communities.models import OARepoCommunityModel
 
 
 def _check_community(comm, community_ext_groups):
@@ -59,8 +61,27 @@ def test_get_community_from_role(community, community_roles, community_ext_group
     assert comm is not None
     _check_community(comm, community_ext_groups['A'])
 
+    rol = Role.query.get(community_roles['B']['curators_id'])
+    comm = rol.curators_oarepo_community.one_or_none()
+    assert comm is not None
+    _check_community(comm, community_ext_groups['A'])
+
     # Test role not bound to community
     rol = Role.query.get(community_roles['B']['members_id'])
     comm = rol.oarepo_community.one_or_none()
 
     assert comm is None
+
+
+def test_community_delete(community):
+    rols = Role.query.all()
+    assert len(rols) == 6
+
+    db.session.delete(community[1])
+    db.session.commit()
+    coms = OARepoCommunityModel.query.all()
+    assert len(coms) == 0
+
+    rols = Role.query.all()
+    assert len(rols) == 3
+
