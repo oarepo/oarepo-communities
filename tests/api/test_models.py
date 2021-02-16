@@ -12,7 +12,6 @@ import pytest
 from invenio_accounts.models import Role
 from invenio_accounts.proxies import current_datastore
 from invenio_db import db
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import FlushError
 
 from oarepo_communities.api import OARepoCommunity
@@ -93,4 +92,3 @@ def test_community_delete(community):
 
     rols = Role.query.all()
     assert len(rols) == 3
-

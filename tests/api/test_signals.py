@@ -6,7 +6,6 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-import uuid
 from functools import partial
 
 import pytest
@@ -34,7 +33,6 @@ def signals():
 
 
 def test_signals(base_app, db, signals, community_roles):
-
     com = OARepoCommunity.create({}, **community_roles['A'], id_='signals-community')
 
     assert 'before_community_insert' in signals
