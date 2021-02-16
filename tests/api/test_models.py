@@ -77,8 +77,10 @@ def test_get_community_from_role(community, community_roles, community_ext_group
     # Test role not bound to community
     rol = Role.query.get(community_roles['B']['members_id'])
     comm = rol.oarepo_community.one_or_none()
-
     assert comm is None
+
+    comm2 = OARepoCommunity.get_community_from_role(rol)
+    assert comm2 is None
 
 
 def test_community_delete(community):

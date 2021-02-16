@@ -72,8 +72,9 @@ class OARepoCommunity(RecordBase):
             query = cls.model_cls.query.filter(or_(cls.model_cls.members_id == role.id,
                                                    cls.model_cls.curators_id == role.id,
                                                    cls.model_cls.publishers_id == role.id))
-            obj = query.one()
-            return cls(obj.json, model=obj).model
+            obj = query.one_or_none()
+            if obj:
+                return cls(obj.json, model=obj).model
 
     @classmethod
     def get_communities(cls, ids, with_deleted=False):
