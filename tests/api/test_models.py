@@ -61,10 +61,19 @@ def test_get_community_from_role(community, community_roles, community_ext_group
     assert comm is not None
     _check_community(comm, community_ext_groups['A'])
 
-    rol = Role.query.get(community_roles['B']['curators_id'])
+    rol = Role.query.get(community_roles['A']['curators_id'])
     comm = rol.curators_oarepo_community.one_or_none()
     assert comm is not None
     _check_community(comm, community_ext_groups['A'])
+
+    rol = Role.query.get(community_roles['A']['publishers_id'])
+    comm = rol.publishers_oarepo_community.one_or_none()
+    assert comm is not None
+    _check_community(comm, community_ext_groups['A'])
+
+    comm2 = OARepoCommunity.get_community_from_role(rol)
+    assert comm2 is not None
+    assert comm2 == comm
 
     # Test role not bound to community
     rol = Role.query.get(community_roles['B']['members_id'])

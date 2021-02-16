@@ -60,6 +60,18 @@ class OARepoCommunity(RecordBase):
             return cls(obj.json, model=obj).model
 
     @classmethod
+    def get_community_from_role(cls, role):
+        """Retrieve the community for a given role.
+
+        :param role: A flask Role instance
+        :returns: The :class:`OARepoCommunityModel` instance,
+                  None if role is not associated with any community.
+        """
+        return role.oarepo_community.one_or_none() or \
+               role.curators_oarepo_community.one_or_none() or \
+               role.publishers_oarepo_community.one_or_none()
+
+    @classmethod
     def get_communities(cls, ids, with_deleted=False):
         """Retrieve multiple communities by id.
 

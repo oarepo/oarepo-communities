@@ -74,7 +74,7 @@ def app_config(app_config):
     return app_config
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def app(base_app):
     """Flask application fixture."""
     OARepoEnrollmentsExt(base_app)
