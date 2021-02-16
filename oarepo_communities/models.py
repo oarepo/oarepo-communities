@@ -8,7 +8,7 @@
 """OArepo module that adds support for communities"""
 from invenio_db import db
 from invenio_records.models import Timestamp
-from sqlalchemy import Integer, ForeignKey
+from sqlalchemy import Integer
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_utils import JSONType
 
@@ -39,9 +39,9 @@ class OARepoCommunityModel(db.Model, Timestamp):
                                           ondelete="CASCADE"),
                             nullable=False)
     curators = db.relationship('Role',
-                              cascade="all, delete",
-                              foreign_keys=[curators_id],
-                              backref=db.backref('curators_oarepo_community', lazy='dynamic'))
+                               cascade="all, delete",
+                               foreign_keys=[curators_id],
+                               backref=db.backref('curators_oarepo_community', lazy='dynamic'))
     """Community curators role."""
 
     publishers_id = db.Column(Integer,
@@ -49,9 +49,9 @@ class OARepoCommunityModel(db.Model, Timestamp):
                                             ondelete="CASCADE"),
                               nullable=False)
     publishers = db.relationship('Role',
-                               cascade="all, delete",
-                               foreign_keys=[publishers_id],
-                               backref=db.backref('publishers_oarepo_community', lazy='dynamic'))
+                                 cascade="all, delete",
+                                 foreign_keys=[publishers_id],
+                                 backref=db.backref('publishers_oarepo_community', lazy='dynamic'))
     """Community publishers role."""
 
     json = db.Column(
