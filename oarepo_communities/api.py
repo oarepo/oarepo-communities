@@ -9,6 +9,7 @@
 from flask import current_app
 from invenio_db import db
 from invenio_records.api import RecordBase
+from sqlalchemy import or_
 
 from oarepo_communities.models import OARepoCommunityModel
 from oarepo_communities.signals import before_community_insert, after_community_insert
@@ -58,6 +59,22 @@ class OARepoCommunity(RecordBase):
                 query = query.filter(cls.model_cls.json != None)  # noqa
             obj = query.one()
             return cls(obj.json, model=obj).model
+
+    @classmethod
+    def get_community_from_role(cls, role):
+        """Retrieve the community for a given role.
+
+        :param role: A flask Role instance
+        :returns: The :class:`OARepoCommunityModel` instance,
+                  None if role is not associated with any community.
+        """
+        with db.session.no_autoflush:
+            query = cls.model_cls.query.filter(or_(cls.model_cls.members_id == role.id,
+                                                   cls.model_cls.curators_id == role.id,
+                                                   cls.model_cls.publishers_id == role.id))
+            obj = query.one_or_none()
+            if obj:
+                return cls(obj.json, model=obj).model
 
     @classmethod
     def get_communities(cls, ids, with_deleted=False):
