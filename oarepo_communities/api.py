@@ -7,33 +7,36 @@
 
 """OArepo module that adds support for communities"""
 from flask import current_app
+from invenio_accounts.proxies import current_datastore
 from invenio_db import db
 from invenio_records.api import RecordBase
-from sqlalchemy import or_
 
+from oarepo_communities.errors import OARepoCommunityCreateError
 from oarepo_communities.models import OARepoCommunityModel
 from oarepo_communities.signals import before_community_insert, after_community_insert
+from oarepo_communities.utils import community_role_kwargs, community_kwargs_from_role
 
 
 class OARepoCommunity(RecordBase):
     model_cls = OARepoCommunityModel
 
     @classmethod
-    def create(cls, data, members_id, curators_id, publishers_id, id_=None, **kwargs):
+    def create(cls, data, title, ctype='other', id_=None, **kwargs):
         """Create a new Community instance and store it in the database."""
         with db.session.begin_nested():
             comm = cls(data)
             comm.model = cls.model_cls(
                 id=id_,
-                members_id=members_id,
-                curators_id=curators_id,
-                publishers_id=publishers_id,
+                title=title,
+                type=ctype,
                 json=comm)
 
             before_community_insert.send(
                 current_app._get_current_object(),
                 community=comm.model
             )
+            cls._create_community_roles(comm.model)
+
             db.session.add(comm.model)
 
         after_community_insert.send(
@@ -44,7 +47,21 @@ class OARepoCommunity(RecordBase):
         return comm.model
 
     @classmethod
-    def get_community(cls, id_, with_deleted=False):
+    def _create_community_roles(cls, community):
+        role_kwargs_impl = current_app.config.get('OAREPO_COMMUNITIES_ROLE_NAME', community_role_kwargs)
+        roles = current_app.config['OAREPO_COMMUNITIES_ROLES']
+
+        for role in roles:
+            role_kwargs = role_kwargs_impl(community, role)
+            role = current_datastore.find_or_create_role(str(role_kwargs['name']))
+            if not role:
+                raise OARepoCommunityCreateError(community)
+
+            role.description = role_kwargs['description']
+            current_datastore.put(role)
+
+    @classmethod
+    def get_community(cls, id_, with_deleted=False, **kwargs):
         """Retrieve the community by its id.
 
         Raise a database exception if the community does not exist.
@@ -68,13 +85,9 @@ class OARepoCommunity(RecordBase):
         :returns: The :class:`OARepoCommunityModel` instance,
                   None if role is not associated with any community.
         """
-        with db.session.no_autoflush:
-            query = cls.model_cls.query.filter(or_(cls.model_cls.members_id == role.id,
-                                                   cls.model_cls.curators_id == role.id,
-                                                   cls.model_cls.publishers_id == role.id))
-            obj = query.one_or_none()
-            if obj:
-                return cls(obj.json, model=obj).model
+        kwargs = community_kwargs_from_role(role)
+        if kwargs:
+            return cls.get_community(**kwargs)
 
     @classmethod
     def get_communities(cls, ids, with_deleted=False):
