@@ -147,13 +147,12 @@ def community_roles(community_ext_groups):
 
 
 @pytest.fixture
-def community(db, community_roles):
+def community(db):
     """Community fixture."""
     comid = 'comtest'
     community = OARepoCommunity.create(
-        {'title': 'Title',
-         'description': 'Community description'},
-        **community_roles['A'],
+        {'description': 'Community description'},
+        title='Title',
         id_=comid)
     db.session.commit()
     yield comid, community

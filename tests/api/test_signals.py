@@ -32,8 +32,8 @@ def signals():
     yield called
 
 
-def test_signals(base_app, db, signals, community_roles):
-    com = OARepoCommunity.create({}, **community_roles['A'], id_='signals-community')
+def test_signals(base_app, db, signals):
+    com = OARepoCommunity.create({}, id_='signals-community', title='Signals comm')
 
     assert 'before_community_insert' in signals
     assert 'after_community_insert' in signals

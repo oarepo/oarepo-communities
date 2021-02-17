@@ -16,7 +16,7 @@ from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.cli import communities as cmd
 
 
-def test_cli_community_create(app, db, community_ext_groups):
+def test_cli_community_create(app, db):
     runner = CliRunner()
     script_info = ScriptInfo(create_app=lambda info: app)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI',
@@ -26,9 +26,9 @@ def test_cli_community_create(app, db, community_ext_groups):
     with runner.isolated_filesystem():
         result = runner.invoke(cmd, ['create',
                                      'cli-test-community',
+                                     'Test Community',
                                      '--description', 'community desc',
-                                     '--title', 'Test Community',
-                                     *community_ext_groups['A'].values()],
+                                     '--ctype', 'wgroup'],
                                env={'INVENIO_SQLALCHEMY_DATABASE_URI':
                                         os.getenv('SQLALCHEMY_DATABASE_URI',
                                                   'sqlite://')},
@@ -37,11 +37,12 @@ def test_cli_community_create(app, db, community_ext_groups):
 
         comm = OARepoCommunity.get_community('cli-test-community')
         assert comm is not None
-        assert comm.json['title'] == 'Test Community'
+        assert comm.title == 'Test Community'
+        assert comm.type == 'wgroup'
         assert comm.json['description'] == 'community desc'
 
         rols = Role.query.all()
         assert len(rols) == 3
-        assert {comm.members_id, comm.curators_id, comm.publishers_id} == {
-            r.id for r in rols
-        }
+        assert set([r.name for r in rols]) == {'community:cli-test-community:member',
+                                               'community:cli-test-community:curator',
+                                               'community:cli-test-community:publisher'}

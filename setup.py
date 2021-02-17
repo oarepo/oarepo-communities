@@ -11,7 +11,7 @@ import os
 
 from setuptools import find_packages, setup
 
-readme = open('README.rst').read()
+readme = open('README.md').read()
 history = open('CHANGES.rst').read()
 
 OAREPO_VERSION = os.environ.get('OAREPO_VERSION', '3.3.0')
@@ -54,6 +54,7 @@ setup(
     description=__doc__,
     long_description=readme + '\n\n' + history,
     keywords='invenio oarepo communities',
+    long_description_content_type='text/markdown',
     license='MIT',
     author='Miroslav Bauer',
     author_email='bauer@cesnet.cz',

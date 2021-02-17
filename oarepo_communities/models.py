@@ -6,11 +6,27 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
+from flask_babelex import gettext
+from invenio_accounts.models import Role
 from invenio_db import db
 from invenio_records.models import Timestamp
-from sqlalchemy import Integer
+from speaklater import make_lazy_gettext
+from sqlalchemy import event
 from sqlalchemy.dialects import postgresql
-from sqlalchemy_utils import JSONType
+from sqlalchemy_utils import JSONType, ChoiceType
+
+from oarepo_communities.config import OAREPO_COMMUNITIES_ROLES
+from oarepo_communities.utils import community_role_kwargs
+
+_ = make_lazy_gettext(lambda: gettext)
+
+OAREPO_COMMUNITIES_TYPES = [
+    ('wgroup', _('Working group')),
+    ('project', _('Project')),
+    ('rgroup', _('Research group')),
+    ('other', _('Other'))
+]
+"""Community types or focus."""
 
 
 class OARepoCommunityModel(db.Model, Timestamp):
@@ -19,40 +35,19 @@ class OARepoCommunityModel(db.Model, Timestamp):
     __versioned__ = {'versioning': False}
 
     id = db.Column(
-        db.String(64),
+        db.String(63),
         primary_key=True,
     )
     """Primary Community identifier slug."""
 
-    members_id = db.Column(db.Integer(),
-                           db.ForeignKey('accounts_role.id',
-                                         ondelete="CASCADE"),
-                           nullable=False)
-    members = db.relationship('Role',
-                              cascade="all, delete",
-                              foreign_keys=[members_id],
-                              backref=db.backref('oarepo_community', lazy='dynamic'))
-    """Community members role."""
+    title = db.Column(
+        db.String(128),
+    )
+    """Community title name."""
 
-    curators_id = db.Column(Integer,
-                            db.ForeignKey('accounts_role.id',
-                                          ondelete="CASCADE"),
-                            nullable=False)
-    curators = db.relationship('Role',
-                               cascade="all, delete",
-                               foreign_keys=[curators_id],
-                               backref=db.backref('curators_oarepo_community', lazy='dynamic'))
-    """Community curators role."""
-
-    publishers_id = db.Column(Integer,
-                              db.ForeignKey('accounts_role.id',
-                                            ondelete="CASCADE"),
-                              nullable=False)
-    publishers = db.relationship('Role',
-                                 cascade="all, delete",
-                                 foreign_keys=[publishers_id],
-                                 backref=db.backref('publishers_oarepo_community', lazy='dynamic'))
-    """Community publishers role."""
+    type = db.Column(ChoiceType(choices=OAREPO_COMMUNITIES_TYPES, impl=db.CHAR(16)),
+                     default='other', nullable=False)
+    """Community type or focus."""
 
     json = db.Column(
         db.JSON().with_variant(
@@ -77,6 +72,29 @@ class OARepoCommunityModel(db.Model, Timestamp):
     )
     """Was the OARepo community soft-deleted."""
 
+    @property
+    def roles(self):
+        """Return roles associated with this community."""
+        role_names = []
+        for name in [community_role_kwargs(self, r)['name'] for r in OAREPO_COMMUNITIES_ROLES]:
+            role_names.append(name)
+
+        with db.session.no_autoflush:
+            query = Role.query.filter(Role.name.in_(role_names))
+            return query.all()
+
+    def delete_roles(self):
+        """Delete roles associated with this community."""
+        with db.session.begin_nested():
+            for r in self.roles:
+                db.session.delete(r)
+
     def delete(self):
         """Mark the community for deletion."""
         self.is_deleted = True
+        self.delete_roles()
+
+
+@event.listens_for(OARepoCommunityModel, 'before_delete')
+def handle_before_delete(mapper, connection, target):
+    target.delete()
