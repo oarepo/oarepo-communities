@@ -13,3 +13,6 @@ OAREPO_COMMUNITIES_ROLE_KWARGS = community_role_kwargs
 
 OAREPO_COMMUNITIES_ROLES = ['member', 'curator', 'publisher']
 """Roles present in each community."""
+
+OAREPO_COMMUNITIES_PERMISSION_FACTORY = 'oarepo_communities.permissions.permission_factory'
+"""Permissions factory for Community record collections."""

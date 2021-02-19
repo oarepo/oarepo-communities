@@ -9,12 +9,22 @@
 from jsonpatch import apply_patch
 
 
-class CommunityKeepingMixin(object):
+class CommunityRecordMixin(object):
     """A mixin that keeps community info in the metadata."""
     PRIMARY_COMMUNITY_FIELD = '_primary_community'
+    SECONDARY_COMMUNITY_FIELD = '_communities'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    @property
+    def primary_community(self):
+        return self[self.PRIMARY_COMMUNITY_FIELD]
+
+    @property
+    def secondary_communities(self) -> list:
+        return self.get(self.SECONDARY_COMMUNITY_FIELD, [])
+
 
     def clear(self):
         """Preserves the schema even if the record is cleared and all metadata wiped out."""
@@ -25,8 +35,8 @@ class CommunityKeepingMixin(object):
 
     def _check_community(self, data):
         if self.PRIMARY_COMMUNITY_FIELD in data:
-            if data[self.PRIMARY_COMMUNITY_FIELD] != self[self.PRIMARY_COMMUNITY_FIELD]:
-                raise AttributeError('_primary_community cannot be changed')
+            if data[self.PRIMARY_COMMUNITY_FIELD] != self.primary_community:
+                raise AttributeError('Primary Community cannot be changed')
 
     def update(self, e=None, **f):
         """Dictionary update."""
@@ -36,8 +46,8 @@ class CommunityKeepingMixin(object):
     def __setitem__(self, key, value):
         """Dict's setitem."""
         if key == self.PRIMARY_COMMUNITY_FIELD:
-            if self.PRIMARY_COMMUNITY_FIELD in self and self[self.PRIMARY_COMMUNITY_FIELD] != value:
-                raise AttributeError('_primary_community cannot be changed')
+            if self.PRIMARY_COMMUNITY_FIELD in self and self.primary_community != value:
+                raise AttributeError('Primary Community cannot be changed')
         return super().__setitem__(key, value)
 
     def __delitem__(self, key):
@@ -53,7 +63,7 @@ class CommunityKeepingMixin(object):
         For parameters see :py:class:invenio_records.api.Record
         """
         if not data.get(cls.PRIMARY_COMMUNITY_FIELD, None):
-            raise AttributeError('_primary_community is missing from record')
+            raise AttributeError('Primary Community is missing from record')
         ret = super().create(data, id_, **kwargs)
         return ret
 
@@ -63,6 +73,8 @@ class CommunityKeepingMixin(object):
         :returns: A new :class:`Record` instance.
         """
         data = apply_patch(dict(self), patch)
-        if self[self.PRIMARY_COMMUNITY_FIELD] != data[self.PRIMARY_COMMUNITY_FIELD]:
-            raise AttributeError('_primary_community cannot be changed')
+        if self.primary_community != data[self.PRIMARY_COMMUNITY_FIELD]:
+            raise AttributeError('Primary Community cannot be changed')
         return self.__class__(data, model=self.model)
+
+

@@ -20,12 +20,12 @@ from werkzeug.local import LocalProxy
 
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.links import record_collection_links_factory
-from oarepo_communities.record import CommunityKeepingMixin
+from oarepo_communities.record import CommunityRecordMixin
 
 _datastore = LocalProxy(lambda: current_app.extensions['security'].datastore)
 
 
-class TestRecord(CommunityKeepingMixin, Record):
+class TestRecord(CommunityRecordMixin, Record):
     blueprint = 'tests.api/recid_item'
 
     @property

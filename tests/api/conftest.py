@@ -135,18 +135,6 @@ def community_ext_groups():
 
 
 @pytest.fixture
-def community_roles(community_ext_groups):
-    roles = {'A': {}, 'B': {}}
-    for cid, g in community_ext_groups.items():
-        for gid, guuid in g.items():
-            r: Role = current_datastore.create_role(name=str(guuid))
-            current_datastore.commit()
-            roles[cid][gid] = r.id
-
-    return roles
-
-
-@pytest.fixture
 def community(db):
     """Community fixture."""
     comid = 'comtest'
