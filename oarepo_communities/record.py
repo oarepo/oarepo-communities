@@ -25,7 +25,6 @@ class CommunityRecordMixin(object):
     def secondary_communities(self) -> list:
         return self.get(self.SECONDARY_COMMUNITY_FIELD, [])
 
-
     def clear(self):
         """Preserves the schema even if the record is cleared and all metadata wiped out."""
         primary = self.get(self.PRIMARY_COMMUNITY_FIELD)

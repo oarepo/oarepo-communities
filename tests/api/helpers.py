@@ -19,7 +19,7 @@ from oarepo_enrollment_permissions import create_permission_factory, delete_perm
 from werkzeug.local import LocalProxy
 
 from oarepo_communities.api import OARepoCommunity
-from oarepo_communities.links import record_collection_links_factory
+from oarepo_communities.links import community_record_links_factory
 from oarepo_communities.record import CommunityRecordMixin
 
 _datastore = LocalProxy(lambda: current_app.extensions['security'].datastore)
@@ -50,7 +50,7 @@ def gen_rest_endpoint(pid_type, search_class, record_class, path, custom_read_pe
         pid_fetcher=pid_type,
         search_class=search_class,
         indexer_class=RecordIndexer,
-        links_factory_imp=record_collection_links_factory,
+        links_factory_imp=community_record_links_factory,
         search_index='records-record-v1.0.0',
         search_type='_doc',
         record_class=record_class,

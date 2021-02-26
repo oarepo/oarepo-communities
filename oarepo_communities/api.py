@@ -7,14 +7,15 @@
 
 """OArepo module that adds support for communities"""
 from flask import current_app
+from invenio_accounts.models import Role
 from invenio_accounts.proxies import current_datastore
 from invenio_db import db
 from invenio_records.api import RecordBase
 
 from oarepo_communities.errors import OARepoCommunityCreateError
 from oarepo_communities.models import OARepoCommunityModel
+from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.signals import before_community_insert, after_community_insert
-from oarepo_communities.utils import community_role_kwargs, community_kwargs_from_role
 
 
 class OARepoCommunity(RecordBase):
@@ -48,11 +49,8 @@ class OARepoCommunity(RecordBase):
 
     @classmethod
     def _create_community_roles(cls, community):
-        role_kwargs_impl = current_app.config.get('OAREPO_COMMUNITIES_ROLE_NAME', community_role_kwargs)
-        roles = current_app.config['OAREPO_COMMUNITIES_ROLES']
-
-        for role in roles:
-            role_kwargs = role_kwargs_impl(community, role)
+        for role in current_oarepo_communities.roles:
+            role_kwargs = current_oarepo_communities.role_name_factory(community, role)
             role = current_datastore.find_or_create_role(str(role_kwargs['name']))
             if not role:
                 raise OARepoCommunityCreateError(community)
@@ -85,9 +83,15 @@ class OARepoCommunity(RecordBase):
         :returns: The :class:`OARepoCommunityModel` instance,
                   None if role is not associated with any community.
         """
-        kwargs = community_kwargs_from_role(role)
+        kwargs = current_oarepo_communities.role_parser(role)
         if kwargs:
             return cls.get_community(**kwargs)
+
+    @classmethod
+    def get_role(cls, community: OARepoCommunityModel, role_name: str) -> Role:
+        """Retrieve the community Invenio Role for a given role name."""
+        kwargs = current_oarepo_communities.role_name_factory(community, role_name)
+        return current_datastore.find_role(kwargs['name'])
 
     @classmethod
     def get_communities(cls, ids, with_deleted=False):

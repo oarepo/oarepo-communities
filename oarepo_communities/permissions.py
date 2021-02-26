@@ -15,6 +15,7 @@ from flask_principal import Permission
 from invenio_access import action_factory
 from invenio_files_rest.views import check_permission
 
+from oarepo_communities.models import OARepoCommunityModel
 from oarepo_communities.proxies import current_permission_factory
 from oarepo_communities.record import CommunityRecordMixin
 
@@ -35,27 +36,6 @@ Publish = action_factory('community-publish', parameter=True)
 
 Unpublish = action_factory('community-unpublish', parameter=True)
 """Action needed: unpublish community record."""
-
-#
-# TODO: Implement Global action needs?
-#
-# request_approval_all = RequestApproval(None)
-# """Action needed: request any community record approval."""
-#
-# approve_all = Approve(None)
-# """Action needed: approve any community record."""
-#
-# revert_approve_all = RevertApprove(None)
-# """Action needed: revert any community record approval."""
-#
-# request_changes_all = RequestChanges(None)
-# """Action needed: request changes to any community record."""
-#
-# publish_all = Publish(None)
-# """Action needed: publish any community record."""
-#
-# unpublish_all = Unpublish(None)
-# """Action needed: unpublish any community record."""
 
 _action2need_map = {
     'request-approval': RequestApproval,
@@ -80,15 +60,13 @@ def permission_factory(obj, action):
     need_class = _action2need_map[action]
     arg = None
     if isinstance(obj, CommunityRecordMixin):
-        kwargs = dict(
-            primary_community=obj.primary_community,
-            secondary_communities=obj.secondary_communities,
-            record=obj.id
-        )
+        arg = obj.primary_community
+    elif isinstance(obj, OARepoCommunityModel):
+        arg = obj.id
     else:
         raise RuntimeError('Unknown or missing object')
 
-    return Permission(need_class(kwargs))
+    return Permission(need_class(arg))
 
 
 def need_permissions(object_getter, action, hidden=True):
