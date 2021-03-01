@@ -15,8 +15,7 @@ from sqlalchemy import event
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_utils import JSONType, ChoiceType
 
-from oarepo_communities.config import OAREPO_COMMUNITIES_ROLES
-from oarepo_communities.utils import community_role_kwargs
+from oarepo_communities.proxies import current_oarepo_communities
 
 _ = make_lazy_gettext(lambda: gettext)
 
@@ -76,8 +75,8 @@ class OARepoCommunityModel(db.Model, Timestamp):
     def roles(self):
         """Return roles associated with this community."""
         role_names = []
-        for name in [community_role_kwargs(self, r)['name'] for r in OAREPO_COMMUNITIES_ROLES]:
-            role_names.append(name)
+        for role in current_oarepo_communities.roles:
+            role_names.append(current_oarepo_communities.role_name_factory(self, role)['name'])
 
         with db.session.no_autoflush:
             query = Role.query.filter(Role.name.in_(role_names))

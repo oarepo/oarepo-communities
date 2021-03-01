@@ -6,10 +6,14 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-from oarepo_communities.utils import community_role_kwargs
-
-OAREPO_COMMUNITIES_ROLE_KWARGS = community_role_kwargs
-"""Function returning an Invenio Role kwargs for a given community role."""
-
 OAREPO_COMMUNITIES_ROLES = ['member', 'curator', 'publisher']
 """Roles present in each community."""
+
+OAREPO_COMMUNITIES_PERMISSION_FACTORY = 'oarepo_communities.permissions.permission_factory'
+"""Permissions factory for Community record collections."""
+
+OAREPO_COMMUNITIES_ROLE_NAME = 'oarepo_communities.utils.community_role_kwargs'
+"""Factory that returns role name for community-based roles."""
+
+OAREPO_COMMUNITIES_ROLE_PARSER = 'oarepo_communities.utils.community_kwargs_from_role'
+"""Factory that parses community id and role from community role names."""

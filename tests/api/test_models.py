@@ -49,7 +49,7 @@ def test_get_communities(community):
     _check_community(comms[0])
 
 
-def test_get_community_from_role(community, community_roles):
+def test_get_community_from_role(community):
     rol = current_datastore.find_role(f'community:{community[1].id}:member')
     assert rol is not None
 
@@ -58,7 +58,7 @@ def test_get_community_from_role(community, community_roles):
     assert comm == community[1]
 
     # Test role not bound to community
-    rol = Role.query.get(community_roles['B']['members_id'])
+    rol = current_datastore.create_role(name='other')
     comm2 = OARepoCommunity.get_community_from_role(rol)
     assert comm2 is None
 

@@ -19,6 +19,16 @@ def test_schema_create(app, db):
         make_sample_record(db, 'invalid-community', None, None)
 
 
+def test_primary_community(app, db):
+    pid, rec = make_sample_record(db, 'primary', 'A', None)
+    assert rec.primary_community == 'A'
+
+
+def test_secondary_communities(app, db):
+    pid, rec = make_sample_record(db, 'secondary', 'A', None, ['B', 'C'])
+    assert rec.secondary_communities == ['B', 'C']
+
+
 def test_clear(app, db):
     pid, rec = make_sample_record(db, 'clear-community', 'A', None)
     rec.clear()

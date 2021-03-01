@@ -11,8 +11,8 @@ from invenio_records_rest import current_records_rest
 from invenio_records_rest.links import default_links_factory
 
 
-def record_collection_links_factory(pid, record=None, **kwargs):
-    """Ensures that primary collection is set in self link."""
+def community_record_links_factory(pid, record=None, **kwargs):
+    """Ensures that primary community is set in self link."""
     links = default_links_factory(pid, record, **kwargs)
     endpoint = '.{0}_item'.format(
         current_records_rest.default_endpoint_prefixes[pid.pid_type])

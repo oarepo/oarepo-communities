@@ -6,6 +6,9 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
+from invenio_base.utils import load_or_import_from_config
+from werkzeug.utils import cached_property
+
 from flask import request
 from invenio_base.signals import app_loaded
 from . import config
@@ -21,6 +24,39 @@ def add_urlkwargs(sender, app, **kwargs):
     app.url_default_functions.setdefault('invenio_records_rest', []).append(_community_urlkwargs)
 
 
+class _OARepoCommunitiesState(object):
+    """Invenio Files REST state."""
+
+    def __init__(self, app):
+        """Initialize state."""
+        self.app = app
+
+    @cached_property
+    def roles(self):
+        """Roles created in each community."""
+        return load_or_import_from_config(
+            'OAREPO_COMMUNITIES_ROLES', app=self.app)
+
+    @cached_property
+    def role_name_factory(self):
+        """Load default factory that returns role name for community-based roles."""
+        return load_or_import_from_config(
+            'OAREPO_COMMUNITIES_ROLE_NAME', app=self.app)
+
+    @cached_property
+    def role_parser(self):
+        """Load default factory that parses community id and role from community role names."""
+        return load_or_import_from_config(
+            'OAREPO_COMMUNITIES_ROLE_PARSER', app=self.app)
+
+    @cached_property
+    def permission_factory(self):
+        """Load default permission factory for Community record collections."""
+        return load_or_import_from_config(
+            'OAREPO_COMMUNITIES_PERMISSION_FACTORY', app=self.app
+        )
+
+
 class OARepoCommunities(object):
     """OARepo-Communities extension."""
 
@@ -32,7 +68,7 @@ class OARepoCommunities(object):
     def init_app(self, app):
         """Flask application initialization."""
         self.init_config(app)
-        app.extensions['oarepo-communities'] = self
+        app.extensions['oarepo-communities'] = _OARepoCommunitiesState(app)
 
     def init_config(self, app):
         """Initialize configuration."""
