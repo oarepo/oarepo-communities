@@ -17,3 +17,6 @@ OAREPO_COMMUNITIES_ROLE_NAME = 'oarepo_communities.utils.community_role_kwargs'
 
 OAREPO_COMMUNITIES_ROLE_PARSER = 'oarepo_communities.utils.community_kwargs_from_role'
 """Factory that parses community id and role from community role names."""
+
+OAREPO_COMMUNITIES_ACTIONS_POLICY = 'oarepo_communities.utils.community_actions_policy'
+"""Factory that takes a Community and returns role x actions policy matrix."""

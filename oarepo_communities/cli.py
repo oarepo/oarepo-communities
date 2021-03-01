@@ -58,4 +58,4 @@ def create(community_id, description, policy, title, ctype, logo_path):
         exit(5)
 
     db.session.commit()
-    click.secho(f'Created community: {comm}', fg='green')
+    click.secho(f'Created community: {comm} with roles {[r.name for r in comm.roles]}', fg='green')

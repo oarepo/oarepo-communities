@@ -15,7 +15,6 @@ from sqlalchemy import event
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_utils import JSONType, ChoiceType
 
-from oarepo_communities.proxies import current_oarepo_communities
 
 _ = make_lazy_gettext(lambda: gettext)
 
@@ -26,6 +25,16 @@ OAREPO_COMMUNITIES_TYPES = [
     ('other', _('Other'))
 ]
 """Community types or focus."""
+
+
+oarepo_communities_role = db.Table(
+    'oarepo_communities_role',
+    db.Column('community_id', db.String(63), db.ForeignKey(
+        'oarepo_communities.id', name='fk_oarepo_communities_role_community_id')),
+    db.Column('role_id', db.Integer(), db.ForeignKey(
+        'accounts_role.id', name='fk_oarepo_communities_role_role_id'), unique=True),
+)
+"""Relationship between Communities and Invenio roles."""
 
 
 class OARepoCommunityModel(db.Model, Timestamp):
@@ -44,7 +53,7 @@ class OARepoCommunityModel(db.Model, Timestamp):
     )
     """Community title name."""
 
-    type = db.Column(ChoiceType(choices=OAREPO_COMMUNITIES_TYPES, impl=db.CHAR(16)),
+    type = db.Column(ChoiceType(choices=OAREPO_COMMUNITIES_TYPES, impl=db.VARCHAR(16)),
                      default='other', nullable=False)
     """Community type or focus."""
 
@@ -71,16 +80,8 @@ class OARepoCommunityModel(db.Model, Timestamp):
     )
     """Was the OARepo community soft-deleted."""
 
-    @property
-    def roles(self):
-        """Return roles associated with this community."""
-        role_names = []
-        for role in current_oarepo_communities.roles:
-            role_names.append(current_oarepo_communities.role_name_factory(self, role)['name'])
-
-        with db.session.no_autoflush:
-            query = Role.query.filter(Role.name.in_(role_names))
-            return query.all()
+    roles = db.relationship('Role', secondary=oarepo_communities_role,
+                            backref=db.backref('community', lazy='dynamic'))
 
     def delete_roles(self):
         """Delete roles associated with this community."""

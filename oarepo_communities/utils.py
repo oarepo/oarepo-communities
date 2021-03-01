@@ -11,6 +11,7 @@ This file is imported by ``oarepo_communities.__init__``,
 and parsed by ``setup.py``.
 """
 from flask_babelex import gettext
+from flask_security import AnonymousUser
 from speaklater import make_lazy_gettext
 
 _ = make_lazy_gettext(lambda: gettext)
@@ -34,3 +35,17 @@ def community_kwargs_from_role(role):
         id_=args[1],
         role=args[2]
     )
+
+
+def community_actions_policy(community):
+    """Returns matrix of allowed actions per each role in a commmunity."""
+    return {
+        'read': [],
+        'create': [],
+        'request-approval': [],
+        'approve': [],
+        'revert-approve': [],
+        'request-changes': [],
+        'publish': [],
+        'unpublish': [],
+    }

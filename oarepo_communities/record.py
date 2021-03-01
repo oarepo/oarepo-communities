@@ -56,7 +56,8 @@ class CommunityRecordMixin(object):
         return super().__delitem__(key)
 
     @classmethod
-    def create(cls, data, id_=None, **kwargs):
+    # @need_permissions(lambda self, data, id_, **kwargs: data, 'create')
+    def create(cls, data=dict, id_=None, **kwargs):
         """
         Creates a new record instance and store it in the database.
         For parameters see :py:class:invenio_records.api.Record
@@ -75,5 +76,3 @@ class CommunityRecordMixin(object):
         if self.primary_community != data[self.PRIMARY_COMMUNITY_FIELD]:
             raise AttributeError('Primary Community cannot be changed')
         return self.__class__(data, model=self.model)
-
-

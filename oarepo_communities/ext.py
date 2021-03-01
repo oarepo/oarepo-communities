@@ -38,6 +38,12 @@ class _OARepoCommunitiesState(object):
             'OAREPO_COMMUNITIES_ROLES', app=self.app)
 
     @cached_property
+    def actions_policy(self):
+        """Roles created in each community."""
+        return load_or_import_from_config(
+            'OAREPO_COMMUNITIES_ACTIONS_POLICY', app=self.app)
+
+    @cached_property
     def role_name_factory(self):
         """Load default factory that returns role name for community-based roles."""
         return load_or_import_from_config(

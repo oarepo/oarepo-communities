@@ -10,13 +10,13 @@ from invenio_access import Permission
 from invenio_access.utils import get_identity
 
 from oarepo_communities.api import OARepoCommunity
-from oarepo_communities.permissions import _action2need_map
+from oarepo_communities.permissions import action2need_map
 
 
 def test_permissions(permissions, community, sample_records):
     """Test community permissions."""
 
-    perms = {a: p(community[1].id) for a, p in _action2need_map.items()}
+    perms = {a: p(community[1].id) for a, p in action2need_map.items()}
 
     member = OARepoCommunity.get_role(community[1], 'member')
     curator = OARepoCommunity.get_role(community[1], 'curator')
@@ -27,9 +27,9 @@ def test_permissions(permissions, community, sample_records):
     assert permissions['author'].roles == [member]
     assert Permission(perms['request-approval']).allows(author_identity)
     assert not any([Permission(perms[p]).allows(author_identity) for p in perms.keys() if p != 'request-approval'])
-    assert not Permission(_action2need_map['request-approval']('B')).allows(author_identity)
+    assert not Permission(action2need_map['request-approval']('B')).allows(author_identity)
     assert not any(
-        [Permission(_action2need_map['request-approval']('B')).allows(author_identity) for p in perms.keys() if
+        [Permission(action2need_map['request-approval']('B')).allows(author_identity) for p in perms.keys() if
          p != 'request-approval'])
 
     # Test community curator action permissions
@@ -37,7 +37,7 @@ def test_permissions(permissions, community, sample_records):
     assert set(permissions['curator'].roles) == {member, curator}
     assert Permission(perms['approve']).allows(curator_identity)
     assert Permission(perms['request-changes']).allows(curator_identity)
-    assert not Permission(_action2need_map['approve']('B')).allows(curator_identity)
+    assert not Permission(action2need_map['approve']('B')).allows(curator_identity)
     assert not any([Permission(perms[p]).allows(curator_identity) for p in perms.keys() if
                     p not in ['approve', 'request-changes', 'revert-approve']])
 
@@ -46,6 +46,6 @@ def test_permissions(permissions, community, sample_records):
     assert set(permissions['publisher'].roles) == {member, publisher}
     assert Permission(perms['publish']).allows(publisher_identity)
     assert Permission(perms['unpublish']).allows(publisher_identity)
-    assert not Permission(_action2need_map['publish']('B')).allows(publisher_identity)
+    assert not Permission(action2need_map['publish']('B')).allows(publisher_identity)
     assert not any([Permission(perms[p]).allows(publisher_identity) for p in perms.keys() if
                     p not in ['publish', 'unpublish', 'revert-approve']])

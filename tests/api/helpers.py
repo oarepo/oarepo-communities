@@ -120,3 +120,7 @@ def make_sample_community(db, comid):
         id_=comid)
     db.session.commit()
     return community
+
+
+def make_sample_community_with_users(db, comid):
+    pass
