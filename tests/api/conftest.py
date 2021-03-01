@@ -193,6 +193,7 @@ def permissions(db, community, sample_records):
         if role == 'author':
             current_datastore.add_role_to_user(users[role], community_roles['member'])
         else:
+            current_datastore.add_role_to_user(users[role], community_roles['member'])
             current_datastore.add_role_to_user(users[role], community_roles[role])
 
     perms = [

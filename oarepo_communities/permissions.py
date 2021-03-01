@@ -70,7 +70,7 @@ def permission_factory(obj, action):
 
 
 def need_permissions(object_getter, action, hidden=True):
-    """Get permission for Community Record abort.
+    """Get permission on Community Record action or abort.
 
     :param object_getter: The function used to retrieve the object and pass it
         to the permission factory.
@@ -83,7 +83,6 @@ def need_permissions(object_getter, action, hidden=True):
             check_permission(current_permission_factory(
                 object_getter(*args, **kwargs),
                 action(*args, **kwargs) if callable(action) else action,
-
             ), hidden=hidden)
             return f(*args, **kwargs)
         return decorate
