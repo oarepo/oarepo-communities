@@ -10,47 +10,37 @@
 #
 # Action needs
 #
-from flask_principal import Permission
-from invenio_access import action_factory
+from flask_principal import Permission, ActionNeed
 
 from oarepo_communities.models import OARepoCommunityModel
 from oarepo_communities.record import CommunityRecordMixin
 
-Create = action_factory('community-create', parameter=True)
-"""Action needed: create a record in a community."""
-
-Read = action_factory('community-read', parameter=True)
+COMMUNITY_READ = 'community-read'
 """Action needed: read/list records in a community."""
 
-RequestApproval = action_factory('community-request-approval', parameter=True)
+COMMUNITY_CREATE = 'community-create'
+"""Action needed: create a record in a community."""
+
+COMMUNITY_REQUEST_APPROVAL = 'community-request-approval'
 """Action needed: request community record approval."""
 
-Approve = action_factory('community-approve', parameter=True)
+COMMUNITY_APPROVE = 'community-approve'
 """Action needed: approve community record."""
 
-RevertApprove = action_factory('community-revert-approve', parameter=True)
+COMMUNITY_REVERT_APPROVE = 'community-revert-approve'
 """Action needed: revert community record approval."""
 
-RequestChanges = action_factory('community-request-changes', parameter=True)
+COMMUNITY_REQUEST_CHANGES = 'community-request-changes'
 """Action needed: request changes to community record."""
 
-Publish = action_factory('community-publish', parameter=True)
+COMMUNITY_PUBLISH = 'community-publish'
 """Action needed: publish community record."""
 
-Unpublish = action_factory('community-unpublish', parameter=True)
+COMMUNITY_UNPUBLISH = 'community-unpublish'
 """Action needed: unpublish community record."""
 
-action2need_map = {
-    'request-approval': RequestApproval,
-    'approve': Approve,
-    'revert-approve': RevertApprove,
-    'request-changes': RequestChanges,
-    'publish': Publish,
-    'unpublish': Unpublish,
-    'create': Create,
-    'read': Read
-}
-"""Mapping of action names to action needs."""
+ALLOWED_ACTIONS = [COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE,
+                   COMMUNITY_REVERT_APPROVE, COMMUNITY_REQUEST_CHANGES, COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH]
 
 
 def permission_factory(obj, action):
@@ -62,7 +52,6 @@ def permission_factory(obj, action):
     :raises RuntimeError: If the object is unknown.
     :returns: A :class:`invenio_access.permissions.Permission` instance.
     """
-    need_class = action2need_map[action]
     arg = None
     if isinstance(obj, CommunityRecordMixin):
         arg = obj.primary_community
@@ -73,4 +62,4 @@ def permission_factory(obj, action):
     else:
         raise RuntimeError('Unknown or missing object')
 
-    return Permission(need_class(arg))
+    return Permission(ActionNeed(action, arg))

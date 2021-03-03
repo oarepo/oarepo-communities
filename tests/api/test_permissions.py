@@ -6,11 +6,14 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-from invenio_access import Permission
+from flask_principal import ActionNeed
+from flask_security import login_user
+from invenio_access import Permission, ActionRoles
 from invenio_access.utils import get_identity
+from invenio_accounts.proxies import current_datastore
 
 from oarepo_communities.api import OARepoCommunity
-from oarepo_communities.permissions import action2need_map
+from oarepo_communities.permissions import action2need_map, Read, COMMUNITY_READ
 
 
 def test_permissions(permissions, community, sample_records):
@@ -49,3 +52,17 @@ def test_permissions(permissions, community, sample_records):
     assert not Permission(action2need_map['publish']('B')).allows(publisher_identity)
     assert not any([Permission(perms[p]).allows(publisher_identity) for p in perms.keys() if
                     p not in ['publish', 'unpublish', 'revert-approve']])
+
+
+def test_action_needs(app, db, community, community_curator):
+    """Test action needs creation."""
+    role = current_datastore.find_role('community:comtest:member')
+    current_datastore.add_role_to_user(community_curator, role)
+
+    ar = ActionRoles(action=COMMUNITY_READ, argument=community[1].id, role=role)
+    db.session.add(ar)
+    db.session.commit()
+
+    login_user(community_curator)
+
+    assert Permission(ActionNeed(COMMUNITY_READ, community[1].id)).can()

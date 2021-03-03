@@ -82,7 +82,7 @@ class OARepoCommunity(RecordBase):
 
     @classmethod
     def get_role(cls, community: OARepoCommunityModel, role_name: str) -> Role:
-        """Retrieve the community Invenio Role for a given role name."""
+        """Retrieve the community Invenio Role for a given role short name."""
         kwargs = current_oarepo_communities.role_name_factory(community, role_name)
         return current_datastore.find_role(kwargs['name'])
 

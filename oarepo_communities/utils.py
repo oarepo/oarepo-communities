@@ -40,12 +40,12 @@ def community_kwargs_from_role(role):
 def community_actions_policy(community):
     """Returns matrix of allowed actions per each role in a commmunity."""
     return {
-        'read': [],
-        'create': [],
-        'request-approval': [],
-        'approve': [],
-        'revert-approve': [],
-        'request-changes': [],
-        'publish': [],
-        'unpublish': [],
+        'read': [AnonymousUser, 'member'],
+        'create': ['member'],
+        'request-approval': ['author'],
+        'approve': ['curator'],
+        'request-changes': ['curator'],
+        'revert-approve': ['publisher'],
+        'publish': ['publisher'],
+        'unpublish': ['admin'],
     }
