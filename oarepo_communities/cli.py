@@ -7,7 +7,7 @@
 
 """OArepo module that adds support for communities"""
 from itertools import groupby
-from operator import attrgetter, itemgetter
+from operator import attrgetter
 
 import click
 import sqlalchemy
@@ -110,8 +110,8 @@ def list_actions(community=None):
                 click.secho(f'- {role.name}')
 
             click.secho('\nAllowed community actions:', fg='green')
-            ars = ActionRoles.query\
-                .filter_by(argument=_community.id)\
+            ars = ActionRoles.query \
+                .filter_by(argument=_community.id) \
                 .order_by(ActionRoles.action).all()
             ars = [{k: list(g)} for k, g in groupby(ars, key=attrgetter('action'))]
             for ar in ars:
@@ -185,4 +185,3 @@ def deny_actions(role, actions):
                 click.secho(f'Removing role action: {ar.action} {ar.need}', fg='green')
 
     db.session.commit()
-

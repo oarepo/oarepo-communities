@@ -7,14 +7,12 @@
 
 """OArepo module that adds support for communities"""
 from flask_babelex import gettext
-from invenio_accounts.models import Role
 from invenio_db import db
 from invenio_records.models import Timestamp
 from speaklater import make_lazy_gettext
 from sqlalchemy import event
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_utils import JSONType, ChoiceType
-
 
 _ = make_lazy_gettext(lambda: gettext)
 
@@ -25,7 +23,6 @@ OAREPO_COMMUNITIES_TYPES = [
     ('other', _('Other'))
 ]
 """Community types or focus."""
-
 
 oarepo_communities_role = db.Table(
     'oarepo_communities_role',
