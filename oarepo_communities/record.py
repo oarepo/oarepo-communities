@@ -7,6 +7,7 @@
 
 """OArepo module that adds support for communities"""
 from jsonpatch import apply_patch
+from oarepo_fsm.decorators import transition
 
 
 class CommunityRecordMixin(object):
@@ -56,7 +57,6 @@ class CommunityRecordMixin(object):
         return super().__delitem__(key)
 
     @classmethod
-    # @need_permissions(lambda self, data, id_, **kwargs: data, 'create')
     def create(cls, data=dict, id_=None, **kwargs):
         """
         Creates a new record instance and store it in the database.
@@ -76,3 +76,9 @@ class CommunityRecordMixin(object):
         if self.primary_community != data[self.PRIMARY_COMMUNITY_FIELD]:
             raise AttributeError('Primary Community cannot be changed')
         return self.__class__(data, model=self.model)
+
+    @transition(src=[None, 'filling'], dest='approving',
+                permissions=None)
+    def finish(self, **kwargs):
+        pass
+

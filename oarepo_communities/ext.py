@@ -38,10 +38,10 @@ class _OARepoCommunitiesState(object):
             'OAREPO_COMMUNITIES_ROLES', app=self.app)
 
     @cached_property
-    def actions_policy(self):
-        """Roles created in each community."""
+    def allowed_actions(self):
+        """Community actions available to community roles."""
         return load_or_import_from_config(
-            'OAREPO_COMMUNITIES_ACTIONS_POLICY', app=self.app)
+            'OAREPO_COMMUNITIES_ALLOWED_ACTIONS', app=self.app)
 
     @cached_property
     def role_name_factory(self):

@@ -11,36 +11,11 @@
 # Action needs
 #
 from flask_principal import Permission, ActionNeed
+from invenio_records_rest.utils import deny_all
 
 from oarepo_communities.models import OARepoCommunityModel
+from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.record import CommunityRecordMixin
-
-COMMUNITY_READ = 'community-read'
-"""Action needed: read/list records in a community."""
-
-COMMUNITY_CREATE = 'community-create'
-"""Action needed: create a record in a community."""
-
-COMMUNITY_REQUEST_APPROVAL = 'community-request-approval'
-"""Action needed: request community record approval."""
-
-COMMUNITY_APPROVE = 'community-approve'
-"""Action needed: approve community record."""
-
-COMMUNITY_REVERT_APPROVE = 'community-revert-approve'
-"""Action needed: revert community record approval."""
-
-COMMUNITY_REQUEST_CHANGES = 'community-request-changes'
-"""Action needed: request changes to community record."""
-
-COMMUNITY_PUBLISH = 'community-publish'
-"""Action needed: publish community record."""
-
-COMMUNITY_UNPUBLISH = 'community-unpublish'
-"""Action needed: unpublish community record."""
-
-ALLOWED_ACTIONS = [COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE,
-                   COMMUNITY_REVERT_APPROVE, COMMUNITY_REQUEST_CHANGES, COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH]
 
 
 def permission_factory(obj, action):
@@ -52,6 +27,9 @@ def permission_factory(obj, action):
     :raises RuntimeError: If the object is unknown.
     :returns: A :class:`invenio_access.permissions.Permission` instance.
     """
+    if action not in current_oarepo_communities.allowed_actions:
+        return deny_all()
+
     arg = None
     if isinstance(obj, CommunityRecordMixin):
         arg = obj.primary_community

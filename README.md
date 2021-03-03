@@ -17,6 +17,12 @@
 
 OArepo module that adds support for communities
 
+## Prerequisites
+
+To use this library, you need to configure your `RECORDS_REST_ENDPOINTS`
+to use [OARepo FSM](https://github.com/oarepo/oarepo-fsm)
+and [OARepo Records Draft](https://github.com/oarepo/invenio-records-draft) libraries first.
+
 ## Installation
 
 OARepo-Communities is on PyPI so all you need is:
@@ -27,11 +33,53 @@ $ pip install oarepo-communities
 
 ## Configuration
 
+### Community Roles
 To customize invenio roles to be created inside each community, override the following defaults:
 ```python
 OAREPO_COMMUNITIES_ROLES = ['member', 'curator', 'publisher']
 """Roles present in each community."""
 ```
+
+### Community actions
+To customize, which actions should be allowed to be assigned to community roles, override the following defaults:
+```python
+OAREPO_COMMUNITIES_ALLOWED_ACTIONS = [
+    COMMUNITY_READ, COMMUNITY_CREATE,
+    COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE, COMMUNITY_REVERT_APPROVE,
+    COMMUNITY_REQUEST_CHANGES,
+    COMMUNITY_PUBLISH,
+    COMMUNITY_UNPUBLISH
+]
+"""Community actions available to community roles."""
+```
+
+### Links Factory
+
+For this library to work, you will need to set the following links factory in your `RECORDS_REST_ENDPOINTS`:
+```python
+from oarepo_communities.links import community_record_links_factory
+...
+RECORDS_REST_ENDPOINTS={
+    'recid': {
+        ...
+        links_factory_imp=community_record_links_factory,
+    }
+```
+
+### Search class
+
+To limit search results to records in a community, use the following search class in your `RECORDS_REST_ENDPOINTS`:
+
+```python
+from oarepo_communities.search import CommunitySearch
+...
+RECORDS_REST_ENDPOINTS={
+    'recid': {
+        ...
+        search_class=CommunitySearch,
+    }
+```
+
 
 ## Usage
 

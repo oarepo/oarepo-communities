@@ -21,7 +21,6 @@ from sqlalchemy.exc import IntegrityError
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.errors import OARepoCommunityCreateError
 from oarepo_communities.models import OAREPO_COMMUNITIES_TYPES, OARepoCommunityModel
-from oarepo_communities.permissions import ALLOWED_ACTIONS
 from oarepo_communities.proxies import current_oarepo_communities
 
 
@@ -94,7 +93,7 @@ def community_actions():
 def list_actions(community=None):
     """List all available community actions."""
     click.secho('Available actions:', fg='green')
-    for action in ALLOWED_ACTIONS:
+    for action in current_oarepo_communities.allowed_actions:
         _action = action[len('community-'):]
         click.secho(f'- {_action}')
 
@@ -135,7 +134,7 @@ def _validate_role_actions(role, actions):
         exit(1)
 
     def _action_valid(action):
-        if f'community-{action}' in ALLOWED_ACTIONS:
+        if f'community-{action}' in current_oarepo_communities.allowed_actions:
             return True
         click.secho(f'Action {action} not allowed', fg='red')
 

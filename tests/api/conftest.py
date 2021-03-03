@@ -25,8 +25,9 @@ from oarepo_enrollments.ext import OARepoEnrollmentsExt
 
 from oarepo_communities import OARepoCommunities
 from oarepo_communities.api import OARepoCommunity
+from oarepo_communities.constants import COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE, COMMUNITY_REQUEST_CHANGES, \
+    COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH
 from oarepo_communities.handlers import CommunityHandler
-from oarepo_communities.permissions import RequestApproval, Approve, RevertApprove, Publish, Unpublish, RequestChanges
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.search import CommunitySearch
 from tests.api.helpers import gen_rest_endpoint, make_sample_record, LiteEntryPoint
@@ -197,24 +198,25 @@ def permissions(db, community, sample_records):
             current_datastore.add_role_to_user(users[role], community_roles[role])
 
     perms = [
-        (RequestApproval, ['author']),
-        (Approve, ['curator']),
-        (RequestChanges, ['curator']),
-        (RevertApprove, ['curator', 'publisher']),
-        (Publish, ['publisher']),
-        (Unpublish, ['publisher'])
+        (COMMUNITY_REQUEST_APPROVAL, ['author']),
+        (COMMUNITY_APPROVE, ['curator']),
+        (COMMUNITY_REQUEST_CHANGES, ['curator']),
+        (COMMUNITY_REVERT_APPROVE, ['curator', 'publisher']),
+        (COMMUNITY_PUBLISH, ['publisher']),
+        (COMMUNITY_UNPUBLISH, ['publisher'])
     ]
 
-    for perm, roles in perms:
+    for action, roles in perms:
         for r in roles:
             if r == 'author':
-                db.session.add(ActionUsers.allow(
-                    action=perm(community[1].id),
+                db.session.add(ActionUsers(
+                    action=action,
+                    argument=community[1].id,
                     user=users[r]))
             else:
                 role_name = current_oarepo_communities.role_name_factory(community[1], r)['name']
                 role = current_datastore.find_role(role_name)
-                db.session.add(ActionRoles.allow(perm(community[1].id), role=role))
+                db.session.add(ActionRoles(action, argument=community[1].id, role=role))
 
     db.session.commit()
 
