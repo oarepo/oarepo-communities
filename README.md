@@ -64,6 +64,21 @@ dict(
 
 This can be customized by using custom `OAREPO_COMMUNITIES_ROLE_KWARGS` factory.
 
+To manage actions allowed on each role in a community use the following CLI commands:
+```
+Usage: invenio oarepo:communities actions [OPTIONS] COMMAND [ARGS]...
+
+  Management commands for OARepo Communities actions.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  allow  Allow actions to the given role.
+  deny   Deny actions on the given role.
+  list   List all available community actions.
+```
+
 Further documentation is available on
 https://oarepo-communities.readthedocs.io/
 
