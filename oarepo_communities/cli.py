@@ -12,8 +12,7 @@ from operator import attrgetter
 import click
 import sqlalchemy
 from flask.cli import with_appcontext
-from invenio_access import ActionRoles
-from invenio_accounts.proxies import current_datastore
+from invenio_access import ActionRoles, ActionSystemRoles, any_user
 from invenio_db import db
 from oarepo_micro_api.cli import with_api
 from sqlalchemy.exc import IntegrityError
@@ -21,6 +20,7 @@ from sqlalchemy.exc import IntegrityError
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.errors import OARepoCommunityCreateError
 from oarepo_communities.models import OAREPO_COMMUNITIES_TYPES, OARepoCommunityModel
+from oarepo_communities.permissions import community_record_owner
 from oarepo_communities.proxies import current_oarepo_communities
 
 
@@ -86,6 +86,58 @@ def community_actions():
     """Management commands for OARepo Communities actions."""
 
 
+def _validate_role(community, role):
+    role = OARepoCommunity.get_role(community, role)
+    if not role:
+        click.secho(f'Role {role} does not exist', fg='red')
+        exit(4)
+    return role
+
+
+def _validate_community(community):
+    _community = None
+    try:
+        _community = OARepoCommunity.get_community(community)
+    except sqlalchemy.orm.exc.NoResultFound:
+        click.secho(f'Community {community} does not exist', fg='red')
+        exit(3)
+    return _community
+
+
+def _validate_actions(actions):
+    if not actions:
+        exit(0)
+
+    def _action_valid(action):
+        if f'community-{action}' in current_oarepo_communities.allowed_actions:
+            return True
+        click.secho(f'Action {action} not allowed', fg='red')
+
+    actions = [a for a in actions if _action_valid(a)]
+
+    return actions
+
+
+def _allow_actions(community, actions, role, system=False):
+    with db.session.begin_nested():
+        for action in actions:
+            _action = f'community-{action}'
+            ar = community.allow_action(role, _action, system)
+            click.secho(f'Added role action: {ar.action} {ar.need}', fg='green')
+
+    db.session.commit()
+
+
+def _deny_actions(community, actions, role, system=False):
+    with db.session.begin_nested():
+        for action in actions:
+            _action = f'community-{action}'
+            click.secho(f'Removing role action: {_action}', fg='green')
+            community.deny_action(role, _action, system)
+
+    db.session.commit()
+
+
 @community_actions.command('list')
 @with_appcontext
 @with_api
@@ -98,90 +150,63 @@ def list_actions(community=None):
         click.secho(f'- {_action}')
 
     if community:
-        _community = None
-        try:
-            _community = OARepoCommunity.get_community(community)
-        except sqlalchemy.orm.exc.NoResultFound:
-            click.secho(f'Community {community} does not exist', fg='red')
+        community = _validate_community(community)
+        click.secho('\nAvailable community roles:', fg='green')
+        for role in community.roles:
+            click.secho(f'- {role.name.split(":")[-1]}')
 
-        if _community:
-            click.secho('\nAvailable community roles:', fg='green')
-            for role in _community.roles:
-                click.secho(f'- {role.name}')
-
-            click.secho('\nAllowed community actions:', fg='green')
-            ars = ActionRoles.query \
-                .filter_by(argument=_community.id) \
-                .order_by(ActionRoles.action).all()
-            ars = [{k: list(g)} for k, g in groupby(ars, key=attrgetter('action'))]
-            for ar in ars:
-                for action, roles in ar.items():
-                    click.secho(f'- {action[len("community-"):]}: ', nl=False, fg='yellow')
-                    click.secho(', '.join([r.need.value.split(':')[-1] for r in roles]))
-
-
-def _validate_role_actions(role, actions):
-    if not actions:
-        exit(0)
-
-    role = current_datastore.find_role(role)
-    if not role:
-        click.secho(f'Role {role} does not exist', fg='red')
-
-    community = role.community.first()
-    if not community:
-        click.secho(f'Role {role} does not belong to any community', fg='red')
-        exit(1)
-
-    def _action_valid(action):
-        if f'community-{action}' in current_oarepo_communities.allowed_actions:
-            return True
-        click.secho(f'Action {action} not allowed', fg='red')
-
-    actions = [a for a in actions if _action_valid(a)]
-
-    return community, role, actions
+        click.secho('\nAllowed community actions:', fg='green')
+        ars = ActionRoles.query \
+            .filter_by(argument=community.id) \
+            .order_by(ActionRoles.action).all()
+        ars = [{k: list(g)} for k, g in groupby(ars, key=attrgetter('action'))]
+        for ar in ars:
+            for action, roles in ar.items():
+                click.secho(f'- {action[len("community-"):]}: ', nl=False, fg='yellow')
+                click.secho(', '.join([r.need.value.split(':')[-1] for r in roles]))
 
 
 @community_actions.command('allow')
 @with_appcontext
 @with_api
+@click.argument('community')
 @click.argument('role')
 @click.argument('actions', nargs=-1)
-def allow_actions(role, actions):
+def allow_actions(community, role, actions):
     """Allow actions to the given role."""
-    community, role, actions = _validate_role_actions(role, actions)
+    actions = _validate_actions(actions)
+    community = _validate_community(community)
 
-    with db.session.begin_nested():
-        for action in actions:
-            _action = f'community-{action}'
-
-            if ActionRoles.query.filter_by(action=_action, argument=community.id, role_id=role.id).first():
-                click.secho(f'Action {action} already allowed', fg='yellow')
-                continue
-
-            ar = ActionRoles(action=_action, argument=community.id, role=role)
-            db.session.add(ar)
-            click.secho(f'Adding role action: {ar.action} {ar.need}', fg='green')
-
-    db.session.commit()
+    if role == 'any':
+        # Allow actions for anonymous users
+        _allow_actions(community, actions, any_user, system=True)
+    elif role == 'author':
+        # Allow actions for record owners
+        _allow_actions(community, actions, community_record_owner, system=True)
+    else:
+        role = _validate_role(community, role)
+        _allow_actions(community, actions, role)
 
 
 @community_actions.command('deny')
 @with_appcontext
 @with_api
+@click.argument('community')
 @click.argument('role')
 @click.argument('actions', nargs=-1)
-def deny_actions(role, actions):
+def deny_actions(community, role, actions):
     """Deny actions on the given role."""
-    community, role, actions = _validate_role_actions(role, actions)
+    actions = _validate_actions(actions)
+    community = _validate_community(community)
 
-    with db.session.begin_nested():
-        for action in actions:
-            _action = f'community-{action}'
-            ars = ActionRoles.query.filter_by(action=_action, argument=community.id, role_id=role.id).all()
-            for ar in ars:
-                db.session.delete(ar)
-                click.secho(f'Removing role action: {ar.action} {ar.need}', fg='green')
+    if role == 'any':
+        # Allow actions for anonymous users
+        _deny_actions(community, actions, any_user, system=True)
+    elif role == 'author':
+        # Allow actions for record owners
+        _deny_actions(community, actions, community_record_owner, system=True)
+    else:
+        role = _validate_role(community, role)
+        _deny_actions(community, actions, role)
 
     db.session.commit()

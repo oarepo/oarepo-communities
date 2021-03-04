@@ -30,3 +30,12 @@ COMMUNITY_PUBLISH = 'community-publish'
 
 COMMUNITY_UNPUBLISH = 'community-unpublish'
 """Action needed: unpublish community record."""
+
+COMMUNITY_DELETE = 'community-delete'
+"""Action needed: delete community draft record."""
+
+PRIMARY_COMMUNITY_FIELD = '_primary_community'
+"""Record metadata field holding primary community ID."""
+
+SECONDARY_COMMUNITY_FIELD = '_communities'
+"""Record metadata field holding primary community ID."""

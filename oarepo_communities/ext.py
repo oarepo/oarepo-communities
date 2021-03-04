@@ -6,12 +6,15 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
+from flask_login import current_user
+from flask_principal import identity_loaded
 from invenio_base.utils import load_or_import_from_config
 from werkzeug.utils import cached_property
 
-from flask import request
+from flask import request, current_app
 from invenio_base.signals import app_loaded
 from . import config
+from .permissions import community_record_owner
 
 
 @app_loaded.connect
@@ -74,7 +77,13 @@ class OARepoCommunities(object):
     def init_app(self, app):
         """Flask application initialization."""
         self.init_config(app)
-        app.extensions['oarepo-communities'] = _OARepoCommunitiesState(app)
+        state = _OARepoCommunitiesState(app)
+
+        app.extensions['oarepo-communities'] = state
+
+        identity_loaded.connect_via(app)(on_identity_loaded)
+
+        return state
 
     def init_config(self, app):
         """Initialize configuration."""
@@ -83,3 +92,9 @@ class OARepoCommunities(object):
         for k in dir(config):
             if k.startswith('OAREPO_COMMUNITIES_'):
                 app.config.setdefault(k, getattr(config, k))
+
+
+def on_identity_loaded(sender, identity):
+    if current_user.is_authenticated:
+        # Any authenticated user could be a community record owner.
+        identity.provides.add(community_record_owner)

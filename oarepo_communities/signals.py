@@ -39,3 +39,5 @@ When implementing the event listener, the community data can be retrieved from
    Do not perform any modification to the community here: they will be not
    persisted.
 """
+
+

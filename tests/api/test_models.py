@@ -17,7 +17,8 @@ from sqlalchemy.orm.exc import FlushError
 
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.models import OARepoCommunityModel
-from oarepo_communities.permissions import action2need_map
+from oarepo_communities.proxies import current_oarepo_communities
+
 
 def _check_community(comm):
     assert comm.json == {'description': 'Community description'}
@@ -45,7 +46,7 @@ def test_community_create(db):
     )
     _check_community(comm)
     ar = ActionRoles.query.filter_by(argument=comm.id).all()
-    assert set(action2need_map.keys()) == {a.action for a in ar}
+    assert len(ar) == 0
 
 
 def test_get_community(community, community_ext_groups):

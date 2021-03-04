@@ -7,12 +7,15 @@
 
 """OArepo module that adds support for communities"""
 from flask_babelex import gettext
+from invenio_access import ActionRoles, ActionSystemRoles
 from invenio_db import db
 from invenio_records.models import Timestamp
 from speaklater import make_lazy_gettext
 from sqlalchemy import event
 from sqlalchemy.dialects import postgresql
 from sqlalchemy_utils import JSONType, ChoiceType
+
+from oarepo_communities.proxies import current_oarepo_communities
 
 _ = make_lazy_gettext(lambda: gettext)
 
@@ -90,6 +93,41 @@ class OARepoCommunityModel(db.Model, Timestamp):
         """Mark the community for deletion."""
         self.is_deleted = True
         self.delete_roles()
+
+    def _validate_role_action(self, role, action):
+        if action not in current_oarepo_communities.allowed_actions:
+            raise AttributeError(f'Action {action} not allowed')
+        if role not in self.roles:
+            raise AttributeError(f'Role {role} not in community roles')
+
+    def allow_action(self, role, action, system=False):
+        """Allow action for a role."""
+        self._validate_role_action(role, action)
+
+        with db.session.begin_nested():
+            ar = ActionRoles.query.filter_by(action=action, argument=self.id, role_id=role.id).first()
+            if ar:
+                return ar
+
+            if system:
+                ar = ActionSystemRoles(action=action, argument=self.id, role_name=role.value)
+            else:
+                ar = ActionRoles(action=action, argument=self.id, role=role)
+
+            db.session.add(ar)
+            return ar
+
+    def deny_action(self, role, action, system=False):
+        """Deny action for a role."""
+        self._validate_role_action(role, action)
+
+        with db.session.begin_nested():
+            if system:
+                ar = ActionSystemRoles.query.filter_by(action=action, argument=self.id, role_name=role.value).all()
+            else:
+                ar = ActionRoles.query.filter_by(action=action, argument=self.id, role=role).all()
+            for a in ar:
+                db.session.delete(a)
 
 
 @event.listens_for(OARepoCommunityModel, 'before_delete')

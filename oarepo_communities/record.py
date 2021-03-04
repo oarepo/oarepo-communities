@@ -8,34 +8,35 @@
 """OArepo module that adds support for communities"""
 from jsonpatch import apply_patch
 from oarepo_fsm.decorators import transition
+from oarepo_fsm.permissions import require_any
+
+from oarepo_communities.constants import COMMUNITY_REQUEST_APPROVAL, PRIMARY_COMMUNITY_FIELD, SECONDARY_COMMUNITY_FIELD
+from oarepo_communities.permissions import permission_factory
 
 
 class CommunityRecordMixin(object):
     """A mixin that keeps community info in the metadata."""
-    PRIMARY_COMMUNITY_FIELD = '_primary_community'
-    SECONDARY_COMMUNITY_FIELD = '_communities'
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     @property
     def primary_community(self):
-        return self[self.PRIMARY_COMMUNITY_FIELD]
+        return self[PRIMARY_COMMUNITY_FIELD]
 
     @property
     def secondary_communities(self) -> list:
-        return self.get(self.SECONDARY_COMMUNITY_FIELD, [])
+        return self.get(SECONDARY_COMMUNITY_FIELD, []) or []
 
     def clear(self):
         """Preserves the schema even if the record is cleared and all metadata wiped out."""
-        primary = self.get(self.PRIMARY_COMMUNITY_FIELD)
+        primary = self.get(PRIMARY_COMMUNITY_FIELD)
         super().clear()
         if primary:
-            self[self.PRIMARY_COMMUNITY_FIELD] = primary
+            self[PRIMARY_COMMUNITY_FIELD] = primary
 
     def _check_community(self, data):
-        if self.PRIMARY_COMMUNITY_FIELD in data:
-            if data[self.PRIMARY_COMMUNITY_FIELD] != self.primary_community:
+        if PRIMARY_COMMUNITY_FIELD in data:
+            if data[PRIMARY_COMMUNITY_FIELD] != self.primary_community:
                 raise AttributeError('Primary Community cannot be changed')
 
     def update(self, e=None, **f):
@@ -45,14 +46,14 @@ class CommunityRecordMixin(object):
 
     def __setitem__(self, key, value):
         """Dict's setitem."""
-        if key == self.PRIMARY_COMMUNITY_FIELD:
-            if self.PRIMARY_COMMUNITY_FIELD in self and self.primary_community != value:
+        if key == PRIMARY_COMMUNITY_FIELD:
+            if PRIMARY_COMMUNITY_FIELD in self and self.primary_community != value:
                 raise AttributeError('Primary Community cannot be changed')
         return super().__setitem__(key, value)
 
     def __delitem__(self, key):
         """Dict's delitem."""
-        if key == self.PRIMARY_COMMUNITY_FIELD:
+        if key == PRIMARY_COMMUNITY_FIELD:
             raise AttributeError('Primary Community can not be deleted')
         return super().__delitem__(key)
 
@@ -62,8 +63,9 @@ class CommunityRecordMixin(object):
         Creates a new record instance and store it in the database.
         For parameters see :py:class:invenio_records.api.Record
         """
-        if not data.get(cls.PRIMARY_COMMUNITY_FIELD, None):
+        if not data.get(PRIMARY_COMMUNITY_FIELD, None):
             raise AttributeError('Primary Community is missing from record')
+
         ret = super().create(data, id_, **kwargs)
         return ret
 
@@ -73,12 +75,11 @@ class CommunityRecordMixin(object):
         :returns: A new :class:`Record` instance.
         """
         data = apply_patch(dict(self), patch)
-        if self.primary_community != data[self.PRIMARY_COMMUNITY_FIELD]:
+        if self.primary_community != data[PRIMARY_COMMUNITY_FIELD]:
             raise AttributeError('Primary Community cannot be changed')
         return self.__class__(data, model=self.model)
 
     @transition(src=[None, 'filling'], dest='approving',
-                permissions=None)
-    def finish(self, **kwargs):
+                permissions=require_any(permission_factory(COMMUNITY_REQUEST_APPROVAL)))
+    def request_approval(self, **kwargs):
         pass
-

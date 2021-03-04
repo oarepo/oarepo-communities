@@ -11,6 +11,7 @@ from collections import namedtuple
 
 import flask
 from flask import current_app, url_for
+from flask_security import login_user
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.minters import recid_minter
 from invenio_records import Record
@@ -20,6 +21,8 @@ from werkzeug.local import LocalProxy
 
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.links import community_record_links_factory
+from oarepo_communities.permissions import read_object_permission_impl, create_object_permission_impl, \
+    update_object_permission_impl, delete_object_permission_impl
 from oarepo_communities.record import CommunityRecordMixin
 
 _datastore = LocalProxy(lambda: current_app.extensions['security'].datastore)
@@ -54,6 +57,9 @@ def gen_rest_endpoint(pid_type, search_class, record_class, path, custom_read_pe
         search_index='records-record-v1.0.0',
         search_type='_doc',
         record_class=record_class,
+        record_loaders={
+            'application/json': 'oarepo_communities.loaders:community_json_loader',
+        },
         record_serializers={
             'application/json': ('invenio_records_rest.serializers'
 
@@ -68,10 +74,10 @@ def gen_rest_endpoint(pid_type, search_class, record_class, path, custom_read_pe
         default_media_type='application/json',
         max_result_window=10000,
         error_handlers=dict(),
-        create_permission_factory_imp=create_permission_factory,
-        delete_permission_factory_imp=delete_permission_factory,
-        update_permission_factory_imp=update_permission_factory,
-        read_permission_factory_imp=custom_read_permission_factory or read_permission_factory,
+        read_permission_factory_imp=read_object_permission_impl,
+        create_permission_factory_imp=create_object_permission_impl,
+        delete_permission_factory_imp=delete_object_permission_impl,
+        update_permission_factory_imp=update_object_permission_impl,
     )
 
 
@@ -101,7 +107,10 @@ def make_sample_record(db, title, community_id, state='filling', secondary=None)
         'title': title,
         '_primary_community': community_id,
         'state': state,
-        '_communities': secondary
+        '_communities': secondary,
+        'access': {
+            'owned_by': [1]
+        }
     }
     record_uuid = uuid.uuid4()
     pid = recid_minter(record_uuid, rec)
@@ -124,3 +133,12 @@ def make_sample_community(db, comid):
 
 def make_sample_community_with_users(db, comid):
     pass
+
+
+def _test_login_factory(user):
+    def test_login():
+        login_user(user, remember=True)
+        return 'OK'
+
+    test_login.__name__ = '{}_{}'.format(test_login.__name__, user.id)
+    return test_login

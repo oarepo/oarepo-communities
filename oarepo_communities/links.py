@@ -8,12 +8,12 @@
 """OArepo module that adds support for communities"""
 from flask import url_for
 from invenio_records_rest import current_records_rest
-from invenio_records_rest.links import default_links_factory
+from oarepo_fsm.links import record_fsm_links_factory
 
 
 def community_record_links_factory(pid, record=None, **kwargs):
     """Ensures that primary community is set in self link."""
-    links = default_links_factory(pid, record, **kwargs)
+    links = record_fsm_links_factory(pid, record, **kwargs)
     endpoint = '.{0}_item'.format(
         current_records_rest.default_endpoint_prefixes[pid.pid_type])
     primary_community = None

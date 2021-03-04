@@ -15,7 +15,9 @@ import os
 import uuid
 
 import pytest
+from flask import Blueprint
 from invenio_access import ActionRoles, ActionUsers
+from invenio_accounts.models import User
 from invenio_accounts.proxies import current_datastore
 from invenio_accounts.testutils import create_test_user
 from invenio_app.factory import create_api
@@ -30,7 +32,7 @@ from oarepo_communities.constants import COMMUNITY_REQUEST_APPROVAL, COMMUNITY_A
 from oarepo_communities.handlers import CommunityHandler
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.search import CommunitySearch
-from tests.api.helpers import gen_rest_endpoint, make_sample_record, LiteEntryPoint
+from tests.api.helpers import gen_rest_endpoint, make_sample_record, LiteEntryPoint, _test_login_factory
 
 logging.basicConfig()
 logging.getLogger('elasticsearch').setLevel(logging.DEBUG)
@@ -171,7 +173,7 @@ def sample_records(app, db, es_clear):
             make_sample_record(db, 'Test 6 in community B', 'B', 'published', ['C']),
         ],
         'comtest': [
-            make_sample_record(db, 'Test 4 in community comid', 'comid'),
+            make_sample_record(db, 'Test 4 in community comid', 'comtest'),
         ]
     }
     current_search.flush_and_refresh('records-record-v1.0.0')
@@ -216,8 +218,30 @@ def permissions(db, community, sample_records):
             else:
                 role_name = current_oarepo_communities.role_name_factory(community[1], r)['name']
                 role = current_datastore.find_role(role_name)
-                db.session.add(ActionRoles(action, argument=community[1].id, role=role))
+                db.session.add(ActionRoles(action=action, argument=community[1].id, role=role))
 
     db.session.commit()
 
     yield users
+
+
+@pytest.fixture()
+def test_blueprint(users, base_app):
+    """Test blueprint with dynamically added testing endpoints."""
+    blue = Blueprint(
+        '_tests',
+        __name__,
+        url_prefix='/_tests/'
+    )
+
+    if blue.name in base_app.blueprints:
+        del base_app.blueprints[blue.name]
+
+    for user in User.query.all():
+        if base_app.view_functions.get('_tests.test_login_{}'.format(user.id)) is not None:
+            del base_app.view_functions['_tests.test_login_{}'.format(user.id)]
+
+        blue.add_url_rule('_login_{}'.format(user.id), view_func=_test_login_factory(user))
+
+    base_app.register_blueprint(blue)
+    return blue

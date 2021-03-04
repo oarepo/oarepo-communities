@@ -23,6 +23,41 @@ To use this library, you need to configure your `RECORDS_REST_ENDPOINTS`
 to use [OARepo FSM](https://github.com/oarepo/oarepo-fsm)
 and [OARepo Records Draft](https://github.com/oarepo/invenio-records-draft) libraries first.
 
+Ensure that your Record Metadata schema contains the following fields:
+```json
+{
+    "_primary_community":{
+        "type": "string"
+    },
+    "_communities": {
+        "type": "array",
+        "items": {
+            "type": "string"
+        }
+    },
+    "state": {
+        "type": "string"
+    },
+    "access": {
+        "owned_by": {
+            "description": "List of user IDs that are owners of the record.",
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "user": {
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
 ## Installation
 
 OARepo-Communities is on PyPI so all you need is:
