@@ -84,4 +84,4 @@ def test_record_create(db, app, community, client, users, es, test_blueprint):
 
         # Create with correct primary community  data succeeds
         resp = client.post('https://localhost/comtest/', json=recdata)
-        assert resp.status_code == 200
+        assert resp.status_code == 201

@@ -10,6 +10,7 @@
 #
 # Action needs
 #
+from flask import request
 from flask_principal import UserNeed
 from invenio_access import action_factory, SystemRoleNeed, Permission, ParameterizedActionNeed
 from invenio_records import Record
@@ -31,13 +32,12 @@ def action_permission_factory(action):
     :returns: A :class:`invenio_access.permissions.Permission` instance.
     """
 
-    def inner(record=None):
+    def inner(record, *args, **kwargs):
         if action not in current_oarepo_communities.allowed_actions:
             return deny_all()
 
         if record is None:
-            # TODO: Check permissions for object creation.
-            return Permission(ParameterizedActionNeed(action, None))
+            raise RuntimeError('Record is missing.')
 
         arg = None
         if isinstance(record, Record):
@@ -97,7 +97,7 @@ def owner_or_role_action_permission_factory(action):
 
 def create_permission_factory(record, *args, **kwargs):
     """Records REST create permission factory."""
-    return action_permission_factory(COMMUNITY_CREATE)(record, *args, **kwargs)
+    return Permission(ParameterizedActionNeed(COMMUNITY_CREATE, request.view_args['community_id']))
 
 
 def update_permission_factory(record, *args, **kwargs):

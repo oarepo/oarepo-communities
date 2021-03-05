@@ -88,6 +88,22 @@ OAREPO_COMMUNITIES_ALLOWED_ACTIONS = [
 """Community actions available to community roles."""
 ```
 
+Register Records REST endpoints that will represent community record collections under:
+```python
+OAREPO_COMMUNITIES_ENDPOINTS = ['recid', ...]
+"""List of community enabled endpoints."""
+```
+
+Endpoints registered as community endpoints are expected to have item and list paths in the
+following format:
+```python
+RECORDS_REST_ENDPOINTS={
+    list_route=f'/<community_id>/',
+    item_route=f'/<commpid({pid_type},record_class="{record_class}"):pid_value>',
+...
+}
+```
+
 ### Links Factory
 
 For this library to work, you will need to set the following links factory in your `RECORDS_REST_ENDPOINTS`:
