@@ -11,7 +11,6 @@ This file is imported by ``oarepo_communities.__init__``,
 and parsed by ``setup.py``.
 """
 from flask_babelex import gettext
-from flask_security import AnonymousUser
 from speaklater import make_lazy_gettext
 
 _ = make_lazy_gettext(lambda: gettext)

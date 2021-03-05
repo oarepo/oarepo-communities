@@ -7,10 +7,6 @@
 
 """Create oarepo communities table."""
 
-from alembic import op
-import sqlalchemy as sa
-
-
 # revision identifiers, used by Alembic.
 revision = 'fc68521ce662'
 down_revision = None

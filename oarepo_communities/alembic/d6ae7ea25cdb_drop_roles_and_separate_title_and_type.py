@@ -6,10 +6,9 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Drop roles and separate title and type."""
+import sqlalchemy as sa
 import sqlalchemy_utils
 from alembic import op
-import sqlalchemy as sa
-
 
 # revision identifiers, used by Alembic.
 from oarepo_communities.models import OAREPO_COMMUNITIES_TYPES
@@ -44,9 +43,12 @@ def downgrade():
     op.add_column('oarepo_communities', sa.Column('publishers_id', sa.INTEGER(), autoincrement=False, nullable=False))
     op.add_column('oarepo_communities', sa.Column('members_id', sa.INTEGER(), autoincrement=False, nullable=False))
     op.add_column('oarepo_communities', sa.Column('curators_id', sa.INTEGER(), autoincrement=False, nullable=False))
-    op.create_foreign_key('fk_oarepo_communities_members_id_accounts_role', 'oarepo_communities', 'accounts_role', ['members_id'], ['id'], ondelete='CASCADE')
-    op.create_foreign_key('fk_oarepo_communities_publishers_id_accounts_role', 'oarepo_communities', 'accounts_role', ['publishers_id'], ['id'], ondelete='CASCADE')
-    op.create_foreign_key('fk_oarepo_communities_curators_id_accounts_role', 'oarepo_communities', 'accounts_role', ['curators_id'], ['id'], ondelete='CASCADE')
+    op.create_foreign_key('fk_oarepo_communities_members_id_accounts_role', 'oarepo_communities', 'accounts_role',
+                          ['members_id'], ['id'], ondelete='CASCADE')
+    op.create_foreign_key('fk_oarepo_communities_publishers_id_accounts_role', 'oarepo_communities', 'accounts_role',
+                          ['publishers_id'], ['id'], ondelete='CASCADE')
+    op.create_foreign_key('fk_oarepo_communities_curators_id_accounts_role', 'oarepo_communities', 'accounts_role',
+                          ['curators_id'], ['id'], ondelete='CASCADE')
     op.drop_column('oarepo_communities', 'type')
     op.drop_column('oarepo_communities', 'title')
     # ### end Alembic commands ###
