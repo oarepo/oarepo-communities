@@ -14,14 +14,13 @@ from flask import request
 from flask_principal import UserNeed
 from invenio_access import action_factory, SystemRoleNeed, Permission, ParameterizedActionNeed
 from invenio_records import Record
-from invenio_records_rest.utils import deny_all, allow_all
+from invenio_records_rest.utils import allow_all
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, PRIMARY_COMMUNITY_FIELD, \
     STATE_EDITING, COMMUNITY_REQUEST_APPROVAL, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
     STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, COMMUNITY_UNPUBLISH
 from oarepo_communities.proxies import current_oarepo_communities
-
 
 community_record_owner = SystemRoleNeed('community-record-owner')
 
@@ -35,6 +34,7 @@ def require_action_allowed(action):
         require_all(require_action_allowed(COMMUNITY_CREATE), Permission(RoleNeed('editor')))
     ```
     """
+
     def factory(record, *_args, **_kwargs):
         def can():
             return action in current_oarepo_communities.allowed_actions
