@@ -55,3 +55,6 @@ STATE_APPROVED = 'approved'
 
 STATE_PUBLISHED = 'published'
 """State: record has been made public."""
+
+STATE_DELETED = 'deleted'
+"""State: record draft has been deleted."""

@@ -11,10 +11,12 @@ from oarepo_fsm.decorators import transition
 from oarepo_fsm.mixins import FSMMixin
 
 from oarepo_communities.constants import PRIMARY_COMMUNITY_FIELD, SECONDARY_COMMUNITY_FIELD, \
-    STATE_PENDING_APPROVAL, STATE_EDITING, STATE_APPROVED, STATE_PUBLISHED
+    STATE_PENDING_APPROVAL, STATE_EDITING, STATE_APPROVED, STATE_PUBLISHED, STATE_DELETED
 from oarepo_communities.permissions import request_approval_permission_impl, delete_draft_permission_impl, \
-    request_changes_permission_impl, approve_permission_impl, revert_approval_permission_impl, publish_permission_impl, \
-    unpublish_permission_impl
+    request_changes_permission_impl, approve_permission_impl, revert_approval_permission_impl, \
+    publish_permission_impl, unpublish_permission_impl
+from oarepo_communities.signals import on_request_approval, on_delete_draft, on_request_changes, on_approve, \
+    on_revert_approval, on_unpublish, on_publish
 
 
 class CommunityRecordMixin(FSMMixin):
@@ -86,34 +88,44 @@ class CommunityRecordMixin(FSMMixin):
     @transition(src=[None, STATE_EDITING], dest=STATE_PENDING_APPROVAL,
                 permissions=request_approval_permission_impl)
     def request_approval(self, **kwargs):
-        pass
+        """Submit record for approval."""
+        on_request_approval.send(self, **kwargs)
 
-    @transition(src=[None, STATE_EDITING], dest=None,
-                permissions=delete_draft_permission_impl)
+    @transition(src=[None, STATE_EDITING, STATE_PENDING_APPROVAL], dest=STATE_DELETED,
+                permissions=delete_draft_permission_impl,
+                commit_record=False)
     def delete_draft(self, **kwargs):
-        pass
+        """Completely delete a draft record."""
+        on_delete_draft.send(self, **kwargs)
 
-    @transition(src=[STATE_PENDING_APPROVAL], dest=STATE_EDITING,
+    @transition(src=STATE_PENDING_APPROVAL, dest=STATE_EDITING,
                 permissions=request_changes_permission_impl)
     def request_changes(self, **kwargs):
-        pass
+        """Request changes to the record."""
+        on_request_changes.send(self, **kwargs)
 
     @transition(src=[STATE_PENDING_APPROVAL], dest=STATE_APPROVED,
-                permissions=approve_permission_impl)
+                permissions=approve_permission_impl,
+                commit_record=False)
     def approve(self, **kwargs):
-        pass
+        """Approve the record to be included in the community."""
+        on_approve.send(self, **kwargs)
 
     @transition(src=[STATE_APPROVED], dest=STATE_PENDING_APPROVAL,
-                permissions=revert_approval_permission_impl)
+                permissions=revert_approval_permission_impl,
+                commit_record=False)
     def revert_approval(self, **kwargs):
-        pass
+        """Revert the record approval, requesting it to be re-approved."""
+        on_revert_approval.send(self, **kwargs)
 
     @transition(src=[STATE_APPROVED], dest=STATE_PUBLISHED,
                 permissions=publish_permission_impl)
     def publish(self, **kwargs):
-        pass
+        """Make the record visible outside of the community."""
+        on_publish.send(self, **kwargs)
 
     @transition(src=[STATE_PUBLISHED], dest=STATE_APPROVED,
                 permissions=unpublish_permission_impl)
     def unpublish(self, **kwargs):
-        pass
+        """Revert the record publication, returning it to approved state."""
+        on_unpublish.send(self, **kwargs)

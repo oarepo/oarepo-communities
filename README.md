@@ -144,6 +144,49 @@ RECORDS_REST_ENDPOINTS={
     }
 ```
 
+## Signals
+
+Each community action defined on CommunityRecordMixin sends a signal whenever
+a record's state changes. The
+following [signals](https://github.com/oarepo/oarepo-communities/oarepo_communities/signals.py) are available for
+each possible action. You will need to connect to these signals in your app to
+execute any extra actions needed on each state change event.
+
+```python
+on_request_approval = _signals.signal('on-community-request-approve')
+"""Signal sent when community record transitions to pending approval state."""
+
+on_delete_draft = _signals.signal('on-community-delete-draft')
+"""Signal sent when community record delete draft action is triggered.
+
+   When implementing the event listener, it is your responsibility
+   to commit any changes to the record.
+"""
+
+on_request_changes = _signals.signal('on-community-request-changes')
+"""Signal sent when community record transitions from approved to editing state."""
+
+on_approve = _signals.signal('on-community-approve')
+"""Signal sent when community record transtions to approved state.
+
+   When implementing the event listener, it is your responsibility
+   to commit any changes to the record.
+"""
+
+on_revert_approval = _signals.signal('on-community-revert-approval')
+"""Signal sent when community record transitions from approved to pending approval state.
+
+   When implementing the event listener, it is your responsibility
+   to commit any changes to the record.
+"""
+
+on_publish = _signals.signal('on-community-publish')
+"""Signal sent when community record transitions from approved to published state."""
+
+on_unpublish = _signals.signal('on-community-unpublish')
+"""Signal sent when community record transitions published to approved state."""
+```
+
 
 ## Usage
 

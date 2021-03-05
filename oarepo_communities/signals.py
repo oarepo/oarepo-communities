@@ -40,4 +40,35 @@ When implementing the event listener, the community data can be retrieved from
    persisted.
 """
 
+on_request_approval = _signals.signal('on-community-request-approve')
+"""Signal sent when community record transitions to pending approval state."""
 
+on_delete_draft = _signals.signal('on-community-delete-draft')
+"""Signal sent when community record delete draft action is triggered.
+
+   When implementing the event listener, it is your responsibility
+   to commit any changes to the record.
+"""
+
+on_request_changes = _signals.signal('on-community-request-changes')
+"""Signal sent when community record transitions from approved to editing state."""
+
+on_approve = _signals.signal('on-community-approve')
+"""Signal sent when community record transtions to approved state.
+
+   When implementing the event listener, it is your responsibility
+   to commit any changes to the record.
+"""
+
+on_revert_approval = _signals.signal('on-community-revert-approval')
+"""Signal sent when community record transitions from approved to pending approval state.
+
+   When implementing the event listener, it is your responsibility
+   to commit any changes to the record.
+"""
+
+on_publish = _signals.signal('on-community-publish')
+"""Signal sent when community record transitions from approved to published state."""
+
+on_unpublish = _signals.signal('on-community-unpublish')
+"""Signal sent when community record transitions published to approved state."""
