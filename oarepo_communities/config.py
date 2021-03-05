@@ -28,3 +28,6 @@ OAREPO_COMMUNITIES_ALLOWED_ACTIONS = [COMMUNITY_READ, COMMUNITY_CREATE, COMMUNIT
                                       COMMUNITY_REVERT_APPROVE, COMMUNITY_REQUEST_CHANGES, COMMUNITY_PUBLISH,
                                       COMMUNITY_UNPUBLISH]
 """Community actions available to community roles."""
+
+OAREPO_COMMUNITIES_ENDPOINTS = []
+"""List of community enabled endpoints."""

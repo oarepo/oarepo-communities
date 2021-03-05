@@ -52,6 +52,8 @@ def app_config(app_config):
         CACHE_TYPE='simple',
         SERVER_NAME='localhost',
         DEBUG=False,
+        PREFERRED_URL_SCHEME='https',
+        FLASK_ENV='development',
         PIDSTORE_RECID_FIELD='id',
         EMAIL_BACKEND='flask_email.backends.locmem.Mail',
         SECRET_KEY='TEST',
@@ -68,9 +70,9 @@ def app_config(app_config):
             'recid': gen_rest_endpoint('recid',
                                        CommunitySearch,
                                        'tests.api.helpers.TestRecord',
-                                       '<community_id>/records-anonymous',
                                        custom_read_permission_factory=allow_all)
-        }
+        },
+        OAREPO_COMMUNITIES_ENDPOINTS=['recid']
     )
     app_config.pop('RATELIMIT_STORAGE_URL', None)
     return app_config
@@ -79,8 +81,8 @@ def app_config(app_config):
 @pytest.fixture(scope='module')
 def app(base_app):
     """Flask application fixture."""
-    OARepoEnrollmentsExt(base_app)
-    OARepoCommunities(base_app)
+    # OARepoEnrollmentsExt(base_app)
+    # OARepoCommunities(base_app)
 
     # Register blueprints here
     # base_app.register_blueprint(create_blueprint_from_app(base_app))
@@ -170,10 +172,10 @@ def sample_records(app, db, es_clear):
         'B': [
             make_sample_record(db, 'Test 4 in community B', 'B', 'published'),
             make_sample_record(db, 'Test 5 in community B', 'B'),
-            make_sample_record(db, 'Test 6 in community B', 'B', 'published', ['C']),
+            make_sample_record(db, 'Test 6 in community B', 'B', 'published', secondary=['C']),
         ],
         'comtest': [
-            make_sample_record(db, 'Test 4 in community comid', 'comtest'),
+            make_sample_record(db, 'Test 4 in community comid', 'comtest', secondary=['B']),
         ]
     }
     current_search.flush_and_refresh('records-record-v1.0.0')

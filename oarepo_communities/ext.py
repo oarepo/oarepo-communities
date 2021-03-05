@@ -6,23 +6,29 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
+from flask import request
 from flask_login import current_user
 from flask_principal import identity_loaded
+from invenio_base.signals import app_loaded
 from invenio_base.utils import load_or_import_from_config
 from werkzeug.utils import cached_property
 
-from flask import request, current_app
-from invenio_base.signals import app_loaded
 from . import config
 from .permissions import community_record_owner
 
 
 @app_loaded.connect
 def add_urlkwargs(sender, app, **kwargs):
+    # ziskat vsechna listing url pro komunity
+    eps = app.config['OAREPO_COMMUNITIES_ENDPOINTS']
+    for ep in eps:
+        app.extensions['oarepo-communities'].list_endpoints.add(f'invenio_records_rest.{ep}_list')
 
     def _community_urlkwargs(endpoint, values):
-        if 'community_id' not in values:
-            values['community_id'] = request.view_args['community_id']
+        # TODO: config option for endpoints that need community_id kwarg
+        if endpoint in app.extensions['oarepo-communities'].list_endpoints:
+            if 'community_id' not in values:
+                values['community_id'] = request.view_args['community_id']
 
     app.url_default_functions.setdefault('invenio_records_rest', []).append(_community_urlkwargs)
 
@@ -33,6 +39,7 @@ class _OARepoCommunitiesState(object):
     def __init__(self, app):
         """Initialize state."""
         self.app = app
+        self.list_endpoints = set()
 
     @cached_property
     def roles(self):
@@ -82,8 +89,6 @@ class OARepoCommunities(object):
         app.extensions['oarepo-communities'] = state
 
         identity_loaded.connect_via(app)(on_identity_loaded)
-
-        return state
 
     def init_config(self, app):
         """Initialize configuration."""

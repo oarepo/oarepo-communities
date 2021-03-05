@@ -14,7 +14,7 @@ from oarepo_communities.constants import PRIMARY_COMMUNITY_FIELD
 
 def community_json_loader():
     data = request.get_json(force=True)
-    rcomid = request.kwargs['community_id']
+    rcomid = request.view_args['community_id']
     dcomid = data.get(PRIMARY_COMMUNITY_FIELD, None)
     if dcomid:
         if rcomid != dcomid:

@@ -46,7 +46,7 @@ class LiteEntryPoint:
         return self.val
 
 
-def gen_rest_endpoint(pid_type, search_class, record_class, path, custom_read_permission_factory=None):
+def gen_rest_endpoint(pid_type, search_class, record_class, custom_read_permission_factory=None):
     return dict(
         pid_type=pid_type,
         pid_minter=pid_type,
@@ -62,15 +62,14 @@ def gen_rest_endpoint(pid_type, search_class, record_class, path, custom_read_pe
         },
         record_serializers={
             'application/json': ('invenio_records_rest.serializers'
-
                                  ':json_v1_response'),
         },
         search_serializers={
             'application/json': ('invenio_records_rest.serializers'
                                  ':json_v1_search'),
         },
-        list_route=f'/{path}/',
-        item_route=f'/{path}/<pid({pid_type},record_class="{record_class}"):pid_value>',
+        list_route=f'/<community_id>/',
+        item_route=f'/<commpid({pid_type},record_class="{record_class}"):pid_value>',
         default_media_type='application/json',
         max_result_window=10000,
         error_handlers=dict(),

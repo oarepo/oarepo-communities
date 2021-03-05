@@ -8,14 +8,14 @@
 """OArepo module that adds support for communities"""
 from jsonpatch import apply_patch
 from oarepo_fsm.decorators import transition
-from oarepo_fsm.permissions import require_any
 
 from oarepo_communities.constants import COMMUNITY_REQUEST_APPROVAL, PRIMARY_COMMUNITY_FIELD, SECONDARY_COMMUNITY_FIELD
-from oarepo_communities.permissions import permission_factory
+from oarepo_communities.permissions import owner_or_role_action_permission_factory
 
 
 class CommunityRecordMixin(object):
     """A mixin that keeps community info in the metadata."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -80,6 +80,6 @@ class CommunityRecordMixin(object):
         return self.__class__(data, model=self.model)
 
     @transition(src=[None, 'filling'], dest='approving',
-                permissions=require_any(permission_factory(COMMUNITY_REQUEST_APPROVAL)))
+                permissions=owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL))
     def request_approval(self, **kwargs):
         pass

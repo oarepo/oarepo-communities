@@ -89,6 +89,12 @@ setup(
         'invenio_db.alembic': [
             'oarepo_communities = oarepo_communities:alembic',
         ],
+        'invenio_base.api_converters': [
+            'commpid = oarepo_communities.converters:CommunityPIDConverter',
+        ],
+        'invenio_base.converters': [
+            'commpid = oarepo_communities.converters:CommunityPIDConverter',
+        ]
         # 'invenio_pidstore.minters': [],
         # 'invenio_records.jsonresolver': [],
     },
