@@ -15,13 +15,33 @@ from flask_principal import UserNeed
 from invenio_access import action_factory, SystemRoleNeed, Permission, ParameterizedActionNeed
 from invenio_records import Record
 from invenio_records_rest.utils import deny_all, allow_all
-from oarepo_fsm.permissions import require_any, require_all
+from oarepo_fsm.permissions import require_any, require_all, state_required
 
-from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, PRIMARY_COMMUNITY_FIELD
+from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, PRIMARY_COMMUNITY_FIELD, \
+    STATE_EDITING, COMMUNITY_REQUEST_APPROVAL, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
+    STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, COMMUNITY_UNPUBLISH
 from oarepo_communities.proxies import current_oarepo_communities
 
 
 community_record_owner = SystemRoleNeed('community-record-owner')
+
+
+def require_action_allowed(action):
+    """
+    Permission factory that requires the action to be allowed by configuration.
+
+    You can use
+    ```
+        require_all(require_action_allowed(COMMUNITY_CREATE), Permission(RoleNeed('editor')))
+    ```
+    """
+    def factory(record, *_args, **_kwargs):
+        def can():
+            return action in current_oarepo_communities.allowed_actions
+
+        return type('ActionAllowedPermission', (), {'can': can})
+
+    return factory
 
 
 def action_permission_factory(action):
@@ -33,9 +53,6 @@ def action_permission_factory(action):
     """
 
     def inner(record, *args, **kwargs):
-        if action not in current_oarepo_communities.allowed_actions:
-            return deny_all()
-
         if record is None:
             raise RuntimeError('Record is missing.')
 
@@ -46,7 +63,9 @@ def action_permission_factory(action):
             arg = record[PRIMARY_COMMUNITY_FIELD]
         else:
             raise RuntimeError('Unknown or missing object')
-        return Permission(ParameterizedActionNeed(action, arg))
+        return require_all(
+            require_action_allowed(action),
+            Permission(ParameterizedActionNeed(action, arg)))
 
     return inner
 
@@ -125,4 +144,39 @@ update_object_permission_impl = require_any(
 
 delete_object_permission_impl = require_any(
     delete_permission_factory
+)
+
+request_approval_permission_impl = require_all(
+    state_required(None, STATE_EDITING),
+    owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL)
+)
+
+delete_draft_permission_impl = require_all(
+    state_required(None, STATE_EDITING),
+    owner_or_role_action_permission_factory(COMMUNITY_DELETE)
+)
+
+request_changes_permission_impl = require_all(
+    state_required(STATE_PENDING_APPROVAL),
+    action_permission_factory(COMMUNITY_REQUEST_CHANGES)
+)
+
+approve_permission_impl = require_all(
+    state_required(STATE_PENDING_APPROVAL),
+    action_permission_factory(COMMUNITY_APPROVE)
+)
+
+revert_approval_permission_impl = require_all(
+    state_required(STATE_APPROVED),
+    action_permission_factory(COMMUNITY_REVERT_APPROVE)
+)
+
+publish_permission_impl = require_all(
+    state_required(STATE_APPROVED),
+    action_permission_factory(COMMUNITY_PUBLISH)
+)
+
+unpublish_permission_impl = require_all(
+    state_required(STATE_PUBLISHED),
+    action_permission_factory(COMMUNITY_UNPUBLISH)
 )

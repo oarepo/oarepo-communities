@@ -26,6 +26,11 @@ class CommunityPIDValue(str):
     def __init__(self, pid_value, community_id):
         self.community_id = community_id
 
+    def __eq__(self, other):
+        if not isinstance(other, CommunityPIDValue):
+            return False
+        return self.community_id == other.community_id and str(self) == str(other)
+
 
 class CommunityPIDConverter(PIDConverter):
     """Community records PID converter."""

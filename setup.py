@@ -36,7 +36,7 @@ setup_requires = [
 ]
 
 install_requires = [
-    'oarepo-fsm',
+    'oarepo-fsm>=1.4.4',
     'oarepo-micro-api',
     'oarepo-enrollment-permissions'
 ]

@@ -22,36 +22,27 @@ from oarepo_communities.cli import communities as cmd
 from oarepo_communities.constants import COMMUNITY_READ
 
 
-def test_cli_community_create(app, db):
-    runner = CliRunner()
-    script_info = ScriptInfo(create_app=lambda info: app)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI',
-                                                      'sqlite://')
-
+def test_cli_community_create(cli_runner, db):
     # Test community creation.
-    with runner.isolated_filesystem():
-        result = runner.invoke(cmd, ['create',
-                                     'cli-test-community',
-                                     'Test Community',
-                                     '--description', 'community desc',
-                                     '--ctype', 'wgroup'],
-                               env={'INVENIO_SQLALCHEMY_DATABASE_URI':
-                                        os.getenv('SQLALCHEMY_DATABASE_URI',
-                                                  'sqlite://')},
-                               obj=script_info)
-        assert 0 == result.exit_code
+    result = cli_runner(cmd, ['create',
+                                 'cli-test-community',
+                                 'Test Community',
+                                 '--description', 'community desc',
+                                 '--ctype', 'wgroup'],
+                        )
+    assert 0 == result.exit_code
 
-        comm = OARepoCommunity.get_community('cli-test-community')
-        assert comm is not None
-        assert comm.title == 'Test Community'
-        assert comm.type == 'wgroup'
-        assert comm.json['description'] == 'community desc'
+    comm = OARepoCommunity.get_community('cli-test-community')
+    assert comm is not None
+    assert comm.title == 'Test Community'
+    assert comm.type == 'wgroup'
+    assert comm.json['description'] == 'community desc'
 
-        rols = Role.query.all()
-        assert len(rols) == 3
-        assert set([r.name for r in rols]) == {'community:cli-test-community:member',
-                                               'community:cli-test-community:curator',
-                                               'community:cli-test-community:publisher'}
+    rols = Role.query.all()
+    assert len(rols) == 3
+    assert set([r.name for r in rols]) == {'community:cli-test-community:member',
+                                           'community:cli-test-community:curator',
+                                           'community:cli-test-community:publisher'}
 
 
 def test_cli_action_allow(app, community, authenticated_user, db):

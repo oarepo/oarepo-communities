@@ -15,8 +15,7 @@ from flask_security import login_user
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.minters import recid_minter
 from invenio_records import Record
-from oarepo_enrollment_permissions import create_permission_factory, delete_permission_factory, \
-    update_permission_factory, read_permission_factory
+from oarepo_fsm.mixins import FSMMixin
 from werkzeug.local import LocalProxy
 
 from oarepo_communities.api import OARepoCommunity
@@ -28,7 +27,7 @@ from oarepo_communities.record import CommunityRecordMixin
 _datastore = LocalProxy(lambda: current_app.extensions['security'].datastore)
 
 
-class TestRecord(CommunityRecordMixin, Record):
+class TestRecord(CommunityRecordMixin, FSMMixin, Record):
     blueprint = 'tests.api/recid_item'
 
     @property

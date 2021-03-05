@@ -8,12 +8,16 @@
 """OArepo module that adds support for communities"""
 from jsonpatch import apply_patch
 from oarepo_fsm.decorators import transition
+from oarepo_fsm.mixins import FSMMixin
 
-from oarepo_communities.constants import COMMUNITY_REQUEST_APPROVAL, PRIMARY_COMMUNITY_FIELD, SECONDARY_COMMUNITY_FIELD
-from oarepo_communities.permissions import owner_or_role_action_permission_factory
+from oarepo_communities.constants import PRIMARY_COMMUNITY_FIELD, SECONDARY_COMMUNITY_FIELD, \
+    STATE_PENDING_APPROVAL, STATE_EDITING, STATE_APPROVED, STATE_PUBLISHED
+from oarepo_communities.permissions import request_approval_permission_impl, delete_draft_permission_impl, \
+    request_changes_permission_impl, approve_permission_impl, revert_approval_permission_impl, publish_permission_impl, \
+    unpublish_permission_impl
 
 
-class CommunityRecordMixin(object):
+class CommunityRecordMixin(FSMMixin):
     """A mixin that keeps community info in the metadata."""
 
     def __init__(self, *args, **kwargs):
@@ -79,7 +83,37 @@ class CommunityRecordMixin(object):
             raise AttributeError('Primary Community cannot be changed')
         return self.__class__(data, model=self.model)
 
-    @transition(src=[None, 'filling'], dest='approving',
-                permissions=owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL))
+    @transition(src=[None, STATE_EDITING], dest=STATE_PENDING_APPROVAL,
+                permissions=request_approval_permission_impl)
     def request_approval(self, **kwargs):
+        pass
+
+    @transition(src=[None, STATE_EDITING], dest=None,
+                permissions=delete_draft_permission_impl)
+    def delete_draft(self, **kwargs):
+        pass
+
+    @transition(src=[STATE_PENDING_APPROVAL], dest=STATE_EDITING,
+                permissions=request_changes_permission_impl)
+    def request_changes(self, **kwargs):
+        pass
+
+    @transition(src=[STATE_PENDING_APPROVAL], dest=STATE_APPROVED,
+                permissions=approve_permission_impl)
+    def approve(self, **kwargs):
+        pass
+
+    @transition(src=[STATE_APPROVED], dest=STATE_PENDING_APPROVAL,
+                permissions=revert_approval_permission_impl)
+    def revert_approval(self, **kwargs):
+        pass
+
+    @transition(src=[STATE_APPROVED], dest=STATE_PUBLISHED,
+                permissions=publish_permission_impl)
+    def publish(self, **kwargs):
+        pass
+
+    @transition(src=[STATE_PUBLISHED], dest=STATE_APPROVED,
+                permissions=unpublish_permission_impl)
+    def unpublish(self, **kwargs):
         pass

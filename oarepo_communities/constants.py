@@ -7,6 +7,15 @@
 
 """OArepo module that adds support for communities"""
 
+
+PRIMARY_COMMUNITY_FIELD = '_primary_community'
+"""Record metadata field holding primary community ID."""
+
+SECONDARY_COMMUNITY_FIELD = '_communities'
+"""Record metadata field holding primary community ID."""
+
+
+# Available community actions
 COMMUNITY_READ = 'community-read'
 """Action needed: read/list records in a community."""
 
@@ -34,8 +43,15 @@ COMMUNITY_UNPUBLISH = 'community-unpublish'
 COMMUNITY_DELETE = 'community-delete'
 """Action needed: delete community draft record."""
 
-PRIMARY_COMMUNITY_FIELD = '_primary_community'
-"""Record metadata field holding primary community ID."""
+# Available community record states
+STATE_EDITING = 'editing'
+"""State: record is an edited draft."""
 
-SECONDARY_COMMUNITY_FIELD = '_communities'
-"""Record metadata field holding primary community ID."""
+STATE_PENDING_APPROVAL = 'pending-approval'
+"""State: record creator has finished editing and submitted record for approval."""
+
+STATE_APPROVED = 'approved'
+"""State: record has been validated and approved for publishing."""
+
+STATE_PUBLISHED = 'published'
+"""State: record has been made public."""

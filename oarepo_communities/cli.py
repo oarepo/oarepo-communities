@@ -12,7 +12,7 @@ from operator import attrgetter
 import click
 import sqlalchemy
 from flask.cli import with_appcontext
-from invenio_access import ActionRoles, ActionSystemRoles, any_user
+from invenio_access import ActionRoles, any_user
 from invenio_db import db
 from oarepo_micro_api.cli import with_api
 from sqlalchemy.exc import IntegrityError

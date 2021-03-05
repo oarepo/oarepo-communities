@@ -68,6 +68,16 @@ $ pip install oarepo-communities
 
 ## Configuration
 
+### Community record class
+
+To use this module, you need to inherit your Record class from the following mixin:
+```python
+from oarepo_communities.record import CommunityRecordMixin
+
+class CommunityRecord(CommunityRecordMixin, Record):
+...
+```
+
 ### Community Roles
 To customize invenio roles to be created inside each community, override the following defaults:
 ```python
@@ -92,6 +102,9 @@ Register Records REST endpoints that will represent community record collections
 ```python
 OAREPO_COMMUNITIES_ENDPOINTS = ['recid', ...]
 """List of community enabled endpoints."""
+
+OAREPO_FSM_ENABLED_REST_ENDPOINTS = ['recid', ...]
+"""Enable FSM transitions for the community record collection."""
 ```
 
 Endpoints registered as community endpoints are expected to have item and list paths in the
