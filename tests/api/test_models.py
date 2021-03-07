@@ -9,6 +9,7 @@
 import uuid
 
 import pytest
+from invenio_access import ActionRoles
 from invenio_accounts.models import Role
 from invenio_accounts.proxies import current_datastore
 from invenio_db import db
@@ -16,6 +17,7 @@ from sqlalchemy.orm.exc import FlushError
 
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.models import OARepoCommunityModel
+from oarepo_communities.proxies import current_oarepo_communities
 
 
 def _check_community(comm):
@@ -36,6 +38,17 @@ def test_community_model(community):
     _check_community(comm)
 
 
+def test_community_create(db):
+    comm = OARepoCommunity.create(
+        {'description': 'Community description'},
+        id_='comtest',
+        title='Title',
+    )
+    _check_community(comm)
+    ar = ActionRoles.query.filter_by(argument=comm.id).all()
+    assert len(ar) == 0
+
+
 def test_get_community(community, community_ext_groups):
     comm = OARepoCommunity.get_community('comtest')
     assert comm is not None
@@ -53,13 +66,13 @@ def test_get_community_from_role(community):
     rol = current_datastore.find_role(f'community:{community[1].id}:member')
     assert rol is not None
 
-    comm = OARepoCommunity.get_community_from_role(rol)
+    comm = rol.community.one_or_none()
     assert comm is not None
     assert comm == community[1]
 
     # Test role not bound to community
     rol = current_datastore.create_role(name='other')
-    comm2 = OARepoCommunity.get_community_from_role(rol)
+    comm2 = rol.community.one_or_none()
     assert comm2 is None
 
 

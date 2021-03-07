@@ -49,6 +49,8 @@ class OARepoCommunity(RecordBase):
 
     @classmethod
     def _create_community_roles(cls, community):
+        community.roles = []
+
         for role in current_oarepo_communities.roles:
             role_kwargs = current_oarepo_communities.role_name_factory(community, role)
             role = current_datastore.find_or_create_role(str(role_kwargs['name']))
@@ -57,6 +59,9 @@ class OARepoCommunity(RecordBase):
 
             role.description = role_kwargs['description']
             current_datastore.put(role)
+            community.roles.append(role)
+
+            # Allow actions on community roles based on policy rules
 
     @classmethod
     def get_community(cls, id_, with_deleted=False, **kwargs):
@@ -76,20 +81,8 @@ class OARepoCommunity(RecordBase):
             return cls(obj.json, model=obj).model
 
     @classmethod
-    def get_community_from_role(cls, role):
-        """Retrieve the community for a given role.
-
-        :param role: A flask Role instance
-        :returns: The :class:`OARepoCommunityModel` instance,
-                  None if role is not associated with any community.
-        """
-        kwargs = current_oarepo_communities.role_parser(role)
-        if kwargs:
-            return cls.get_community(**kwargs)
-
-    @classmethod
     def get_role(cls, community: OARepoCommunityModel, role_name: str) -> Role:
-        """Retrieve the community Invenio Role for a given role name."""
+        """Retrieve the community Invenio Role for a given role short name."""
         kwargs = current_oarepo_communities.role_name_factory(community, role_name)
         return current_datastore.find_role(kwargs['name'])
 

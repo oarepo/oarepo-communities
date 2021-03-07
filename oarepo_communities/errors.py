@@ -10,6 +10,7 @@
 
 class OARepoCommunityCreateError(Exception):
     """Failed to create community error."""
+
     def __init__(self, community, *args, **kwargs):
         """Constructor.
 

@@ -6,26 +6,31 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-from flask import url_for
-from invenio_records_rest import current_records_rest
-from invenio_records_rest.links import default_links_factory
+from invenio_pidstore.fetchers import FetchedPID
+from invenio_pidstore.models import PersistentIdentifier
+from oarepo_fsm.links import record_fsm_links_factory
+
+from oarepo_communities.constants import PRIMARY_COMMUNITY_FIELD
+from oarepo_communities.converters import CommunityPIDValue
 
 
 def community_record_links_factory(pid, record=None, **kwargs):
     """Ensures that primary community is set in self link."""
-    links = default_links_factory(pid, record, **kwargs)
-    endpoint = '.{0}_item'.format(
-        current_records_rest.default_endpoint_prefixes[pid.pid_type])
-    primary_community = None
+    if not isinstance(pid.pid_value, CommunityPIDValue):
+        if record:
+            primary_community = record[PRIMARY_COMMUNITY_FIELD]
+        elif 'record_hit' in kwargs:
+            primary_community = kwargs['record_hit']['_source'][PRIMARY_COMMUNITY_FIELD]
+        else:
+            raise AttributeError('Record or record hit is missing')
 
-    if record:
-        primary_community = record['_primary_community']
-    elif 'record_hit' in kwargs:
-        primary_community = kwargs['record_hit']['_source']['_primary_community']
+        if isinstance(pid, FetchedPID):
+            pid = FetchedPID(pid.provider, pid.pid_type, CommunityPIDValue(pid.pid_value, primary_community))
+        elif isinstance(pid, PersistentIdentifier):
+            pid.pid_value = CommunityPIDValue(pid.pid_value, primary_community)
+        else:
+            raise NotImplementedError
 
-    if primary_community:
-        links['self'] = url_for(endpoint,
-                                pid_value=pid.pid_value,
-                                _external=True,
-                                community_id=primary_community)
+    links = record_fsm_links_factory(pid, record, **kwargs)
+
     return links

@@ -36,6 +36,7 @@ setup_requires = [
 ]
 
 install_requires = [
+    'oarepo-fsm>=1.4.4',
     'oarepo-micro-api',
     'oarepo-enrollment-permissions'
 ]
@@ -70,16 +71,10 @@ setup(
         'invenio_base.apps': [
             'oarepo_communities = oarepo_communities:OARepoCommunities',
         ],
-        # TODO: Edit these entry points to fit your needs.
-        'invenio_access.actions': [
-            # 'RequestApproval = oarepo_communities.permissions:RequestApproval',
-            # 'Approve = oarepo_communities.permissions:Approve',
-            # 'RevertApprove = oarepo_communities.permissions.RevertApprove',
-            # 'RequestChanges = oarepo_communities.permissions:RequestChanges',
-            # 'Publish = oarepo_communities.permissions:Publish',
-            # 'Unpublish = oarepo_communities.permissions:Unpublish'
-        ],
         # 'invenio_admin.actions': [],
+        'invenio_access.system_roles': [
+            'community_record_owner = oarepo_communities.permissions:community_record_owner',
+        ],
         # 'invenio_assets.bundles': [],
         'invenio_base.api_apps': [
             'oarepo_communities = oarepo_communities:OARepoCommunities',
@@ -94,6 +89,12 @@ setup(
         'invenio_db.alembic': [
             'oarepo_communities = oarepo_communities:alembic',
         ],
+        'invenio_base.api_converters': [
+            'commpid = oarepo_communities.converters:CommunityPIDConverter',
+        ],
+        'invenio_base.converters': [
+            'commpid = oarepo_communities.converters:CommunityPIDConverter',
+        ]
         # 'invenio_pidstore.minters': [],
         # 'invenio_records.jsonresolver': [],
     },

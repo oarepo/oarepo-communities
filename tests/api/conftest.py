@@ -15,7 +15,9 @@ import os
 import uuid
 
 import pytest
+from flask import Blueprint
 from invenio_access import ActionRoles, ActionUsers
+from invenio_accounts.models import User
 from invenio_accounts.proxies import current_datastore
 from invenio_accounts.testutils import create_test_user
 from invenio_app.factory import create_api
@@ -25,11 +27,12 @@ from oarepo_enrollments.ext import OARepoEnrollmentsExt
 
 from oarepo_communities import OARepoCommunities
 from oarepo_communities.api import OARepoCommunity
+from oarepo_communities.constants import COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE, COMMUNITY_REQUEST_CHANGES, \
+    COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH
 from oarepo_communities.handlers import CommunityHandler
-from oarepo_communities.permissions import RequestApproval, Approve, RevertApprove, Publish, Unpublish, RequestChanges
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.search import CommunitySearch
-from tests.api.helpers import gen_rest_endpoint, make_sample_record, LiteEntryPoint
+from tests.api.helpers import gen_rest_endpoint, make_sample_record, LiteEntryPoint, _test_login_factory
 
 logging.basicConfig()
 logging.getLogger('elasticsearch').setLevel(logging.DEBUG)
@@ -49,6 +52,8 @@ def app_config(app_config):
         CACHE_TYPE='simple',
         SERVER_NAME='localhost',
         DEBUG=False,
+        PREFERRED_URL_SCHEME='https',
+        FLASK_ENV='development',
         PIDSTORE_RECID_FIELD='id',
         EMAIL_BACKEND='flask_email.backends.locmem.Mail',
         SECRET_KEY='TEST',
@@ -65,9 +70,9 @@ def app_config(app_config):
             'recid': gen_rest_endpoint('recid',
                                        CommunitySearch,
                                        'tests.api.helpers.TestRecord',
-                                       '<community_id>/records-anonymous',
                                        custom_read_permission_factory=allow_all)
-        }
+        },
+        OAREPO_COMMUNITIES_ENDPOINTS=['recid']
     )
     app_config.pop('RATELIMIT_STORAGE_URL', None)
     return app_config
@@ -76,8 +81,8 @@ def app_config(app_config):
 @pytest.fixture(scope='module')
 def app(base_app):
     """Flask application fixture."""
-    OARepoEnrollmentsExt(base_app)
-    OARepoCommunities(base_app)
+    # OARepoEnrollmentsExt(base_app)
+    # OARepoCommunities(base_app)
 
     # Register blueprints here
     # base_app.register_blueprint(create_blueprint_from_app(base_app))
@@ -167,10 +172,10 @@ def sample_records(app, db, es_clear):
         'B': [
             make_sample_record(db, 'Test 4 in community B', 'B', 'published'),
             make_sample_record(db, 'Test 5 in community B', 'B'),
-            make_sample_record(db, 'Test 6 in community B', 'B', 'published', ['C']),
+            make_sample_record(db, 'Test 6 in community B', 'B', 'published', secondary=['C']),
         ],
         'comtest': [
-            make_sample_record(db, 'Test 4 in community comid', 'comid'),
+            make_sample_record(db, 'Test 4 in community comid', 'comtest', secondary=['B']),
         ]
     }
     current_search.flush_and_refresh('records-record-v1.0.0')
@@ -197,25 +202,48 @@ def permissions(db, community, sample_records):
             current_datastore.add_role_to_user(users[role], community_roles[role])
 
     perms = [
-        (RequestApproval, ['author']),
-        (Approve, ['curator']),
-        (RequestChanges, ['curator']),
-        (RevertApprove, ['curator', 'publisher']),
-        (Publish, ['publisher']),
-        (Unpublish, ['publisher'])
+        (COMMUNITY_REQUEST_APPROVAL, ['author']),
+        (COMMUNITY_APPROVE, ['curator']),
+        (COMMUNITY_REQUEST_CHANGES, ['curator']),
+        (COMMUNITY_REVERT_APPROVE, ['curator', 'publisher']),
+        (COMMUNITY_PUBLISH, ['publisher']),
+        (COMMUNITY_UNPUBLISH, ['publisher'])
     ]
 
-    for perm, roles in perms:
+    for action, roles in perms:
         for r in roles:
             if r == 'author':
-                db.session.add(ActionUsers.allow(
-                    action=perm(community[1].id),
+                db.session.add(ActionUsers(
+                    action=action,
+                    argument=community[1].id,
                     user=users[r]))
             else:
                 role_name = current_oarepo_communities.role_name_factory(community[1], r)['name']
                 role = current_datastore.find_role(role_name)
-                db.session.add(ActionRoles.allow(perm(community[1].id), role=role))
+                db.session.add(ActionRoles(action=action, argument=community[1].id, role=role))
 
     db.session.commit()
 
     yield users
+
+
+@pytest.fixture()
+def test_blueprint(users, base_app):
+    """Test blueprint with dynamically added testing endpoints."""
+    blue = Blueprint(
+        '_tests',
+        __name__,
+        url_prefix='/_tests/'
+    )
+
+    if blue.name in base_app.blueprints:
+        del base_app.blueprints[blue.name]
+
+    for user in User.query.all():
+        if base_app.view_functions.get('_tests.test_login_{}'.format(user.id)) is not None:
+            del base_app.view_functions['_tests.test_login_{}'.format(user.id)]
+
+        blue.add_url_rule('_login_{}'.format(user.id), view_func=_test_login_factory(user))
+
+    base_app.register_blueprint(blue)
+    return blue
