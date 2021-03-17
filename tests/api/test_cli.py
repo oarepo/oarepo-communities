@@ -23,29 +23,26 @@ from oarepo_communities.constants import COMMUNITY_READ
 
 def test_cli_community_create(script_info, db):
     # Test community creation.
-    pass
-    # TODO: cli commands uses with_api() decorator that overrides test app
-    # figure out how to override this override, or at least pass testing config to the app
-    # result = CliRunner().invoke(cmd, ['create',
-    #                                   'cli-test-community',
-    #                                   'Test Community',
-    #                                   '--description', 'community desc',
-    #                                   '--ctype', 'wgroup'],
-    #                             obj=script_info
-    #                             )
-    # assert 0 == result.exit_code
-    #
-    # comm = OARepoCommunity.get_community('cli-test-community')
-    # assert comm is not None
-    # assert comm.title == 'Test Community'
-    # assert comm.type == 'wgroup'
-    # assert comm.json['description'] == 'community desc'
-    #
-    # rols = Role.query.all()
-    # assert len(rols) == 3
-    # assert set([r.name for r in rols]) == {'community:cli-test-community:member',
-    #                                        'community:cli-test-community:curator',
-    #                                        'community:cli-test-community:publisher'}
+    result = CliRunner().invoke(cmd, ['create',
+                                      'cli-test-community',
+                                      'Test Community',
+                                      '--description', 'community desc',
+                                      '--ctype', 'wgroup'],
+                                obj=script_info
+                                )
+    assert 0 == result.exit_code
+
+    comm = OARepoCommunity.get_community('cli-test-community')
+    assert comm is not None
+    assert comm.title == 'Test Community'
+    assert comm.type == 'wgroup'
+    assert comm.json['description'] == 'community desc'
+
+    rols = Role.query.all()
+    assert len(rols) == 3
+    assert set([r.name for r in rols]) == {'community:cli-test-community:member',
+                                           'community:cli-test-community:curator',
+                                           'community:cli-test-community:publisher'}
 
 
 def test_cli_action_allow(app, script_info, community, authenticated_user, db):

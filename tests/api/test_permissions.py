@@ -8,7 +8,7 @@
 """OArepo module that adds support for communities"""
 from flask import g
 from flask_principal import UserNeed
-from flask_security import login_user
+from flask_security import login_user, logout_user
 from invenio_access import Permission, ActionRoles, action_factory, ParameterizedActionNeed, ActionSystemRoles
 from invenio_access.utils import get_identity
 from invenio_accounts.proxies import current_datastore
@@ -16,8 +16,10 @@ from oarepo_fsm.permissions import require_any, require_all
 
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.constants import COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE, COMMUNITY_REQUEST_CHANGES, \
-    COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH, COMMUNITY_READ
-from oarepo_communities.permissions import community_record_owner
+    COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH, COMMUNITY_READ, COMMUNITY_CREATE, \
+    COMMUNITY_UPDATE, STATE_EDITING, STATE_PENDING_APPROVAL
+from oarepo_communities.permissions import community_record_owner, create_object_permission_impl, \
+    update_object_permission_impl
 from oarepo_communities.proxies import current_oarepo_communities
 
 
@@ -71,7 +73,45 @@ def test_action_needs(app, db, community, community_curator):
 
     login_user(community_curator)
 
-    assert Permission(action_factory(COMMUNITY_READ, parameter=True)(community[1].id)).can()
+    assert Permission(ParameterizedActionNeed(COMMUNITY_READ, community[1].id)).can()
+
+
+def test_create_object_factory(community, users, community_member, sample_records):
+    logout_user()
+
+    community[1].allow_action(OARepoCommunity.get_role(community[1], 'member'), COMMUNITY_CREATE)
+
+    # AnonymousUser cannot
+    assert not create_object_permission_impl(record=None, community_id=community[0]).can()
+
+    # Member can create
+    login_user(community_member)
+    assert create_object_permission_impl(record=None, community_id=community[0]).can()
+
+
+def test_update_object_factory(community, users, community_member, community_curator, sample_records):
+    logout_user()
+
+    community[1].allow_action(OARepoCommunity.get_role(community[1], 'curator'), COMMUNITY_UPDATE)
+
+    # AnonymousUser cannot update
+    for state, rec in sample_records[community[0]][1].items():
+        assert not update_object_permission_impl(record=rec.record)().can()
+
+    # Member cannot update
+    login_user(community_member)
+    for state, rec in sample_records[community[0]][1].items():
+        assert not update_object_permission_impl(record=rec.record).can()
+
+    # Curator can update filling or approving
+    login_user(community_curator)
+    for state, rec in sample_records[community[0]][1].items():
+        if state in {STATE_PENDING_APPROVAL, STATE_EDITING}:
+            assert update_object_permission_impl(record=rec.record).can()
+        else:
+            assert not update_object_permission_impl(record=rec.record).can()
+
+    # Owner can update filling only
 
 
 def test_owner_permissions(app, db, community, authenticated_user):

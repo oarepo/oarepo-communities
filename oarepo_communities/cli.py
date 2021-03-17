@@ -14,7 +14,6 @@ import sqlalchemy
 from flask.cli import with_appcontext
 from invenio_access import ActionRoles, any_user
 from invenio_db import db
-from oarepo_micro_api.cli import with_api
 from sqlalchemy.exc import IntegrityError
 
 from oarepo_communities.api import OARepoCommunity
@@ -31,7 +30,6 @@ def communities():
 
 @communities.command('list')
 @with_appcontext
-@with_api
 def list_communities():
     """List all OARepo communities."""
     comm = OARepoCommunityModel.query.all()
@@ -43,7 +41,6 @@ def list_communities():
 
 @communities.command('create')
 @with_appcontext
-@with_api
 @click.argument('community-id')  # Community PID that will be part of community URLs
 @click.argument('title')
 @click.option('--description', help='Community description')
@@ -140,7 +137,6 @@ def _deny_actions(community, actions, role, system=False):
 
 @community_actions.command('list')
 @with_appcontext
-@with_api
 @click.option('-c', '--community', help='List allowed and available actions in a community')
 def list_actions(community=None):
     """List all available community actions."""
@@ -168,7 +164,6 @@ def list_actions(community=None):
 
 @community_actions.command('allow')
 @with_appcontext
-@with_api
 @click.argument('community')
 @click.argument('role')
 @click.argument('actions', nargs=-1)
@@ -190,7 +185,6 @@ def allow_actions(community, role, actions):
 
 @community_actions.command('deny')
 @with_appcontext
-@with_api
 @click.argument('community')
 @click.argument('role')
 @click.argument('actions', nargs=-1)
