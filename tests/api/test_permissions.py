@@ -96,20 +96,23 @@ def test_update_object_factory(community, users, community_member, community_cur
 
     # AnonymousUser cannot update
     for state, rec in sample_records[community[0]][1].items():
-        assert not update_object_permission_impl(record=rec.record)().can()
+        perm = update_object_permission_impl
+        assert not perm(record=rec.record).can()
 
     # Member cannot update
     login_user(community_member)
     for state, rec in sample_records[community[0]][1].items():
-        assert not update_object_permission_impl(record=rec.record).can()
+        perm = update_object_permission_impl
+        assert not perm(record=rec.record).can()
 
     # Curator can update filling or approving
     login_user(community_curator)
     for state, rec in sample_records[community[0]][1].items():
+        perm = update_object_permission_impl
         if state in {STATE_PENDING_APPROVAL, STATE_EDITING}:
-            assert update_object_permission_impl(record=rec.record).can()
+            assert perm(record=rec.record).can()
         else:
-            assert not update_object_permission_impl(record=rec.record).can()
+            assert not perm(record=rec.record).can()
 
     # Owner can update filling only
 

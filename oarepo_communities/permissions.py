@@ -63,7 +63,7 @@ def action_permission_factory(action):
         else:
             raise RuntimeError('Unknown or missing object')
         return require_all(
-            require_action_allowed(action)(),
+            require_action_allowed(action),
             Permission(ParameterizedActionNeed(action, arg)))
 
     return inner
@@ -113,7 +113,7 @@ def owner_or_role_action_permission_factory(action, record, *args, **kwargs):
     return require_any(
         action_permission_factory(action)(record, *args, **kwargs),
         owner_permission_factory(action, record, *args, **kwargs)
-    )
+    )(record, *args, **kwargs)
 
 
 def create_permission_factory(record, community_id=None, *args, **kwargs):
@@ -127,7 +127,7 @@ def update_permission_factory(record, *args, **kwargs):
     return require_all(
         state_required(STATE_EDITING, STATE_PENDING_APPROVAL),
         action_permission_factory(COMMUNITY_UPDATE)(record, *args, **kwargs)
-    )
+    )(record, *args, **kwargs)
 
 
 def delete_permission_factory(record, *args, **kwargs):
