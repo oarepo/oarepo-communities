@@ -22,6 +22,9 @@ COMMUNITY_READ = 'community-read'
 COMMUNITY_CREATE = 'community-create'
 """Action needed: create a record in a community."""
 
+COMMUNITY_UPDATE = 'community-update'
+"""Action needed: update a record in a community."""
+
 COMMUNITY_REQUEST_APPROVAL = 'community-request-approval'
 """Action needed: request community record approval."""
 

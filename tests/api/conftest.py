@@ -23,12 +23,11 @@ from invenio_accounts.testutils import create_test_user
 from invenio_app.factory import create_api
 from invenio_search import current_search
 from oarepo_enrollments.config import allow_all
-from oarepo_enrollments.ext import OARepoEnrollmentsExt
 
-from oarepo_communities import OARepoCommunities
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.constants import COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE, COMMUNITY_REQUEST_CHANGES, \
-    COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH
+    COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH, STATE_EDITING, STATE_PENDING_APPROVAL, \
+    STATE_APPROVED, STATE_PUBLISHED
 from oarepo_communities.handlers import CommunityHandler
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.search import CommunitySearch
@@ -114,15 +113,33 @@ def authenticated_user(db):
 
 
 @pytest.fixture
-def community_curator(db):
-    """Curator user."""
-    yield create_test_user('community-curator@inveniosoftware.org')
+def community_member(db, community):
+    user = create_test_user('community-member@inveniosoftware.org')
+    role = OARepoCommunity.get_role(community[1], 'member')
+    current_datastore.add_role_to_user(user, role)
+    yield user
 
 
 @pytest.fixture
-def community_publisher(db):
+def community_curator(db, community):
     """Curator user."""
-    yield create_test_user('community-publisher@inveniosoftware.org')
+    user = create_test_user('community-curator@inveniosoftware.org')
+    member = OARepoCommunity.get_role(community[1], 'member')
+    curator = OARepoCommunity.get_role(community[1], 'curator')
+    current_datastore.add_role_to_user(user, member)
+    current_datastore.add_role_to_user(user, curator)
+    yield user
+
+
+@pytest.fixture
+def community_publisher(db, community):
+    """Curator user."""
+    user = create_test_user('community-publisher@inveniosoftware.org')
+    member = OARepoCommunity.get_role(community[1], 'member')
+    publisher = OARepoCommunity.get_role(community[1], 'publisher')
+    current_datastore.add_role_to_user(user, member)
+    current_datastore.add_role_to_user(user, publisher)
+    yield publisher
 
 
 @pytest.fixture
@@ -176,6 +193,16 @@ def sample_records(app, db, es_clear):
         ],
         'comtest': [
             make_sample_record(db, 'Test 4 in community comid', 'comtest', secondary=['B']),
+            {
+                STATE_EDITING: make_sample_record(db, 'Test 4 in community comid', 'comtest',
+                                                  state=STATE_EDITING, secondary=['B']),
+                STATE_PENDING_APPROVAL: make_sample_record(db, 'Test 4 in community comid', 'comtest',
+                                                  state=STATE_PENDING_APPROVAL, secondary=['B']),
+                STATE_APPROVED: make_sample_record(db, 'Test 4 in community comid', 'comtest',
+                                                  state=STATE_APPROVED, secondary=['B']),
+                STATE_PUBLISHED: make_sample_record(db, 'Test 4 in community comid', 'comtest',
+                                                  state=STATE_PUBLISHED, secondary=['B']),
+            }
         ]
     }
     current_search.flush_and_refresh('records-record-v1.0.0')

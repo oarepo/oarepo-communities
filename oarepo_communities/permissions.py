@@ -12,14 +12,13 @@
 #
 from flask import request
 from flask_principal import UserNeed
-from invenio_access import action_factory, SystemRoleNeed, Permission, ParameterizedActionNeed
+from invenio_access import SystemRoleNeed, Permission, ParameterizedActionNeed
 from invenio_records import Record
-from invenio_records_rest.utils import allow_all
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, PRIMARY_COMMUNITY_FIELD, \
-    STATE_EDITING, COMMUNITY_REQUEST_APPROVAL, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
-    STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, COMMUNITY_UNPUBLISH
+    STATE_EDITING, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
+    STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, COMMUNITY_UNPUBLISH, COMMUNITY_UPDATE
 from oarepo_communities.proxies import current_oarepo_communities
 
 community_record_owner = SystemRoleNeed('community-record-owner')
@@ -35,7 +34,7 @@ def require_action_allowed(action):
     ```
     """
 
-    def factory(record, *_args, **_kwargs):
+    def factory(record=None, *_args, **_kwargs):
         def can():
             return action in current_oarepo_communities.allowed_actions
 
@@ -80,12 +79,15 @@ def read_permission_factory(record, *args, **kwargs):
     """
     if isinstance(record, Record):
         communities = [record.primary_community, *record.secondary_communities]
-        return Permission(*[action_factory(COMMUNITY_READ, parameter=True)(x) for x in communities])
+        return require_all(
+            require_action_allowed(COMMUNITY_READ),
+            Permission(*[ParameterizedActionNeed(COMMUNITY_READ, x) for x in communities])
+        )(record, *args, **kwargs)
     else:
         raise RuntimeError('Unknown or missing object')
 
 
-def owner_permission_factory(action):
+def owner_permission_factory(action, record, *args, **kwargs):
     """Owner permission factory.
 
     Permission factory that requires user to be both the owner of the
@@ -96,7 +98,7 @@ def owner_permission_factory(action):
     """
     return require_all(
         owner_permission_impl,
-        action_permission_factory(f'owner-{action}')
+        action_permission_factory(f'owner-{action}')(record, *args, **kwargs)
     )
 
 
@@ -107,53 +109,56 @@ def owner_permission_impl(record, *args, **kwargs):
     )
 
 
-def owner_or_role_action_permission_factory(action):
+def owner_or_role_action_permission_factory(action, record, *args, **kwargs):
     return require_any(
-        action_permission_factory(action),
-        owner_permission_factory(action)
-    )
+        action_permission_factory(action)(record, *args, **kwargs),
+        owner_permission_factory(action, record, *args, **kwargs)
+    )(record, *args, **kwargs)
 
 
-def create_permission_factory(record, *args, **kwargs):
+def create_permission_factory(record, community_id=None, *args, **kwargs):
     """Records REST create permission factory."""
-    return Permission(ParameterizedActionNeed(COMMUNITY_CREATE, request.view_args['community_id']))
+    # return action_permission_factory(COMMUNITY_CREATE)
+    return Permission(ParameterizedActionNeed(COMMUNITY_CREATE, community_id or request.view_args['community_id']))
 
 
 def update_permission_factory(record, *args, **kwargs):
     """Records REST update permission factory."""
-    # TODO: tady by mel byt autor recordu
-    return allow_all
+    return require_all(
+        state_required(STATE_EDITING, STATE_PENDING_APPROVAL),
+        action_permission_factory(COMMUNITY_UPDATE)(record, *args, **kwargs)
+    )(record, *args, **kwargs)
 
 
 def delete_permission_factory(record, *args, **kwargs):
     """Records REST delete permission factory."""
-    return action_permission_factory(COMMUNITY_DELETE)
+    return owner_or_role_action_permission_factory(COMMUNITY_DELETE, record, *args, **kwargs)
 
 
+# REST endpoints permission factories.
 read_object_permission_impl = require_any(
+    # Anyone can read published records
+    state_required(STATE_PUBLISHED),
+    # Roles with granted READ action in record's primary or secondary communities can read
     read_permission_factory
 )
 
-create_object_permission_impl = require_any(
-    create_permission_factory
-)
+create_object_permission_impl = create_permission_factory
 
-update_object_permission_impl = require_any(
-    update_permission_factory
-)
+update_object_permission_impl = update_permission_factory
 
-delete_object_permission_impl = require_any(
-    delete_permission_factory
-)
+delete_object_permission_impl = delete_permission_factory
 
+
+# Record actions permission factories.
 request_approval_permission_impl = require_all(
     state_required(None, STATE_EDITING),
-    owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL)
+    # owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL, None)
 )
 
 delete_draft_permission_impl = require_all(
     state_required(None, STATE_EDITING),
-    owner_or_role_action_permission_factory(COMMUNITY_DELETE)
+    # owner_or_role_action_permission_factory(COMMUNITY_DELETE, None)
 )
 
 request_changes_permission_impl = require_all(

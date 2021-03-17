@@ -11,7 +11,7 @@ from invenio_access import ActionRoles
 from invenio_accounts.models import Role, User
 from invenio_accounts.proxies import current_datastore
 
-from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE
+from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, STATE_PUBLISHED
 
 
 def test_links_from_search(app, client, es, sample_records):
@@ -85,3 +85,27 @@ def test_record_create(db, app, community, client, users, es, test_blueprint):
         # Create with correct primary community  data succeeds
         resp = client.post('https://localhost/comtest/', json=recdata)
         assert resp.status_code == 201
+
+
+def test_anonymous_permissions(sample_records, community, client):
+    """Test anonymous rest permissions."""
+    for state, record in sample_records['comtest'][1].items():
+        if state != STATE_PUBLISHED:
+            resp = client.get(f'https://localhost/comtest/{record.pid.pid_value}')
+            assert resp.status_code == 401
+        else:
+            resp = client.get(f'https://localhost/comtest/{record.pid.pid_value}')
+            assert resp.status_code == 200
+
+        # No create
+        resp = client.post(f'https://localhost/comtest/', json=record.record.dumps())
+        assert resp.status_code == 401
+
+        # No update
+        resp = client.put(f'https://localhost/comtest/{record.pid.pid_value}',
+                          json={'op': 'replace', 'path': '/title', 'value': 'qux'})
+        assert resp.status_code == 401
+
+        # No delete
+        resp = client.delete(f'https://localhost/comtest/{record.pid.pid_value}')
+        assert resp.status_code == 401
