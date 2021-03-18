@@ -1,0 +1,12 @@
+{
+  "Communities": {
+    "properties": {
+      "_primary_community": {
+        "type": "keyword"
+      },
+      "_communities": {
+        "type": "keyword"
+      }
+    }
+  }
+}
