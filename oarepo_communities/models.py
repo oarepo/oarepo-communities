@@ -8,6 +8,7 @@
 """OArepo module that adds support for communities"""
 from flask_babelex import gettext
 from invenio_access import ActionRoles, ActionSystemRoles
+from invenio_access.proxies import current_access
 from invenio_db import db
 from invenio_records.models import Timestamp
 from speaklater import make_lazy_gettext
@@ -94,32 +95,35 @@ class OARepoCommunityModel(db.Model, Timestamp):
         self.is_deleted = True
         self.delete_roles()
 
-    def _validate_role_action(self, role, action):
+    def _validate_role_action(self, role, action, system=False):
         if action not in current_oarepo_communities.allowed_actions:
             raise AttributeError(f'Action {action} not allowed')
-        if role not in self.roles:
+        if system:
+            if role.value not in current_access.system_roles:
+                raise AttributeError(f'Role {role} not in system roles')
+        elif role not in self.roles:
             raise AttributeError(f'Role {role} not in community roles')
 
     def allow_action(self, role, action, system=False):
         """Allow action for a role."""
-        self._validate_role_action(role, action)
+        self._validate_role_action(role, action, system)
 
         with db.session.begin_nested():
-            ar = ActionRoles.query.filter_by(action=action, argument=self.id, role_id=role.id).first()
-            if ar:
-                return ar
-
             if system:
-                ar = ActionSystemRoles(action=action, argument=self.id, role_name=role.value)
+                ar = ActionSystemRoles.query.filter_by(action=action, argument=self.id, role_name=role.value).first()
+                if not ar:
+                    ar = ActionSystemRoles(action=action, argument=self.id, role_name=role.value)
             else:
-                ar = ActionRoles(action=action, argument=self.id, role=role)
+                ar = ActionRoles.query.filter_by(action=action, argument=self.id, role_id=role.id).first()
+                if not ar:
+                    ar = ActionRoles(action=action, argument=self.id, role=role)
 
             db.session.add(ar)
             return ar
 
     def deny_action(self, role, action, system=False):
         """Deny action for a role."""
-        self._validate_role_action(role, action)
+        self._validate_role_action(role, action, system)
 
         with db.session.begin_nested():
             if system:
