@@ -1,0 +1,22 @@
+{
+  "definitions": {
+    "Communities": {
+      "$id": "#communities",
+      "type": "object",
+      "properties": {
+        "_primary_community": {
+          "type": "string"
+        },
+        "_communities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "_primary_community"
+      ]
+    }
+  }
+}

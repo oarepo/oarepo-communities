@@ -94,7 +94,13 @@ setup(
         ],
         'invenio_base.converters': [
             'commpid = oarepo_communities.converters:CommunityPIDConverter',
-        ]
+        ],
+        'oarepo_mapping_includes': [
+            'oarepo_communities = oarepo_communities.included_mappings'
+        ],
+        'invenio_jsonschemas.schemas': [
+            'oarepo_communities = oarepo_communities.jsonschemas',
+        ],
         # 'invenio_pidstore.minters': [],
         # 'invenio_records.jsonresolver': [],
     },
