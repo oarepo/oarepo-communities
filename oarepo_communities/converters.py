@@ -35,12 +35,27 @@ class CommunityPIDValue(str):
 class CommunityPIDConverter(PIDConverter):
     """Community records PID converter."""
 
-    regex = "[^/]+/[^/]+"
-    weight = 200
+    def __init__(self, url_map, pid_type, getter=None, record_class=None,
+                 object_type='rec', model=None):
+        """Initialize a PIDConverter."""
+        self.model = model
+        super().__init__(url_map, pid_type, getter=getter, record_class=record_class, object_type=object_type)
+
+    @property
+    def weight(self):
+        return 200 + 100 * len(self.model.split('/')) if self.model else 0
+
+    @property
+    def regex(self):
+        if self.model:
+            return f'[^/]+/{self.model}/[^/]+'
+        else:
+            return f'[^/]+/[^/]+'
 
     def to_python(self, value):
         """Resolve PID value."""
-        community, pid_value = value.split('/')
+        args = value.split('/')
+        community, pid_value = args[0], args[-1]
         lazy_pid = super().to_python(pid_value)
         pid, record = lazy_pid.data
 
@@ -55,4 +70,4 @@ class CommunityPIDConverter(PIDConverter):
         if isinstance(value, LazyPIDValue):
             value = value.data[0].pid_value
 
-        return f'{super().to_url(value.community_id)}/{super().to_url(value)}'
+        return f'{super().to_url(value.community_id)}/{f"{self.model}/" if self.model else ""}{super().to_url(value)}'
