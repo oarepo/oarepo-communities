@@ -14,7 +14,9 @@ import sqlalchemy
 from flask.cli import with_appcontext
 from invenio_access import ActionRoles, any_user
 from invenio_db import db
+from oarepo_ui.proxy import current_oarepo_ui
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.attributes import flag_modified
 
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.errors import OARepoCommunityCreateError
@@ -115,6 +117,18 @@ def _validate_actions(actions):
     return actions
 
 
+def _validate_facets(index_name, facets):
+    index = current_oarepo_ui.facets.get(index_name, None)
+    if not index:
+        click.secho(f'Index {index_name} not found in facets config', fg='red')
+        exit(4)
+
+    for fac in facets:
+        if not fac in index['aggs'].keys():
+            click.secho(f'Facet {fac} not in {index_name} facets', fg='red')
+            exit(5)
+
+
 def _allow_actions(community, actions, role, system=False):
     with db.session.begin_nested():
         for action in actions:
@@ -204,3 +218,55 @@ def deny_actions(community, role, actions):
         _deny_actions(community, actions, role)
 
     db.session.commit()
+
+
+@communities.group('facets')
+def community_facets():
+    """Management commands for OARepo Communities facets."""
+
+
+@community_facets.command('list')
+@with_appcontext
+@click.option('-c', '--community', help='List configured facets for community REST endpoints.')
+def list_facets(community=None):
+    """List all available community facets."""
+    if community:
+        community = _validate_community(community)
+        click.secho(f'\nAvailable community {community.title} facets on indices:', fg='green')
+    else:
+        click.secho('\nAvailable facets on indices:', fg='green')
+
+    for endpoint in current_oarepo_communities.enabled_endpoints:
+        index_name = endpoint['config'].get('search_index')
+        if index_name:
+            click.secho(f'\nIndex: {index_name}', fg='yellow')
+            index = current_oarepo_ui.facets[index_name]
+            for agg in index['aggs'].keys():
+                is_excluded = False
+                if community:
+                    excluded_facets = community.json.get('excluded_facets', {}).get(index_name, [])
+                    if agg in excluded_facets:
+                        is_excluded = True
+
+                click.secho(f'{"x" if is_excluded else "-"} {agg}', fg=f'{"red" if is_excluded else ""}')
+
+
+@community_facets.command('exclude')
+@with_appcontext
+@click.argument('community')
+@click.argument('index_name')
+@click.argument('facets', nargs=-1)
+def exclude(community, index_name, facets):
+    """Exclude some facets on a given index for a given community."""
+    community = _validate_community(community)
+    _validate_facets(index_name=index_name, facets=facets)
+
+    with db.session.begin_nested():
+        community.json.setdefault('excluded_facets', {})
+        community.json['excluded_facets'] = {index_name: facets}
+
+        flag_modified(community, 'json')
+        db.session.add(community)
+    db.session.commit()
+
+    click.secho(f'Excluded: {",".join(facets)} on index {index_name} for {community.title}', fg='green')
