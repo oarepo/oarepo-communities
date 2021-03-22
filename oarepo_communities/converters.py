@@ -43,11 +43,14 @@ class CommunityPIDConverter(PIDConverter):
 
     @property
     def weight(self):
-        return 200 + 100 * len(self.model.split('/'))
+        return 200 + 100 * len(self.model.split('/')) if self.model else 0
 
     @property
     def regex(self):
-        return f'[^/]+/{self.model}/[^/]+'
+        if self.model:
+            return f'[^/]+/{self.model}/[^/]+'
+        else:
+            return f'[^/]+/[^/]+'
 
     def to_python(self, value):
         """Resolve PID value."""
@@ -67,4 +70,4 @@ class CommunityPIDConverter(PIDConverter):
         if isinstance(value, LazyPIDValue):
             value = value.data[0].pid_value
 
-        return f'{super().to_url(value.community_id)}/{self.model}/{super().to_url(value)}'
+        return f'{super().to_url(value.community_id)}/{f"{self.model}/" if self.model else ""}{super().to_url(value)}'
