@@ -11,6 +11,7 @@ from flask_login import current_user
 from flask_principal import identity_loaded
 from invenio_base.signals import app_loaded
 from invenio_base.utils import load_or_import_from_config
+from oarepo_ui.proxy import current_oarepo_ui
 from werkzeug.utils import cached_property
 
 from . import config
@@ -46,6 +47,13 @@ class _OARepoCommunitiesState(object):
         """Roles created in each community."""
         return load_or_import_from_config(
             'OAREPO_COMMUNITIES_ROLES', app=self.app)
+
+    @cached_property
+    def enabled_endpoints(self):
+        """List of community-enabled REST endpoints."""
+        enabled_endpoints = load_or_import_from_config(
+            'OAREPO_COMMUNITIES_ENDPOINTS', app=self.app)
+        return [e for e in current_oarepo_ui.endpoints if e['name'] in enabled_endpoints]
 
     @cached_property
     def allowed_actions(self):
