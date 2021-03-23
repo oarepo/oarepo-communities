@@ -11,11 +11,12 @@
 # Action needs
 #
 from flask import request
-from flask_principal import UserNeed
+from flask_principal import UserNeed, RoleNeed
 from invenio_access import SystemRoleNeed, Permission, ParameterizedActionNeed
 from invenio_records import Record
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
+from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, PRIMARY_COMMUNITY_FIELD, \
     STATE_EDITING, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
     STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, COMMUNITY_UNPUBLISH, COMMUNITY_UPDATE
@@ -100,6 +101,22 @@ def owner_permission_factory(action, record, *args, **kwargs):
         owner_permission_impl,
         action_permission_factory(f'owner-{action}')(record, *args, **kwargs)
     )
+
+
+def community_role_permission_factory(role):
+    """Community role permission factory.
+       :param role: Community role name.
+    """
+
+    def inner(record, *args, **kwargs):
+        community = OARepoCommunity.get_community(request.view_args['community_id'])
+        return Permission(RoleNeed(OARepoCommunity.get_role(community, role).name))
+
+    return inner
+
+
+def community_member_permission_impl(record, *args, **kwargs):
+    return community_role_permission_factory('member')
 
 
 def owner_permission_impl(record, *args, **kwargs):
