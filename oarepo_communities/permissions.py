@@ -119,6 +119,14 @@ def community_member_permission_impl(record, *args, **kwargs):
     return community_role_permission_factory('member')(record, *args, **kwargs)
 
 
+def community_curator_permission_impl(record, *args, **kwargs):
+    return community_role_permission_factory('curator')(record, *args, **kwargs)
+
+
+def community_publisher_permission_impl(record, *args, **kwargs):
+    return community_role_permission_factory('publisher')(record, *args, **kwargs)
+
+
 def owner_permission_impl(record, *args, **kwargs):
     owners = record['access']['owned_by']
     return Permission(
