@@ -116,7 +116,7 @@ def community_role_permission_factory(role):
 
 
 def community_member_permission_impl(record, *args, **kwargs):
-    return community_role_permission_factory('member')
+    return community_role_permission_factory('member')(record, *args, **kwargs)
 
 
 def owner_permission_impl(record, *args, **kwargs):
