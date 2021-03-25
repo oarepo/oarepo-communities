@@ -19,7 +19,8 @@ from oarepo_fsm.permissions import require_any, require_all, state_required
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, PRIMARY_COMMUNITY_FIELD, \
     STATE_EDITING, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
-    STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, COMMUNITY_UNPUBLISH, COMMUNITY_UPDATE
+    STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, COMMUNITY_UNPUBLISH, COMMUNITY_UPDATE, \
+    COMMUNITY_REQUEST_APPROVAL
 from oarepo_communities.proxies import current_oarepo_communities
 
 community_record_owner = SystemRoleNeed('community-record-owner')
@@ -160,6 +161,55 @@ def delete_permission_factory(record, *args, **kwargs):
     return owner_or_role_action_permission_factory(COMMUNITY_DELETE, record, *args, **kwargs)
 
 
+def request_approval_permission_factory(record, *args, **kwargs):
+    return require_all(
+        state_required(None, STATE_EDITING),
+        owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL, None)
+    )(record, *args, **kwargs)
+
+
+def delete_draft_permission_factory(record, *args, **kwargs):
+    return require_all(
+        state_required(None, STATE_EDITING),
+        owner_or_role_action_permission_factory(COMMUNITY_DELETE, None)
+    )(record, *args, **kwargs)
+
+
+def request_changes_permission_factory(record, *args, **kwargs):
+    return require_all(
+        state_required(STATE_PENDING_APPROVAL),
+        action_permission_factory(COMMUNITY_REQUEST_CHANGES)(record, *args, **kwargs)
+    )(record, *args, **kwargs)
+
+
+def approve_permission_factory(record, *args, **kwargs):
+    return require_all(
+        state_required(STATE_PENDING_APPROVAL),
+        action_permission_factory(COMMUNITY_APPROVE)(record, *args, **kwargs)
+    )(record, *args, **kwargs)
+
+
+def revert_approval_permission_factory(record, *args, **kwargs):
+    return require_all(
+        state_required(STATE_APPROVED),
+        action_permission_factory(COMMUNITY_REVERT_APPROVE)(record, *args, **kwargs)
+    )(record, *args, **kwargs)
+
+
+def publish_permission_factory(record, *args, **kwargs):
+    return require_all(
+        state_required(STATE_APPROVED),
+        action_permission_factory(COMMUNITY_PUBLISH)(record, *args, **kwargs)
+    )(record, *args, **kwargs)
+
+
+def unpublish_permission_factory(record, *args, **kwargs):
+    return require_all(
+        state_required(STATE_PUBLISHED),
+        action_permission_factory(COMMUNITY_UNPUBLISH)(record, *args, **kwargs)
+    )(record, *args, **kwargs)
+
+
 # REST endpoints permission factories.
 read_object_permission_impl = require_any(
     # Anyone can read published records
@@ -176,37 +226,16 @@ delete_object_permission_impl = delete_permission_factory
 
 
 # Record actions permission factories.
-request_approval_permission_impl = require_all(
-    state_required(None, STATE_EDITING),
-    # owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL, None)
-)
+request_approval_permission_impl = request_approval_permission_factory
 
-delete_draft_permission_impl = require_all(
-    state_required(None, STATE_EDITING),
-    # owner_or_role_action_permission_factory(COMMUNITY_DELETE, None)
-)
+delete_draft_permission_impl = delete_draft_permission_factory
 
-request_changes_permission_impl = require_all(
-    state_required(STATE_PENDING_APPROVAL),
-    action_permission_factory(COMMUNITY_REQUEST_CHANGES)
-)
+request_changes_permission_impl = request_changes_permission_factory
 
-approve_permission_impl = require_all(
-    state_required(STATE_PENDING_APPROVAL),
-    action_permission_factory(COMMUNITY_APPROVE)
-)
+approve_permission_impl = approve_permission_factory
 
-revert_approval_permission_impl = require_all(
-    state_required(STATE_APPROVED),
-    action_permission_factory(COMMUNITY_REVERT_APPROVE)
-)
+revert_approval_permission_impl = revert_approval_permission_factory
 
-publish_permission_impl = require_all(
-    state_required(STATE_APPROVED),
-    action_permission_factory(COMMUNITY_PUBLISH)
-)
+publish_permission_impl = publish_permission_factory
 
-unpublish_permission_impl = require_all(
-    state_required(STATE_PUBLISHED),
-    action_permission_factory(COMMUNITY_UNPUBLISH)
-)
+unpublish_permission_impl = unpublish_permission_factory
