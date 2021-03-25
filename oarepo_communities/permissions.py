@@ -164,14 +164,14 @@ def delete_permission_factory(record, *args, **kwargs):
 def request_approval_permission_factory(record, *args, **kwargs):
     return require_all(
         state_required(None, STATE_EDITING),
-        owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL, None)
+        owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL, record)
     )(record, *args, **kwargs)
 
 
 def delete_draft_permission_factory(record, *args, **kwargs):
     return require_all(
         state_required(None, STATE_EDITING),
-        owner_or_role_action_permission_factory(COMMUNITY_DELETE, None)
+        owner_or_role_action_permission_factory(COMMUNITY_DELETE, record)
     )(record, *args, **kwargs)
 
 
