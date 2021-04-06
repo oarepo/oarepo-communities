@@ -120,12 +120,12 @@ class CommunityRecordMixin(FSMMixin):
 
     @transition(src=[STATE_APPROVED], dest=STATE_PUBLISHED,
                 permissions=publish_permission_impl)
-    def publish(self, **kwargs):
-        """Make the record visible outside of the community."""
+    def make_public(self, **kwargs):
+        """Make the record visible for general public."""
         on_publish.send(self, **kwargs)
 
     @transition(src=[STATE_PUBLISHED], dest=STATE_APPROVED,
                 permissions=unpublish_permission_impl)
-    def unpublish(self, **kwargs):
-        """Revert the record publication, returning it to approved state."""
+    def make_private(self, **kwargs):
+        """Hide record from public, restrict only to community members."""
         on_unpublish.send(self, **kwargs)
