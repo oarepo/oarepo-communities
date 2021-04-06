@@ -8,7 +8,7 @@
 """OArepo module that adds support for communities"""
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_REQUEST_APPROVAL, \
     COMMUNITY_APPROVE, COMMUNITY_UNPUBLISH, COMMUNITY_PUBLISH, COMMUNITY_REQUEST_CHANGES, COMMUNITY_REVERT_APPROVE, \
-    COMMUNITY_UPDATE
+    COMMUNITY_UPDATE, COMMUNITY_DELETE
 
 OAREPO_COMMUNITIES_ROLES = ['member', 'curator', 'publisher']
 """Roles present in each community."""
@@ -27,7 +27,7 @@ OAREPO_COMMUNITIES_ACTIONS_POLICY = 'oarepo_communities.utils.community_actions_
 
 OAREPO_COMMUNITIES_ALLOWED_ACTIONS = [COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_UPDATE,
                                       COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE, COMMUNITY_REVERT_APPROVE,
-                                      COMMUNITY_REQUEST_CHANGES,
+                                      COMMUNITY_REQUEST_CHANGES, COMMUNITY_DELETE,
                                       COMMUNITY_PUBLISH, COMMUNITY_UNPUBLISH]
 """Community actions available to community roles."""
 

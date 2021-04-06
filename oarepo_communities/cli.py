@@ -12,7 +12,7 @@ from operator import attrgetter
 import click
 import sqlalchemy
 from flask.cli import with_appcontext
-from invenio_access import ActionRoles, any_user
+from invenio_access import ActionRoles, ActionSystemRoles, any_user
 from invenio_db import db
 from oarepo_ui.proxy import current_oarepo_ui
 from sqlalchemy.exc import IntegrityError
@@ -162,18 +162,28 @@ def list_actions(community=None):
     if community:
         community = _validate_community(community)
         click.secho('\nAvailable community roles:', fg='green')
-        for role in community.roles:
-            click.secho(f'- {role.name.split(":")[-1]}')
+        for role in {r.name.split(':')[-1] for r in community.roles}.union({'any', 'author'}):
+            click.secho(f'- {role}')
 
-        click.secho('\nAllowed community actions:', fg='green')
+        click.secho('\nAllowed community role actions:', fg='green')
         ars = ActionRoles.query \
             .filter_by(argument=community.id) \
             .order_by(ActionRoles.action).all()
+        sars = ActionSystemRoles.query \
+            .filter_by(argument=community.id) \
+            .order_by(ActionSystemRoles.action).all()
         ars = [{k: list(g)} for k, g in groupby(ars, key=attrgetter('action'))]
+        sars = [{k: list(g)} for k, g in groupby(sars, key=attrgetter('action'))]
         for ar in ars:
             for action, roles in ar.items():
                 click.secho(f'- {action[len("community-"):]}: ', nl=False, fg='yellow')
                 click.secho(', '.join([r.need.value.split(':')[-1] for r in roles]))
+
+        click.secho('\nAllowed system role actions:', fg='green')
+        for ar in sars:
+            for action, roles in ar.items():
+                click.secho(f'- {action[len("community-"):]}: ', nl=False, fg='yellow')
+                click.secho(', '.join([r.need.value.split('-')[-1] for r in roles]))
 
 
 @community_actions.command('allow')
