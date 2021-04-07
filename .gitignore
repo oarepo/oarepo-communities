@@ -62,3 +62,5 @@ target/
 .*.sw?
 
 .venv
+
+venv/
