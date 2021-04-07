@@ -11,6 +11,8 @@ from flask import request
 from invenio_records_rest.facets import terms_filter
 from oarepo_enrollment_permissions import RecordsSearchMixin
 
+from oarepo_communities.proxies import current_oarepo_communities
+
 
 class CommunitySearchMixin(RecordsSearchMixin):
     """RecordsSearchMixin that limits results to community scope."""
@@ -33,8 +35,8 @@ class CommunitySearchMixin(RecordsSearchMixin):
         request_community = request.view_args['community_id']
 
         return Bool(should=[
-            Q('term', **{'_primary_community': request_community}),
-            terms_filter('_communities.keyword')([request_community])
+            Q('term', **{current_oarepo_communities.primary_community_field: request_community}),
+            terms_filter(current_oarepo_communities.communities_field)([request_community])
         ], minimum_should_match=1)
 
 

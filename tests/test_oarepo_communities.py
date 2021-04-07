@@ -30,3 +30,73 @@ def test_init():
     ext.init_app(app)
     assert 'oarepo-communities' in app.extensions
 
+
+def test_get_primary_community_field():
+    data = {
+        "bla": {"spam": "ham"}
+    }
+    app = Flask('testapp')
+    app.config["OAREPO_COMMUNITIES_PRIMARY_COMMUNITY_FIELD"] = "bla.spam"
+    OARepoCommunities(app)
+    state = app.extensions['oarepo-communities']
+    a = state.get_primary_community_field(data)
+    assert a == "ham"
+
+
+def test_set_primary_community_field():
+    data = {
+        "bla": {"spam": "ham"}
+    }
+    app = Flask('testapp')
+    app.config["OAREPO_COMMUNITIES_PRIMARY_COMMUNITY_FIELD"] = "bla.spam"
+    OARepoCommunities(app)
+    state = app.extensions['oarepo-communities']
+    a = state.set_primary_community_field(data, "blah")
+    assert a == {'spam': 'blah'}
+
+
+def test_get_owned_by_field():
+    data = {
+        "bla": {"spam": "ham"}
+    }
+    app = Flask('testapp')
+    app.config["OAREPO_COMMUNITIES_OWNED_BY_FIELD"] = "bla.spam"
+    OARepoCommunities(app)
+    state = app.extensions['oarepo-communities']
+    a = state.get_owned_by_field(data)
+    assert a == "ham"
+
+
+def test_set_owned_by_field():
+    data = {
+        "bla": {"spam": "ham"}
+    }
+    app = Flask('testapp')
+    app.config["OAREPO_COMMUNITIES_OWNED_BY_FIELD"] = "bla.spam"
+    OARepoCommunities(app)
+    state = app.extensions['oarepo-communities']
+    a = state.set_owned_by_field(data, "blah")
+    assert a == {'spam': 'blah'}
+
+def test_get_communities_field():
+    data = {
+        "bla": {"spam": "ham"}
+    }
+    app = Flask('testapp')
+    app.config["OAREPO_COMMUNITIES_COMMUNITIES_FIELD"] = "bla.spam"
+    OARepoCommunities(app)
+    state = app.extensions['oarepo-communities']
+    a = state.get_communities_field(data)
+    assert a == "ham"
+
+
+def test_set_communities_field():
+    data = {
+        "bla": {"spam": "ham"}
+    }
+    app = Flask('testapp')
+    app.config["OAREPO_COMMUNITIES_COMMUNITIES_FIELD"] = "bla.spam"
+    OARepoCommunities(app)
+    state = app.extensions['oarepo-communities']
+    a = state.set_communities_field(data, "blah")
+    assert a == {'spam': 'blah'}

@@ -9,17 +9,17 @@
 from flask import request
 from werkzeug.exceptions import BadRequest
 
-from oarepo_communities.constants import PRIMARY_COMMUNITY_FIELD
+from oarepo_communities.proxies import current_oarepo_communities
 
 
 def community_json_loader():
     data = request.get_json(force=True)
     rcomid = request.view_args['community_id']
-    dcomid = data.get(PRIMARY_COMMUNITY_FIELD, None)
+    dcomid = data.get(current_oarepo_communities.primary_community_field, None)
     if dcomid:
         if rcomid != dcomid:
             raise BadRequest('Primary Community mismatch')
     else:
-        data[PRIMARY_COMMUNITY_FIELD] = rcomid
+        data[current_oarepo_communities.primary_community_field] = rcomid
 
     return data

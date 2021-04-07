@@ -12,8 +12,7 @@ from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_rest.errors import PIDDoesNotExistRESTError
 from invenio_records_rest.utils import PIDConverter, LazyPIDValue
 
-from oarepo_communities.constants import PRIMARY_COMMUNITY_FIELD, SECONDARY_COMMUNITY_FIELD
-
+from oarepo_communities.proxies import current_oarepo_communities
 
 community_lazy_pid_value = namedtuple('community_lazy_pid_value', 'data')
 
@@ -59,11 +58,11 @@ class CommunityPIDConverter(PIDConverter):
         lazy_pid = super().to_python(pid_value)
         pid, record = lazy_pid.data
 
-        if community != record[PRIMARY_COMMUNITY_FIELD] and community not in (record[SECONDARY_COMMUNITY_FIELD] or []):
+        if community != record[current_oarepo_communities.primary_community_field] and community not in (record[current_oarepo_communities.communities_field] or []):
             raise PIDDoesNotExistRESTError(
                 pid_error=PIDDoesNotExistError(pid_type=pid.pid_type, pid_value=pid.pid_value))
 
-        pid.pid_value = CommunityPIDValue(pid.pid_value, record[PRIMARY_COMMUNITY_FIELD])
+        pid.pid_value = CommunityPIDValue(pid.pid_value, record[current_oarepo_communities.primary_community_field])
         return lazy_pid
 
     def to_url(self, value):

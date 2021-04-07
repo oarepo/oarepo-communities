@@ -10,17 +10,17 @@ from invenio_pidstore.fetchers import FetchedPID
 from invenio_pidstore.models import PersistentIdentifier
 from oarepo_fsm.links import record_fsm_links_factory
 
-from oarepo_communities.constants import PRIMARY_COMMUNITY_FIELD
 from oarepo_communities.converters import CommunityPIDValue
+from oarepo_communities.proxies import current_oarepo_communities
 
 
 def community_record_links_factory(pid, record=None, **kwargs):
     """Ensures that primary community is set in self link."""
     if not isinstance(pid.pid_value, CommunityPIDValue):
         if record:
-            primary_community = record[PRIMARY_COMMUNITY_FIELD]
+            primary_community = record[current_oarepo_communities.primary_community_field]
         elif 'record_hit' in kwargs:
-            primary_community = kwargs['record_hit']['_source'][PRIMARY_COMMUNITY_FIELD]
+            primary_community = kwargs['record_hit']['_source'][current_oarepo_communities.primary_community_field]
         else:
             raise AttributeError('Record or record hit is missing')
 

@@ -10,12 +10,15 @@ from jsonpatch import apply_patch
 from oarepo_fsm.decorators import transition
 from oarepo_fsm.mixins import FSMMixin
 
-from oarepo_communities.constants import PRIMARY_COMMUNITY_FIELD, SECONDARY_COMMUNITY_FIELD, \
-    STATE_PENDING_APPROVAL, STATE_EDITING, STATE_APPROVED, STATE_PUBLISHED, STATE_DELETED
-from oarepo_communities.permissions import request_approval_permission_impl, delete_draft_permission_impl, \
+from oarepo_communities.constants import STATE_PENDING_APPROVAL, \
+    STATE_EDITING, STATE_APPROVED, STATE_PUBLISHED, STATE_DELETED
+from oarepo_communities.permissions import request_approval_permission_impl, \
+    delete_draft_permission_impl, \
     request_changes_permission_impl, approve_permission_impl, revert_approval_permission_impl, \
     publish_permission_impl, unpublish_permission_impl
-from oarepo_communities.signals import on_request_approval, on_delete_draft, on_request_changes, on_approve, \
+from oarepo_communities.proxies import current_oarepo_communities
+from oarepo_communities.signals import on_request_approval, on_delete_draft, on_request_changes, \
+    on_approve, \
     on_revert_approval, on_unpublish, on_publish
 
 
@@ -27,22 +30,22 @@ class CommunityRecordMixin(FSMMixin):
 
     @property
     def primary_community(self):
-        return self[PRIMARY_COMMUNITY_FIELD]
+        return self[current_oarepo_communities.primary_community_field]
 
     @property
     def secondary_communities(self) -> list:
-        return self.get(SECONDARY_COMMUNITY_FIELD, []) or []
+        return self.get(current_oarepo_communities.communities_field, []) or []
 
     def clear(self):
         """Preserves the schema even if the record is cleared and all metadata wiped out."""
-        primary = self.get(PRIMARY_COMMUNITY_FIELD)
+        primary = self.get(current_oarepo_communities.primary_community_field)
         super().clear()
         if primary:
-            self[PRIMARY_COMMUNITY_FIELD] = primary
+            self[current_oarepo_communities.primary_community_field] = primary
 
     def _check_community(self, data):
-        if PRIMARY_COMMUNITY_FIELD in data:
-            if data[PRIMARY_COMMUNITY_FIELD] != self.primary_community:
+        if current_oarepo_communities.primary_community_field in data:
+            if data[current_oarepo_communities.primary_community_field] != self.primary_community:
                 raise AttributeError('Primary Community cannot be changed')
 
     def update(self, e=None, **f):
@@ -52,14 +55,14 @@ class CommunityRecordMixin(FSMMixin):
 
     def __setitem__(self, key, value):
         """Dict's setitem."""
-        if key == PRIMARY_COMMUNITY_FIELD:
-            if PRIMARY_COMMUNITY_FIELD in self and self.primary_community != value:
+        if key == current_oarepo_communities.primary_community_field:
+            if current_oarepo_communities.primary_community_field in self and self.primary_community != value:
                 raise AttributeError('Primary Community cannot be changed')
         return super().__setitem__(key, value)
 
     def __delitem__(self, key):
         """Dict's delitem."""
-        if key == PRIMARY_COMMUNITY_FIELD:
+        if key == current_oarepo_communities.primary_community_field:
             raise AttributeError('Primary Community can not be deleted')
         return super().__delitem__(key)
 
@@ -69,7 +72,7 @@ class CommunityRecordMixin(FSMMixin):
         Creates a new record instance and store it in the database.
         For parameters see :py:class:invenio_records.api.Record
         """
-        if not data.get(PRIMARY_COMMUNITY_FIELD, None):
+        if not data.get(current_oarepo_communities.primary_community_field, None):
             raise AttributeError('Primary Community is missing from record')
 
         ret = super().create(data, id_, **kwargs)
@@ -81,7 +84,7 @@ class CommunityRecordMixin(FSMMixin):
         :returns: A new :class:`Record` instance.
         """
         data = apply_patch(dict(self), patch)
-        if self.primary_community != data[PRIMARY_COMMUNITY_FIELD]:
+        if self.primary_community != data[current_oarepo_communities.primary_community_field]:
             raise AttributeError('Primary Community cannot be changed')
         return self.__class__(data, model=self.model)
 
