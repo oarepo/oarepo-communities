@@ -58,6 +58,14 @@ Ensure that your Record Metadata schema contains the following fields:
 }
 ```
 
+or if you want you can use your custom schema and you have to specify JSON address separated by dots (level1.level2
+etc.) in configuration. Please see example:
+```python
+OAREPO_COMMUNITIES_PRIMARY_COMMUNITY_FIELD = 'address1.separated.by.dots'
+OAREPO_COMMUNITIES_OWNED_BY_FIELD = 'address2.separated.by.dots'
+OAREPO_COMMUNITIES_COMMUNITIES_FIELD = 'address3.separated.by.dots'
+```
+
 ## Installation
 
 OARepo-Communities is on PyPI so all you need is:
