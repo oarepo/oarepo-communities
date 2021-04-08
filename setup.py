@@ -42,7 +42,7 @@ install_requires = [
     'oarepo_ui'
 ]
 
-packages = find_packages()
+packages = find_packages(exclude=["tests", 'tests.api', 'tests.api.mappings', 'tests.api.mappings.v7'])
 
 # Get the version string. Cannot be done with import!
 g = {}
