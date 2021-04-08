@@ -17,9 +17,10 @@ from invenio_records import Record
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
 from oarepo_communities.api import OARepoCommunity
-from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, PRIMARY_COMMUNITY_FIELD, \
+from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, \
     STATE_EDITING, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
-    STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, COMMUNITY_UNPUBLISH, COMMUNITY_UPDATE, \
+    STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, \
+    COMMUNITY_UNPUBLISH, COMMUNITY_UPDATE, \
     COMMUNITY_REQUEST_APPROVAL
 from oarepo_communities.proxies import current_oarepo_communities
 
@@ -61,7 +62,7 @@ def action_permission_factory(action):
         if isinstance(record, Record):
             arg = record.primary_community
         elif isinstance(record, dict):
-            arg = record[PRIMARY_COMMUNITY_FIELD]
+            arg = current_oarepo_communities.get_primary_community_field(record)
         else:
             raise RuntimeError('Unknown or missing object')
         return require_all(
@@ -129,7 +130,7 @@ def community_publisher_permission_impl(record, *args, **kwargs):
 
 
 def owner_permission_impl(record, *args, **kwargs):
-    owners = record['access']['owned_by']
+    owners = current_oarepo_communities.get_owned_by_field(record)
     return Permission(
         *[UserNeed(int(owner)) for owner in owners],
     )
@@ -145,7 +146,8 @@ def owner_or_role_action_permission_factory(action, record, *args, **kwargs):
 def create_permission_factory(record, community_id=None, *args, **kwargs):
     """Records REST create permission factory."""
     # return action_permission_factory(COMMUNITY_CREATE)
-    return Permission(ParameterizedActionNeed(COMMUNITY_CREATE, community_id or request.view_args['community_id']))
+    return Permission(ParameterizedActionNeed(COMMUNITY_CREATE,
+                                              community_id or request.view_args['community_id']))
 
 
 def update_permission_factory(record, *args, **kwargs):
@@ -223,7 +225,6 @@ create_object_permission_impl = create_permission_factory
 update_object_permission_impl = update_permission_factory
 
 delete_object_permission_impl = delete_permission_factory
-
 
 # Record actions permission factories.
 request_approval_permission_impl = request_approval_permission_factory

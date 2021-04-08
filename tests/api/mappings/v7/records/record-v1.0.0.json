@@ -9,6 +9,9 @@
       },
       "control_number": {
         "type": "keyword"
+      },
+      "_communities": {
+        "type": "keyword"
       }
     }
   }

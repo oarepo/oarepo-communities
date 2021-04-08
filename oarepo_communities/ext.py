@@ -41,6 +41,12 @@ class _OARepoCommunitiesState(object):
         """Initialize state."""
         self.app = app
         self.list_endpoints = set()
+        self._primary_community_field = '_primary_community'
+        self._primary_community_field_parsed = None
+        self._owned_by_field = 'access.owned_by'
+        self._owned_by_field_parsed = None
+        self._communities_field = '_communities'
+        self._communities_field_parsed = None
 
     @cached_property
     def roles(self):
@@ -79,6 +85,84 @@ class _OARepoCommunitiesState(object):
         return load_or_import_from_config(
             'OAREPO_COMMUNITIES_PERMISSION_FACTORY', app=self.app
         )
+
+    @cached_property
+    def primary_community_field(self):
+        """Roles created in each community."""
+        primary_community_field = self.app.config.get('OAREPO_COMMUNITIES_PRIMARY_COMMUNITY_FIELD')
+        if primary_community_field:
+            self._primary_community_field = primary_community_field
+        return self._primary_community_field
+
+    def get_primary_community_field(self, data):
+        if not self._primary_community_field_parsed:
+            self._primary_community_field_parsed = self.primary_community_field.split(".")
+        for s in self._primary_community_field_parsed:
+            if data:
+                data = data.get(s)
+        return data
+
+    def set_primary_community_field(self, data, field):
+        if not self._primary_community_field_parsed:
+            self._primary_community_field_parsed = self.primary_community_field.split(".")
+        for s in self._primary_community_field_parsed[:-1]:
+            if s not in data:
+                data[s] = {}
+            data = data[s]
+        data[self._primary_community_field_parsed[-1]] = field
+        return data
+
+    @cached_property
+    def owned_by_field(self):
+        """Roles created in each community."""
+        owned_by_field = self.app.config.get('OAREPO_COMMUNITIES_OWNED_BY_FIELD')
+        if owned_by_field:
+            self._owned_by_field = owned_by_field
+        return self._owned_by_field
+
+    def get_owned_by_field(self, data):
+        if not self._owned_by_field_parsed:
+            self._owned_by_field_parsed = self.owned_by_field.split(".")
+        for s in self._owned_by_field_parsed:
+            if data:
+                data = data.get(s)
+        return data
+
+    def set_owned_by_field(self, data, field):
+        if not self._owned_by_field_parsed:
+            self._owned_by_field_parsed = self.owned_by_field.split(".")
+        for s in self._owned_by_field_parsed[:-1]:
+            if s not in data:
+                data[s] = {}
+            data = data[s]
+        data[self._owned_by_field_parsed[-1]] = field
+        return data
+
+    @cached_property
+    def communities_field(self):
+        """Roles created in each community."""
+        communities_field = self.app.config.get('OAREPO_COMMUNITIES_COMMUNITIES_FIELD')
+        if communities_field:
+            self._communities_field = communities_field
+        return self._communities_field
+
+    def get_communities_field(self, data):
+        if not self._communities_field_parsed:
+            self._communities_field_parsed = self.communities_field.split(".")
+        for s in self._communities_field_parsed:
+            if data:
+                data = data.get(s)
+        return data
+
+    def set_communities_field(self, data, field):
+        if not self._communities_field_parsed:
+            self._communities_field_parsed = self.communities_field.split(".")
+        for s in self._communities_field_parsed[:-1]:
+            if s not in data:
+                data[s] = {}
+            data = data[s]
+        data[self._communities_field_parsed[-1]] = field
+        return data
 
 
 class OARepoCommunities(object):
