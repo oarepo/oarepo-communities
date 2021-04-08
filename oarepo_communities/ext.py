@@ -99,7 +99,7 @@ class _OARepoCommunitiesState(object):
             self._primary_community_field_parsed = self.primary_community_field.split(".")
         for s in self._primary_community_field_parsed:
             if data:
-                data = data[s]
+                data = data.get(s)
         return data
 
     def set_primary_community_field(self, data, field):
@@ -125,7 +125,7 @@ class _OARepoCommunitiesState(object):
             self._owned_by_field_parsed = self.owned_by_field.split(".")
         for s in self._owned_by_field_parsed:
             if data:
-                data = data[s]
+                data = data.get(s)
         return data
 
     def set_owned_by_field(self, data, field):
@@ -151,7 +151,7 @@ class _OARepoCommunitiesState(object):
             self._communities_field_parsed = self.communities_field.split(".")
         for s in self._communities_field_parsed:
             if data:
-                data = data[s]
+                data = data.get(s)
         return data
 
     def set_communities_field(self, data, field):

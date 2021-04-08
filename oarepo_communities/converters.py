@@ -58,11 +58,12 @@ class CommunityPIDConverter(PIDConverter):
         lazy_pid = super().to_python(pid_value)
         pid, record = lazy_pid.data
 
-        if community != record[current_oarepo_communities.primary_community_field] and community not in (record[current_oarepo_communities.communities_field] or []):
+        if community != current_oarepo_communities.get_primary_community_field(record) \
+            and community not in (current_oarepo_communities.get_communities_field(record) or []):
             raise PIDDoesNotExistRESTError(
                 pid_error=PIDDoesNotExistError(pid_type=pid.pid_type, pid_value=pid.pid_value))
 
-        pid.pid_value = CommunityPIDValue(pid.pid_value, record[current_oarepo_communities.primary_community_field])
+        pid.pid_value = CommunityPIDValue(pid.pid_value, current_oarepo_communities.get_primary_community_field(record))
         return lazy_pid
 
     def to_url(self, value):
