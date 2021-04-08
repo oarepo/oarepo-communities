@@ -15,11 +15,11 @@ from oarepo_communities.proxies import current_oarepo_communities
 def community_json_loader():
     data = request.get_json(force=True)
     rcomid = request.view_args['community_id']
-    dcomid = data.get(current_oarepo_communities.primary_community_field, None)
+    dcomid = current_oarepo_communities.get_primary_community_field(data)
     if dcomid:
         if rcomid != dcomid:
             raise BadRequest('Primary Community mismatch')
     else:
-        data[current_oarepo_communities.primary_community_field] = rcomid
+        current_oarepo_communities.set_primary_community_field(data, rcomid)
 
     return data

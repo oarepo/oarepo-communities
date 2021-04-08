@@ -30,22 +30,22 @@ class CommunityRecordMixin(FSMMixin):
 
     @property
     def primary_community(self):
-        return self[current_oarepo_communities.primary_community_field]
+        return current_oarepo_communities.get_primary_community_field(self)
 
     @property
     def secondary_communities(self) -> list:
-        return self.get(current_oarepo_communities.communities_field, []) or []
+        return current_oarepo_communities.get_communities_field(self) or []
 
     def clear(self):
         """Preserves the schema even if the record is cleared and all metadata wiped out."""
         primary = self.get(current_oarepo_communities.primary_community_field)
         super().clear()
         if primary:
-            self[current_oarepo_communities.primary_community_field] = primary
+            current_oarepo_communities.set_primary_community_field(self, primary)
 
     def _check_community(self, data):
         if current_oarepo_communities.primary_community_field in data:
-            if data[current_oarepo_communities.primary_community_field] != self.primary_community:
+            if current_oarepo_communities.get_primary_community_field(data) != self.primary_community:
                 raise AttributeError('Primary Community cannot be changed')
 
     def update(self, e=None, **f):
@@ -56,7 +56,7 @@ class CommunityRecordMixin(FSMMixin):
     def __setitem__(self, key, value):
         """Dict's setitem."""
         if key == current_oarepo_communities.primary_community_field:
-            if current_oarepo_communities.primary_community_field in self and self.primary_community != value:
+            if self.primary_community and self.primary_community != value:
                 raise AttributeError('Primary Community cannot be changed')
         return super().__setitem__(key, value)
 
@@ -72,7 +72,7 @@ class CommunityRecordMixin(FSMMixin):
         Creates a new record instance and store it in the database.
         For parameters see :py:class:invenio_records.api.Record
         """
-        if not data.get(current_oarepo_communities.primary_community_field, None):
+        if not current_oarepo_communities.get_primary_community_field(data):
             raise AttributeError('Primary Community is missing from record')
 
         ret = super().create(data, id_, **kwargs)

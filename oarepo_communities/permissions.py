@@ -62,7 +62,7 @@ def action_permission_factory(action):
         if isinstance(record, Record):
             arg = record.primary_community
         elif isinstance(record, dict):
-            arg = record[current_oarepo_communities.primary_community_field]
+            arg = current_oarepo_communities.get_primary_community_field(record)
         else:
             raise RuntimeError('Unknown or missing object')
         return require_all(

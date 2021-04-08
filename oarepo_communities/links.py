@@ -18,9 +18,9 @@ def community_record_links_factory(pid, record=None, **kwargs):
     """Ensures that primary community is set in self link."""
     if not isinstance(pid.pid_value, CommunityPIDValue):
         if record:
-            primary_community = record[current_oarepo_communities.primary_community_field]
+            primary_community = current_oarepo_communities.get_primary_community_field(record)
         elif 'record_hit' in kwargs:
-            primary_community = kwargs['record_hit']['_source'][current_oarepo_communities.primary_community_field]
+            primary_community = current_oarepo_communities.get_primary_community_field(kwargs['record_hit']['_source'])
         else:
             raise AttributeError('Record or record hit is missing')
 
