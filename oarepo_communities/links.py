@@ -6,12 +6,18 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
+from flask import url_for
 from invenio_pidstore.fetchers import FetchedPID
 from invenio_pidstore.models import PersistentIdentifier
 from oarepo_fsm.links import record_fsm_links_factory
 
 from oarepo_communities.converters import CommunityPIDValue
 from oarepo_communities.proxies import current_oarepo_communities
+
+
+def community_links_factory(community):
+    """Links factory for community views."""
+    return {'self': url_for('oarepo_communities.community_detail', community_id=community.id, _external=True)}
 
 
 def community_record_links_factory(pid, record=None, **kwargs):

@@ -109,3 +109,46 @@ def test_anonymous_permissions(sample_records, community, client):
         # No delete
         resp = client.delete(f'https://localhost/comtest/{record.pid.pid_value}')
         assert resp.status_code == 401
+
+
+def test_community_list(app, db, client, community):
+    resp = client.get(
+        url_for('oarepo_communities.community_list'))
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json == {
+        'comtest': {
+            'id': 'comtest',
+            'metadata': {'description': 'Community description'},
+            'title': 'Title',
+            'type': 'Other',
+            'links': {
+                'self': 'https://localhost/communities/comtest'
+            }
+        }}
+
+
+def test_community_detail(app, db, client, community, community_member):
+    resp = client.get(
+        url_for('oarepo_communities.community_detail', community_id=community[0]))
+
+    assert resp.status_code == 200
+    assert 'id' in resp.json.keys()
+    assert 'actions' not in resp.json.keys()
+
+    resp = client.get(
+        url_for('oarepo_communities.community_detail', community_id='blah'))
+    assert resp.status_code == 404
+
+    user = User.query.filter_by(id=community_member.id).one()
+
+    with app.test_client() as client:
+        resp = client.get(url_for(
+            '_tests.test_login_{}'.format(user.id), _external=True))
+        assert resp.status_code == 200
+
+        resp = client.get(
+            url_for('oarepo_communities.community_detail', community_id=community[0]))
+        assert resp.status_code == 200
+        assert 'actions' in resp.json
+        assert resp.json['actions'] == {}

@@ -13,7 +13,7 @@ def filter_facet_options(sender, index_name, index, view_kwargs, **kwargs):
     community_id = view_kwargs.get('community_id', None)
     if community_id:
         community = OARepoCommunity.get_community(community_id)
-        excluded_facets = community.json.get('excluded_facets', {}).get(index_name, None)
+        excluded_facets = community.excluded_facets.get(index_name, None)
         if not excluded_facets:
             return
 

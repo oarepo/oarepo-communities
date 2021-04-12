@@ -12,6 +12,7 @@ from collections import namedtuple
 import flask
 from flask import current_app, url_for
 from flask_security import login_user
+from invenio_accounts.models import User
 from invenio_indexer.api import RecordIndexer
 from invenio_pidstore.minters import recid_minter
 from invenio_records import Record

@@ -6,6 +6,9 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
+from itertools import groupby
+from operator import attrgetter
+
 from flask_babelex import gettext
 from invenio_access import ActionRoles, ActionSystemRoles
 from invenio_access.proxies import current_access
@@ -132,6 +135,31 @@ class OARepoCommunityModel(db.Model, Timestamp):
                 ar = ActionRoles.query.filter_by(action=action, argument=self.id, role=role).all()
             for a in ar:
                 db.session.delete(a)
+
+    @property
+    def actions(self):
+        ars = ActionRoles.query \
+            .filter_by(argument=self.id) \
+            .order_by(ActionRoles.action).all()
+        sars = ActionSystemRoles.query \
+            .filter_by(argument=self.id) \
+            .order_by(ActionSystemRoles.action).all()
+        ars = [{k: list(g)} for k, g in groupby(ars, key=attrgetter('action'))]
+        sars = [{k: list(g)} for k, g in groupby(sars, key=attrgetter('action'))]
+
+        return ars, sars
+
+    @property
+    def excluded_facets(self):
+        return self.json.get('excluded_facets', {})
+
+    def to_json(self):
+        return dict(
+            id=self.id,
+            title=self.title,
+            type=str(self.type),
+            metadata=self.json
+        )
 
 
 @event.listens_for(OARepoCommunityModel, 'before_delete')
