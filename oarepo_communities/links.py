@@ -20,7 +20,7 @@ def community_links_factory(community):
     return {'self': url_for('oarepo_communities.community_detail', community_id=community.id, _external=True)}
 
 
-def community_record_links_factory(pid, record=None, **kwargs):
+def community_record_links_factory(pid, record=None, original_links_factory=None, **kwargs):
     """Ensures that primary community is set in self link."""
     if not isinstance(pid.pid_value, CommunityPIDValue):
         if record:
@@ -37,6 +37,8 @@ def community_record_links_factory(pid, record=None, **kwargs):
         else:
             raise NotImplementedError
 
-    links = record_fsm_links_factory(pid, record, **kwargs)
+    links = record_fsm_links_factory(
+        pid, record,
+        original_links_factory=original_links_factory, **kwargs)
 
     return links
