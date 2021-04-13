@@ -14,6 +14,7 @@ from flask import request
 from flask_principal import UserNeed, RoleNeed
 from invenio_access import SystemRoleNeed, Permission, ParameterizedActionNeed
 from invenio_records import Record
+from invenio_records_rest.utils import deny_all
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
 from oarepo_communities.api import OARepoCommunity
@@ -131,9 +132,11 @@ def community_publisher_permission_impl(record, *args, **kwargs):
 
 def owner_permission_impl(record, *args, **kwargs):
     owners = current_oarepo_communities.get_owned_by_field(record)
-    return Permission(
-        *[UserNeed(int(owner)) for owner in owners],
-    )
+    if owners:
+        return Permission(
+            *[UserNeed(int(owner)) for owner in owners],
+        )
+    return deny_all
 
 
 def owner_or_role_action_permission_factory(action, record, *args, **kwargs):
