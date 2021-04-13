@@ -50,6 +50,9 @@ def require_action_allowed(action):
 def action_permission_factory(action):
     """Community action permission factory.
 
+    Grants access to the record if the action is
+    allowed and user is allowed to invoke the action in a record's PRIMARY community.
+
     :param action: The required community action.
     :raises RuntimeError: If the object is unknown.
     :returns: A :class:`invenio_access.permissions.Permission` instance.
@@ -73,42 +76,32 @@ def action_permission_factory(action):
     return inner
 
 
-def read_permission_factory(record, *args, **kwargs):
-    """Read permission factory that takes secondary communities into account.
-
-    :param record: An instance of :class:`oarepo_communities.record.CommunityRecordMixin`
-        or ``None`` if the action is global.
-    :raises RuntimeError: If the object is unknown.
-    :returns: A :class:`invenio_access.permissions.Permission` instance.
-    """
-    if isinstance(record, Record):
-        communities = [record.primary_community, *record.secondary_communities]
-        return require_all(
-            require_action_allowed(COMMUNITY_READ),
-            Permission(*[ParameterizedActionNeed(COMMUNITY_READ, x) for x in communities])
-        )(record, *args, **kwargs)
-    else:
-        raise RuntimeError('Unknown or missing object')
-
-
 def owner_permission_factory(action, record, *args, **kwargs):
     """Owner permission factory.
 
-    Permission factory that requires user to be both the owner of the
-    accessed record and that required action is granted to record owners.
+    Permission factory that requires user to be the owner of the
+    accessed record.
+
+    If the record is not owned by any user, access to the record is denied.
+
     :param action: The required community action.
     :raises RuntimeError: If the object is unknown.
     :returns: A :class:`invenio_access.permissions.Permission` instance.
     """
-    return require_all(
-        owner_permission_impl,
-        action_permission_factory(f'owner-{action}')(record, *args, **kwargs)
-    )
+    return owner_permission_impl
 
 
 def community_role_permission_factory(role):
     """Community role permission factory.
-       :param role: Community role name.
+
+       Permission is granted if the user belongs to a given community role.
+
+       Usage:
+       ```
+            community_role_permission_factory('member')
+       ```
+
+       :param role: Community role name without community prefix.
     """
 
     def inner(record, *args, **kwargs):
@@ -131,6 +124,11 @@ def community_publisher_permission_impl(record, *args, **kwargs):
 
 
 def owner_permission_impl(record, *args, **kwargs):
+    f"""Record owner permission factory.
+
+       * Allows access to record if current_user if record is owned by the current user.
+       * If the record is not owned by any user, access to the record is denied.
+    """
     owners = current_oarepo_communities.get_owned_by_field(record)
     if owners:
         return Permission(
@@ -140,24 +138,91 @@ def owner_permission_impl(record, *args, **kwargs):
 
 
 def owner_or_role_action_permission_factory(action, record, *args, **kwargs):
+    f"""Record owner/role permission factory.
+
+        Allows access to record if:
+        * The record is owned by the current user.
+        /OR/
+        * User's role is allowed the required action for the record
+    """
     return require_any(
         action_permission_factory(action)(record, *args, **kwargs),
         owner_permission_factory(action, record, *args, **kwargs)
     )(record, *args, **kwargs)
 
 
+def read_permission_factory(record, *args, **kwargs):
+    f"""Read permission factory that takes secondary communities into account.
+
+    Allows access to record in one of the following cases:
+        * Record is PUBLISHED
+        * Current user is the OWNER of the record
+        * User's role has allowed READ action in one of record's communities AND:
+            1) User is in one of the roles of the community from the request path AND record is atleast APPROVED. OR
+            2) User is CURATOR in the community from the request path
+
+    :param record: An instance of :class:`oarepo_communities.record.CommunityRecordMixin`
+        or ``None`` if the action is global.
+    :raises RuntimeError: If the object is unknown.
+    :returns: A :class:`invenio_access.permissions.Permission` instance.
+    """
+    if isinstance(record, Record):
+        communities = [record.primary_community, *record.secondary_communities]
+        return require_any(
+            #: Anyone can read published records
+            state_required(STATE_PUBLISHED),
+            require_all(
+                require_action_allowed(COMMUNITY_READ),
+                require_any(
+                    #: Record AUTHOR can READ his own records
+                    owner_permission_impl,
+                    require_all(
+                        #: User's role has granted READ permissions in record's communities
+                        Permission(*[ParameterizedActionNeed(COMMUNITY_READ, x) for x in communities]),
+                        require_any(
+                            #: Community MEMBERS can READ APPROVED community records
+                            require_all(
+                                state_required(STATE_APPROVED),
+                                require_any(
+                                    community_member_permission_impl,
+                                    community_publisher_permission_impl
+                                )
+                            ),
+                            #: Community CURATORS can READ ALL community records
+                            community_curator_permission_impl
+                        )
+                    )
+                )
+            )
+        )(record, *args, **kwargs)
+    else:
+        raise RuntimeError('Unknown or missing object')
+
+
 def create_permission_factory(record, community_id=None, *args, **kwargs):
     """Records REST create permission factory."""
-    # return action_permission_factory(COMMUNITY_CREATE)
     return Permission(ParameterizedActionNeed(COMMUNITY_CREATE,
                                               community_id or request.view_args['community_id']))
 
 
 def update_permission_factory(record, *args, **kwargs):
-    """Records REST update permission factory."""
+    f"""Records REST update permission factory.
+
+       Permission is granted if:
+       * Record is a DRAFT AND
+         * Current user is the OWNER of the record and record is not submitted for APPROVAL yet. OR
+         * Current user is in role that has UPDATE action allowed in record's PRIMARY community.
+    """
     return require_all(
-        state_required(STATE_EDITING, STATE_PENDING_APPROVAL),
-        action_permission_factory(COMMUNITY_UPDATE)(record, *args, **kwargs)
+        state_required(None, STATE_EDITING, STATE_PENDING_APPROVAL),
+        require_any(
+            require_all(
+                state_required(None, STATE_EDITING),
+                owner_permission_impl
+            ),
+            action_permission_factory(COMMUNITY_UPDATE)(record, *args, **kwargs)
+        )
+
     )(record, *args, **kwargs)
 
 
@@ -167,6 +232,14 @@ def delete_permission_factory(record, *args, **kwargs):
 
 
 def request_approval_permission_factory(record, *args, **kwargs):
+    f"""Request approval action permissions factory.
+
+       Permission is granted if:
+       * Record an EDITED DRAFT record. AND
+         * Current user is the owner of the record. OR
+         * Current user is in role that has REQUEST APPROVAL action allowed
+           in record's PRIMARY community.
+    """
     return require_all(
         state_required(None, STATE_EDITING),
         owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL, record)
@@ -174,6 +247,13 @@ def request_approval_permission_factory(record, *args, **kwargs):
 
 
 def delete_draft_permission_factory(record, *args, **kwargs):
+    f"""Delete DRAFT records permissions factory.
+
+       Permission is granted if:
+       * Record is a DRAFT record AND
+         * Current user is the owner of the record. OR
+         * Current user is in role that has DELETE action allowed in record's PRIMARY community.
+    """
     return require_all(
         state_required(None, STATE_EDITING, STATE_PENDING_APPROVAL),
         owner_or_role_action_permission_factory(COMMUNITY_DELETE, record)
@@ -181,6 +261,12 @@ def delete_draft_permission_factory(record, *args, **kwargs):
 
 
 def request_changes_permission_factory(record, *args, **kwargs):
+    f"""Request changes action permissions factory.
+
+       Permission is granted if:
+       * Record is submitted for approval. AND
+       * Current user is in role that has REQUEST CHANGES action allowed in record's PRIMARY community.
+    """
     return require_all(
         state_required(STATE_PENDING_APPROVAL),
         action_permission_factory(COMMUNITY_REQUEST_CHANGES)(record, *args, **kwargs)
@@ -188,6 +274,12 @@ def request_changes_permission_factory(record, *args, **kwargs):
 
 
 def approve_permission_factory(record, *args, **kwargs):
+    f"""Approve action permissions factory.
+
+       Permission is granted if:
+       * Record is submitted for approval. AND
+       * Current user is in role that has APPROVE action allowed in record's PRIMARY community.
+    """
     return require_all(
         state_required(STATE_PENDING_APPROVAL),
         action_permission_factory(COMMUNITY_APPROVE)(record, *args, **kwargs)
@@ -195,6 +287,12 @@ def approve_permission_factory(record, *args, **kwargs):
 
 
 def revert_approval_permission_factory(record, *args, **kwargs):
+    f"""Revert approval action permissions factory.
+
+       Permission is granted if:
+       * Record is APPROVED. AND
+       * Current user is in role that has REVERT APPROVE action allowed in record's PRIMARY community.
+    """
     return require_all(
         state_required(STATE_APPROVED),
         action_permission_factory(COMMUNITY_REVERT_APPROVE)(record, *args, **kwargs)
@@ -202,6 +300,12 @@ def revert_approval_permission_factory(record, *args, **kwargs):
 
 
 def publish_permission_factory(record, *args, **kwargs):
+    f"""Publish action permissions factory.
+
+       Permission is granted if:
+       * Record is APPROVED. AND
+       * Current user is in role that has PUBLISH action allowed in record's PRIMARY community.
+    """
     return require_all(
         state_required(STATE_APPROVED),
         action_permission_factory(COMMUNITY_PUBLISH)(record, *args, **kwargs)
@@ -209,6 +313,12 @@ def publish_permission_factory(record, *args, **kwargs):
 
 
 def unpublish_permission_factory(record, *args, **kwargs):
+    f"""Unpublish action permissions factory.
+
+       Permission is granted if:
+       * Record is PUBLISHED. AND
+       * Current user is in role that has UNPUBLISH action allowed in record's PRIMARY community.
+    """
     return require_all(
         state_required(STATE_PUBLISHED),
         action_permission_factory(COMMUNITY_UNPUBLISH)(record, *args, **kwargs)
@@ -216,12 +326,7 @@ def unpublish_permission_factory(record, *args, **kwargs):
 
 
 # REST endpoints permission factories.
-read_object_permission_impl = require_any(
-    # Anyone can read published records
-    state_required(STATE_PUBLISHED),
-    # Roles with granted READ action in record's primary or secondary communities can read
-    read_permission_factory
-)
+read_object_permission_impl = read_permission_factory
 
 create_object_permission_impl = create_permission_factory
 

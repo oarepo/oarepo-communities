@@ -16,6 +16,7 @@ from oarepo_ui.proxy import current_oarepo_ui
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.attributes import flag_modified
 
+from invenio_access.permissions import Need
 from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.errors import OARepoCommunityCreateError
 from oarepo_communities.models import OAREPO_COMMUNITIES_TYPES, OARepoCommunityModel
@@ -60,6 +61,8 @@ def create(community_id, description, policy, title, ctype, logo_path):
         "description": description,
         # TODO: "logo": "data/community-logos/ecfunded.jpg"
     }
+
+    comm = None
     try:
         comm = OARepoCommunity.create(
             comm_data,
@@ -67,12 +70,26 @@ def create(community_id, description, policy, title, ctype, logo_path):
             title=title,
             ctype=ctype
         )
+
     except IntegrityError:
         click.secho(f'Community {community_id} already exists', fg='red')
         exit(4)
     except OARepoCommunityCreateError as e:
         click.secho(e, fg='red')
         exit(5)
+
+    for role_name, actions in current_oarepo_communities.default_action_matrix.items():
+        role = OARepoCommunity.get_role(comm, role_name)
+        if not role and role_name in ['author', 'any']:
+            if role_name == 'author':
+                role = community_record_owner
+            else:
+                role = any_user
+
+        _allow_actions(community=comm,
+                       actions=[a[len('community-'):] for a in actions],
+                       role=role,
+                       system=True if isinstance(role, Need) else False)
 
     db.session.commit()
     click.secho(f'Created community: {comm} with roles {[r.name for r in comm.roles]}', fg='green')
