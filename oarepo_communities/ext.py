@@ -51,6 +51,8 @@ class _OARepoCommunitiesState(object):
     @cached_property
     def default_action_matrix(self):
         """Default action2role permission matrix for newly created communities."""
+        return load_or_import_from_config(
+            'OAREPO_COMMUNITIES_DEFAULT_ACTIONS', app=self.app)
 
     @cached_property
     def roles(self):

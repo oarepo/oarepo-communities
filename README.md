@@ -93,6 +93,15 @@ OAREPO_COMMUNITIES_ROLES = ['member', 'curator', 'publisher']
 """Roles present in each community."""
 ```
 
+This configuration will create an internal Invenio roles named:
+```
+community:<community_id>:member
+community:<community_id>:curator
+community:<community_id>:publisher
+```
+
+for each newly created community.
+
 ### Community actions
 To customize, which actions should be allowed to be assigned to community roles, override the following defaults:
 ```python
@@ -104,6 +113,22 @@ OAREPO_COMMUNITIES_ALLOWED_ACTIONS = [
     COMMUNITY_UNPUBLISH
 ]
 """Community actions available to community roles."""
+```
+
+### Default role actions permission matrix
+
+You can customize default action permissions assigned to roles of newly
+created communities by customizing:
+
+```python
+OAREPO_COMMUNITIES_DEFAULT_ACTIONS = {
+   'any': [],
+   'author': [],
+   'member': [COMMUNITY_CREATE],
+   'curator': [COMMUNITY_READ, COMMUNITY_APPROVE, COMMUNITY_UPDATE, COMMUNITY_REQUEST_CHANGES, COMMUNITY_DELETE],
+   'publisher': [COMMUNITY_PUBLISH, COMMUNITY_REVERT_APPROVE]
+}
+"""Default action2role permission matrix for newly created communities."""
 ```
 
 Register Records REST endpoints that will represent community record collections under:
@@ -151,6 +176,38 @@ RECORDS_REST_ENDPOINTS={
         search_class=CommunitySearch,
     }
 ```
+
+## Permissions
+
+This library provides the permission factories to be used for securing `RECORDS_REST_ENDPOINTS` community-enabled
+collections. It also provides default permissions for each community action.
+
+Default community permission factories together with default `OAREPO_COMMUNITIES_DEFAULT_ACTIONS` config implements the following
+permissions matrix in a collection of community records:
+
+### State-based permissions
+
+Each role is granted permissions based on a state of the record:
+
+| state | anonymous/any | author |  member  | curator | publisher | admin |
+|------|-------------|-------|-----------|---------|--------|---------|
+| filling |       x            |   r/w    |         c        |      r/w     |       x     |       r/w     |
+| approving |     x      |   r        |        x         |      r/w     |     x       |       r/w     |
+| approved  |     x      |   r        |        r          |       r       |      r       |       r/w                    |
+| published |     r      |    r       |        r          |       r       |      r        |        r(+unpublish) |
+
+
+_r(read), w(update), c(create)_
+### Action need permissions
+
+Each role can be granted community-scope restricted permissions to invoke a certain actions on a record:
+
+| role | actions |
+|-----|-------|
+| author | request-approval (own records only) |
+| curator | approve, delete, read, request-changes, update |
+| publisher | publish, revert-approve |
+| admin | all above + unpublish |
 
 ## Signals
 
