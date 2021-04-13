@@ -6,6 +6,7 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
+import sqlalchemy
 from flask import current_app
 from invenio_accounts.models import Role
 from invenio_accounts.proxies import current_datastore
@@ -71,13 +72,16 @@ class OARepoCommunity(RecordBase):
 
         :param id_: community ID.
         :param with_deleted: If `True` then it includes deleted communities.
-        :returns: The :class:`OARepoCommunityModel` instance.
+        :returns: The :class:`OARepoCommunityModel` instance or None if not found.
         """
         with db.session.no_autoflush:
             query = cls.model_cls.query.filter_by(id=id_)
             if not with_deleted:
                 query = query.filter(cls.model_cls.json != None)  # noqa
-            obj = query.one()
+            try:
+                obj = query.one()
+            except sqlalchemy.orm.exc.NoResultFound:
+                return None
             return cls(obj.json, model=obj).model
 
     @classmethod

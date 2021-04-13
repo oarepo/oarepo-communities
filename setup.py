@@ -80,7 +80,9 @@ setup(
         'invenio_base.api_apps': [
             'oarepo_communities = oarepo_communities:OARepoCommunities',
         ],
-        # 'invenio_base.api_blueprints': [],
+        'invenio_base.api_blueprints': [
+            'oarepo_communities = oarepo_communities.views:blueprint',
+        ],
         # 'invenio_base.blueprints': [],
         # 'invenio_celery.tasks': [],
         # 'invenio_db.models': [],

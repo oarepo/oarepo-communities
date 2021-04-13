@@ -6,13 +6,11 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-from itertools import groupby
-from operator import attrgetter
 
 import click
 import sqlalchemy
 from flask.cli import with_appcontext
-from invenio_access import ActionRoles, ActionSystemRoles, any_user
+from invenio_access import any_user
 from invenio_db import db
 from oarepo_ui.proxy import current_oarepo_ui
 from sqlalchemy.exc import IntegrityError
@@ -159,21 +157,14 @@ def list_actions(community=None):
         _action = action[len('community-'):]
         click.secho(f'- {_action}')
 
+    community = OARepoCommunity.get_community(community)
     if community:
-        community = _validate_community(community)
         click.secho('\nAvailable community roles:', fg='green')
         for role in {r.name.split(':')[-1] for r in community.roles}.union({'any', 'author'}):
             click.secho(f'- {role}')
 
         click.secho('\nAllowed community role actions:', fg='green')
-        ars = ActionRoles.query \
-            .filter_by(argument=community.id) \
-            .order_by(ActionRoles.action).all()
-        sars = ActionSystemRoles.query \
-            .filter_by(argument=community.id) \
-            .order_by(ActionSystemRoles.action).all()
-        ars = [{k: list(g)} for k, g in groupby(ars, key=attrgetter('action'))]
-        sars = [{k: list(g)} for k, g in groupby(sars, key=attrgetter('action'))]
+        ars, sars = community.actions
         for ar in ars:
             for action, roles in ar.items():
                 click.secho(f'- {action[len("community-"):]}: ', nl=False, fg='yellow')
@@ -194,7 +185,7 @@ def list_actions(community=None):
 def allow_actions(community, role, actions):
     """Allow actions to the given role."""
     actions = _validate_actions(actions)
-    community = _validate_community(community)
+    community = OARepoCommunity.get_community(community)
 
     if role == 'any':
         # Allow actions for anonymous users
@@ -215,7 +206,7 @@ def allow_actions(community, role, actions):
 def deny_actions(community, role, actions):
     """Deny actions on the given role."""
     actions = _validate_actions(actions)
-    community = _validate_community(community)
+    community = OARepoCommunity.get_community(community)
 
     if role == 'any':
         # Allow actions for anonymous users
@@ -240,25 +231,22 @@ def community_facets():
 @click.option('-c', '--community', help='List configured facets for community REST endpoints.')
 def list_facets(community=None):
     """List all available community facets."""
+    community = OARepoCommunity.get_community(community)
     if community:
-        community = _validate_community(community)
         click.secho(f'\nAvailable community {community.title} facets on indices:', fg='green')
     else:
         click.secho('\nAvailable facets on indices:', fg='green')
 
-    for endpoint in current_oarepo_communities.enabled_endpoints:
-        index_name = endpoint['config'].get('search_index')
-        if index_name:
-            click.secho(f'\nIndex: {index_name}', fg='yellow')
-            index = current_oarepo_ui.facets[index_name]
-            for agg in index['aggs'].keys():
-                is_excluded = False
-                if community:
-                    excluded_facets = community.json.get('excluded_facets', {}).get(index_name, [])
-                    if agg in excluded_facets:
-                        is_excluded = True
+    for index_name, aggs in current_oarepo_communities.facets.items():
+        click.secho(f'\nIndex: {index_name}', fg='yellow')
+        for agg in aggs:
+            is_excluded = False
+            if community:
+                excluded_aggs = community.excluded_facets.get(index_name, [])
+                if agg in excluded_aggs:
+                    is_excluded = True
 
-                click.secho(f'{"x" if is_excluded else "-"} {agg}', fg=f'{"red" if is_excluded else ""}')
+            click.secho(f'{"x" if is_excluded else "-"} {agg}', fg=f'{"red" if is_excluded else ""}')
 
 
 @community_facets.command('exclude')
@@ -268,7 +256,7 @@ def list_facets(community=None):
 @click.argument('facets', nargs=-1)
 def exclude(community, index_name, facets):
     """Exclude some facets on a given index for a given community."""
-    community = _validate_community(community)
+    community = OARepoCommunity.get_community(community)
     _validate_facets(index_name=index_name, facets=facets)
 
     with db.session.begin_nested():

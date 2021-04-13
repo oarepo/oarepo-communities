@@ -11,7 +11,9 @@ from invenio_access import ActionRoles
 from invenio_accounts.models import Role, User
 from invenio_accounts.proxies import current_datastore
 
-from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, STATE_PUBLISHED
+from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, STATE_PUBLISHED, COMMUNITY_UPDATE
+from oarepo_communities.models import OARepoCommunityModel
+from oarepo_communities.permissions import community_record_owner
 
 
 def test_links_from_search(app, client, es, sample_records):
@@ -109,3 +111,57 @@ def test_anonymous_permissions(sample_records, community, client):
         # No delete
         resp = client.delete(f'https://localhost/comtest/{record.pid.pid_value}')
         assert resp.status_code == 401
+
+
+def test_community_list(app, db, client, community):
+    resp = client.get(
+        url_for('oarepo_communities.community_list'))
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json == {
+        'comtest': {
+            'id': 'comtest',
+            'metadata': {'description': 'Community description'},
+            'title': 'Title',
+            'type': 'Other',
+            'links': {
+                'self': 'https://localhost/communities/comtest'
+            }
+        }}
+
+
+def test_community_detail(app, db, client, community, test_blueprint, community_member):
+    resp = client.get(
+        url_for('oarepo_communities.community_detail', community_id=community[0]))
+
+    assert resp.status_code == 200
+    assert 'id' in resp.json.keys()
+    assert 'actions' not in resp.json.keys()
+
+    resp = client.get(
+        url_for('oarepo_communities.community_detail', community_id='blah'))
+    assert resp.status_code == 404
+
+    user = User.query.filter_by(id=community_member.id).one()
+
+    with app.test_client() as client:
+        resp = client.get(url_for(
+            '_tests.test_login_{}'.format(user.id), _external=True))
+        assert resp.status_code == 200
+
+        resp = client.get(
+            url_for('oarepo_communities.community_detail', community_id=community[0]))
+        assert resp.status_code == 200
+
+        c: OARepoCommunityModel = community[1]
+        c.allow_action(c.roles[1], COMMUNITY_READ)
+        c.allow_action(community_record_owner, COMMUNITY_READ, system=True)
+        c.allow_action(community_record_owner, COMMUNITY_UPDATE, system=True)
+        db.session.commit()
+
+        resp = client.get(
+            url_for('oarepo_communities.community_detail', community_id=community[0]))
+        assert resp.status_code == 200
+        assert 'actions' in resp.json.keys()
+        assert resp.json['actions'] == {'community-read': ['community:comtest:curator', 'community-record-owner'],
+                                        'community-update': ['community-record-owner']}

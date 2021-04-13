@@ -164,6 +164,18 @@ class _OARepoCommunitiesState(object):
         data[self._communities_field_parsed[-1]] = field
         return data
 
+    @cached_property
+    def facets(self):
+        facets = {}
+        for endpoint in self.enabled_endpoints:
+            index_name = endpoint['config'].get('search_index')
+            if index_name:
+                index = current_oarepo_ui.facets.get(index_name)
+                if index:
+                    facets[index_name] = index['aggs']
+
+        return facets
+
 
 class OARepoCommunities(object):
     """OARepo-Communities extension."""

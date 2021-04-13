@@ -204,7 +204,7 @@ You can find all CLI commands that are available under `invenio oarepo:communiti
 
 To create a community, use:
 ````shell
-Usage: invenio oarepo:communities create [OPTIONS] COMMUNITY_ID TITLE
+Usage: oarepo oarepo:communities create [OPTIONS] COMMUNITY_ID TITLE
 
 Options:
   --description TEXT  Community description
@@ -229,7 +229,7 @@ This can be customized by using custom `OAREPO_COMMUNITIES_ROLE_KWARGS` factory.
 
 To manage actions allowed on each role in a community use the following CLI commands:
 ```
-Usage: invenio oarepo:communities actions [OPTIONS] COMMAND [ARGS]...
+Usage: oarepo oarepo:communities actions [OPTIONS] COMMAND [ARGS]...
 
   Management commands for OARepo Communities actions.
 
@@ -240,6 +240,98 @@ Commands:
   allow  Allow actions to the given role.
   deny   Deny actions on the given role.
   list   List all available community actions.
+```
+
+#### Discover available communities
+
+```shell
+$ oarepo oarepo:communities list
+- cesnet - CESNET community A testing CESNET community to test oarepo-communities
+```
+
+#### Discover actions available/assigned to the community roles
+
+```yaml
+$ oarepo oarepo:communities actions list -c cesnet
+Available actions:
+- read
+- create
+- update
+- request-approval
+- approve
+- revert-approve
+- request-changes
+- delete
+- publish
+- unpublish
+
+Available community roles:
+- author
+- any
+- publisher
+- curator
+- member
+
+Allowed community role actions:
+- create: publisher, curator
+- publish: publisher
+- read: publisher
+- request-changes: curator
+
+Allowed system role actions:
+```
+
+#### Allow a certain actions for the certain community role
+
+```shell
+$ oarepo oarepo:communities actions allow cesnet curator delete approve revert-approve
+Added role action: community-delete Need(method='role', value='community:cesnet:curator')
+Added role action: community-approve Need(method='role', value='community:cesnet:curator')
+Added role action: community-revert-approve Need(method='role', value='community:cesnet:curator')
+
+```
+
+### REST API
+
+This library registers the folowing REST API routes for OARepo:
+
+#### Community list
+
+```shell
+curl http://127.0.0.1:5000/communities/
+ {
+    'comtest': {
+        'id': 'comtest',
+        'metadata': {'description': 'Community description'},
+        'title': 'Title',
+        'type': 'Other',
+        'links': {
+            'self': 'https://localhost/communities/comtest'
+        }
+    }},
+    ...
+ }
+```
+
+#### Community Detail
+
+```shell
+community_id=comtest
+curl http://127.0.0.1:5000/communities/${community_id}
+{
+    'id': 'comtest',
+    'metadata': {'description': 'Community description'},
+    'title': 'Title',
+    'type': 'Other',
+    'actions': { # present for community members only
+       'community-read': ['community:comtest:curator', 'community-record-owner'],
+       'community-update': ['community-record-owner'],
+       ...
+     },
+    'links': {
+        'self': 'https://localhost/communities/comtest'
+    }
+}}
 ```
 
 Further documentation is available on

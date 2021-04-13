@@ -22,6 +22,7 @@ from invenio_accounts.proxies import current_datastore
 from invenio_accounts.testutils import create_test_user
 from invenio_app.factory import create_api
 from invenio_search import current_search
+from oarepo_communities.views import blueprint
 from oarepo_enrollments.config import allow_all
 
 from oarepo_communities.api import OARepoCommunity
@@ -85,6 +86,8 @@ def app(base_app):
 
     # Register blueprints here
     # base_app.register_blueprint(create_blueprint_from_app(base_app))
+    base_app.register_blueprint(blueprint)
+
     return base_app
 
 
@@ -117,6 +120,7 @@ def community_member(db, community):
     user = create_test_user('community-member@inveniosoftware.org')
     role = OARepoCommunity.get_role(community[1], 'member')
     current_datastore.add_role_to_user(user, role)
+    user = User.query.get(user.id)
     yield user
 
 
@@ -255,7 +259,7 @@ def permissions(db, community, sample_records):
 
 
 @pytest.fixture()
-def test_blueprint(users, base_app):
+def test_blueprint(db, users, community_member, base_app):
     """Test blueprint with dynamically added testing endpoints."""
     blue = Blueprint(
         '_tests',
@@ -266,11 +270,12 @@ def test_blueprint(users, base_app):
     if blue.name in base_app.blueprints:
         del base_app.blueprints[blue.name]
 
+    db.session.commit()
     for user in User.query.all():
         if base_app.view_functions.get('_tests.test_login_{}'.format(user.id)) is not None:
             del base_app.view_functions['_tests.test_login_{}'.format(user.id)]
 
-        blue.add_url_rule('_login_{}'.format(user.id), view_func=_test_login_factory(user))
+        blue.add_url_rule('_login_{}/{}'.format(user.id, user.id), view_func=_test_login_factory(user))
 
     base_app.register_blueprint(blue)
     return blue
