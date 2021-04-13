@@ -7,6 +7,7 @@
 
 """OARepo-Communities views."""
 import json
+from collections import defaultdict
 
 from flask import Blueprint, jsonify, Response, abort
 
@@ -46,12 +47,14 @@ def community_detail(community_id):
     comm = OARepoCommunity.get_community(community_id)
     if comm:
         ars, sars = comm.actions
-        actions = {}
+        actions = defaultdict(list)
 
         if community_member_permission_impl(None).can():
+            alist = ars + sars
             # Community member can list action permission matrix
-            actions['community_roles'] = ars
-            actions['system_roles'] = sars
+            for act in alist:
+                for action, roles in act.items():
+                    actions[action] += [r.need.value for r in roles]
 
         return jsonify({
             **comm.to_json(),

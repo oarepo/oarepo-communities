@@ -259,7 +259,7 @@ def permissions(db, community, sample_records):
 
 
 @pytest.fixture()
-def test_blueprint(users, community_member, base_app):
+def test_blueprint(db, users, community_member, base_app):
     """Test blueprint with dynamically added testing endpoints."""
     blue = Blueprint(
         '_tests',
@@ -270,6 +270,7 @@ def test_blueprint(users, community_member, base_app):
     if blue.name in base_app.blueprints:
         del base_app.blueprints[blue.name]
 
+    db.session.commit()
     for user in User.query.all():
         if base_app.view_functions.get('_tests.test_login_{}'.format(user.id)) is not None:
             del base_app.view_functions['_tests.test_login_{}'.format(user.id)]

@@ -11,7 +11,9 @@ from invenio_access import ActionRoles
 from invenio_accounts.models import Role, User
 from invenio_accounts.proxies import current_datastore
 
-from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, STATE_PUBLISHED
+from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, STATE_PUBLISHED, COMMUNITY_UPDATE
+from oarepo_communities.models import OARepoCommunityModel
+from oarepo_communities.permissions import community_record_owner
 
 
 def test_links_from_search(app, client, es, sample_records):
@@ -128,7 +130,7 @@ def test_community_list(app, db, client, community):
         }}
 
 
-def test_community_detail(app, db, client, community, community_member):
+def test_community_detail(app, db, client, community, test_blueprint, community_member):
     resp = client.get(
         url_for('oarepo_communities.community_detail', community_id=community[0]))
 
@@ -150,5 +152,16 @@ def test_community_detail(app, db, client, community, community_member):
         resp = client.get(
             url_for('oarepo_communities.community_detail', community_id=community[0]))
         assert resp.status_code == 200
-        assert 'actions' in resp.json
-        assert resp.json['actions'] == {}
+
+        c: OARepoCommunityModel = community[1]
+        c.allow_action(c.roles[1], COMMUNITY_READ)
+        c.allow_action(community_record_owner, COMMUNITY_READ, system=True)
+        c.allow_action(community_record_owner, COMMUNITY_UPDATE, system=True)
+        db.session.commit()
+
+        resp = client.get(
+            url_for('oarepo_communities.community_detail', community_id=community[0]))
+        assert resp.status_code == 200
+        assert 'actions' in resp.json.keys()
+        assert resp.json['actions'] == {'community-read': ['community:comtest:curator', 'community-record-owner'],
+                                        'community-update': ['community-record-owner']}
