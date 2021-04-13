@@ -61,6 +61,6 @@ def community_detail(community_id):
             'links': community_links_factory(comm),
             **({'actions': actions} if actions else {})
         })
-    return json_abort(404, {
+    json_abort(404, {
         "message": "community %s was not found" % community_id
     })
