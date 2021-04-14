@@ -152,7 +152,7 @@ CommunitySearch = CommunitySearchMixin
 def community_search_factory(list_resource, records_search, **kwargs):
     community_id = community_id_from_request()
 
-    endpoint = request.endpoint  # 'invenio_records_rest.draft-nresults-community_list'
+    endpoint = request.endpoint
     endpoint = endpoint.split('.')[1]
     endpoint = re.sub('_list$', '', endpoint)
 
