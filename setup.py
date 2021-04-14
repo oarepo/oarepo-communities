@@ -11,7 +11,7 @@ import os
 
 from setuptools import find_packages, setup
 
-readme = open('README.rst').read()
+readme = open('README.md').read()
 history = open('CHANGES.rst').read()
 
 OAREPO_VERSION = os.environ.get('OAREPO_VERSION', '3.3.0')
@@ -22,9 +22,6 @@ tests_require = [
 ]
 
 extras_require = {
-    'docs': [
-        'Sphinx>=3,<4',
-    ],
     'tests': [
         'oarepo[tests]~={version}'.format(version=OAREPO_VERSION),
         *tests_require
@@ -36,14 +33,16 @@ for reqs in extras_require.values():
     extras_require['all'].extend(reqs)
 
 setup_requires = [
-    'Babel>=2.8',
 ]
 
 install_requires = [
-    'oarepo-enrollment-permissions'
+    'oarepo-fsm>=1.6.1',
+    'oarepo-micro-api',
+    'oarepo-enrollment-permissions',
+    'oarepo_ui'
 ]
 
-packages = find_packages()
+packages = find_packages(exclude=["tests", 'tests.api', 'tests.api.mappings', 'tests.api.mappings.v7'])
 
 # Get the version string. Cannot be done with import!
 g = {}
@@ -57,6 +56,7 @@ setup(
     description=__doc__,
     long_description=readme + '\n\n' + history,
     keywords='invenio oarepo communities',
+    long_description_content_type='text/markdown',
     license='MIT',
     author='Miroslav Bauer',
     author_email='bauer@cesnet.cz',
@@ -72,14 +72,17 @@ setup(
         'invenio_base.apps': [
             'oarepo_communities = oarepo_communities:OARepoCommunities',
         ],
-        # TODO: Edit these entry points to fit your needs.
-        # 'invenio_access.actions': [],
         # 'invenio_admin.actions': [],
+        'invenio_access.system_roles': [
+            'community_record_owner = oarepo_communities.permissions:community_record_owner',
+        ],
         # 'invenio_assets.bundles': [],
         'invenio_base.api_apps': [
             'oarepo_communities = oarepo_communities:OARepoCommunities',
         ],
-        # 'invenio_base.api_blueprints': [],
+        'invenio_base.api_blueprints': [
+            'oarepo_communities = oarepo_communities.views:blueprint',
+        ],
         # 'invenio_base.blueprints': [],
         # 'invenio_celery.tasks': [],
         # 'invenio_db.models': [],
@@ -88,6 +91,18 @@ setup(
         ],
         'invenio_db.alembic': [
             'oarepo_communities = oarepo_communities:alembic',
+        ],
+        'invenio_base.api_converters': [
+            'commpid = oarepo_communities.converters:CommunityPIDConverter',
+        ],
+        'invenio_base.converters': [
+            'commpid = oarepo_communities.converters:CommunityPIDConverter',
+        ],
+        'oarepo_mapping_includes': [
+            'oarepo_communities = oarepo_communities.included_mappings'
+        ],
+        'invenio_jsonschemas.schemas': [
+            'oarepo_communities = oarepo_communities.jsonschemas',
         ],
         # 'invenio_pidstore.minters': [],
         # 'invenio_records.jsonresolver': [],
