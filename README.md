@@ -78,12 +78,21 @@ $ pip install oarepo-communities
 
 ### Community record class
 
-To use this module, you need to inherit your Record class from the following mixin:
+To use this module, you need to inherit your Record class from the following mixin.
+You should also implement `canonical_url` with `CommunityPIDValue` for record's `pid_value`,
+which provides an ID of record's primary community e.g.:
 ```python
 from oarepo_communities.record import CommunityRecordMixin
 
 class CommunityRecord(CommunityRecordMixin, Record):
 ...
+@property
+def canonical_url(self):
+    return url_for(f'invenio_records_rest.records/record_item',
+                   pid_value=CommunityPIDValue(
+                       self['id'],
+                       current_oarepo_communities.get_primary_community_field(self)
+                   ), _external=True)
 ```
 
 ### Community Roles
@@ -103,7 +112,12 @@ community:<community_id>:publisher
 for each newly created community.
 
 ### Community actions
-To customize, which actions should be allowed to be assigned to community roles, override the following defaults:
+
+Community action grants users having community roles associated with the action a permission to
+perform a certain action on all records in the community (given that other necessary conditions
+are also met, e.g. record's ownership and/or current state, see [Permissions](https://github.com/oarepo/oarepo-communities#permissions)).
+
+To customize which actions could be assigned to community roles, override the following defaults:
 ```python
 OAREPO_COMMUNITIES_ALLOWED_ACTIONS = [
     COMMUNITY_READ, COMMUNITY_CREATE,
@@ -122,8 +136,8 @@ created communities by customizing:
 
 ```python
 OAREPO_COMMUNITIES_DEFAULT_ACTIONS = {
-   'any': [],
-   'author': [],
+   'any': [], # e.g. anonymous, non-community users
+   'author': [], # owners of the records
    'member': [COMMUNITY_CREATE],
    'curator': [COMMUNITY_READ, COMMUNITY_APPROVE, COMMUNITY_UPDATE, COMMUNITY_REQUEST_CHANGES, COMMUNITY_DELETE],
    'publisher': [COMMUNITY_PUBLISH, COMMUNITY_REVERT_APPROVE]
@@ -131,6 +145,7 @@ OAREPO_COMMUNITIES_DEFAULT_ACTIONS = {
 """Default action2role permission matrix for newly created communities."""
 ```
 
+### REST Endpoints
 Register Records REST endpoints that will represent community record collections under:
 ```python
 OAREPO_COMMUNITIES_ENDPOINTS = ['recid', ...]
@@ -139,6 +154,7 @@ OAREPO_COMMUNITIES_ENDPOINTS = ['recid', ...]
 OAREPO_FSM_ENABLED_REST_ENDPOINTS = ['recid', ...]
 """Enable FSM transitions for the community record collection."""
 ```
+_NOTE: items should be the keys of `RECORDS_REST_ENDPOINTS` config dict._
 
 Endpoints registered as community endpoints are expected to have item and list paths in the
 following format:
@@ -150,7 +166,7 @@ RECORDS_REST_ENDPOINTS={
 }
 ```
 
-### Links Factory
+#### Links Factory
 
 For this library to work, you will need to set the following links factory in your `RECORDS_REST_ENDPOINTS`:
 ```python
@@ -159,23 +175,34 @@ from oarepo_communities.links import community_record_links_factory
 RECORDS_REST_ENDPOINTS={
     'recid': {
         ...
-        links_factory_imp=community_record_links_factory,
+        links_factory_imp=partial(community_record_links_factory, original_links_factory=your_original_links_factory),
     }
 ```
+***WARNING***: `your_original_links_factory` should expect `CommunityPIDValue` instance to be passed for link
+generation as record's `pid_value`
 
-### Search class
+## Search
 
-To limit search results to records in a community, use the following search class in your `RECORDS_REST_ENDPOINTS`:
+To limit search results to records in a certain community, use the following in your `RECORDS_REST_ENDPOINTS`:
 
 ```python
-from oarepo_communities.search import CommunitySearch
+from oarepo_communities.search import CommunitySearch, community_search_factory
 ...
 RECORDS_REST_ENDPOINTS={
     'recid': {
         ...
         search_class=CommunitySearch,
+        search_factory_imp=community_search_factory
     }
 ```
+
+This will restrict the results of a search query to just the records having primary or secondary
+community ID obtained from the current request. Further
+filtering will occur considering the current user community roles and records state
+(see [Permissions](https://github.com/oarepo/oarepo-communities#permissions)).
+
+If the community ID could not be determined from the current request, results will be
+filtered with all IDs of communities where the current user is in any role.
 
 ## Permissions
 
@@ -198,9 +225,10 @@ Each role is granted permissions based on a state of the record:
 
 
 _r(read), w(update), c(create)_
+
 ### Action need permissions
 
-Each role can be granted community-scope restricted permissions to invoke a certain actions on a record:
+Each role is granted community-scope restricted permissions to invoke a certain actions on a record.
 
 | role | actions |
 |-----|-------|

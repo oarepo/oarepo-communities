@@ -16,6 +16,7 @@ from werkzeug.utils import cached_property
 
 from . import config
 from .permissions import community_record_owner
+from .utils import community_id_from_request
 
 
 @app_loaded.connect
@@ -28,7 +29,7 @@ def add_urlkwargs(sender, app, **kwargs):
     def _community_urlkwargs(endpoint, values):
         if endpoint in app.extensions['oarepo-communities'].list_endpoints:
             if 'community_id' not in values:
-                values['community_id'] = request.view_args['community_id']
+                values['community_id'] = community_id_from_request()
 
     app.url_default_functions.setdefault('invenio_records_rest', []).append(_community_urlkwargs)
 
