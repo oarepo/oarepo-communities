@@ -26,7 +26,6 @@ def add_urlkwargs(sender, app, **kwargs):
         app.extensions['oarepo-communities'].list_endpoints.add(f'invenio_records_rest.{ep}_list')
 
     def _community_urlkwargs(endpoint, values):
-        # TODO: config option for endpoints that need community_id kwarg
         if endpoint in app.extensions['oarepo-communities'].list_endpoints:
             if 'community_id' not in values:
                 values['community_id'] = request.view_args['community_id']

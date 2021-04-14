@@ -18,6 +18,7 @@ from invenio_records_rest.utils import deny_all
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
 from oarepo_communities.api import OARepoCommunity
+from oarepo_communities.converters import CommunityPIDValue
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, \
     STATE_EDITING, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
     STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, \
@@ -105,8 +106,16 @@ def community_role_permission_factory(role):
     """
 
     def inner(record, *args, **kwargs):
-        community = OARepoCommunity.get_community(request.view_args['community_id'])
-        return Permission(RoleNeed(OARepoCommunity.get_role(community, role).name))
+        community_id = request.view_args.get('community_id')
+        if not community_id:
+            pid = request.view_args.get('pid_value')
+            if pid and isinstance(pid.data[0].pid_value, CommunityPIDValue):
+                community_id = pid.data[0].pid_value.community_id
+
+        if community_id:
+            community = OARepoCommunity.get_community(community_id)
+            return Permission(RoleNeed(OARepoCommunity.get_role(community, role).name))
+        return deny_all()
 
     return inner
 
@@ -134,7 +143,7 @@ def owner_permission_impl(record, *args, **kwargs):
         return Permission(
             *[UserNeed(int(owner)) for owner in owners],
         )
-    return deny_all
+    return deny_all()
 
 
 def owner_or_role_action_permission_factory(action, record, *args, **kwargs):
