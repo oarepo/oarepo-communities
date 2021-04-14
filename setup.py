@@ -39,7 +39,9 @@ install_requires = [
     'oarepo-fsm>=1.6.1',
     'oarepo-micro-api',
     'oarepo-enrollment-permissions',
-    'oarepo_ui'
+    'oarepo-ui',
+    'oarepo-search',
+    'boltons'
 ]
 
 packages = find_packages(exclude=["tests", 'tests.api', 'tests.api.mappings', 'tests.api.mappings.v7'])

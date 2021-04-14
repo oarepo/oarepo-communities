@@ -6,7 +6,6 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-from oarepo_communities.proxies import current_oarepo_communities
 
 # Available community actions
 COMMUNITY_READ = 'community-read'

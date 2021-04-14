@@ -10,11 +10,12 @@ from flask import request
 from werkzeug.exceptions import BadRequest
 
 from oarepo_communities.proxies import current_oarepo_communities
+from oarepo_communities.utils import community_id_from_request
 
 
 def community_json_loader():
     data = request.get_json(force=True)
-    rcomid = request.view_args['community_id']
+    rcomid = community_id_from_request()
     dcomid = current_oarepo_communities.get_primary_community_field(data)
     if dcomid:
         if rcomid != dcomid:

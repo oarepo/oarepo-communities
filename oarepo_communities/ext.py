@@ -6,7 +6,6 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-from flask import request
 from flask_login import current_user
 from flask_principal import identity_loaded
 from invenio_base.signals import app_loaded
@@ -16,6 +15,7 @@ from werkzeug.utils import cached_property
 
 from . import config
 from .permissions import community_record_owner
+from .utils import community_id_from_request
 
 
 @app_loaded.connect
@@ -28,7 +28,7 @@ def add_urlkwargs(sender, app, **kwargs):
     def _community_urlkwargs(endpoint, values):
         if endpoint in app.extensions['oarepo-communities'].list_endpoints:
             if 'community_id' not in values:
-                values['community_id'] = request.view_args['community_id']
+                values['community_id'] = community_id_from_request()
 
     app.url_default_functions.setdefault('invenio_records_rest', []).append(_community_urlkwargs)
 

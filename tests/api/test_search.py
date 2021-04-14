@@ -17,12 +17,12 @@ def test_has_records(app, client, sample_records):
 def test_rest_list_primary(client, es, sample_records):
     resp = client.get('https://localhost/A/')
     assert resp.status_code == 200
-    assert resp.json['hits']['total'] == 3  # 1 published record in community A
+    assert resp.json['hits']['total'] == 1  # only 1 published record in community A
     assert 'B' not in [r['metadata']['_primary_community'] for r in resp.json['hits']['hits']]
 
     resp = client.get('https://localhost/B/')
     assert resp.status_code == 200
-    assert resp.json['hits']['total'] == 8  # 1 published record in community B
+    assert resp.json['hits']['total'] == 3  # 2 published record in community B + 1 with B as secondary
     assert 'A' not in [r['metadata']['_primary_community'] for r in resp.json['hits']['hits']]
 
 

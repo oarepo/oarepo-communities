@@ -10,7 +10,6 @@
 #
 # Action needs
 #
-from flask import request
 from flask_principal import UserNeed, RoleNeed
 from invenio_access import SystemRoleNeed, Permission, ParameterizedActionNeed
 from invenio_records import Record
@@ -18,13 +17,13 @@ from invenio_records_rest.utils import deny_all
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
 from oarepo_communities.api import OARepoCommunity
-from oarepo_communities.converters import CommunityPIDValue
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, \
     STATE_EDITING, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
     STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, \
     COMMUNITY_UNPUBLISH, COMMUNITY_UPDATE, \
     COMMUNITY_REQUEST_APPROVAL
 from oarepo_communities.proxies import current_oarepo_communities
+from oarepo_communities.utils import community_id_from_request
 
 community_record_owner = SystemRoleNeed('community-record-owner')
 
@@ -106,11 +105,7 @@ def community_role_permission_factory(role):
     """
 
     def inner(record, *args, **kwargs):
-        community_id = request.view_args.get('community_id')
-        if not community_id:
-            pid = request.view_args.get('pid_value')
-            if pid and isinstance(pid.data[0].pid_value, CommunityPIDValue):
-                community_id = pid.data[0].pid_value.community_id
+        community_id = community_id_from_request()
 
         if community_id:
             community = OARepoCommunity.get_community(community_id)
@@ -210,8 +205,8 @@ def read_permission_factory(record, *args, **kwargs):
 
 def create_permission_factory(record, community_id=None, *args, **kwargs):
     """Records REST create permission factory."""
-    return Permission(ParameterizedActionNeed(COMMUNITY_CREATE,
-                                              community_id or request.view_args['community_id']))
+    community_id = community_id or community_id_from_request()
+    return Permission(ParameterizedActionNeed(COMMUNITY_CREATE, community_id))
 
 
 def update_permission_factory(record, *args, **kwargs):
