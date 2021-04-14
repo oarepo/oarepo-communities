@@ -6,7 +6,6 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """OArepo module that adds support for communities"""
-from flask import request
 from flask_login import current_user
 from flask_principal import identity_loaded
 from invenio_base.signals import app_loaded

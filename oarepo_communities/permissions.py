@@ -10,7 +10,6 @@
 #
 # Action needs
 #
-from flask import request
 from flask_principal import UserNeed, RoleNeed
 from invenio_access import SystemRoleNeed, Permission, ParameterizedActionNeed
 from invenio_records import Record
@@ -18,7 +17,6 @@ from invenio_records_rest.utils import deny_all
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
 from oarepo_communities.api import OARepoCommunity
-from oarepo_communities.converters import CommunityPIDValue
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, \
     STATE_EDITING, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
     STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, \

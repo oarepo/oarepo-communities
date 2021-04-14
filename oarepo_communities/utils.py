@@ -10,7 +10,6 @@
 This file is imported by ``oarepo_communities.__init__``,
 and parsed by ``setup.py``.
 """
-import sqlalchemy
 from flask import request
 from flask_babelex import gettext
 from flask_login import current_user

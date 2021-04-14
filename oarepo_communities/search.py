@@ -9,7 +9,6 @@
 import functools
 import re
 
-import sqlalchemy
 from boltons.typeutils import classproperty
 from elasticsearch_dsl.query import Bool, Q
 from flask import request
