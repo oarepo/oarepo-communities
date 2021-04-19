@@ -85,7 +85,7 @@ class CommunityRecordMixin(FSMMixin):
         """
         record = super().patch(patch)
 
-        if self.primary_community != record[current_oarepo_communities.primary_community_field]:
+        if self.primary_community != record.primary_community:
             raise AttributeError('Primary Community cannot be changed')
         return record
 
