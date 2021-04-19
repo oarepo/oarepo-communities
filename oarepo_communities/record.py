@@ -83,10 +83,11 @@ class CommunityRecordMixin(FSMMixin):
         :params patch: Dictionary of record metadata.
         :returns: A new :class:`Record` instance.
         """
-        data = apply_patch(dict(self), patch)
-        if self.primary_community != data[current_oarepo_communities.primary_community_field]:
+        record = super().patch(patch)
+
+        if self.primary_community != record.primary_community:
             raise AttributeError('Primary Community cannot be changed')
-        return self.__class__(data, model=self.model)
+        return record
 
     @transition(src=[None, STATE_EDITING], dest=STATE_PENDING_APPROVAL,
                 permissions=request_approval_permission_impl)
