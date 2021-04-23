@@ -1,16 +1,18 @@
 {
   "definitions": {
     "Communities": {
-      "$id": "#communities",
+      "title": "OARepo Communities fields v1.0.0",
       "type": "object",
       "properties": {
         "_primary_community": {
-          "type": "string"
+          "type": "string",
+          "description": "Primary community ID of the record"
         },
         "_communities": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "description": "List of secondary community IDs where the record is also published"
           }
         }
       },
