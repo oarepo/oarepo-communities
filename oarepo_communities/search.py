@@ -90,9 +90,8 @@ class CommunitySearchMixin(RecordsSearchMixin):
             ], minimum_should_match=1)
 
         @staticmethod
-        def default_multi_community_filter(cls, community_list):
+        def default_multi_community_filter(community_list):
             return Bool(must=[
-                cls.outer_class.Meta.default_authenticated_filter,
                 Bool(should=[
                     Q('terms',
                       **{current_oarepo_communities.primary_community_field: community_list}),
@@ -119,9 +118,14 @@ class CommunitySearchMixin(RecordsSearchMixin):
             if current_user.is_authenticated:
                 if not community_id_from_request():
                     # Filter records for all user's communities
+                    user_communities = current_user_communities()
+
                     return Bool(should=[
                         q,
-                        cls.outer_class.Meta.default_multi_community_filter(current_user_communities),
+                        Bool(must=[
+                            # TODO: implement per-community filters based on roles in each community
+                            Q('terms', state=[STATE_APPROVED, STATE_PUBLISHED]),
+                            cls.outer_class.Meta.default_multi_community_filter(user_communities)])
                     ], minimum_should_match=1)
                 else:
                     # Filter records in request-sourced community

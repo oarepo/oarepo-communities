@@ -29,6 +29,8 @@ def current_user_communities():
         if community and community.id not in communities:
             communities.append(community.id)
 
+    return communities
+
 
 def community_id_from_request():
     """Returns community ID from request or None if ID could not be determined."""
