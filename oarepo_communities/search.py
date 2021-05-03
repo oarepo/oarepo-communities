@@ -44,6 +44,9 @@ class CommunitySearchMixin(RecordsSearchMixin):
 
         @classproperty
         def default_anonymous_filter(cls):
+            if not community_id_from_request():
+                return Q('term', state=STATE_PUBLISHED)
+
             return Bool(must=[
                 cls.outer_class.Meta.default_request_community_filter(),
                 Q('term', state=STATE_PUBLISHED)])
