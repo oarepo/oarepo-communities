@@ -35,10 +35,11 @@ OAREPO_COMMUNITIES_ENDPOINTS = []
 """List of community enabled endpoints."""
 
 OAREPO_COMMUNITIES_DEFAULT_ACTIONS = {
-   'any': [],
-   'author': [],
-   'member': [COMMUNITY_CREATE],
-   'curator': [COMMUNITY_READ, COMMUNITY_APPROVE, COMMUNITY_UPDATE, COMMUNITY_REQUEST_CHANGES, COMMUNITY_DELETE],
-   'publisher': [COMMUNITY_PUBLISH, COMMUNITY_REVERT_APPROVE]
+    'any': [],
+    'author': [],
+    'member': [COMMUNITY_CREATE],
+    'curator': [COMMUNITY_READ, COMMUNITY_REQUEST_APPROVAL, COMMUNITY_APPROVE, COMMUNITY_UPDATE,
+                COMMUNITY_REQUEST_CHANGES, COMMUNITY_DELETE],
+    'publisher': [COMMUNITY_PUBLISH, COMMUNITY_REVERT_APPROVE]
 }
 """Default action2role permission matrix for newly created communities."""
