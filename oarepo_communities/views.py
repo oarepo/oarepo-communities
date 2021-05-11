@@ -35,10 +35,10 @@ blueprint = Blueprint(
 def community_list():
     """Community list view."""
     comms = OARepoCommunityModel.query.all()
-    return jsonify({comm.id: {
+    return jsonify([{
         **comm.to_json(),
         'links': community_links_factory(comm)
-    } for comm in comms})
+    } for comm in comms])
 
 
 @blueprint.route('/<community_id>', strict_slashes=False)
