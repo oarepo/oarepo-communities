@@ -118,8 +118,7 @@ def test_community_list(app, db, client, community):
         url_for('oarepo_communities.community_list'))
     assert resp.status_code == 200
     assert len(resp.json) == 1
-    assert resp.json == {
-        'comtest': {
+    assert resp.json == [{
             'id': 'comtest',
             'metadata': {'description': 'Community description'},
             'title': 'Title',
@@ -127,7 +126,7 @@ def test_community_list(app, db, client, community):
             'links': {
                 'self': 'https://localhost/communities/comtest'
             }
-        }}
+        }]
 
 
 def test_community_detail(app, db, client, community, test_blueprint, community_member):
