@@ -34,4 +34,4 @@ recursive-include oarepo_communities *.py
 recursive-include oarepo_communities/alembic *.py
 recursive-exclude tests *.cfg
 recursive-include oarepo_communities *.json
-
+recursive-include oarepo_communities *.json5

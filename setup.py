@@ -25,6 +25,9 @@ extras_require = {
     'tests': [
         'oarepo[tests]~={version}'.format(version=OAREPO_VERSION),
         *tests_require
+    ],
+    'build': [
+         'oarepo-model-builder'
     ]
 }
 
@@ -106,6 +109,9 @@ setup(
         'invenio_jsonschemas.schemas': [
             'oarepo_communities = oarepo_communities.jsonschemas',
         ],
+        'oarepo_model_builder.datamodels': [
+            'oarepo_communities = oarepo_communities.datamodels'
+        ]
         # 'invenio_pidstore.minters': [],
         # 'invenio_records.jsonresolver': [],
     },

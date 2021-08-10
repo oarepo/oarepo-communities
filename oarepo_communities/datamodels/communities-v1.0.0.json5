@@ -1,0 +1,15 @@
+{
+  "definitions": {
+    "primaryCommunity": {
+      "type": "string",
+      "description": "Primary community ID of the record"
+    },
+    "secondaryCommunities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "List of secondary community IDs where the record is also published"
+      }
+    }
+  }
+}
