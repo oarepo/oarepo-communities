@@ -1,0 +1,17 @@
+{
+  "definitions": {
+    "oarepo:secondaryCommunities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+      },
+      "description": "List of secondary community IDs where the record is also available",
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "oarepo:primaryCommunity": {
+      "type": "string",
+      "description": "Primary community ID of the record"
+    }
+  }
+}

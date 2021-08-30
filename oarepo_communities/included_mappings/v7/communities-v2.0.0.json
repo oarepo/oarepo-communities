@@ -1,0 +1,12 @@
+{
+  "Communities": {
+    "properties": {
+      "oarepo:secondaryCommunities": {
+        "type": "keyword"
+      },
+      "oarepo:primaryCommunity": {
+        "type": "keyword"
+      }
+    }
+  }
+}

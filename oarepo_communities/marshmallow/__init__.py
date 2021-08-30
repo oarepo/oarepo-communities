@@ -14,3 +14,8 @@ from marshmallow.fields import List
 class OARepoCommunitiesMixin(Schema):
     _primary_community = SanitizedUnicode(required=True)
     _communities = List(SanitizedUnicode, default=list)
+
+
+class OARepoCommunitiesMixinV2(Schema):
+    _primary_community = SanitizedUnicode(required=True, data_key='oarepo:primaryCommunity')
+    _secondary_communities = List(SanitizedUnicode, default=list, data_key='oarepo:secondaryCommunities')
