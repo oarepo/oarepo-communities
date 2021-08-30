@@ -45,17 +45,17 @@ class CommunitySearchMixin(RecordsSearchMixin):
         @classproperty
         def default_anonymous_filter(cls):
             if not community_id_from_request():
-                return Q('term', state=STATE_PUBLISHED)
+                return Q('term', **{'oarepo:recordStatus': STATE_PUBLISHED})
 
             return Bool(must=[
                 cls.outer_class.Meta.default_request_community_filter(),
-                Q('term', state=STATE_PUBLISHED)])
+                Q('term', **{'oarepo:recordStatus': STATE_PUBLISHED})])
 
         @classproperty
         def default_authenticated_filter(cls):
             return Bool(must=[
                 cls.outer_class.Meta.default_request_community_filter(),
-                Q('terms', state=[STATE_APPROVED, STATE_PUBLISHED])])
+                Q('terms', **{'oarepo:recordStatus': [STATE_APPROVED, STATE_PUBLISHED]})])
 
         @classproperty
         def default_any_filter(cls):
