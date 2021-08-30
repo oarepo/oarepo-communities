@@ -77,7 +77,7 @@ class CommunitySearchMixin(RecordsSearchMixin):
         def default_author_filter(cls):
             return Bool(should=[
                 cls.outer_class.Meta.default_member_filter,
-                Q('term', access__owned_by=current_user.id)
+                Q('term', **{current_oarepo_communities.owned_by_field: current_user.id})
             ], minimum_should_match=1)
 
         @staticmethod
