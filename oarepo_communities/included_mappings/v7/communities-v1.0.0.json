@@ -1,10 +1,10 @@
 {
   "Communities": {
     "properties": {
-      "_primary_community": {
+      "oarepo:secondaryCommunities": {
         "type": "keyword"
       },
-      "_communities": {
+      "oarepo:primaryCommunity": {
         "type": "keyword"
       }
     }

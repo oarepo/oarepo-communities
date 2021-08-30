@@ -4,11 +4,11 @@
       "title": "OARepo Communities fields v1.0.0",
       "type": "object",
       "properties": {
-        "_primary_community": {
+        "oarepo:primaryCommunity": {
           "type": "string",
           "description": "Primary community ID of the record"
         },
-        "_communities": {
+        "oarepo:secondaryCommunities": {
           "type": "array",
           "items": {
             "type": "string",
@@ -17,7 +17,7 @@
         }
       },
       "required": [
-        "_primary_community"
+        "oarepo:primaryCommunity"
       ]
     }
   }
