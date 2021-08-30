@@ -15,6 +15,9 @@
       },
       "oarepo:ownedBy": {
         "type": "integer"
+      },
+      "oarepo:recordStatus": {
+        "type": "keyword"
       }
     }
   }

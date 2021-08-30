@@ -105,7 +105,7 @@ def make_sample_record(db, title, community_id, state='filling', secondary=None)
     rec = {
         'title': title,
         'oarepo:primaryCommunity': community_id,
-        'state': state,
+        'oarepo:recordStatus': state,
         'oarepo:secondaryCommunities': secondary,
         'oarepo:ownedBy': 1
     }
