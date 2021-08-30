@@ -104,9 +104,9 @@ PIDRecord = namedtuple('PIDRecord', 'pid record')
 def make_sample_record(db, title, community_id, state='filling', secondary=None):
     rec = {
         'title': title,
-        '_primary_community': community_id,
+        'oarepo:primaryCommunity': community_id,
         'state': state,
-        '_communities': secondary,
+        'oarepo:secondaryCommunities': secondary,
         'access': {
             'owned_by': [1]
         }
