@@ -36,34 +36,63 @@ class CommunityRecordMixin(FSMMixin):
     def secondary_communities(self) -> list:
         return current_oarepo_communities.get_communities_field(self) or []
 
+    @property
+    def owned_by(self) -> int:
+        return current_oarepo_communities.get_owned_by_field(self)
+
     def clear(self):
         """Preserves the schema even if the record is cleared and all metadata wiped out."""
-        primary = self.get(current_oarepo_communities.primary_community_field)
+        primary = self.primary_community
+        owner = self.owned_by
         super().clear()
+
         if primary:
             current_oarepo_communities.set_primary_community_field(self, primary)
+        if owner:
+            current_oarepo_communities.set_owned_by_field(self, owner)
 
     def _check_community(self, data):
-        if current_oarepo_communities.primary_community_field in data:
-            if current_oarepo_communities.get_primary_community_field(data) != self.primary_community:
-                raise AttributeError('Primary Community cannot be changed')
+        val = current_oarepo_communities.get_primary_community_field(data)
+        if val and val != self.primary_community:
+            raise AttributeError('Primary Community cannot be changed')
+
+    def _check_record_owner(self, data):
+        val = current_oarepo_communities.get_owned_by_field(data)
+        if val and val != self.owned_by:
+            raise AttributeError('Record owner cannot be changed')
 
     def update(self, e=None, **f):
         """Dictionary update."""
         self._check_community(e or f)
+        self._check_record_owner(e or f)
         return super().update(e, **f)
 
     def __setitem__(self, key, value):
         """Dict's setitem."""
-        if key == current_oarepo_communities.primary_community_field:
-            if self.primary_community and self.primary_community != value:
-                raise AttributeError('Primary Community cannot be changed')
-        return super().__setitem__(key, value)
+        # TODO: following won't work for nested dicts (keys)
+        primary = self.primary_community
+        owner = self.owned_by
+
+        ret = super().__setitem__(key, value)
+
+        if primary and self.primary_community != primary:
+            print(primary, self.primary_community)
+            raise AttributeError('Primary Community cannot be changed')
+
+        if owner and self.owned_by != owner:
+            raise AttributeError('Record owner cannot be changed')
+
+        return ret
 
     def __delitem__(self, key):
         """Dict's delitem."""
+        # TODO: following won't work for nested dicts (keys)
         if key == current_oarepo_communities.primary_community_field:
             raise AttributeError('Primary Community can not be deleted')
+
+        if key == current_oarepo_communities.owned_by_field:
+            raise AttributeError('Record owner can not be deleted')
+
         return super().__delitem__(key)
 
     @classmethod
@@ -87,6 +116,10 @@ class CommunityRecordMixin(FSMMixin):
 
         if self.primary_community != record.primary_community:
             raise AttributeError('Primary Community cannot be changed')
+
+        if self.owned_by != record.owned_by:
+            raise AttributeError('Record owner cannot be changed')
+
         return record
 
     @transition(src=[None, STATE_EDITING], dest=STATE_PENDING_APPROVAL,

@@ -107,9 +107,7 @@ def make_sample_record(db, title, community_id, state='filling', secondary=None)
         'oarepo:primaryCommunity': community_id,
         'state': state,
         'oarepo:secondaryCommunities': secondary,
-        'access': {
-            'owned_by': [1]
-        }
+        'oarepo:ownedBy': 1
     }
     record_uuid = uuid.uuid4()
     pid = recid_minter(record_uuid, rec)

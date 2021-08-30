@@ -6,6 +6,9 @@
       },
       "oarepo:primaryCommunity": {
         "type": "keyword"
+      },
+      "oarepo:ownedBy": {
+        "type": "integer"
       }
     }
   }

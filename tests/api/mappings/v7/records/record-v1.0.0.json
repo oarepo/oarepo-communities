@@ -12,6 +12,9 @@
       },
       "oarepo:secondaryCommunities": {
         "type": "keyword"
+      },
+      "oarepo:ownedBy": {
+        "type": "integer"
       }
     }
   }

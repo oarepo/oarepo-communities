@@ -133,11 +133,9 @@ def owner_permission_impl(record, *args, **kwargs):
        * Allows access to record if current_user if record is owned by the current user.
        * If the record is not owned by any user, access to the record is denied.
     """
-    owners = current_oarepo_communities.get_owned_by_field(record)
-    if owners:
-        return Permission(
-            *[UserNeed(int(owner)) for owner in owners],
-        )
+    owner = current_oarepo_communities.get_owned_by_field(record)
+    if owner:
+        return Permission(UserNeed(owner))
     return deny_all()
 
 

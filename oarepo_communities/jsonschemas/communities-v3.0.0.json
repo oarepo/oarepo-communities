@@ -14,9 +14,15 @@
             "type": "string",
             "description": "List of secondary community IDs where the record is also published"
           }
+        },
+        "oarepo:ownedBy": {
+          "description": "Record owner - user that created/submitted the repository record for the resource",
+          "type": "integer",
+          "default": "Current authenticated user's ID"
         }
       },
       "required": [
+        "oarepo:ownedBy",
         "oarepo:primaryCommunity"
       ]
     }

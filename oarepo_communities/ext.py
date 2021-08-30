@@ -40,11 +40,11 @@ class _OARepoCommunitiesState(object):
         """Initialize state."""
         self.app = app
         self.list_endpoints = set()
-        self._primary_community_field = '_primary_community'
+        self._primary_community_field = 'oarepo:primaryCommunity'
         self._primary_community_field_parsed = None
-        self._owned_by_field = 'access.owned_by'
+        self._owned_by_field = 'oarepo:ownedBy'
         self._owned_by_field_parsed = None
-        self._communities_field = '_communities'
+        self._communities_field = 'oarepo:secondaryCommunities'
         self._communities_field_parsed = None
 
     @cached_property
@@ -103,7 +103,7 @@ class _OARepoCommunitiesState(object):
         if not self._primary_community_field_parsed:
             self._primary_community_field_parsed = self.primary_community_field.split(".")
         for s in self._primary_community_field_parsed:
-            if data:
+            if data is not None:
                 data = data.get(s)
         return data
 
@@ -129,7 +129,7 @@ class _OARepoCommunitiesState(object):
         if not self._owned_by_field_parsed:
             self._owned_by_field_parsed = self.owned_by_field.split(".")
         for s in self._owned_by_field_parsed:
-            if data:
+            if data is not None:
                 data = data.get(s)
         return data
 
@@ -155,7 +155,7 @@ class _OARepoCommunitiesState(object):
         if not self._communities_field_parsed:
             self._communities_field_parsed = self.communities_field.split(".")
         for s in self._communities_field_parsed:
-            if data:
+            if data is not None:
                 data = data.get(s)
         return data
 
