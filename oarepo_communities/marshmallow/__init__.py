@@ -17,5 +17,9 @@ class OARepoCommunitiesMixin(Schema):
 
 
 class OARepoCommunitiesMixinV2(Schema):
-    _primary_community = SanitizedUnicode(required=True, data_key='oarepo:primaryCommunity')
-    _secondary_communities = List(SanitizedUnicode, default=list, data_key='oarepo:secondaryCommunities')
+    _primary_community = SanitizedUnicode(required=True,
+                                          data_key='oarepo:primaryCommunity',
+                                          attribute='oarepo:primaryCommunity')
+    _secondary_communities = List(SanitizedUnicode, default=list,
+                                  data_key='oarepo:secondaryCommunities',
+                                  attribute='oarepo:secondaryCommunities')
