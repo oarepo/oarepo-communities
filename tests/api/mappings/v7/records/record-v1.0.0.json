@@ -4,13 +4,19 @@
   },
   "mappings": {
     "properties": {
-      "_primary_community": {
+      "oarepo:primaryCommunity": {
         "type": "keyword"
       },
       "control_number": {
         "type": "keyword"
       },
-      "_communities": {
+      "oarepo:secondaryCommunities": {
+        "type": "keyword"
+      },
+      "oarepo:ownedBy": {
+        "type": "integer"
+      },
+      "oarepo:recordStatus": {
         "type": "keyword"
       }
     }

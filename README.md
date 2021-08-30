@@ -26,16 +26,16 @@ and [OARepo Records Draft](https://github.com/oarepo/invenio-records-draft) libr
 Ensure that your Record Metadata schema contains the following fields:
 ```json
 {
-    "_primary_community":{
+    "oarepo:primaryCommunity":{
         "type": "string"
     },
-    "_communities": {
+    "oarepo:secondaryCommunities": {
         "type": "array",
         "items": {
             "type": "string"
         }
     },
-    "state": {
+    "oarepo:recordStatus": {
         "type": "string"
     },
     "access": {

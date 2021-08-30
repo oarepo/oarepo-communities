@@ -62,9 +62,9 @@ def test_record_create(db, app, community, client, users, es, test_blueprint):
     # Non-community members cannot create records in a community.
     recdata = {
         'title': 'Test record',
-        '_primary_community': community[0],
+        'oarepo:primaryCommunity': community[0],
         'state': '',
-        '_communities': ['B'],
+        'oarepo:secondaryCommunities': ['B'],
         'access': {
             'owned_by': [1]
         }

@@ -12,6 +12,11 @@
     "oarepo:primaryCommunity": {
       "type": "string",
       "description": "Primary community ID of the record"
+    },
+    "oarepo:ownedBy": {
+      "description": "Record owner - user that created/submitted the repository record for the resource",
+      "type": "integer",
+      "default": "Current authenticated user ID"
     }
   }
 }

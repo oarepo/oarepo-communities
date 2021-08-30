@@ -104,12 +104,10 @@ PIDRecord = namedtuple('PIDRecord', 'pid record')
 def make_sample_record(db, title, community_id, state='filling', secondary=None):
     rec = {
         'title': title,
-        '_primary_community': community_id,
-        'state': state,
-        '_communities': secondary,
-        'access': {
-            'owned_by': [1]
-        }
+        'oarepo:primaryCommunity': community_id,
+        'oarepo:recordStatus': state,
+        'oarepo:secondaryCommunities': secondary,
+        'oarepo:ownedBy': 1
     }
     record_uuid = uuid.uuid4()
     pid = recid_minter(record_uuid, rec)
