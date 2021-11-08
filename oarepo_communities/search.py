@@ -116,7 +116,8 @@ class CommunitySearchMixin(RecordsSearchMixin):
             q = cls.outer_class.Meta.default_any_filter
 
             if current_user.is_authenticated:
-                if not community_id_from_request():
+                cid = community_id_from_request()
+                if not cid:
                     # Filter records for all user's communities
                     user_communities = current_user_communities()
 
@@ -144,6 +145,11 @@ class CommunitySearchMixin(RecordsSearchMixin):
                             q,
                             cls.outer_class.Meta.default_publisher_filter
                         ], minimum_should_match=1)
+                    q = Bool(must=[
+                        q,
+                        cls.outer_class.Meta.default_request_community_filter()
+                    ])
+
             return q
 
     @classproperty
