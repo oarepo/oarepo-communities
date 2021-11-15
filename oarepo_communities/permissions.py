@@ -108,8 +108,7 @@ def community_role_permission_factory(role):
         community_id = community_id_from_request()
 
         if community_id:
-            community = OARepoCommunity.get_community(community_id)
-            return Permission(RoleNeed(OARepoCommunity.get_role(community, role).name))
+            return Permission(RoleNeed(f'community:{community_id}:{role}'))
         return deny_all()
 
     return inner
