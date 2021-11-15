@@ -16,7 +16,6 @@ from invenio_records import Record
 from invenio_records_rest.utils import deny_all
 from oarepo_fsm.permissions import require_any, require_all, state_required
 
-from oarepo_communities.api import OARepoCommunity
 from oarepo_communities.constants import COMMUNITY_READ, COMMUNITY_CREATE, COMMUNITY_DELETE, \
     STATE_EDITING, STATE_PENDING_APPROVAL, COMMUNITY_REQUEST_CHANGES, COMMUNITY_APPROVE, \
     STATE_APPROVED, COMMUNITY_REVERT_APPROVE, COMMUNITY_PUBLISH, STATE_PUBLISHED, \
@@ -108,8 +107,7 @@ def community_role_permission_factory(role):
         community_id = community_id_from_request()
 
         if community_id:
-            community = OARepoCommunity.get_community(community_id)
-            return Permission(RoleNeed(OARepoCommunity.get_role(community, role).name))
+            return Permission(RoleNeed(f'community:{community_id}:{role}'))
         return deny_all()
 
     return inner
