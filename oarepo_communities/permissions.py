@@ -227,8 +227,17 @@ def update_permission_factory(record, *args, **kwargs):
 
 
 def delete_permission_factory(record, *args, **kwargs):
-    """Records REST delete permission factory."""
-    return owner_or_role_action_permission_factory(COMMUNITY_DELETE, record, *args, **kwargs)
+    """Records REST delete permission factory.
+
+       Permission is granted if:
+       * Record is a DRAFT record AND
+         * Current user is the owner of the record. OR
+         * Current user is in role that has DELETE action allowed in record's PRIMARY community.
+    """
+    return require_all(
+        state_required(None, STATE_EDITING),
+        owner_or_role_action_permission_factory(COMMUNITY_DELETE, record, *args, **kwargs)
+    )(record, *args, **kwargs)
 
 
 def request_approval_permission_factory(record, *args, **kwargs):
@@ -243,20 +252,6 @@ def request_approval_permission_factory(record, *args, **kwargs):
     return require_all(
         state_required(None, STATE_EDITING),
         owner_or_role_action_permission_factory(COMMUNITY_REQUEST_APPROVAL, record)
-    )(record, *args, **kwargs)
-
-
-def delete_draft_permission_factory(record, *args, **kwargs):
-    f"""Delete DRAFT records permissions factory.
-
-       Permission is granted if:
-       * Record is a DRAFT record AND
-         * Current user is the owner of the record. OR
-         * Current user is in role that has DELETE action allowed in record's PRIMARY community.
-    """
-    return require_all(
-        state_required(None, STATE_EDITING, STATE_PENDING_APPROVAL),
-        owner_or_role_action_permission_factory(COMMUNITY_DELETE, record)
     )(record, *args, **kwargs)
 
 
@@ -337,7 +332,7 @@ delete_object_permission_impl = delete_permission_factory
 # Record actions permission factories.
 request_approval_permission_impl = request_approval_permission_factory
 
-delete_draft_permission_impl = delete_draft_permission_factory
+delete_draft_permission_impl = delete_object_permission_impl
 
 request_changes_permission_impl = request_changes_permission_factory
 
