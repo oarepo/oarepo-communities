@@ -40,7 +40,6 @@ setup_requires = [
 
 install_requires = [
     'oarepo-fsm>=1.6.1',
-    'oarepo-micro-api',
     'oarepo-enrollment-permissions',
     'oarepo-ui',
     'oarepo-search',
