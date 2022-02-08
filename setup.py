@@ -86,9 +86,6 @@ setup(
         "flask.commands": [
             "oarepo:communities = oarepo_communities.cli:communities",
         ],
-        "oarepo.models": [
-            "oarepo:communities = oarepo_communities.builtin_models:communities.json"
-        ]
         # "invenio_base.apps": [
         #     "invenio_communities = invenio_communities:InvenioCommunities",
         # ],
