@@ -5,6 +5,9 @@ __pycache__/
 # Idea software family
 .idea/
 
+# VSCode software family
+.vscode/
+
 # C extensions
 *.so
 
@@ -57,10 +60,5 @@ docs/_build/
 
 # PyBuilder
 target/
-
-# Vim swapfiles
-.*.sw?
-
-.venv
-
-venv/
+.venv/
+.DS_Store

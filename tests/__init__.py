@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
+# Copyright (c) 2022 CESNET
 #
-# Copyright (C) 2021 CESNET.
-#
-# OARepo-Communities is free software; you can redistribute it and/or modify
-# it under the terms of the MIT License; see LICENSE file for more details.
+# This software is released under the MIT License.
+# https://opensource.org/licenses/MIT
 
-"""OArepo module that adds support for communities"""

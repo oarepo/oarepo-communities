@@ -1,0 +1,7 @@
+type: "object"
+properties:
+  default:
+    type: keyword
+  ids[]:
+    type: keyword
+    uniqueItems: true
