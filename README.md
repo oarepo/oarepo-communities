@@ -375,6 +375,9 @@ Added role action: community-approve Need(method='role', value='community:cesnet
 Added role action: community-revert-approve Need(method='role', value='community:cesnet:curator')
 
 ```
+#### Assigning groups to the community role via CLI
+The guide on how to add a group to the defined community's role is included under [oarepo/cesnet-openid-remote](https://github.com/oarepo/cesnet-openid-remote#cli) module.
+
 
 ### REST API
 
