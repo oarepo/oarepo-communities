@@ -4,9 +4,9 @@ from invenio_communities.proxies import current_communities
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_resources.services import (
     RecordIndexerMixin,
-    Service,
     ServiceSchemaWrapper,
 )
+from invenio_drafts_resources.services import RecordService
 from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import (
     IndexRefreshOp,
@@ -21,7 +21,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 
-class RecordCommunitiesService(Service, RecordIndexerMixin):
+class RecordCommunitiesService(RecordService, RecordIndexerMixin):
     """Record communities service.
 
     The communities service is in charge of managing communities of a given record.
@@ -114,7 +114,14 @@ class RecordCommunitiesService(Service, RecordIndexerMixin):
         return self.result_item()
 
     @unit_of_work()
-    def add(self, identity, id_, data, uow):
+    def add_to_draft(self, identity, id_, data, uow):
+        return self._add(identity, id_, data, True, uow)
+
+    @unit_of_work()
+    def add_to_published_record(self, identity, id_, data, uow):
+        return self._add(identity, id_, data, False, uow)
+
+    def _add(self, identity, id_, data, is_draft, uow):
         """Include the record in the given communities."""
         valid_data, errors = self.schema.load(
             data,
@@ -125,8 +132,10 @@ class RecordCommunitiesService(Service, RecordIndexerMixin):
             raise_errors=True,
         )
         communities = valid_data["communities"]
-
-        record = self.record_cls.pid.resolve(id_)
+        if is_draft:
+            record = self.draft_cls.pid.resolve(id_, registered_only=False)
+        else:
+            record = self.record_cls.pid.resolve(id_)
         self.require_permission(identity, "add_community", record=record)
 
         processed = []
@@ -199,16 +208,16 @@ class RecordCommunitiesService(Service, RecordIndexerMixin):
         processed = []
         for community in communities:
             community_id = community["id"]
-            #try:
-            self._remove(identity, community_id, record)
-            #    processed.append({"community": community_id})
-            #except (RecordCommunityMissing, PermissionDeniedError) as ex:
-            #    errors.append(
-            #        {
-            #            "community": community_id,
-            #            "message": ex.description,
-            #        }
-            #    )
+            try:
+                self._remove(identity, community_id, record)
+                processed.append({"community": community_id})
+            except (ValueError, PermissionDeniedError) as ex:
+                errors.append(
+                    {
+                        "community": community_id,
+                        "message": ex.description,
+                    }
+                )
 
         if processed:
             uow.register(RecordCommitOp(record.parent))

@@ -1,7 +1,7 @@
 from invenio_records_resources.services.custom_fields import BaseCF
 from marshmallow import fields as ma_fields
 
-class CommunityRolesToGroupsCF(BaseCF):
+class UserMapCF(BaseCF):
     """"""
     @property
     def mapping(self):
@@ -9,7 +9,7 @@ class CommunityRolesToGroupsCF(BaseCF):
 
     @property
     def field(self):
-        return ma_fields.Dict(keys=ma_fields.String, values=ma_fields.Dict(keys=ma_fields.String, values=ma_fields.String))
+        return ma_fields.Dict(keys=ma_fields.UUID, values=ma_fields.String)
         # example {
         #          "owner":   {"can_create": true ,  "can_read": true, "can_update": true ,  "can_delete":true },
         #          "manager": {"can_create": true ,  "can_read": true, "can_update": true ,  "can_delete":true },

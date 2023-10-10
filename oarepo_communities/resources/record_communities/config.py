@@ -13,6 +13,7 @@ class RecordCommunitiesResourceConfig(CommunityResourceConfig, ConfiguratorMixin
     routes = {
         "list": "/<pid_value>/communities",
         "suggestions": "/<pid_value>/communities-suggestions",
+        "draft-list": "/<pid_value>/draft/communities",
     }
 
     request_extra_args = {

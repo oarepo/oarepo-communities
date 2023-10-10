@@ -1,0 +1,28 @@
+record:
+  properties:
+    metadata:
+      properties:
+        title:
+          type: fulltext
+        status:
+          type: keyword
+  module:
+    qualified: thesis
+  permissions:
+    presets: ['community']
+  use:
+    - invenio
+
+  draft: {}
+  record-communities: {}
+
+
+
+profiles:
+  - record
+  - draft
+  - record_communities
+
+
+settings:
+  schema-server: 'local://'

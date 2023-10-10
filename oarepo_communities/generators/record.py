@@ -6,7 +6,7 @@ from invenio_records_permissions.generators import (
 )
 from invenio_communities.generators import CommunityRoleNeed
 from ..proxies import current_communities_permissions
-
+from invenio_search.engine import dsl
 
 class RecordCommunitiesGenerator(Generator):
     """Allows system_process role."""
@@ -25,14 +25,27 @@ class RecordCommunitiesGenerator(Generator):
             by_actions = record_community_permissions(frozenset(community_ids))
             if self.action in by_actions:
                 community2role_list = by_actions[self.action]
-                for c, roles in community2role_list.items():
+                for community_id, roles in community2role_list.items():
                     for role in roles:
-                        _needs.add(CommunityRoleNeed(c, role))
+                        _needs.add(CommunityRoleNeed(community_id, role))
                 return _needs
         return []
+    """
+    def communities(self, identity):
 
+        roles = self.roles()
+        community_ids = set()
+        for n in identity.provides:
+            if n.method == "community" and n.role in roles:
+                community_ids.add(n.value)
+        return list(community_ids)
 
-@cached(cache=TTLCache(maxsize=1028, ttl=360))
+    def query_filter(self, identity=None, **kwargs):
+
+        return dsl.Q("terms", **{"parent.communities.ids": self.communities(identity)})
+
+    """
+@cached(cache=TTLCache(maxsize=1028, ttl=600))
 def record_community_permissions(record_communities):
     communities_permissions = {}
 
@@ -40,9 +53,9 @@ def record_community_permissions(record_communities):
         communities_permissions[record_community_id] = current_communities_permissions(record_community_id)
 
     by_actions = defaultdict(lambda: defaultdict(list))
-    for c, role_permissions_dct in communities_permissions.items():
+    for community_id, role_permissions_dct in communities_permissions.items():
         for role, role_permissions in role_permissions_dct.items():
             for action, val in role_permissions.items():
                 if val:
-                    by_actions[action][c].append(role)
+                    by_actions[action][community_id].append(role)
     return by_actions
