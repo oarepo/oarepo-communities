@@ -1,4 +1,3 @@
-from invenio_communities.communities.records.api import Community as InvenioCommunityRecord
 from flask import current_app
 
 def get_field(record_class):

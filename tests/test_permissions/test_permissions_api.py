@@ -1,11 +1,5 @@
-from time import sleep
-
 from invenio_communities import current_communities
 from invenio_communities.communities.records.api import Community
-from invenio_pidstore.errors import PIDDoesNotExistError
-
-from oarepo_runtime.cf.mappings import prepare_cf_indices
-from tests.conftest import _community_get_or_create
 from thesis.resources.record_communities.config import (
     ThesisRecordCommunitiesResourceConfig,
 )

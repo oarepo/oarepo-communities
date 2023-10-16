@@ -19,6 +19,7 @@ from invenio_requests.resolvers.registry import ResolverRegistry
 from invenio_search.engine import dsl
 from sqlalchemy.orm.exc import NoResultFound
 
+from oarepo_communities.services.record_communities.errors import CommunityAlreadyExists, RecordCommunityMissing
 
 
 class RecordCommunitiesService(RecordService, RecordIndexerMixin):
@@ -72,8 +73,8 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         com_id = str(community.id)
 
         already_included = com_id in record.parent.communities
-        #if already_included:
-        #    raise CommunityAlreadyExists()
+        if already_included:
+            raise CommunityAlreadyExists()
 
         # check if there is already an open request, to avoid duplications
         #existing_request_id = self._exists(identity, com_id, record)
@@ -164,14 +165,14 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             except (NoResultFound, PIDDoesNotExistError):
                 result["message"] = "Community not found."
                 errors.append(result)
-            #except (
-            #    CommunityAlreadyExists,
-            #    OpenRequestAlreadyExists,
-            #    InvalidAccessRestrictions,
-            #    PermissionDeniedError,
-            #) as ex:
-            #    result["message"] = ex.description
-            #    errors.append(result)
+            except (
+                CommunityAlreadyExists,
+                #OpenRequestAlreadyExists,
+                #InvalidAccessRestrictions,
+                PermissionDeniedError,
+            ) as ex:
+                result["message"] = ex.description
+                errors.append(result)
 
         uow.register(IndexRefreshOp(indexer=self.indexer))
 
@@ -180,8 +181,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
     def _remove(self, identity, community_id, record):
         """Remove a community from the record."""
         if community_id not in record.parent.communities.ids:
-        #    raise RecordCommunityMissing(record.id, community_id)
-            raise ValueError
+            raise RecordCommunityMissing(record.id, community_id)
 
         # check permission here, per community: curator cannot remove another community
         self.require_permission(

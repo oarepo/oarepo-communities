@@ -1,9 +1,7 @@
 from collections import defaultdict
 
 from invenio_records_resources.services.records.components import ServiceComponent
-from invenio_communities.proxies import current_communities
-
-from oarepo_communities.proxies import current_communities_permissions
+from oarepo_runtime.communities.proxies import current_communities_permissions
 
 
 class AllowedActionsComponent(ServiceComponent):

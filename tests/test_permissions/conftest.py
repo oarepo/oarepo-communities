@@ -20,7 +20,7 @@ from invenio_communities.generators import CommunityRoleNeed
 
 @pytest.fixture(scope="function")
 def sample_metadata_list():
-    data_path = f"./thesis/data/sample_data.yaml"
+    data_path = f"../thesis/data/sample_data.yaml"
     docs = list(yaml.load_all(open(data_path), Loader=yaml.SafeLoader))
     return docs
 
