@@ -10,9 +10,7 @@ RECORD_COMMUNITIES_BASE_URL = ThesisRecordCommunitiesResourceConfig.url_prefix
 def _create_and_publish(client, input_data, community, publish_authorized):
     """Create a draft and publish it."""
     # Create the draft
-    response = client.post(
-        RECORD_COMMUNITIES_BASE_URL, json=input_data
-    )
+    response = client.post(RECORD_COMMUNITIES_BASE_URL, json=input_data)
 
     assert response.status_code == 201
 
@@ -35,7 +33,6 @@ def _create_and_publish(client, input_data, community, publish_authorized):
     else:
         assert response.status_code == 403
     return recid
-
 
 
 def _resp_to_input(resp):
@@ -61,30 +58,35 @@ def _recid_with_community(
     community,
     community_owner,
     community_permissions_cf,
-    publish_authorized=True
+    publish_authorized=True,
 ):
-    comm = _community_with_permissions_cf(community, community_owner.identity, community_permissions_cf)
+    comm = _community_with_permissions_cf(
+        community, community_owner.identity, community_permissions_cf
+    )
     recid = _create_and_publish(owner_client, input_data, comm, publish_authorized)
     return recid
 
 
-
-
-def test_owner(client, community_owner, rando_user, community, community_permissions_cf, input_data, vocab_cf, search_clear):
+def test_owner(
+    client,
+    community_owner,
+    rando_user,
+    community,
+    community_permissions_cf,
+    input_data,
+    vocab_cf,
+    search_clear,
+):
     owner_client = community_owner.login(client)
-    recid = _recid_with_community(owner_client, input_data, community, community_owner, community_permissions_cf)
+    recid = _recid_with_community(
+        owner_client, input_data, community, community_owner, community_permissions_cf
+    )
 
-    response_read = owner_client.get(
-        f"{RECORD_COMMUNITIES_BASE_URL}{recid}"
-    )
+    response_read = owner_client.get(f"{RECORD_COMMUNITIES_BASE_URL}{recid}")
     assert response_read.status_code == 200
-    response_delete = owner_client.delete(
-        f"{RECORD_COMMUNITIES_BASE_URL}{recid}"
-    )
+    response_delete = owner_client.delete(f"{RECORD_COMMUNITIES_BASE_URL}{recid}")
     assert response_delete.status_code == 204
-    response_read = owner_client.get(
-        f"{RECORD_COMMUNITIES_BASE_URL}{recid}"
-    )
+    response_read = owner_client.get(f"{RECORD_COMMUNITIES_BASE_URL}{recid}")
     assert response_read.status_code == 410
     """
     jsn = response_read.json["metadata"]
@@ -96,28 +98,65 @@ def test_owner(client, community_owner, rando_user, community, community_permiss
     print()
     """
 
-def test_cf(client, community_owner, community, community_permissions_cf, input_data, vocab_cf, search_clear):
+
+def test_cf(
+    client,
+    community_owner,
+    community,
+    community_permissions_cf,
+    input_data,
+    vocab_cf,
+    search_clear,
+):
     community_owner.login(client)
-    recid = _recid_with_community(client, input_data, community, community_owner, community_permissions_cf)
-    #sleep(5)
-    response = client.get(
-        f"{RECORD_COMMUNITIES_BASE_URL}{recid}/communities"
+    recid = _recid_with_community(
+        client, input_data, community, community_owner, community_permissions_cf
     )
-    assert response.json['hits']['hits'][0]["custom_fields"] == community_permissions_cf["custom_fields"]
+    # sleep(5)
+    response = client.get(f"{RECORD_COMMUNITIES_BASE_URL}{recid}/communities")
+    assert (
+        response.json["hits"]["hits"][0]["custom_fields"]
+        == community_permissions_cf["custom_fields"]
+    )
 
-def test_reader(client, community_owner, community_reader, community, community_permissions_cf, input_data, vocab_cf, search_clear):
+
+def test_reader(
+    client,
+    community_owner,
+    community_reader,
+    community,
+    community_permissions_cf,
+    input_data,
+    vocab_cf,
+    search_clear,
+):
     reader_client = community_reader.login(client)
-    recid = _recid_with_community(reader_client, input_data, community, community_owner, community_permissions_cf)
+    recid = _recid_with_community(
+        reader_client, input_data, community, community_owner, community_permissions_cf
+    )
 
-    response_read = reader_client.get(
-        f"{RECORD_COMMUNITIES_BASE_URL}{recid}"
-    )
+    response_read = reader_client.get(f"{RECORD_COMMUNITIES_BASE_URL}{recid}")
     assert response_read.status_code == 200
-    response_delete = reader_client.delete(
-        f"{RECORD_COMMUNITIES_BASE_URL}{recid}"
-    )
+    response_delete = reader_client.delete(f"{RECORD_COMMUNITIES_BASE_URL}{recid}")
     assert response_delete.status_code == 403
 
-def test_rando(client, community_owner, rando_user, community, community_permissions_cf, input_data, vocab_cf, search_clear):
+
+def test_rando(
+    client,
+    community_owner,
+    rando_user,
+    community,
+    community_permissions_cf,
+    input_data,
+    vocab_cf,
+    search_clear,
+):
     rando_client = rando_user.login(client)
-    _recid_with_community(rando_client, input_data, community, community_owner, community_permissions_cf, publish_authorized=False)
+    _recid_with_community(
+        rando_client,
+        input_data,
+        community,
+        community_owner,
+        community_permissions_cf,
+        publish_authorized=False,
+    )

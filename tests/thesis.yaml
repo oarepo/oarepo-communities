@@ -15,6 +15,7 @@ record:
 
   draft: {}
   record-communities: {}
+  community-records: {}
 
 
 
@@ -22,6 +23,7 @@ profiles:
   - record
   - draft
   - record_communities
+  - community_records
 
 
 settings:

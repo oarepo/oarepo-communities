@@ -17,7 +17,7 @@ from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
 
-#from invenio_rdm_records.proxies import current_record_communities_service
+# from invenio_rdm_records.proxies import current_record_communities_service
 
 
 class CommunityRecordsService(RecordService):
@@ -25,6 +25,7 @@ class CommunityRecordsService(RecordService):
 
     The record communities service is in charge of managing the records of a given community.
     """
+
     def __init__(self, config, record_communities_service=None):
         super().__init__(config)
         self.record_communities_service = record_communities_service
@@ -46,7 +47,7 @@ class CommunityRecordsService(RecordService):
         params=None,
         search_preference=None,
         extra_filter=None,
-        **kwargs
+        **kwargs,
     ):
         """Search for records published in the given community."""
         self.require_permission(identity, "search")
@@ -62,7 +63,7 @@ class CommunityRecordsService(RecordService):
         )
         if extra_filter is not None:
             community_filter = community_filter & extra_filter
-
+        # todo drafts?
         search = self._search(
             "search",
             identity,
@@ -73,6 +74,19 @@ class CommunityRecordsService(RecordService):
             **kwargs,
         )
         search_result = search.execute()
+
+        """
+        return self.result_list(
+            self,
+            identity,
+            search_result,
+            params,
+            links_tpl=LinksTemplate(self.config.links_search, context={"args": params}),
+            links_item_tpl=self.links_item_tpl,
+            expandable_fields=self.expandable_fields,
+            expand=expand,
+        )
+        """
 
         return self.result_list(
             self,

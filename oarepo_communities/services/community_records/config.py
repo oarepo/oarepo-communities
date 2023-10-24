@@ -1,24 +1,22 @@
 from invenio_communities.communities.records.api import Community
-
-from invenio_records_resources.services.base.config import (
-    ConfiguratorMixin,
-)
+from invenio_records_resources.services.base.config import ConfiguratorMixin
 from invenio_records_resources.services.records.config import RecordServiceConfig
-
-from invenio_records_resources.services.records.links import (
-    pagination_links,
-)
+from invenio_records_resources.services.records.links import pagination_links
+from oarepo_runtime.config.service import PermissionsPresetsConfigMixin
 
 from .schema import CommunityRecordsSchema
 
-#from .schemas import RDMParentSchema, RDMRecordSchema
-#from .schemas.community_records import CommunityRecordsSchema
+# from .schemas import RDMParentSchema, RDMRecordSchema
+# from .schemas.community_records import CommunityRecordsSchema
 
 
 
-from oarepo_runtime.config.service import PermissionsPresetsConfigMixin
-class CommunityRecordsServiceConfig(PermissionsPresetsConfigMixin, RecordServiceConfig, ConfiguratorMixin):
+
+class CommunityRecordsServiceConfig(
+    PermissionsPresetsConfigMixin, RecordServiceConfig, ConfiguratorMixin
+):
     """Community records service config."""
+
     # define at builder level: record_cls
     # schema = RDMRecordSchema
     # record service
@@ -26,23 +24,23 @@ class CommunityRecordsServiceConfig(PermissionsPresetsConfigMixin, RecordService
 
     service_id = "community-records"
     community_cls = Community
-    #permission_policy_cls = FromConfig(
+    # permission_policy_cls = FromConfig(
     #    "RDM_PERMISSION_POLICY", default=RDMRecordPermissionPolicy, import_string=True
-    #) #how to use these things?
+    # ) #how to use these things?
 
     # Search configuration
-    #search = FromConfigSearchOptions(
+    # search = FromConfigSearchOptions(
     #    "RDM_SEARCH",
     #    "RDM_SORT_OPTIONS",
     #    "RDM_FACETS",
     #    search_option_cls=RDMSearchOptions,
-    #)
-    #search_versions = FromConfigSearchOptions(
+    # )
+    # search_versions = FromConfigSearchOptions(
     #    "RDM_SEARCH_VERSIONING",
     #    "RDM_SORT_OPTIONS",
     #    "RDM_FACETS",
     #    search_option_cls=RDMSearchVersionsOptions,
-    #)
+    # )
 
     # Service schemas
     community_record_schema = CommunityRecordsSchema

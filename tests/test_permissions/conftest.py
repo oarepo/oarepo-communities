@@ -1,22 +1,17 @@
 import os
-from pathlib import Path
 
 import pytest
 import yaml
-from flask_security import login_user
-from flask_security.utils import hash_password
-from invenio_access import ActionUsers, current_access
 from invenio_access.permissions import system_identity
-from invenio_accounts.proxies import current_datastore
-from invenio_accounts.testutils import login_user_via_session
 from invenio_app.factory import create_api
+from invenio_communities import current_communities
+from invenio_communities.communities.records.api import Community
+from invenio_communities.generators import CommunityRoleNeed
+from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_resources.services.uow import RecordCommitOp, UnitOfWork
 from thesis.proxies import current_service
 from thesis.records.api import ThesisDraft, ThesisRecord
-from invenio_communities import current_communities
-from invenio_communities.communities.records.api import Community
-from invenio_pidstore.errors import PIDDoesNotExistError
-from invenio_communities.generators import CommunityRoleNeed
+
 
 @pytest.fixture(scope="function")
 def sample_metadata_list():
@@ -40,12 +35,12 @@ def create_app(instance_path, entry_points):
 def app_config(app_config):
     """Mimic an instance's configuration."""
     app_config["JSONSCHEMAS_HOST"] = "localhost"
-    app_config["RECORDS_REFRESOLVER_CLS"] = (
-        "invenio_records.resolver.InvenioRefResolver"
-    )
-    app_config["RECORDS_REFRESOLVER_STORE"] = (
-        "invenio_jsonschemas.proxies.current_refresolver_store"
-    )
+    app_config[
+        "RECORDS_REFRESOLVER_CLS"
+    ] = "invenio_records.resolver.InvenioRefResolver"
+    app_config[
+        "RECORDS_REFRESOLVER_STORE"
+    ] = "invenio_jsonschemas.proxies.current_refresolver_store"
     app_config["RATELIMIT_AUTHENTICATED_USER"] = "200 per second"
     app_config["SEARCH_HOSTS"] = [
         {
@@ -58,6 +53,7 @@ def app_config(app_config):
     app_config["CACHE_DEFAULT_TIMEOUT"] = 300
 
     from oarepo_communities.cf.permissions import PermissionsCF
+
     app_config["COMMUNITIES_CUSTOM_FIELDS"] = [PermissionsCF("permissions")]
 
     app_config["FILES_REST_STORAGE_CLASS_LIST"] = {
@@ -68,6 +64,7 @@ def app_config(app_config):
     app_config["FILES_REST_DEFAULT_STORAGE_CLASS"] = "L"
 
     return app_config
+
 
 @pytest.fixture(scope="function")
 def sample_draft(app, db, input_data):
@@ -83,6 +80,7 @@ def vocab_cf(app, db, cache):
     from oarepo_runtime.cf.mappings import prepare_cf_indices
 
     prepare_cf_indices()
+
 
 @pytest.fixture
 def example_record(app, db, input_data):
@@ -105,6 +103,7 @@ def community_owner_helper(UserFixture, app, db):
     u.create(app, db)
     return u
 
+
 @pytest.fixture()
 def community_curator_helper(UserFixture, app, db):
     """Community owner."""
@@ -114,6 +113,7 @@ def community_curator_helper(UserFixture, app, db):
     )
     u.create(app, db)
     return u
+
 
 @pytest.fixture()
 def community_manager_helper(UserFixture, app, db):
@@ -125,6 +125,7 @@ def community_manager_helper(UserFixture, app, db):
     u.create(app, db)
     return u
 
+
 @pytest.fixture()
 def community_reader_helper(UserFixture, app, db):
     """Community owner."""
@@ -135,6 +136,7 @@ def community_reader_helper(UserFixture, app, db):
     u.create(app, db)
     return u
 
+
 @pytest.fixture()
 def rando_user(UserFixture, app, db):
     """Community owner."""
@@ -144,7 +146,6 @@ def rando_user(UserFixture, app, db):
     )
     u.create(app, db)
     return u
-
 
 
 @pytest.fixture(scope="module")
@@ -160,43 +161,46 @@ def minimal_community():
             "title": "My Community",
         },
     }
+
+
 @pytest.fixture()
 def community_permissions_cf():
-    
-    return        {
-        "custom_fields":{
-        "permissions": {
-            "owner": {
-                "can_publish": True,
-                "can_read": True,
-                "can_update": True,
-                "can_delete": True
-            },
-            "manager": {
-                "can_publish": True,
-                "can_read": False,
-                "can_update": False,
-                "can_delete": False
-            },
-            "curator": {
-                "can_publish": True,
-                "can_read": True,
-                "can_update": True,
-                "can_delete": False
-            },
-            "reader": {
-                "can_publish": True,
-                "can_read": True,
-                "can_update": False,
-                "can_delete": False
+    return {
+        "custom_fields": {
+            "permissions": {
+                "owner": {
+                    "can_publish": True,
+                    "can_read": True,
+                    "can_update": True,
+                    "can_delete": True,
+                },
+                "manager": {
+                    "can_publish": True,
+                    "can_read": False,
+                    "can_update": False,
+                    "can_delete": False,
+                },
+                "curator": {
+                    "can_publish": True,
+                    "can_read": True,
+                    "can_update": True,
+                    "can_delete": False,
+                },
+                "reader": {
+                    "can_publish": True,
+                    "can_read": True,
+                    "can_update": False,
+                    "can_delete": False,
+                },
             }
         }
     }
-    }
+
 
 @pytest.fixture(scope="module", autouse=True)
 def location(location):
     return location
+
 
 @pytest.fixture()
 def inviter():
@@ -220,6 +224,7 @@ def inviter():
 
     return invite
 
+
 def _community_get_or_create(community_dict, identity):
     """Util to get or create community, to avoid duplicate error."""
     slug = community_dict["slug"]
@@ -232,16 +237,23 @@ def _community_get_or_create(community_dict, identity):
         )
         Community.index.refresh()
     return c
+
+
 @pytest.fixture()
 def community(app, community_owner_helper, minimal_community):
     """Get the current RDM records service."""
     return _community_get_or_create(minimal_community, community_owner_helper.identity)
 
+
 @pytest.fixture()
 def community_owner(UserFixture, community_owner_helper, community, inviter, app, db):
-    #inviter(community_owner_helper.id, community.id, "owner")
-    community_owner_helper.identity.provides.add(CommunityRoleNeed(community.data["id"], "owner"))
+    # inviter(community_owner_helper.id, community.id, "owner")
+    community_owner_helper.identity.provides.add(
+        CommunityRoleNeed(community.data["id"], "owner")
+    )
     return community_owner_helper
+
+
 """
 @pytest.fixture()
 def community_manager(UserFixture, community_owner_helper, community, inviter, app, db):
@@ -255,8 +267,9 @@ def community_curator(UserFixture, community_owner_helper, community, inviter, a
     community_owner_helper.identity.provides.add(CommunityRoleNeed(community.data["id"], "curator"))
     return community_owner_helper
 """
+
+
 @pytest.fixture()
 def community_reader(UserFixture, community_reader_helper, community, inviter, app, db):
     inviter(community_reader_helper.id, community.data["id"], "reader")
     return community_reader_helper
-

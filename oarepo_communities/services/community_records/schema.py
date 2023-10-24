@@ -1,4 +1,6 @@
 from marshmallow import Schema, ValidationError, fields, validate, validates
+
+
 class RecordSchema(Schema):
     """Schema to define a community id."""
 
@@ -18,8 +20,8 @@ class CommunityRecordsSchema(Schema):
         max_number = self.context["max_number"]
         if max_number < len(value):
             raise ValidationError(
-                    "Too many records passed, {max_number} max allowed.".format(
-                        max_number=max_number
+                "Too many records passed, {max_number} max allowed.".format(
+                    max_number=max_number
                 )
             )
 

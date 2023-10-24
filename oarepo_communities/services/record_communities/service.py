@@ -1,12 +1,10 @@
 from invenio_communities.proxies import current_communities
-#from invenio_i18n import lazy_gettext as _
-#from invenio_notifications.services.uow import NotificationOp
-from invenio_pidstore.errors import PIDDoesNotExistError
-from invenio_records_resources.services import (
-    RecordIndexerMixin,
-    ServiceSchemaWrapper,
-)
 from invenio_drafts_resources.services import RecordService
+
+# from invenio_i18n import lazy_gettext as _
+# from invenio_notifications.services.uow import NotificationOp
+from invenio_pidstore.errors import PIDDoesNotExistError
+from invenio_records_resources.services import RecordIndexerMixin, ServiceSchemaWrapper
 from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import (
     IndexRefreshOp,
@@ -14,12 +12,13 @@ from invenio_records_resources.services.uow import (
     RecordIndexOp,
     unit_of_work,
 )
-from invenio_requests import current_request_type_registry, current_requests_service
-from invenio_requests.resolvers.registry import ResolverRegistry
 from invenio_search.engine import dsl
 from sqlalchemy.orm.exc import NoResultFound
 
-from oarepo_communities.services.record_communities.errors import CommunityAlreadyExists, RecordCommunityMissing
+from oarepo_communities.services.record_communities.errors import (
+    CommunityAlreadyExists,
+    RecordCommunityMissing,
+)
 
 
 class RecordCommunitiesService(RecordService, RecordIndexerMixin):
@@ -27,6 +26,10 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
 
     The communities service is in charge of managing communities of a given record.
     """
+
+    def __init__(self, config, record_service=None):
+        super().__init__(config)
+        self.record_service = record_service
 
     @property
     def schema(self):
@@ -37,6 +40,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
     def record_cls(self):
         """Factory for creating a record class."""
         return self.config.record_cls
+
     """
     def _exists(self, identity, community_id, record):
 
@@ -56,7 +60,6 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
     """
 
     def include_directly(self, record, community, uow):
-
         # integrity check, it should never happen on a published record
         # assert not record.parent.review
 
@@ -64,7 +67,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         default = not record.parent.communities
         record.parent.communities.add(community, default=default)
         uow.register(RecordCommitOp(record.parent))
-        uow.register(RecordIndexOp(record, indexer=self.config.record_service.indexer))
+        uow.register(RecordIndexOp(record, indexer=self.record_service.indexer))
 
     def _include(self, identity, community_id, comment, require_review, record, uow):
         """Create request to add the community to the record."""
@@ -77,39 +80,39 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             raise CommunityAlreadyExists()
 
         # check if there is already an open request, to avoid duplications
-        #existing_request_id = self._exists(identity, com_id, record)
-        #if existing_request_id:
+        # existing_request_id = self._exists(identity, com_id, record)
+        # if existing_request_id:
         #    raise OpenRequestAlreadyExists(existing_request_id)
 
-        #type_ = current_request_type_registry.lookup(CommunityInclusion.type_id)
-        #receiver = ResolverRegistry.resolve_entity_proxy(
+        # type_ = current_request_type_registry.lookup(CommunityInclusion.type_id)
+        # receiver = ResolverRegistry.resolve_entity_proxy(
         #    {"community": com_id}
-        #).resolve()
+        # ).resolve()
 
-        #request_item = current_requests_service.create(
+        # request_item = current_requests_service.create(
         #    identity,
         #    {},
         #    type_,
         #    receiver,
         #    topic=record,
         #    uow=uow,
-        #)
+        # )
 
         # create review request
-        #request_item = current_rdm_records.community_inclusion_service.submit(
+        # request_item = current_rdm_records.community_inclusion_service.submit(
         #    identity, record, community, request_item._request, comment, uow
-        #)
+        # )
         # include directly when allowed
-        #if not require_review:
+        # if not require_review:
         #    request_item = current_rdm_records.community_inclusion_service.include(
         #        identity, community, request_item._request, uow
         #    )
 
-        #result = current_rdm_records.community_inclusion_service.include(
+        # result = current_rdm_records.community_inclusion_service.include(
         #        identity, community, request_item._request, uow
-        #)
+        # )
 
-        #return result
+        # return result
 
         self.include_directly(record, community, uow)
         return self.result_item()
@@ -152,23 +155,23 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
                 request_item = self._include(
                     identity, community_id, comment, require_review, record, uow
                 )
-                #result["request_id"] = str(request_item.data["id"])
-                #result["request"] = request_item.to_dict()
+                # result["request_id"] = str(request_item.data["id"])
+                # result["request"] = request_item.to_dict()
                 processed.append(result)
-                #uow.register(
+                # uow.register(
                 #    NotificationOp(
                 #        CommunityInclusionSubmittedNotificationBuilder.build(
                 #            request_item._request
                 #        )
                 #    )
-                #)
+                # )
             except (NoResultFound, PIDDoesNotExistError):
                 result["message"] = "Community not found."
                 errors.append(result)
             except (
                 CommunityAlreadyExists,
-                #OpenRequestAlreadyExists,
-                #InvalidAccessRestrictions,
+                # OpenRequestAlreadyExists,
+                # InvalidAccessRestrictions,
                 PermissionDeniedError,
             ) as ex:
                 result["message"] = ex.description
@@ -235,7 +238,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         search_preference=None,
         expand=False,
         extra_filter=None,
-        **kwargs
+        **kwargs,
     ):
         """Search for record's communities."""
         record = self.record_cls.pid.resolve(id_)
@@ -252,8 +255,9 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             search_preference=search_preference,
             expand=expand,
             extra_filter=communities_filter,
-            **kwargs
+            **kwargs,
         )
+
     """
     @staticmethod
     def _get_excluded_communities_filter(record, identity, id_):

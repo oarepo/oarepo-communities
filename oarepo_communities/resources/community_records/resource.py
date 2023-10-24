@@ -1,11 +1,5 @@
-
 from flask import g
-
-from flask_resources import (
-    resource_requestctx,
-    response_handler,
-    route,
-)
+from flask_resources import resource_requestctx, response_handler, route
 from invenio_drafts_resources.resources import RecordResource
 from invenio_records_resources.resources.records.resource import (
     request_data,
@@ -13,6 +7,7 @@ from invenio_records_resources.resources.records.resource import (
     request_view_args,
 )
 from invenio_records_resources.resources.records.utils import search_preference
+
 
 class CommunityRecordsResource(RecordResource):
     """RDM community's records resource."""
