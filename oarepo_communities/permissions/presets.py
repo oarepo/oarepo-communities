@@ -4,6 +4,7 @@ from invenio_records_permissions.generators import (
     AuthenticatedUser,
     SystemProcess,
 )
+from invenio_records_permissions.policies.base import BasePermissionPolicy
 
 from .record import RecordCommunitiesGenerator
 
@@ -38,5 +39,12 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
     can_draft_read_files = [SystemProcess()]
     can_draft_update_files = [SystemProcess()]
 
-    can_add_community = [SystemProcess(), AuthenticatedUser()]
-    can_remove_community = [SystemProcess(), AuthenticatedUser()]
+class CommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
+    can_add_community = [SystemProcess(), AnyUser()]
+    can_remove_community = [SystemProcess(), AnyUser()]
+    can_remove_record = [SystemProcess(), AnyUser()]
+
+class CommunitiesFromCFPermissionPolicy(BasePermissionPolicy):
+    can_add_community = [SystemProcess(), RecordCommunitiesGenerator("can_add_community")]
+    can_remove_community = [SystemProcess(), RecordCommunitiesGenerator("can_remove_community")]
+    can_remove_record = [SystemProcess(), RecordCommunitiesGenerator("can_remove_record")]
