@@ -32,9 +32,9 @@ class RecordCommunitiesSchema(Schema):
         max_number = self.context["max_number"]
         if max_number < len(value):
             raise ValidationError(
-                    "Too many communities passed, {max_number} max allowed.".format(
-                        max_number=max_number
-                    )
+                "Too many communities passed, {max_number} max allowed.".format(
+                    max_number=max_number
+                )
             )
 
         # check unique ids

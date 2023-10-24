@@ -1,12 +1,11 @@
 from collections import defaultdict
 
 from cachetools import TTLCache, cached
-from invenio_records_permissions.generators import (
-    Generator,
-)
 from invenio_communities.generators import CommunityRoleNeed
+from invenio_records_permissions.generators import Generator
+
 from ..proxies import current_communities_permissions
-from invenio_search.engine import dsl
+
 
 class RecordCommunitiesGenerator(Generator):
     """Allows system_process role."""
@@ -30,6 +29,7 @@ class RecordCommunitiesGenerator(Generator):
                         _needs.add(CommunityRoleNeed(community_id, role))
                 return _needs
         return []
+
     """
     def communities(self, identity):
 
@@ -45,12 +45,16 @@ class RecordCommunitiesGenerator(Generator):
         return dsl.Q("terms", **{"parent.communities.ids": self.communities(identity)})
 
     """
+
+
 @cached(cache=TTLCache(maxsize=1028, ttl=600))
 def record_community_permissions(record_communities):
     communities_permissions = {}
 
     for record_community_id in record_communities:
-        communities_permissions[record_community_id] = current_communities_permissions(record_community_id)
+        communities_permissions[record_community_id] = current_communities_permissions(
+            record_community_id
+        )
 
     by_actions = defaultdict(lambda: defaultdict(list))
     for community_id, role_permissions_dct in communities_permissions.items():

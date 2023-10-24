@@ -1,8 +1,8 @@
-from .permissions import permissions_cache
+from .cache import permissions_cache
 
 
-class OArepoCommunities(object):
-    """Invenio extension."""
+class OARepoCommunities(object):
+    """OARepo extension of Invenio-Vocabularies."""
 
     def __init__(self, app=None):
         """Extension initialization."""
@@ -14,7 +14,17 @@ class OArepoCommunities(object):
         self.init_config(app)
         app.extensions["oarepo-communities"] = self
 
-
     def init_config(self, app):
-        self.permissions_cache = permissions_cache
+        """Initialize configuration."""
+        from . import ext_config
 
+        if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
+            app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
+
+        for k in ext_config.OAREPO_PERMISSIONS_PRESETS:
+            if k not in app.config["OAREPO_PERMISSIONS_PRESETS"]:
+                app.config["OAREPO_PERMISSIONS_PRESETS"][
+                    k
+                ] = ext_config.OAREPO_PERMISSIONS_PRESETS[k]
+
+        self.permissions_cache = permissions_cache

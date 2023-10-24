@@ -1,8 +1,10 @@
 from invenio_records_resources.services.custom_fields import BaseCF
 from marshmallow import fields as ma_fields
 
+
 class UserMapCF(BaseCF):
     """"""
+
     @property
     def mapping(self):
         return {"type": "object", "dynamic": True}

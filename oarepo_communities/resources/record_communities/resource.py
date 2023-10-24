@@ -1,24 +1,8 @@
-
-from flask import abort, current_app, g, send_file
-from flask_cors import cross_origin
-from flask_resources import (
-    HTTPJSONException,
-    Resource,
-    ResponseHandler,
-    from_conf,
-    request_parser,
-    resource_requestctx,
-    response_handler,
-    route,
-    with_content_negotiation,
-)
-
+from flask import g
+from flask_resources import Resource, resource_requestctx, response_handler, route
 from invenio_records_resources.resources.errors import ErrorHandlersMixin
 from invenio_records_resources.resources.records.resource import (
     request_data,
-    request_extra_args,
-    request_headers,
-    request_read_args,
     request_search_args,
     request_view_args,
 )
