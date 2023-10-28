@@ -1,4 +1,4 @@
-from .cache import permissions_cache
+from .cache import permissions_cache, aai_mapping
 
 
 class OARepoCommunities(object):
@@ -28,3 +28,4 @@ class OARepoCommunities(object):
                 ] = ext_config.OAREPO_PERMISSIONS_PRESETS[k]
 
         self.permissions_cache = permissions_cache
+        self.aai_mapping = aai_mapping

@@ -7,12 +7,7 @@ class PermissionsCF(BaseCF):
 
     @property
     def mapping(self):
-        return {
-            "custom_fields": {
-                "properties": {"permissions": {"type": "object", "dynamic": True}}
-            }
-        }
-
+        return {"type": "object", "dynamic": True}
     @property
     def mapping_settings(self):
         return {}

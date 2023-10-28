@@ -10,7 +10,7 @@ def permissions_cache(community_id):
     ]["permissions"]
 
 
-def usermap(community_id):
+def aai_mapping(community_id):
     return current_communities.service.read(system_identity, community_id).data[
         "custom_fields"
-    ]["usermap"]
+    ]["aai_mapping"]
