@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from invenio_records_resources.services.records.components import ServiceComponent
+
 from ..proxies import current_communities_permissions
 
 

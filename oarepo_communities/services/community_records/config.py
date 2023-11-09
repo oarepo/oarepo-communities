@@ -10,8 +10,6 @@ from .schema import CommunityRecordsSchema
 # from .schemas.community_records import CommunityRecordsSchema
 
 
-
-
 class CommunityRecordsServiceConfig(
     PermissionsPresetsConfigMixin, RecordServiceConfig, ConfiguratorMixin
 ):

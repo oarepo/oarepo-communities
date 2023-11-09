@@ -8,6 +8,7 @@ class PermissionsCF(BaseCF):
     @property
     def mapping(self):
         return {"type": "object", "dynamic": True}
+
     @property
     def mapping_settings(self):
         return {}

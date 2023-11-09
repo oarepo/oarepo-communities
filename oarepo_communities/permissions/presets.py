@@ -39,12 +39,23 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
     can_draft_read_files = [SystemProcess()]
     can_draft_update_files = [SystemProcess()]
 
+
 class CommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
     can_add_community = [SystemProcess(), AnyUser()]
     can_remove_community = [SystemProcess(), AnyUser()]
     can_remove_record = [SystemProcess(), AnyUser()]
 
+
 class CommunitiesFromCFPermissionPolicy(BasePermissionPolicy):
-    can_add_community = [SystemProcess(), RecordCommunitiesGenerator("can_add_community")]
-    can_remove_community = [SystemProcess(), RecordCommunitiesGenerator("can_remove_community")]
-    can_remove_record = [SystemProcess(), RecordCommunitiesGenerator("can_remove_record")]
+    can_add_community = [
+        SystemProcess(),
+        RecordCommunitiesGenerator("can_add_community"),
+    ]
+    can_remove_community = [
+        SystemProcess(),
+        RecordCommunitiesGenerator("can_remove_community"),
+    ]
+    can_remove_record = [
+        SystemProcess(),
+        RecordCommunitiesGenerator("can_remove_record"),
+    ]

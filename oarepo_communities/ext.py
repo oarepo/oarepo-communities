@@ -1,4 +1,4 @@
-from .cache import permissions_cache, aai_mapping
+from .cache import aai_mapping, permissions_cache
 
 
 class OARepoCommunities(object):
