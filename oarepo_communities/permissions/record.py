@@ -7,11 +7,11 @@ from invenio_records_permissions.generators import Generator
 from ..proxies import current_communities_permissions
 
 
-class RecordCommunitiesGenerator(Generator):
+class CommunityRolePermittedInCF(Generator):
     """Allows system_process role."""
 
-    def __init__(self, action):
-        self.action = action
+    def __init__(self, community_permission_name):
+        self.community_permission_name = community_permission_name
 
     def needs(self, **kwargs):
         if "record" in kwargs and hasattr(kwargs["record"], "parent"):
@@ -20,15 +20,17 @@ class RecordCommunitiesGenerator(Generator):
                 community_ids = record.parent["communities"]["ids"]
             except KeyError:
                 return []
-            return needs_from_community_ids(community_ids, self.action)
+            return needs_from_community_ids(
+                community_ids, self.community_permission_name
+            )
         return []
 
 
-def needs_from_community_ids(community_ids, action):
+def needs_from_community_ids(community_ids, community_permission_name):
     _needs = set()
     by_community_permission = record_community_permissions(frozenset(community_ids))
-    if action in by_community_permission:
-        community2role_list = by_community_permission[action]
+    if community_permission_name in by_community_permission:
+        community2role_list = by_community_permission[community_permission_name]
         for community_id, roles in community2role_list.items():
             for role in roles:
                 _needs.add(CommunityRoleNeed(community_id, role))

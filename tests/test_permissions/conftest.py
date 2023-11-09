@@ -176,24 +176,28 @@ def community_permissions_cf():
             "permissions": {
                 "owner": {
                     "can_publish": True,
+                    "can_publish_directly": True,
                     "can_read": True,
                     "can_update": True,
                     "can_delete": True,
                 },
                 "manager": {
                     "can_publish": True,
+                    "can_publish_directly": True,
                     "can_read": False,
                     "can_update": False,
                     "can_delete": False,
                 },
                 "curator": {
                     "can_publish": True,
+                    "can_publish_directly": True,
                     "can_read": True,
                     "can_update": True,
                     "can_delete": False,
                 },
                 "reader": {
                     "can_publish": False,
+                    "can_publish_directly": True,
                     "can_read": True,
                     "can_update": False,
                     "can_delete": False,
@@ -254,7 +258,6 @@ def community(app, community_owner_helper, minimal_community):
 @pytest.fixture()
 def community_with_permissions_cf(community, community_permissions_cf, vocab_cf):
     data = current_communities.service.read(system_identity, community.id).data
-    # data = _resp_to_input(community.data)
     data |= community_permissions_cf
     community = current_communities.service.update(system_identity, data["id"], data)
     Community.index.refresh()
