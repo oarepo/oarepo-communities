@@ -3,8 +3,6 @@ from marshmallow import fields as ma_fields
 
 
 class PermissionsCF(BaseCF):
-    """"""
-
     @property
     def mapping(self):
         return {"type": "object", "dynamic": True}
