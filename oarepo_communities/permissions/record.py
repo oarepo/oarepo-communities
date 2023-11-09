@@ -14,37 +14,25 @@ class RecordCommunitiesGenerator(Generator):
         self.action = action
 
     def needs(self, **kwargs):
-        _needs = set()
         if "record" in kwargs and hasattr(kwargs["record"], "parent"):
             record = kwargs["record"]
             try:
                 community_ids = record.parent["communities"]["ids"]
             except KeyError:
                 return []
-            by_actions = record_community_permissions(frozenset(community_ids))
-            if self.action in by_actions:
-                community2role_list = by_actions[self.action]
-                for community_id, roles in community2role_list.items():
-                    for role in roles:
-                        _needs.add(CommunityRoleNeed(community_id, role))
-                return _needs
+            return needs_from_community_ids(community_ids, self.action)
         return []
 
-    """
-    def communities(self, identity):
 
-        roles = self.roles()
-        community_ids = set()
-        for n in identity.provides:
-            if n.method == "community" and n.role in roles:
-                community_ids.add(n.value)
-        return list(community_ids)
-
-    def query_filter(self, identity=None, **kwargs):
-
-        return dsl.Q("terms", **{"parent.communities.ids": self.communities(identity)})
-
-    """
+def needs_from_community_ids(community_ids, action):
+    _needs = set()
+    by_community_permission = record_community_permissions(frozenset(community_ids))
+    if action in by_community_permission:
+        community2role_list = by_community_permission[action]
+        for community_id, roles in community2role_list.items():
+            for role in roles:
+                _needs.add(CommunityRoleNeed(community_id, role))
+        return _needs
 
 
 @cached(cache=TTLCache(maxsize=1028, ttl=600))

@@ -5,6 +5,7 @@ import yaml
 from invenio_access.permissions import system_identity
 from invenio_app.factory import create_api
 from invenio_communities import current_communities
+from invenio_communities.cli import create_communities_custom_field
 from invenio_communities.communities.records.api import Community
 from invenio_communities.generators import CommunityRoleNeed
 from invenio_pidstore.errors import PIDDoesNotExistError
@@ -63,6 +64,7 @@ def app_config(app_config):
     }
     app_config["FILES_REST_DEFAULT_STORAGE_CLASS"] = "L"
 
+    app_config["REQUESTS_REGISTERED_TYPES"] = [RequestType()]
     return app_config
 
 
@@ -80,6 +82,10 @@ def vocab_cf(app, db, cache):
     from oarepo_runtime.cf.mappings import prepare_cf_indices
 
     prepare_cf_indices()
+
+    result = app.test_cli_runner().invoke(create_communities_custom_field, [])
+    assert result.exit_code == 0
+    Community.index.refresh()
 
 
 @pytest.fixture
@@ -187,7 +193,7 @@ def community_permissions_cf():
                     "can_delete": False,
                 },
                 "reader": {
-                    "can_publish": True,
+                    "can_publish": False,
                     "can_read": True,
                     "can_update": False,
                     "can_delete": False,
@@ -246,6 +252,16 @@ def community(app, community_owner_helper, minimal_community):
 
 
 @pytest.fixture()
+def community_with_permissions_cf(community, community_permissions_cf, vocab_cf):
+    data = current_communities.service.read(system_identity, community.id).data
+    # data = _resp_to_input(community.data)
+    data |= community_permissions_cf
+    community = current_communities.service.update(system_identity, data["id"], data)
+    Community.index.refresh()
+    return community
+
+
+@pytest.fixture()
 def community_owner(UserFixture, community_owner_helper, community, inviter, app, db):
     # inviter(community_owner_helper.id, community.id, "owner")
     community_owner_helper.identity.provides.add(
@@ -262,7 +278,7 @@ def community_manager(UserFixture, community_owner_helper, community, inviter, a
     return community_owner_helper
 
 @pytest.fixture()
-def community_curator(UserFixture, community_owner_helper, community, inviter, app, db):
+def community_curator(UserFixture, community_curator_helper, community, inviter, app, db):
     #inviter(community_owner_helper.id, community.id, "owner")
     community_owner_helper.identity.provides.add(CommunityRoleNeed(community.data["id"], "curator"))
     return community_owner_helper
@@ -273,3 +289,34 @@ def community_curator(UserFixture, community_owner_helper, community, inviter, a
 def community_reader(UserFixture, community_reader_helper, community, inviter, app, db):
     inviter(community_reader_helper.id, community.data["id"], "reader")
     return community_reader_helper
+
+
+# -----
+from invenio_requests.customizations import RequestType
+from invenio_requests.proxies import current_requests
+
+
+@pytest.fixture(scope="module")
+def requests_service(app):
+    """Request Factory fixture."""
+
+    return current_requests.requests_service
+
+
+@pytest.fixture()
+def create_publish_request(requests_service):
+    """Request Factory fixture."""
+
+    def _create_request(identity, receiver, **kwargs):
+        """Create a request."""
+        RequestType.allowed_receiver_ref_types = ["oarepo_community"]
+        RequestType.needs_context = {
+            "community_permission_name": "can_publish",
+        }
+        # Need to use the service to get the id
+        item = requests_service.create(
+            identity, {}, RequestType, receiver=receiver, **kwargs
+        )
+        return item._request
+
+    return _create_request
