@@ -2,7 +2,7 @@ from invenio_communities.communities.records.api import Community
 from invenio_records_resources.services.base.config import ConfiguratorMixin
 from invenio_records_resources.services.records.config import RecordServiceConfig
 from invenio_records_resources.services.records.links import pagination_links
-from oarepo_runtime.config.service import PermissionsPresetsConfigMixin
+from oarepo_runtime.services.config.service import PermissionsPresetsConfigMixin
 
 from .schema import CommunityRecordsSchema
 
