@@ -12,7 +12,6 @@ record:
     presets: ['community']
   use:
     - invenio
-
   draft: {}
   record-communities: {}
   community-records: {}

@@ -20,10 +20,11 @@ class CommunityRolePermittedInCF(Generator):
                 community_ids = record.parent["communities"]["ids"]
             except KeyError:
                 return []
-            return needs_from_community_ids(
-                community_ids, self.community_permission_name
-            )
-        return []
+        elif "community" in kwargs:
+            community_ids = {kwargs["community"].id}
+        else:
+            return []
+        return needs_from_community_ids(community_ids, self.community_permission_name)
 
 
 def needs_from_community_ids(community_ids, community_permission_name):
@@ -34,7 +35,7 @@ def needs_from_community_ids(community_ids, community_permission_name):
         for community_id, roles in community2role_list.items():
             for role in roles:
                 _needs.add(CommunityRoleNeed(community_id, role))
-        return _needs
+    return _needs
 
 
 @cached(cache=TTLCache(maxsize=1028, ttl=600))

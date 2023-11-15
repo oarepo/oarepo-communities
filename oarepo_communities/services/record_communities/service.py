@@ -21,6 +21,17 @@ from oarepo_communities.services.record_communities.errors import (
 )
 
 
+def include_record_in_community(record, community, record_service, uow):
+    # integrity check, it should never happen on a published record
+    # assert not record.parent.review
+
+    # set the community to `default` if it is the first
+    default = not record.parent.communities
+    parent = record.parent.communities.add(community, default=default)
+    uow.register(RecordCommitOp(record.parent))
+    uow.register(RecordIndexOp(record, indexer=record_service.indexer))
+
+
 class RecordCommunitiesService(RecordService, RecordIndexerMixin):
     """Record communities service.
 
@@ -113,20 +124,26 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         # )
 
         # return result
-
-        self.include_directly(record, community, uow)
+        try:
+            self.require_permission(
+                identity, "community_add_community", community=community
+            )
+        except PermissionDeniedError:
+            return
+        include_record_in_community(record, community, self.record_service, uow)
         return self.result_item()
 
     @unit_of_work()
-    def add_to_draft(self, identity, id_, data, uow):
-        return self._add(identity, id_, data, True, uow)
+    def add_to_draft(self, identity, id_, data, uow=None):
+        draft = self.draft_cls.pid.resolve(id_, registered_only=False)
+        return self.add_to_record(identity, draft, data, uow)
 
     @unit_of_work()
-    def add_to_published_record(self, identity, id_, data, uow):
-        return self._add(identity, id_, data, False, uow)
+    def add_to_published_record(self, identity, id_, data, uow=None):
+        record = self.record_cls.pid.resolve(id_)
+        return self.add_to_record(identity, record, data, uow)
 
-    def _add(self, identity, id_, data, is_draft, uow):
-        """Include the record in the given communities."""
+    def add_to_record(self, identity, record, data, uow):
         valid_data, errors = self.schema.load(
             data,
             context={
@@ -136,11 +153,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             raise_errors=True,
         )
         communities = valid_data["communities"]
-        if is_draft:
-            record = self.draft_cls.pid.resolve(id_, registered_only=False)
-        else:
-            record = self.record_cls.pid.resolve(id_)
-        self.require_permission(identity, "add_community", record=record)
+        self.require_permission(identity, "user_add_community", record=record)
 
         processed = []
         for community in communities:

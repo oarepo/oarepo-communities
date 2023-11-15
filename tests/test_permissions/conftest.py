@@ -68,15 +68,6 @@ def app_config(app_config):
     return app_config
 
 
-@pytest.fixture(scope="function")
-def sample_draft(app, db, input_data):
-    with UnitOfWork(db.session) as uow:
-        record = ThesisDraft.create(input_data)
-        uow.register(RecordCommitOp(record, current_service.indexer, True))
-        uow.commit()
-        return record
-
-
 @pytest.fixture()
 def vocab_cf(app, db, cache):
     from oarepo_runtime.cf.mappings import prepare_cf_indices
@@ -323,3 +314,22 @@ def create_publish_request(requests_service):
         return item._request
 
     return _create_request
+
+
+# -----
+from thesis.proxies import current_service
+
+
+@pytest.fixture(scope="function")
+def sample_draft(app, db, input_data, community):
+    """
+    with UnitOfWork(db.session) as uow:
+        record = ThesisDraft.create(input_data)
+        uow.register(RecordCommitOp(record, current_service.indexer, True))
+        uow.commit()
+        return record
+    """
+    input_data["community_id"] = community.id
+    draft_item = current_service.create(system_identity, input_data)
+    ThesisDraft.index.refresh()
+    return ThesisDraft.pid.resolve(draft_item.id, registered_only=False)

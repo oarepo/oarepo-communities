@@ -10,7 +10,10 @@ from .record import CommunityRolePermittedInCF
 
 
 class CommunityPermissionPolicy(RecordPermissionPolicy):
-    can_search = [SystemProcess(), AnyUser()]
+    can_search = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_search"),
+    ]
     can_read = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_read"),
@@ -24,49 +27,137 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_delete"),
     ]
-    can_manage = [SystemProcess()]
+    can_manage = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_manage"),
+    ]
 
-    can_create_files = [SystemProcess()]
-    can_set_content_files = [SystemProcess()]
-    can_get_content_files = [AnyUser(), SystemProcess()]
-    can_commit_files = [SystemProcess()]
-    can_read_files = [AnyUser(), SystemProcess()]
-    can_update_files = [SystemProcess()]
-    can_delete_files = [SystemProcess()]
+    can_create_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_create_files"),
+    ]
+    can_set_content_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_set_content_files"),
+    ]
+    can_get_content_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_get_content_files"),
+    ]
+    can_commit_files = [SystemProcess()], CommunityRolePermittedInCF(
+        community_permission_name="can_commit_files"
+    )
+    can_read_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_read_files"),
+    ]
+    can_update_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_update_files"),
+    ]
+    can_delete_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_delete_files"),
+    ]
 
-    can_edit = [SystemProcess()]
-    can_new_version = [SystemProcess()]
-    can_search_drafts = [SystemProcess()]
-    can_read_draft = [SystemProcess()]
-    can_update_draft = [SystemProcess()]
-    can_delete_draft = [SystemProcess()]
+    can_edit = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_edit"),
+    ]
+    can_new_version = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_new_version"),
+    ]
+    can_search_drafts = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_search_drafts"),
+    ]
+    can_read_draft = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_read_draft"),
+    ]
+    can_update_draft = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_update_draft"),
+    ]
+    can_delete_draft = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_delete_draft"),
+    ]
     can_publish = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_publish_directly"),
+        CommunityRolePermittedInCF(community_permission_name="can_publish"),
     ]
-    can_draft_create_files = [SystemProcess()]
-    can_draft_set_content_files = [SystemProcess()]
-    can_draft_get_content_files = [SystemProcess()]
-    can_draft_commit_files = [SystemProcess()]
-    can_draft_read_files = [SystemProcess()]
-    can_draft_update_files = [SystemProcess()]
-
-
-class CommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
-    can_add_community = [SystemProcess(), AnyUser()]
-    can_remove_community = [SystemProcess(), AnyUser()]
-    can_remove_record = [SystemProcess(), AnyUser()]
-
-
-class CommunitiesFromCFPermissionPolicy(BasePermissionPolicy):
-    can_add_community = [
+    can_draft_create_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_add_community"),
+        CommunityRolePermittedInCF(community_permission_name="can_draft_create_files"),
+    ]
+    can_draft_set_content_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(
+            community_permission_name="can_draft_set_content_files"
+        ),
+    ]
+    can_draft_get_content_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(
+            community_permission_name="can_draft_get_content_files"
+        ),
+    ]
+    can_draft_commit_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_draft_commit_files"),
+    ]
+    can_draft_read_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_draft_read_files"),
+    ]
+    can_draft_update_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_draft_update_files"),
+    ]
+
+
+class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
+    can_user_add_community = [
+        SystemProcess(),
+        AnyUser(),
+    ]
+    can_community_add_community = [
+        SystemProcess(),
+        AnyUser(),
+    ]
+    can_remove_community = [
+        SystemProcess(),
+        AnyUser(),
+    ]
+
+
+class CommunityRecordsEveryonePermissionPolicy(BasePermissionPolicy):
+    can_remove_record = [
+        SystemProcess(),
+        AnyUser(),
+    ]
+
+
+class RecordCommunitiesCommunityPermissionPolicy(BasePermissionPolicy):
+    can_user_add_community = [
+        SystemProcess(),
+        AuthenticatedUser(),
+    ]
+    can_community_add_community = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(
+            community_permission_name="can_community_add_community"
+        ),
     ]
     can_remove_community = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_remove_community"),
     ]
+
+
+class CommunityRecordsCommunityPermissionPolicy(BasePermissionPolicy):
     can_remove_record = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_remove_record"),

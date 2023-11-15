@@ -1,11 +1,15 @@
 from oarepo_communities.permissions.presets import (
-    CommunitiesEveryonePermissionPolicy,
-    CommunitiesFromCFPermissionPolicy,
     CommunityPermissionPolicy,
+    CommunityRecordsCommunityPermissionPolicy,
+    CommunityRecordsEveryonePermissionPolicy,
+    RecordCommunitiesCommunityPermissionPolicy,
+    RecordCommunitiesEveryonePermissionPolicy,
 )
 
 OAREPO_PERMISSIONS_PRESETS = {
     "community": CommunityPermissionPolicy,
-    "communities-everyone": CommunitiesEveryonePermissionPolicy,
-    "communities-from-cf": CommunitiesFromCFPermissionPolicy,
+    "record-communities-community": RecordCommunitiesCommunityPermissionPolicy,
+    "community-records-community": CommunityRecordsCommunityPermissionPolicy,
+    "record-communities-everyone": RecordCommunitiesEveryonePermissionPolicy,
+    "community-records-everyone": CommunityRecordsEveryonePermissionPolicy,
 }
