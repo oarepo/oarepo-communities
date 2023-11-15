@@ -43,6 +43,7 @@ def record_community_permissions(record_communities):
     communities_permissions = {}
 
     for record_community_id in record_communities:
+        record_community_id = str(record_community_id)
         communities_permissions[record_community_id] = current_communities_permissions(
             record_community_id
         )

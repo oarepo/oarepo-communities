@@ -123,7 +123,7 @@ class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
         SystemProcess(),
         AnyUser(),
     ]
-    can_community_add_community = [
+    can_add_community_to_record = [
         SystemProcess(),
         AnyUser(),
     ]
@@ -145,10 +145,10 @@ class RecordCommunitiesCommunityPermissionPolicy(BasePermissionPolicy):
         SystemProcess(),
         AuthenticatedUser(),
     ]
-    can_community_add_community = [
+    can_add_community_to_record = [
         SystemProcess(),
         CommunityRolePermittedInCF(
-            community_permission_name="can_community_add_community"
+            community_permission_name="can_add_community_to_record"
         ),
     ]
     can_remove_community = [

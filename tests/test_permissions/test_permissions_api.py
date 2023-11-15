@@ -1,3 +1,4 @@
+from thesis.records.api import ThesisDraft
 from thesis.resources.record_communities.config import (
     ThesisRecordCommunitiesResourceConfig,
 )
@@ -21,6 +22,7 @@ def _create_and_publish(client, input_data, community):
             ]
         },
     )
+    ThesisDraft.index.refresh()
     # Publish it
     response = client.post(
         f"{RECORD_COMMUNITIES_BASE_URL}{recid}/draft/actions/publish"
@@ -71,18 +73,22 @@ def test_cf(
 
 def test_reader(
     client,
+    community_owner,
     community_reader,
     community_with_permissions_cf,
     input_data,
     search_clear,
 ):
-    reader_client = community_reader.login(client)
-    record_resp = _create_and_publish(
-        reader_client, input_data, community_with_permissions_cf
+    owner_client = community_owner.login(client)
+    owner_resp = _create_and_publish(
+        owner_client, input_data, community_with_permissions_cf
     )
-    assert record_resp.status_code == 202
-    recid = record_resp.json["id"]
+    assert owner_resp.status_code == 202
+    recid = owner_resp.json["id"]
 
+    community_owner.logout(client)
+
+    reader_client = community_reader.login(client)
     response_read = reader_client.get(f"{RECORD_COMMUNITIES_BASE_URL}{recid}")
     assert response_read.status_code == 200
     response_delete = reader_client.delete(f"{RECORD_COMMUNITIES_BASE_URL}{recid}")

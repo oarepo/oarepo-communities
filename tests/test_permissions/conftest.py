@@ -16,7 +16,7 @@ from thesis.records.api import ThesisDraft, ThesisRecord
 
 @pytest.fixture(scope="function")
 def sample_metadata_list():
-    data_path = f"../thesis/data/sample_data.yaml"
+    data_path = f"tests/thesis/data/sample_data.yaml"
     docs = list(yaml.load_all(open(data_path), Loader=yaml.SafeLoader))
     return docs
 
@@ -167,28 +167,28 @@ def community_permissions_cf():
             "permissions": {
                 "owner": {
                     "can_publish": True,
-                    "can_publish_directly": True,
+                    "can_add_community_to_record": True,
                     "can_read": True,
                     "can_update": True,
                     "can_delete": True,
                 },
                 "manager": {
                     "can_publish": True,
-                    "can_publish_directly": True,
+                    "can_add_community_to_record": True,
                     "can_read": False,
                     "can_update": False,
                     "can_delete": False,
                 },
                 "curator": {
                     "can_publish": True,
-                    "can_publish_directly": True,
+                    "can_add_community_to_record": True,
                     "can_read": True,
                     "can_update": True,
                     "can_delete": False,
                 },
                 "reader": {
                     "can_publish": False,
-                    "can_publish_directly": True,
+                    "can_add_community_to_record": True,
                     "can_read": True,
                     "can_update": False,
                     "can_delete": False,
@@ -322,13 +322,6 @@ from thesis.proxies import current_service
 
 @pytest.fixture(scope="function")
 def sample_draft(app, db, input_data, community):
-    """
-    with UnitOfWork(db.session) as uow:
-        record = ThesisDraft.create(input_data)
-        uow.register(RecordCommitOp(record, current_service.indexer, True))
-        uow.commit()
-        return record
-    """
     input_data["community_id"] = community.id
     draft_item = current_service.create(system_identity, input_data)
     ThesisDraft.index.refresh()

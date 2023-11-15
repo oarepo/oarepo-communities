@@ -21,13 +21,13 @@ from oarepo_communities.services.record_communities.errors import (
 )
 
 
-def include_record_in_community(record, community, record_service, uow):
+def include_record_in_community(record, community_or_id, record_service, uow):
     # integrity check, it should never happen on a published record
     # assert not record.parent.review
 
     # set the community to `default` if it is the first
     default = not record.parent.communities
-    parent = record.parent.communities.add(community, default=default)
+    record.parent.communities.add(community_or_id, default=default)
     uow.register(RecordCommitOp(record.parent))
     uow.register(RecordIndexOp(record, indexer=record_service.indexer))
 
@@ -126,9 +126,10 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         # return result
         try:
             self.require_permission(
-                identity, "community_add_community", community=community
+                identity, "add_community_to_record", community=community
             )
         except PermissionDeniedError:
+            # todo propagate error
             return
         include_record_in_community(record, community, self.record_service, uow)
         return self.result_item()
