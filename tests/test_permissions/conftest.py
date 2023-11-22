@@ -180,7 +180,6 @@ def community_permissions_cf():
                     "can_delete": False,
                 },
                 "curator": {
-                    "can_publish": True,
                     "can_add_community_to_record": True,
                     "can_read": True,
                     "can_update": True,
@@ -270,13 +269,15 @@ def community_manager(UserFixture, community_owner_helper, community, inviter, a
     #inviter(community_owner_helper.id, community.id, "owner")
     community_owner_helper.identity.provides.add(CommunityRoleNeed(community.data["id"], "manager"))
     return community_owner_helper
+"""
+
 
 @pytest.fixture()
-def community_curator(UserFixture, community_curator_helper, community, inviter, app, db):
-    #inviter(community_owner_helper.id, community.id, "owner")
-    community_owner_helper.identity.provides.add(CommunityRoleNeed(community.data["id"], "curator"))
-    return community_owner_helper
-"""
+def community_curator(
+    UserFixture, community_curator_helper, community, inviter, app, db
+):
+    inviter(community_curator_helper.id, community.data["id"], "curator")
+    return community_curator_helper
 
 
 @pytest.fixture()

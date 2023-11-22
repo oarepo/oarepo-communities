@@ -50,7 +50,7 @@ class CommunityRecordsService(RecordService):
         **kwargs,
     ):
         """Search for records published in the given community."""
-        self.require_permission(identity, "search")
+        self.require_permission(identity, "search", community_id=community_id)
 
         community = self.community_cls.pid.resolve(
             community_id

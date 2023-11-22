@@ -1,9 +1,10 @@
-import functools
 
-from invenio_access.permissions import system_identity
 from invenio_records_resources.services.records.components import ServiceComponent
-from oarepo_communities.services.record_communities.service import include_record_in_community
-from invenio_communities.proxies import current_communities
+
+from oarepo_communities.services.record_communities.service import (
+    include_record_in_community,
+)
+
 
 class SetCommunityComponent(ServiceComponent):
     """
@@ -14,7 +15,7 @@ class SetCommunityComponent(ServiceComponent):
 
     def create(self, identity, data=None, record=None, **kwargs):
         if "community_id" not in data:
-            #todo log
+            # todo log
             return
         community_id = data["community_id"]
         include_record_in_community(record, community_id, self.service, self.uow)
@@ -26,6 +27,7 @@ class SetCommunityComponent(ServiceComponent):
             uow=self.uow,
         )
         """
+
 
 """
 def SetCommunityComponent(record_communities_service):

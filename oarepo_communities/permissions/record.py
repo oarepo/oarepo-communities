@@ -22,6 +22,8 @@ class CommunityRolePermittedInCF(Generator):
                 return []
         elif "community" in kwargs:
             community_ids = {kwargs["community"].id}
+        elif "community_id" in kwargs:
+            community_ids = {kwargs["community_id"]}
         else:
             return []
         return needs_from_community_ids(community_ids, self.community_permission_name)
