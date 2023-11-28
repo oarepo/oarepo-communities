@@ -83,6 +83,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
     def _include(self, identity, community_id, comment, require_review, record, uow):
         """Create request to add the community to the record."""
         # check if the community exists
+        # todo is it necesarry to use the service here
         community = current_communities.service.record_cls.pid.resolve(community_id)
         com_id = str(community.id)
 
@@ -124,13 +125,9 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         # )
 
         # return result
-        try:
-            self.require_permission(
-                identity, "add_community_to_record", community=community
-            )
-        except PermissionDeniedError:
-            # todo propagate error
-            return
+        self.require_permission(
+            identity, "community_allows_adding_records", community=community
+        )
         include_record_in_community(record, community, self.record_service, uow)
         return self.result_item()
 
@@ -154,7 +151,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             raise_errors=True,
         )
         communities = valid_data["communities"]
-        self.require_permission(identity, "user_add_community", record=record)
+        self.require_permission(identity, "user_add_communities_to_records", record=record)
 
         processed = []
         for community in communities:
@@ -166,7 +163,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
                 "community_id": community_id,
             }
             try:
-                request_item = self._include(
+                self._include(
                     identity, community_id, comment, require_review, record, uow
                 )
                 # result["request_id"] = str(request_item.data["id"])
@@ -180,6 +177,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
                 #    )
                 # )
             except (NoResultFound, PIDDoesNotExistError):
+                # todo ask about the underscore (translation?)
                 result["message"] = "Community not found."
                 errors.append(result)
             except (
@@ -198,11 +196,14 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
     def _remove(self, identity, community_id, record):
         """Remove a community from the record."""
         if community_id not in record.parent.communities.ids:
-            raise RecordCommunityMissing(record.id, community_id)
+            # try if it's the community slug instead
+            community_id = str(current_communities.service.record_cls.pid.resolve(community_id).id)
+            if community_id not in record.parent.communities.ids:
+                raise RecordCommunityMissing(record.id, community_id)
 
         # check permission here, per community: curator cannot remove another community
         self.require_permission(
-            identity, "remove_community", record=record, community_id=community_id
+            identity, "remove_community_from_record", record=record, community_id=community_id
         )
 
         # Default community is deleted when the exact same community is removed from the record
@@ -228,7 +229,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             try:
                 self._remove(identity, community_id, record)
                 processed.append({"community": community_id})
-            except (ValueError, PermissionDeniedError) as ex:
+            except (RecordCommunityMissing, PermissionDeniedError) as ex:
                 errors.append(
                     {
                         "community": community_id,

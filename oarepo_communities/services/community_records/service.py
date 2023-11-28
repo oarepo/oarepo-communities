@@ -49,13 +49,10 @@ class CommunityRecordsService(RecordService):
         extra_filter=None,
         **kwargs,
     ):
-        """Search for records published in the given community."""
-        self.require_permission(identity, "search", community_id=community_id)
-
         community = self.community_cls.pid.resolve(
             community_id
-        )  # Ensure community's existence
-
+        )
+        self.require_permission(identity, "search", community=community)
         params = params or {}
 
         community_filter = dsl.Q(
@@ -97,7 +94,7 @@ class CommunityRecordsService(RecordService):
                 self.config.links_search_community_records,
                 context={
                     "args": params,
-                    "id": community_id,
+                    "id": str(community.id),
                 },
             ),
             links_item_tpl=self.links_item_tpl,
@@ -117,7 +114,7 @@ class CommunityRecordsService(RecordService):
         """Remove records from a community."""
         community = self.community_cls.pid.resolve(community_id)
 
-        self.require_permission(identity, "remove_record", record=community)
+        self.require_permission(identity, "remove_records_from_community", community=community)
 
         valid_data, errors = self.community_record_schema.load(
             data,

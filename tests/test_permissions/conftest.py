@@ -1,3 +1,4 @@
+import copy
 import os
 
 import pytest
@@ -167,30 +168,44 @@ def community_permissions_cf():
             "permissions": {
                 "owner": {
                     "can_publish": True,
-                    "can_add_community_to_record": True,
                     "can_read": True,
                     "can_update": True,
                     "can_delete": True,
+                    "can_search": True,
+                    "can_community_allows_adding_records": True,
+                    "can_remove_community_from_record": True,
+                    "can_remove_records_from_community": True,
+
+
                 },
                 "manager": {
                     "can_publish": True,
-                    "can_add_community_to_record": True,
                     "can_read": False,
                     "can_update": False,
                     "can_delete": False,
+                    "can_search": True,
+                    "can_community_allows_adding_records": True,
+                    "can_remove_community_from_record": True,
+                    "can_remove_records_from_community": True,
                 },
                 "curator": {
-                    "can_add_community_to_record": True,
                     "can_read": True,
                     "can_update": True,
                     "can_delete": False,
+                    "can_search": True,
+                    "can_community_allows_adding_records": False,
+                    "can_remove_community_from_record": True,
+                    "can_remove_records_from_community": True,
                 },
                 "reader": {
+                    "can_search": True,
                     "can_publish": False,
-                    "can_add_community_to_record": True,
                     "can_read": True,
                     "can_update": False,
                     "can_delete": False,
+                    "can_community_allows_adding_records": True,
+                    "can_remove_community_from_record": False,
+                    "can_remove_records_from_community": False,
                 },
             }
         }
@@ -252,6 +267,21 @@ def community_with_permissions_cf(community, community_permissions_cf, vocab_cf)
     community = current_communities.service.update(system_identity, data["id"], data)
     Community.index.refresh()
     return community
+@pytest.fixture()
+def community_with_permission_cf_factory(minimal_community, vocab_cf, community_permissions_cf):
+    def create_community(slug, community_owner, community_permissions_cf_custom=None):
+        community_permissions_cf_actual = community_permissions_cf_custom or community_permissions_cf
+        minimal_community_actual = copy.deepcopy(minimal_community)
+        minimal_community_actual["slug"] = slug
+        community = _community_get_or_create(minimal_community_actual, community_owner.identity)
+        data = community.data | community_permissions_cf_actual
+        community = current_communities.service.update(system_identity, data["id"], data)
+        Community.index.refresh()
+        return community
+    return create_community
+
+
+
 
 
 @pytest.fixture()

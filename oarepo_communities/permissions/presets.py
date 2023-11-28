@@ -12,7 +12,7 @@ from .record import CommunityRolePermittedInCF
 class CommunityPermissionPolicy(RecordPermissionPolicy):
     can_search = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_search"),
+        AuthenticatedUser(), #the base service does not provide a way to check community in permissions
     ]
     can_read = [
         SystemProcess(),
@@ -119,46 +119,47 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
 
 
 class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
-    can_user_add_community = [
+    can_user_add_communities_to_records = [
         SystemProcess(),
         AnyUser(),
     ]
-    can_add_community_to_record = [
+    can_community_allows_adding_records = [
         SystemProcess(),
         AnyUser(),
     ]
-    can_remove_community = [
+    can_remove_community_from_record = [
         SystemProcess(),
         AnyUser(),
     ]
+
 
 
 class CommunityRecordsEveryonePermissionPolicy(BasePermissionPolicy):
-    can_remove_record = [
+    can_remove_records_from_community = [
         SystemProcess(),
         AnyUser(),
     ]
 
 
 class RecordCommunitiesCommunityPermissionPolicy(BasePermissionPolicy):
-    can_user_add_community = [
+    can_user_add_communities_to_records = [
         SystemProcess(),
         AuthenticatedUser(),
     ]
-    can_add_community_to_record = [
+    can_community_allows_adding_records = [
         SystemProcess(),
         CommunityRolePermittedInCF(
-            community_permission_name="can_add_community_to_record"
+            community_permission_name="can_community_allows_adding_records"
         ),
     ]
-    can_remove_community = [
+    can_remove_community_from_record = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_remove_community"),
+        CommunityRolePermittedInCF(community_permission_name="can_remove_community_from_record"),
     ]
 
 
 class CommunityRecordsCommunityPermissionPolicy(BasePermissionPolicy):
-    can_remove_record = [
+    can_remove_records_from_community = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_remove_record"),
+        CommunityRolePermittedInCF(community_permission_name="can_remove_records_from_community"),
     ]
