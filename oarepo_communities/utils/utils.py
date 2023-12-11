@@ -1,3 +1,15 @@
+from invenio_records_resources.proxies import current_service_registry
+from invenio_requests.resolvers.registry import ResolverRegistry
+
+
+# todo cache? would have to be done by using record cls as key
+def get_matching_service(record):
+    for resolver in ResolverRegistry.get_registered_resolvers():
+        if resolver.matches_entity(record):
+            return current_service_registry.get(resolver._service_id)
+    return None
+
+
 """
 def get_allowed_actions(record, identity=None):
     record_communities = set(record["parent"]["communities"]["ids"])

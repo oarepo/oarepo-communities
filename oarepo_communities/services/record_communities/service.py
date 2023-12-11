@@ -3,7 +3,7 @@ from invenio_drafts_resources.services import RecordService
 
 # from invenio_i18n import lazy_gettext as _
 # from invenio_notifications.services.uow import NotificationOp
-from invenio_pidstore.errors import PIDDoesNotExistError
+from invenio_pidstore.errors import PIDDoesNotExistError, PIDUnregistered
 from invenio_records_resources.services import RecordIndexerMixin, ServiceSchemaWrapper
 from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import (
@@ -15,18 +15,21 @@ from invenio_records_resources.services.uow import (
 from invenio_search.engine import dsl
 from sqlalchemy.orm.exc import NoResultFound
 
-from oarepo_communities.services.record_communities.errors import (
+from oarepo_communities.services.errors import (
     CommunityAlreadyExists,
     RecordCommunityMissing,
 )
 
 
-def include_record_in_community(record, community_or_id, record_service, uow):
+def include_record_in_community(
+    record, community_or_id, record_service, uow, default=None
+):
     # integrity check, it should never happen on a published record
     # assert not record.parent.review
 
     # set the community to `default` if it is the first
-    default = not record.parent.communities
+    if default is None:
+        default = not record.parent.communities
     record.parent.communities.add(community_or_id, default=default)
     uow.register(RecordCommitOp(record.parent))
     uow.register(RecordIndexOp(record, indexer=record_service.indexer))
@@ -70,15 +73,80 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         return next(results.hits)["id"] if results.total > 0 else None
     """
 
-    def include_directly(self, record, community, uow):
+    def _resolve_record(self, id_):
+        try:
+            return self.record_cls.pid.resolve(id_)
+        except PIDUnregistered:
+            return self.draft_cls.pid.resolve(id_, registered_only=False)
+
+    @unit_of_work()
+    def add(self, identity, id_, data, uow=None):
+        record = self._resolve_record(id_)
+        valid_data, errors = self.schema.load(
+            data,
+            context={
+                "identity": identity,
+                "max_number": self.config.max_number_of_additions,
+            },
+            raise_errors=True,
+        )
+        communities = valid_data["communities"]
+        self.require_permission(
+            identity, "user_add_communities_to_records", record=record
+        )
+
+        processed = []
+        for community in communities:
+            community_id = community["id"]
+            comment = community.get("comment", None)
+            require_review = community.get("require_review", False)
+
+            result = {
+                "community_id": community_id,
+            }
+            try:
+                self._include(
+                    identity, community_id, comment, require_review, record, uow
+                )
+                # result["request_id"] = str(request_item.data["id"])
+                # result["request"] = request_item.to_dict()
+                processed.append(result)
+                # uow.register(
+                #    NotificationOp(
+                #        CommunityInclusionSubmittedNotificationBuilder.build(
+                #            request_item._request
+                #        )
+                #    )
+                # )
+            except (NoResultFound, PIDDoesNotExistError):
+                # todo ask about the underscore (translation?)
+                result["message"] = "Community not found."
+                errors.append(result)
+            except (
+                CommunityAlreadyExists,
+                # OpenRequestAlreadyExists,
+                # InvalidAccessRestrictions,
+                PermissionDeniedError,
+            ) as ex:
+                result["message"] = ex.description
+                errors.append(result)
+
+        uow.register(IndexRefreshOp(indexer=self.indexer))
+
+        return processed, errors
+
+    def include_directly(
+        self, record, community_or_id, uow, record_service=None, default=None
+    ):
         # integrity check, it should never happen on a published record
         # assert not record.parent.review
-
-        # set the community to `default` if it is the first
-        default = not record.parent.communities
-        record.parent.communities.add(community, default=default)
+        applied_record_service = record_service or self.record_service
+        if default is None:
+            default = not record.parent.communities
+        record.parent.communities.add(community_or_id, default=default)
         uow.register(RecordCommitOp(record.parent))
-        uow.register(RecordIndexOp(record, indexer=self.record_service.indexer))
+        uow.register(RecordIndexOp(record, indexer=applied_record_service.indexer))
+        return record
 
     def _include(self, identity, community_id, comment, require_review, record, uow):
         """Create request to add the community to the record."""
@@ -128,92 +196,12 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         self.require_permission(
             identity, "community_allows_adding_records", community=community
         )
-        include_record_in_community(record, community, self.record_service, uow)
+        self.include_directly(record, community, uow, record_service=self.record_service)
         return self.result_item()
 
     @unit_of_work()
-    def add_to_draft(self, identity, id_, data, uow=None):
-        draft = self.draft_cls.pid.resolve(id_, registered_only=False)
-        return self.add_to_record(identity, draft, data, uow)
-
-    @unit_of_work()
-    def add_to_published_record(self, identity, id_, data, uow=None):
-        record = self.record_cls.pid.resolve(id_)
-        return self.add_to_record(identity, record, data, uow)
-
-    def add_to_record(self, identity, record, data, uow):
-        valid_data, errors = self.schema.load(
-            data,
-            context={
-                "identity": identity,
-                "max_number": self.config.max_number_of_additions,
-            },
-            raise_errors=True,
-        )
-        communities = valid_data["communities"]
-        self.require_permission(identity, "user_add_communities_to_records", record=record)
-
-        processed = []
-        for community in communities:
-            community_id = community["id"]
-            comment = community.get("comment", None)
-            require_review = community.get("require_review", False)
-
-            result = {
-                "community_id": community_id,
-            }
-            try:
-                self._include(
-                    identity, community_id, comment, require_review, record, uow
-                )
-                # result["request_id"] = str(request_item.data["id"])
-                # result["request"] = request_item.to_dict()
-                processed.append(result)
-                # uow.register(
-                #    NotificationOp(
-                #        CommunityInclusionSubmittedNotificationBuilder.build(
-                #            request_item._request
-                #        )
-                #    )
-                # )
-            except (NoResultFound, PIDDoesNotExistError):
-                # todo ask about the underscore (translation?)
-                result["message"] = "Community not found."
-                errors.append(result)
-            except (
-                CommunityAlreadyExists,
-                # OpenRequestAlreadyExists,
-                # InvalidAccessRestrictions,
-                PermissionDeniedError,
-            ) as ex:
-                result["message"] = ex.description
-                errors.append(result)
-
-        uow.register(IndexRefreshOp(indexer=self.indexer))
-
-        return processed, errors
-
-    def _remove(self, identity, community_id, record):
-        """Remove a community from the record."""
-        if community_id not in record.parent.communities.ids:
-            # try if it's the community slug instead
-            community_id = str(current_communities.service.record_cls.pid.resolve(community_id).id)
-            if community_id not in record.parent.communities.ids:
-                raise RecordCommunityMissing(record.id, community_id)
-
-        # check permission here, per community: curator cannot remove another community
-        self.require_permission(
-            identity, "remove_community_from_record", record=record, community_id=community_id
-        )
-
-        # Default community is deleted when the exact same community is removed from the record
-        record.parent.communities.remove(community_id)
-
-    @unit_of_work()
-    def remove(self, identity, id_, data, uow):
-        """Remove communities from the record."""
-        record = self.record_cls.pid.resolve(id_)
-
+    def remove(self, identity, id_, data, uow=None):
+        record = self._resolve_record(id_)
         valid_data, errors = self.schema.load(
             data,
             context={
@@ -245,6 +233,27 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
 
         return processed, errors
 
+    def _remove(self, identity, community_id, record):
+        """Remove a community from the record."""
+        if community_id not in record.parent.communities.ids:
+            # try if it's the community slug instead
+            community_id = str(
+                current_communities.service.record_cls.pid.resolve(community_id).id
+            )
+            if community_id not in record.parent.communities.ids:
+                raise RecordCommunityMissing(record.id, community_id)
+
+        # check permission here, per community: curator cannot remove another community
+        self.require_permission(
+            identity,
+            "remove_community_from_record",
+            record=record,
+            community_id=community_id,
+        )
+
+        # Default community is deleted when the exact same community is removed from the record
+        record.parent.communities.remove(community_id)
+
     def search(
         self,
         identity,
@@ -256,7 +265,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         **kwargs,
     ):
         """Search for record's communities."""
-        record = self.record_cls.pid.resolve(id_)
+        record = self._resolve_record(id_)
         self.require_permission(identity, "read", record=record)
 
         communities_ids = record.parent.communities.ids

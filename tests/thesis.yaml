@@ -10,13 +10,24 @@ record:
     qualified: thesis
   permissions:
     presets: ['community']
-  service-config:
-    components:
-      - SetCommunityComponent
-    imports:
-      - import: oarepo_communities.components.inclusion.SetCommunityComponent
+#  service-config:
+#    components:
+#      - SetCommunityComponent
+#    imports:
+#      - import: oarepo_communities.components.inclusion.SetCommunityComponent
   use:
     - invenio
+  requests:
+    community-submission:
+      type:
+        base-classes:
+          - CommunitySubmission
+        imports:
+          - import: oarepo_communities.requests.submission.CommunitySubmission
+      actions:
+        approve:
+          generate: False
+
   draft: {}
   record-communities:
     permissions:

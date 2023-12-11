@@ -16,6 +16,18 @@ from invenio_records_resources.services import (
 from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
+from invenio_communities.proxies import current_communities
+
+from oarepo_communities.requests.submission import CommunitySubmission
+from oarepo_communities.services.errors import CommunityAlreadyExists
+from invenio_requests.proxies import current_requests_service, current_request_type_registry
+
+from oarepo_communities.services.errors import OpenRequestAlreadyExists
+
+from invenio_requests.resolvers.registry import ResolverRegistry
+
+from thesis.records.requests.community_submission.types import CommunitySubmissionRequestType
+
 
 # from invenio_rdm_records.proxies import current_record_communities_service
 
@@ -26,8 +38,9 @@ class CommunityRecordsService(RecordService):
     The record communities service is in charge of managing the records of a given community.
     """
 
-    def __init__(self, config, record_communities_service=None):
+    def __init__(self, config, record_service=None, record_communities_service=None):
         super().__init__(config)
+        self.record_service = record_service
         self.record_communities_service = record_communities_service
 
     @property
@@ -40,6 +53,23 @@ class CommunityRecordsService(RecordService):
         """Factory for creating a community class."""
         return self.config.community_cls
 
+    def _exists(self, identity, community_id, record):
+        """Return the request id if an open request already exists, else None."""
+        results = current_requests_service.search(
+            identity,
+            extra_filter=dsl.query.Bool(
+                "must",
+                must=[
+                    dsl.Q("term", **{"receiver.community": community_id}),
+                    dsl.Q("term", **{"topic.record": record.pid.pid_value}),
+                    # todo the type is model builder generated
+                    dsl.Q("term", **{"type": CommunitySubmissionRequestType.type_id}),
+                    dsl.Q("term", **{"is_open": True}),
+                ],
+            ),
+        )
+        return next(results.hits)["id"] if results.total > 0 else None
+
     def search(
         self,
         identity,
@@ -47,11 +77,10 @@ class CommunityRecordsService(RecordService):
         params=None,
         search_preference=None,
         extra_filter=None,
+        expand=False,
         **kwargs,
     ):
-        community = self.community_cls.pid.resolve(
-            community_id
-        )
+        community = self.community_cls.pid.resolve(community_id)
         self.require_permission(identity, "search", community=community)
         params = params or {}
 
@@ -60,7 +89,7 @@ class CommunityRecordsService(RecordService):
         )
         if extra_filter is not None:
             community_filter = community_filter & extra_filter
-        # todo drafts?
+
         search = self._search(
             "search",
             identity,
@@ -98,6 +127,57 @@ class CommunityRecordsService(RecordService):
                 },
             ),
             links_item_tpl=self.links_item_tpl,
+            expandable_fields=self.expandable_fields,
+            expand=expand,
+        )
+
+    def search_drafts(
+        self,
+        identity,
+        community_id,
+        params=None,
+        search_preference=None,
+        extra_filter=None,
+        expand=False,
+        **kwargs,
+    ):
+        community = self.community_cls.pid.resolve(community_id)
+        self.require_permission(identity, "search_drafts")
+        params = params or {}
+
+        community_filter = dsl.Q(
+            "term", **{"parent.communities.ids.keyword": str(community.id)}
+        )
+        if extra_filter is not None:
+            community_filter = community_filter & extra_filter
+
+        search = self._search(
+            "search_drafts",
+            identity,
+            params,
+            search_preference,
+            record_cls=self.config.draft_cls,
+            extra_filter=community_filter,
+            permission_action="read_draft",
+            **kwargs,
+        )
+        search_result = search.execute()
+
+        return self.result_list(
+            self,
+            identity,
+            search_result,
+            params,
+            links_tpl=LinksTemplate(
+                self.config.links_search_community_records,
+                context={
+                    "args": params,
+                    "id": str(community.id),
+                },
+            ),
+            links_item_tpl=self.links_item_tpl,
+            expandable_fields=self.expandable_fields,
+            expand=expand,
         )
 
     def _remove(self, community, record, identity):
@@ -114,7 +194,9 @@ class CommunityRecordsService(RecordService):
         """Remove records from a community."""
         community = self.community_cls.pid.resolve(community_id)
 
-        self.require_permission(identity, "remove_records_from_community", community=community)
+        self.require_permission(
+            identity, "remove_records_from_community", community=community
+        )
 
         valid_data, errors = self.community_record_schema.load(
             data,
@@ -147,3 +229,75 @@ class CommunityRecordsService(RecordService):
                 )
 
         return errors
+
+    @unit_of_work()
+    def create_in_community(self, identity, community_id, data, uow=None, expand=False):
+        # community_id may be the slug coming from resource
+        community_record = current_communities.service.record_cls.pid.resolve(community_id)
+        self.require_permission(
+            identity, "create_in_community", community=community_record
+        )
+
+        # todo check permissions and correct result serialization
+        # idk alse if the include directly is supposed to be publicly accessible?
+        # todo add record service in mb ext
+        record = self.record_service.create(identity, data, uow=uow, expand=expand)._record
+
+        # todo this should probably be reconceptualized, how to return the actual record item with the updated parent?
+        record_with_community_in_parent = self.record_communities_service.include_directly(
+            record, community_record, uow=uow, record_service=self.record_service,
+        )
+        record_item = self.record_service.result_item(
+            self.record_service,
+            identity,
+            record_with_community_in_parent,
+            links_tpl=self.record_service.links_item_tpl,
+            expandable_fields=self.record_service.expandable_fields,
+            expand=expand,
+        )
+
+        return record_item
+
+    @unit_of_work()
+    def community_submission(self, identity, community_id, record_id, uow=None, expand=False):
+        community = current_communities.service.record_cls.pid.resolve(community_id)
+        record = self.record_service.config.record_cls.pid.resolve(record_id)
+
+        # todo do i need separate permission on who can create request; ie. authenticated users
+        #self.require_permission(identity, "submit_to_community", community=community)
+
+        already_included = community_id in record.parent.communities
+        if already_included:
+            raise CommunityAlreadyExists()
+
+        existing_request_id = self._exists(identity, community_id, record)
+        if existing_request_id:
+            raise OpenRequestAlreadyExists(existing_request_id)
+
+        # todo request type mb generated
+        type_ = current_request_type_registry.lookup(CommunitySubmissionRequestType.type_id)
+        receiver = {"oarepo_community": community_id}
+
+        request_item = current_requests_service.create(
+            identity,
+            {},
+            type_,
+            receiver,
+            topic=record,
+            uow=uow,
+        )
+
+        # create review request
+        #request_item = current_rdm_records.community_inclusion_service.submit(
+        #    identity, record, community, request_item._request, comment, uow
+        #)
+        # include directly when allowed
+        #if not require_review:
+        #    request_item = current_rdm_records.community_inclusion_service.include(
+        #        identity, community, request_item._request, uow
+        #    )
+
+        request_item = current_requests_service.execute_action(
+            identity, request_item.id, "submit", uow=uow
+        )
+        return request_item

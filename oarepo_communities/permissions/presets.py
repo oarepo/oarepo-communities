@@ -12,7 +12,7 @@ from .record import CommunityRolePermittedInCF
 class CommunityPermissionPolicy(RecordPermissionPolicy):
     can_search = [
         SystemProcess(),
-        AuthenticatedUser(), #the base service does not provide a way to check community in permissions
+        AuthenticatedUser(),  # the base service does not provide a way to check community in permissions
     ]
     can_read = [
         SystemProcess(),
@@ -133,13 +133,15 @@ class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
     ]
 
 
-
 class CommunityRecordsEveryonePermissionPolicy(BasePermissionPolicy):
     can_remove_records_from_community = [
         SystemProcess(),
         AnyUser(),
     ]
-
+    can_submit_to_community = [
+        SystemProcess(),
+        AnyUser(),
+    ]
 
 class RecordCommunitiesCommunityPermissionPolicy(BasePermissionPolicy):
     can_user_add_communities_to_records = [
@@ -154,12 +156,29 @@ class RecordCommunitiesCommunityPermissionPolicy(BasePermissionPolicy):
     ]
     can_remove_community_from_record = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_remove_community_from_record"),
+        CommunityRolePermittedInCF(
+            community_permission_name="can_remove_community_from_record"
+        ),
     ]
 
 
 class CommunityRecordsCommunityPermissionPolicy(BasePermissionPolicy):
     can_remove_records_from_community = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_remove_records_from_community"),
+        CommunityRolePermittedInCF(
+            community_permission_name="can_remove_records_from_community"
+        ),
+    ]
+    can_create_in_community = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(
+            community_permission_name="can_create_in_community"
+        ),
+    ]
+
+    can_submit_to_community = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(
+            community_permission_name="can_submit_to_community"
+        ),
     ]

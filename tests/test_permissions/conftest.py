@@ -167,6 +167,8 @@ def community_permissions_cf():
         "custom_fields": {
             "permissions": {
                 "owner": {
+                    "can_create_in_community": True,
+                    "can_submit_to_community": True,
                     "can_publish": True,
                     "can_read": True,
                     "can_update": True,
@@ -175,8 +177,6 @@ def community_permissions_cf():
                     "can_community_allows_adding_records": True,
                     "can_remove_community_from_record": True,
                     "can_remove_records_from_community": True,
-
-
                 },
                 "manager": {
                     "can_publish": True,
@@ -189,6 +189,7 @@ def community_permissions_cf():
                     "can_remove_records_from_community": True,
                 },
                 "curator": {
+                    "can_submit_to_community": True,
                     "can_read": True,
                     "can_update": True,
                     "can_delete": False,
@@ -198,6 +199,8 @@ def community_permissions_cf():
                     "can_remove_records_from_community": True,
                 },
                 "reader": {
+                    "can_create_in_community": False,
+                    "can_submit_to_community": False,
                     "can_search": True,
                     "can_publish": False,
                     "can_read": True,
@@ -267,21 +270,32 @@ def community_with_permissions_cf(community, community_permissions_cf, vocab_cf)
     community = current_communities.service.update(system_identity, data["id"], data)
     Community.index.refresh()
     return community
+
+
 @pytest.fixture()
-def community_with_permission_cf_factory(minimal_community, vocab_cf, community_permissions_cf):
+def community_with_permission_cf_factory(
+    minimal_community, vocab_cf, community_permissions_cf
+):
     def create_community(slug, community_owner, community_permissions_cf_custom=None):
-        community_permissions_cf_actual = community_permissions_cf_custom or community_permissions_cf
+        community_permissions_cf_actual = (
+            community_permissions_cf_custom or community_permissions_cf
+        )
         minimal_community_actual = copy.deepcopy(minimal_community)
         minimal_community_actual["slug"] = slug
-        community = _community_get_or_create(minimal_community_actual, community_owner.identity)
+        community = _community_get_or_create(
+            minimal_community_actual, community_owner.identity
+        )
+        community_owner.identity.provides.add(
+            CommunityRoleNeed(community.data["id"], "owner")
+        )
         data = community.data | community_permissions_cf_actual
-        community = current_communities.service.update(system_identity, data["id"], data)
+        community = current_communities.service.update(
+            system_identity, data["id"], data
+        )
         Community.index.refresh()
         return community
+
     return create_community
-
-
-
 
 
 @pytest.fixture()

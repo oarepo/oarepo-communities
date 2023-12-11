@@ -17,7 +17,9 @@ fi
 python3 -m venv $BUILDER_VENV
 . $BUILDER_VENV/bin/activate
 pip install -U setuptools pip wheel
-pip install oarepo-model-builder oarepo-model-builder-drafts oarepo-model-builder-communities
+pip install oarepo-model-builder oarepo-model-builder-requests
+editable_install /home/ron/prace/oarepo-model-builder-drafts
+editable_install /home/ron/prace/oarepo-model-builder-communities
 if test -d $BUILD_TEST_DIR/$MODEL; then
   rm -rf $BUILD_TEST_DIR/$MODEL
 fi

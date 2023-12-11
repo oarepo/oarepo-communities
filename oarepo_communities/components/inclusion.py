@@ -1,9 +1,9 @@
-
 from invenio_records_resources.services.records.components import ServiceComponent
 
 from oarepo_communities.services.record_communities.service import (
     include_record_in_community,
 )
+
 
 class SetCommunityComponent(ServiceComponent):
     def create(self, identity, data=None, record=None, **kwargs):
@@ -13,5 +13,3 @@ class SetCommunityComponent(ServiceComponent):
             return
         community_id = data["community_id"]
         include_record_in_community(record, community_id, self.service, self.uow)
-
-

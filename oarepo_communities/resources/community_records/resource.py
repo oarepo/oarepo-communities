@@ -22,7 +22,10 @@ class CommunityRecordsResource(RecordResource):
         routes = self.config.routes
         url_rules = [
             route("GET", p(routes["list"]), self.search),
+            route("GET", p(routes["list-draft"]), self.search_drafts),
+            route("POST", p(routes["list"]), self.create_in_community),
             route("DELETE", p(routes["list"]), self.delete),
+            route("POST", p(routes["item"]), self.community_submission)
         ]
 
         return url_rules
@@ -49,6 +52,47 @@ class CommunityRecordsResource(RecordResource):
         DELETE /communities/<pid_value>/records
         """
         errors = self.service.delete(
+            identity=g.identity,
+            community_id=resource_requestctx.view_args["pid_value"],
+            data=resource_requestctx.data,
+        )
+        response = {}
+        if errors:
+            response["errors"] = errors
+        return response, 200
+
+    @request_view_args
+    @response_handler()
+    @request_data
+    def create_in_community(self):
+        item = self.service.create_in_community(
+            identity=g.identity,
+            community_id=resource_requestctx.view_args["pid_value"],
+            data=resource_requestctx.data,
+        )
+
+        return item.to_dict(), 201
+    @request_view_args
+    @response_handler()
+    @request_data
+    def community_submission(self):
+        item = self.service.community_submission(
+            identity=g.identity,
+            community_id=resource_requestctx.view_args["pid_value"],
+            record_id=resource_requestctx.view_args["record_id"]
+        )
+
+        return item.to_dict(), 201
+
+    @request_view_args
+    @response_handler()
+    @request_data
+    def search_drafts(self):
+        """Removes records from the communities.
+
+        DELETE /communities/<pid_value>/records
+        """
+        errors = self.service.search_drafts(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
             data=resource_requestctx.data,
