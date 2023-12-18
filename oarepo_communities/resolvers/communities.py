@@ -1,5 +1,11 @@
+from oarepo import __version__ as oarepo_version
+
 from invenio_communities.communities.records.api import Community
-from invenio_communities.communities.resolver import CommunityPKProxy, CommunityResolver
+if oarepo_version.split(".")[0] == "11":
+    from invenio_communities.communities.resolver import CommunityPKProxy, CommunityResolver
+else:
+    from invenio_communities.communities.entity_resolvers import CommunityPKProxy, CommunityResolver
+
 from invenio_communities.communities.services.config import CommunityServiceConfig
 
 from ..permissions.record import needs_from_community_ids
