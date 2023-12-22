@@ -21,6 +21,20 @@ from oarepo_communities.services.errors import (
 )
 
 
+def remove(community_id, record):
+    """Remove a community from the record."""
+    if community_id not in record.parent.communities.ids:
+        # try if it's the community slug instead
+        community_id = str(
+            current_communities.service.record_cls.pid.resolve(community_id).id
+        )
+        if community_id not in record.parent.communities.ids:
+            raise RecordCommunityMissing(record.id, community_id)
+
+    # Default community is deleted when the exact same community is removed from the record
+    record.parent.communities.remove(community_id)
+
+
 def include_record_in_community(
     record, community_or_id, record_service, uow, default=None
 ):
@@ -215,7 +229,14 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         for community in communities:
             community_id = community["id"]
             try:
-                self._remove(identity, community_id, record)
+                # check permission here, per community: curator cannot remove another community
+                self.require_permission(
+                    identity,
+                    "remove_community_from_record",
+                    record=record,
+                    community_id=community_id,
+                )
+                remove(community_id, record)
                 processed.append({"community": community_id})
             except (RecordCommunityMissing, PermissionDeniedError) as ex:
                 errors.append(
@@ -232,27 +253,6 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             )
 
         return processed, errors
-
-    def _remove(self, identity, community_id, record):
-        """Remove a community from the record."""
-        if community_id not in record.parent.communities.ids:
-            # try if it's the community slug instead
-            community_id = str(
-                current_communities.service.record_cls.pid.resolve(community_id).id
-            )
-            if community_id not in record.parent.communities.ids:
-                raise RecordCommunityMissing(record.id, community_id)
-
-        # check permission here, per community: curator cannot remove another community
-        self.require_permission(
-            identity,
-            "remove_community_from_record",
-            record=record,
-            community_id=community_id,
-        )
-
-        # Default community is deleted when the exact same community is removed from the record
-        record.parent.communities.remove(community_id)
 
     def search(
         self,

@@ -18,14 +18,12 @@ from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
 from invenio_communities.proxies import current_communities
 
-from oarepo_communities.requests.submission import CommunitySubmission
 from oarepo_communities.services.errors import CommunityAlreadyExists
 from invenio_requests.proxies import current_requests_service, current_request_type_registry
 
 from oarepo_communities.services.errors import OpenRequestAlreadyExists
 
-from invenio_requests.resolvers.registry import ResolverRegistry
-
+from oarepo_communities.utils.utils import _exists
 from thesis.records.requests.community_submission.types import CommunitySubmissionRequestType
 
 
@@ -52,23 +50,6 @@ class CommunityRecordsService(RecordService):
     def community_cls(self):
         """Factory for creating a community class."""
         return self.config.community_cls
-
-    def _exists(self, identity, community_id, record):
-        """Return the request id if an open request already exists, else None."""
-        results = current_requests_service.search(
-            identity,
-            extra_filter=dsl.query.Bool(
-                "must",
-                must=[
-                    dsl.Q("term", **{"receiver.community": community_id}),
-                    dsl.Q("term", **{"topic.record": record.pid.pid_value}),
-                    # todo the type is model builder generated
-                    dsl.Q("term", **{"type": CommunitySubmissionRequestType.type_id}),
-                    dsl.Q("term", **{"is_open": True}),
-                ],
-            ),
-        )
-        return next(results.hits)["id"] if results.total > 0 else None
 
     def search(
         self,
@@ -257,7 +238,7 @@ class CommunityRecordsService(RecordService):
         )
 
         return record_item
-
+    """
     @unit_of_work()
     def community_submission(self, identity, community_id, record_id, uow=None, expand=False):
         community = current_communities.service.record_cls.pid.resolve(community_id)
@@ -270,7 +251,7 @@ class CommunityRecordsService(RecordService):
         if already_included:
             raise CommunityAlreadyExists()
 
-        existing_request_id = self._exists(identity, community_id, record)
+        existing_request_id = _exists(identity, community_id, record)
         if existing_request_id:
             raise OpenRequestAlreadyExists(existing_request_id)
 
@@ -301,3 +282,4 @@ class CommunityRecordsService(RecordService):
             identity, request_item.id, "submit", uow=uow
         )
         return request_item
+        """

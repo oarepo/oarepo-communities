@@ -24,9 +24,12 @@ record:
           - CommunitySubmission
         imports:
           - import: oarepo_communities.requests.submission.CommunitySubmission
-      actions:
-        approve:
-          generate: False
+    community-migration:
+      type:
+        base-classes:
+          - CommunityMigration
+        imports:
+          - import: oarepo_communities.requests.migration.CommunityMigration
 
   draft: {}
   record-communities:

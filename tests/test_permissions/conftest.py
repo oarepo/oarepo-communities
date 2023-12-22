@@ -371,3 +371,23 @@ def sample_draft(app, db, input_data, community):
     draft_item = current_service.create(system_identity, input_data)
     ThesisDraft.index.refresh()
     return ThesisDraft.pid.resolve(draft_item.id, registered_only=False)
+
+@pytest.fixture
+def request_data_factory():
+    def _community_submission_data(community, topic, type="community-submission", creator=None, payload=None):
+        if not isinstance(community, str):
+            community_id = community.id
+        else:
+            community_id = community
+        input_data = {
+            "receiver": {"oarepo_community": community_id},
+            "request_type": type,
+            "topic": {"thesis": topic["id"]}
+        }
+        if creator:
+            input_data["creator"] = creator
+        if payload:
+            input_data["payload"] = payload
+        return input_data
+    return _community_submission_data
+

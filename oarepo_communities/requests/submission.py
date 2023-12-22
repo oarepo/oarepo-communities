@@ -1,11 +1,11 @@
 from flask_babelex import lazy_gettext as _
 from invenio_records_resources.services.uow import RecordCommitOp, RecordIndexOp
 from invenio_requests.customizations import RequestType, actions
+from invenio_access.permissions import system_identity
 
+from ..services.errors import CommunityAlreadyExists, OpenRequestAlreadyExists
 from ..services.record_communities.service import include_record_in_community
-from ..utils.utils import get_matching_service
-
-# from ..proxies import current_rdm_records_service as service
+from ..utils.utils import get_matching_service, _exists
 
 
 #
@@ -14,45 +14,33 @@ from ..utils.utils import get_matching_service
 class SubmitAction(actions.SubmitAction):
     """Submit action."""
 
-    def execute(self, identity, uow):
-        """Execute the submit action."""
+    def can_execute(self):
+        community = self.request.receiver.resolve()
         record = self.request.topic.resolve()
-        # todo
-        # service._validate_draft(identity, draft)
-        # Set the record's title as the request title.
-        # self.request["title"] = draft.metadata["title"]
-        super().execute(identity, uow)
+        id_ = str(community.id)
+        already_included = id_ in record.parent.communities
+        if already_included:
+            return False
 
+        existing_request_id = _exists(system_identity, id_, record, self.request.type.type_id)
+        if existing_request_id:
+            return False
+
+        return True
 
 class AcceptAction(actions.AcceptAction):
     """Accept action."""
 
     def execute(self, identity, uow):
-        """Accept record into community."""
-        # Resolve the topic and community - the request type only allow for
-        # community receivers and record topics.
         record = self.request.topic.resolve()
         community = self.request.receiver.resolve()
         service = get_matching_service(record)
 
-        service._validate_draft(identity, record)
-
-        # Unset review from record (still accessible from request)
-        # The curator (receiver) should still have access, via the community
-        # The creator (uploader) should also still have access, because
-        # they're the uploader
         record.parent.community_submission = None
 
-        # TODO:
-        # - Put below into a service method
-        # - Check permissions
-
-        # Add community to record.
         default = self.request.type.set_as_default
         include_record_in_community(record, community, service, uow, default)
-        # Publish the record
-        # TODO: Ensure that the accpeting user has permissions to publish.
-        # service.publish(identity, draft.pid.pid_value, uow=uow)
+
         super().execute(identity, uow)
 
 

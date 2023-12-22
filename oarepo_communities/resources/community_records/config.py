@@ -11,7 +11,7 @@ class CommunityRecordsResourceConfig(RecordResourceConfig, ConfiguratorMixin):
     routes = {
         "list": "/<pid_value>/records",
         "list-draft": "/<pid_value>/draft/records",
-        "item": "/<pid_value>/records/<record_id>/<community_to_id>"
+        "item": "/<pid_value>/records/<record_id>"
     }
 
     request_view_args = {
