@@ -1,12 +1,8 @@
-from flask_babelex import lazy_gettext as _
-from invenio_access.permissions import system_identity
-from invenio_requests.customizations import RequestType
-from invenio_requests.customizations import actions
 from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_requests.utils import get_matching_service, request_exists, resolve_reference_dict, open_request_exists
-
-from ..errors import CommunityAlreadyIncludedException
-from ..services.record_communities.service import include_record_in_community
+from invenio_requests.customizations import actions
+from ..errors import CommunityAlreadyIncludedException, PrimaryCommunityException, CommunityNotIncludedException
+from ..services.record_communities.service import include_record_in_community, remove
 
 
 class AcceptAction(actions.AcceptAction):
@@ -16,19 +12,17 @@ class AcceptAction(actions.AcceptAction):
         record = self.request.topic.resolve()
         community = self.request.receiver.resolve()
         service = get_matching_service(record)
-        include_record_in_community(record, community, service, uow, default=self.request.type.set_as_default)
+        remove(community.id, record, service, uow)
 
         super().execute(identity, uow)
 
 
 # Request
 #
-
-class CommunitySubmissionRequestType(OARepoRequestType):
+class RemoveSecondaryRequestType(OARepoRequestType):
     """Review request for submitting a record to a community."""
 
-    type_id = "community_submission"
-    name = _("Community submission")
+    type_id = "remove_secondary_community"
 
     block_publish = True
     set_as_default = True
@@ -39,7 +33,7 @@ class CommunitySubmissionRequestType(OARepoRequestType):
     allowed_receiver_ref_types = ["oarepo_community"]
     allowed_topic_ref_types = ["record"]
 
-    needs_context = {"community_permission_name": "can_submit_to_community"}
+    needs_context = {"community_permission_name": "can_remove_secondary_community"}
 
     available_actions = {
         **OARepoRequestType.available_actions,
@@ -49,8 +43,9 @@ class CommunitySubmissionRequestType(OARepoRequestType):
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
         receiver_community_id = list(receiver.values())[0]
-        topic = resolve_reference_dict(topic)
-        already_included = receiver_community_id in topic.parent.communities.ids
-        if already_included:
-            raise CommunityAlreadyIncludedException
-        #open_request_exists(topic, self.type_id)
+        topic_obj = resolve_reference_dict(topic)
+        not_included = receiver_community_id not in topic_obj.parent.communities
+        if not_included:
+            raise CommunityNotIncludedException
+        if receiver_community_id == str(topic_obj.parent.communities.default.id):
+            raise PrimaryCommunityException

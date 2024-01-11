@@ -21,7 +21,7 @@ from oarepo_communities.services.errors import (
 )
 
 
-def remove(community_id, record):
+def remove(community_id, record, record_service, uow):
     """Remove a community from the record."""
     if community_id not in record.parent.communities.ids:
         # try if it's the community slug instead
@@ -33,6 +33,8 @@ def remove(community_id, record):
 
     # Default community is deleted when the exact same community is removed from the record
     record.parent.communities.remove(community_id)
+    uow.register(RecordCommitOp(record.parent))
+    uow.register(RecordIndexOp(record, indexer=record_service.indexer))
 
 
 def include_record_in_community(
@@ -210,7 +212,9 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         self.require_permission(
             identity, "community_allows_adding_records", community=community
         )
-        self.include_directly(record, community, uow, record_service=self.record_service)
+        self.include_directly(
+            record, community, uow, record_service=self.record_service
+        )
         return self.result_item()
 
     @unit_of_work()

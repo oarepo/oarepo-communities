@@ -25,7 +25,7 @@ class CommunityRecordsResource(RecordResource):
             route("GET", p(routes["list-draft"]), self.search_drafts),
             route("POST", p(routes["list"]), self.create_in_community),
             route("DELETE", p(routes["list"]), self.delete),
-            route("POST", p(routes["item"]), self.community_submission)
+            # route("POST", p(routes["item"]), self.community_submission)
         ]
 
         return url_rules
@@ -72,6 +72,8 @@ class CommunityRecordsResource(RecordResource):
         )
 
         return item.to_dict(), 201
+
+    """
     @request_view_args
     @response_handler()
     @request_data
@@ -83,15 +85,12 @@ class CommunityRecordsResource(RecordResource):
         )
 
         return item.to_dict(), 201
+    """
 
     @request_view_args
     @response_handler()
     @request_data
     def search_drafts(self):
-        """Removes records from the communities.
-
-        DELETE /communities/<pid_value>/records
-        """
         errors = self.service.search_drafts(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],

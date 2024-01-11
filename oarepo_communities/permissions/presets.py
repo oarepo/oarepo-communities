@@ -25,7 +25,6 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
     ]
     can_delete = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_delete"),
     ]
     can_manage = [
         SystemProcess(),
@@ -44,9 +43,9 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_get_content_files"),
     ]
-    can_commit_files = [SystemProcess()], CommunityRolePermittedInCF(
+    can_commit_files = [SystemProcess(), CommunityRolePermittedInCF(
         community_permission_name="can_commit_files"
-    )
+    )]
     can_read_files = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_read_files"),
@@ -86,7 +85,6 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
     ]
     can_publish = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_publish"),
     ]
     can_draft_create_files = [
         SystemProcess(),
@@ -143,6 +141,7 @@ class CommunityRecordsEveryonePermissionPolicy(BasePermissionPolicy):
         AnyUser(),
     ]
 
+
 class RecordCommunitiesCommunityPermissionPolicy(BasePermissionPolicy):
     can_user_add_communities_to_records = [
         SystemProcess(),
@@ -171,14 +170,24 @@ class CommunityRecordsCommunityPermissionPolicy(BasePermissionPolicy):
     ]
     can_create_in_community = [
         SystemProcess(),
-        CommunityRolePermittedInCF(
-            community_permission_name="can_create_in_community"
-        ),
+        CommunityRolePermittedInCF(community_permission_name="can_create_in_community"),
     ]
 
     can_submit_to_community = [
         SystemProcess(),
-        CommunityRolePermittedInCF(
-            community_permission_name="can_submit_to_community"
-        ),
+        CommunityRolePermittedInCF(community_permission_name="can_submit_to_community"),
+    ]
+
+class CommunityRequestsPermissionPolicy(BasePermissionPolicy):
+    can_delete_request = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_delete_request"),
+    ],
+    can_publish_request = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_publish_request"),
+    ]
+    can_add_secondary_community = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_submit_secondary_community"),
     ]

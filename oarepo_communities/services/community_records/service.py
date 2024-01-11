@@ -7,6 +7,7 @@
 
 """RDM Community Records Service."""
 
+from invenio_communities.proxies import current_communities
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_resources.services import (
     LinksTemplate,
@@ -16,16 +17,6 @@ from invenio_records_resources.services import (
 from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
-from invenio_communities.proxies import current_communities
-
-from oarepo_communities.services.errors import CommunityAlreadyExists
-from invenio_requests.proxies import current_requests_service, current_request_type_registry
-
-from oarepo_communities.services.errors import OpenRequestAlreadyExists
-
-from oarepo_communities.utils.utils import _exists
-from thesis.records.requests.community_submission.types import CommunitySubmissionRequestType
-
 
 # from invenio_rdm_records.proxies import current_record_communities_service
 
@@ -81,19 +72,6 @@ class CommunityRecordsService(RecordService):
             **kwargs,
         )
         search_result = search.execute()
-
-        """
-        return self.result_list(
-            self,
-            identity,
-            search_result,
-            params,
-            links_tpl=LinksTemplate(self.config.links_search, context={"args": params}),
-            links_item_tpl=self.links_item_tpl,
-            expandable_fields=self.expandable_fields,
-            expand=expand,
-        )
-        """
 
         return self.result_list(
             self,
@@ -214,19 +192,22 @@ class CommunityRecordsService(RecordService):
     @unit_of_work()
     def create_in_community(self, identity, community_id, data, uow=None, expand=False):
         # community_id may be the slug coming from resource
-        community_record = current_communities.service.record_cls.pid.resolve(community_id)
-        self.require_permission(
-            identity, "create_in_community", community=community_record
-        )
+        community = current_communities.service.record_cls.pid.resolve(community_id)
+        self.require_permission(identity, "create_in_community", community=community)
 
-        # todo check permissions and correct result serialization
-        # idk alse if the include directly is supposed to be publicly accessible?
         # todo add record service in mb ext
-        record = self.record_service.create(identity, data, uow=uow, expand=expand)._record
+        record = self.record_service.create(
+            identity, data, uow=uow, expand=expand
+        )._record
 
         # todo this should probably be reconceptualized, how to return the actual record item with the updated parent?
-        record_with_community_in_parent = self.record_communities_service.include_directly(
-            record, community_record, uow=uow, record_service=self.record_service,
+        record_with_community_in_parent = (
+            self.record_communities_service.include_directly(
+                record,
+                community,
+                uow=uow,
+                record_service=self.record_service,
+            )
         )
         record_item = self.record_service.result_item(
             self.record_service,
@@ -238,6 +219,7 @@ class CommunityRecordsService(RecordService):
         )
 
         return record_item
+
     """
     @unit_of_work()
     def community_submission(self, identity, community_id, record_id, uow=None, expand=False):

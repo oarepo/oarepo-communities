@@ -10,28 +10,62 @@ record:
     qualified: thesis
   permissions:
     presets: ['community']
-#  service-config:
-#    components:
-#      - SetCommunityComponent
-#    imports:
-#      - import: oarepo_communities.components.inclusion.SetCommunityComponent
+
   use:
     - invenio
   requests:
     community-submission:
       type:
         base-classes:
-          - CommunitySubmission
+          - CommunitySubmissionRequestType
         imports:
-          - import: oarepo_communities.requests.submission.CommunitySubmission
+          - import: oarepo_communities.requests.submission.CommunitySubmissionRequestType
     community-migration:
       type:
         base-classes:
-          - CommunityMigration
+          - CommunityMigrationRequestType
         imports:
-          - import: oarepo_communities.requests.migration.CommunityMigration
+          - import: oarepo_communities.requests.migration.CommunityMigrationRequestType
+    delete-record:
+      type:
+        base-classes:
+          - CommunityDeleteRecordRequestType
+        imports:
+          - import: oarepo_communities.requests.community_delete.CommunityDeleteRecordRequestType
+    remove-secondary:
+      type:
+        base-classes:
+          - RemoveSecondaryRequestType
+        imports:
+          - import: oarepo_communities.requests.remove_secondary.RemoveSecondaryRequestType
 
-  draft: {}
+  draft:
+    requests:
+      community-submission:
+        type:
+          base-classes:
+            - CommunitySubmissionRequestType
+          imports:
+            - import: oarepo_communities.requests.submission.CommunitySubmissionRequestType
+      community-migration:
+        type:
+          base-classes:
+            - CommunityMigrationRequestType
+          imports:
+            - import: oarepo_communities.requests.migration.CommunityMigrationRequestType
+      publish-draft:
+        type:
+          base-classes:
+            - CommunityPublishDraftRequestType
+          imports:
+            - import: oarepo_communities.requests.community_publish.CommunityPublishDraftRequestType
+      remove-secondary:
+        type:
+          base-classes:
+            - RemoveSecondaryRequestType
+          imports:
+            - import: oarepo_communities.requests.remove_secondary.RemoveSecondaryRequestType
+
   record-communities:
     permissions:
       presets: [ "community", "record-communities-community" ]

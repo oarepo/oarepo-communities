@@ -18,6 +18,8 @@ python3 -m venv $BUILDER_VENV
 . $BUILDER_VENV/bin/activate
 pip install -U setuptools pip wheel
 pip install oarepo-model-builder oarepo-model-builder-requests
+editable_install /home/ron/prace/oarepo-model-builder-new
+editable_install /home/ron/prace/oarepo-model-builder-requests
 editable_install /home/ron/prace/oarepo-model-builder-drafts
 editable_install /home/ron/prace/oarepo-model-builder-communities
 if test -d $BUILD_TEST_DIR/$MODEL; then
@@ -37,4 +39,6 @@ pip install "./$BUILD_TEST_DIR/$MODEL[tests]"
 pip install .
 pip uninstall -y uritemplate
 pip install uritemplate
+editable_install /home/ron/prace/oarepo-runtime
+editable_install /home/ron/prace/oarepo-requests
 pytest ./$CODE_TEST_DIR/test_permissions

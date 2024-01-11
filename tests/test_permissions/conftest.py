@@ -21,10 +21,21 @@ def sample_metadata_list():
     docs = list(yaml.load_all(open(data_path), Loader=yaml.SafeLoader))
     return docs
 
+@pytest.fixture()
+def record_service():
+    return current_service
 
 @pytest.fixture()
 def input_data(sample_metadata_list):
     return sample_metadata_list[0]
+
+@pytest.fixture
+def client_factory(app):
+    def _client_factory():
+        with app.test_client() as client:
+            return client
+
+    return _client_factory
 
 
 @pytest.fixture(scope="module")
@@ -169,11 +180,16 @@ def community_permissions_cf():
                 "owner": {
                     "can_create_in_community": True,
                     "can_submit_to_community": True,
-                    "can_publish": True,
+                    "can_submit_secondary_community": True,
+                    "can_remove_secondary_community": True,
+
+                    "can_publish_request": True,
+                    "can_delete_request": True,
                     "can_read": True,
+                    "can_read_draft": True,
                     "can_update": True,
-                    "can_delete": True,
                     "can_search": True,
+
                     "can_community_allows_adding_records": True,
                     "can_remove_community_from_record": True,
                     "can_remove_records_from_community": True,
@@ -199,13 +215,20 @@ def community_permissions_cf():
                     "can_remove_records_from_community": True,
                 },
                 "reader": {
-                    "can_create_in_community": False,
+                    "can_create_in_community": True,
                     "can_submit_to_community": False,
-                    "can_search": True,
-                    "can_publish": False,
+                    "can_submit_secondary_community": False,
+                    "can_remove_secondary_community": False,
+
+
+                    "can_publish_request": False,
+                    "can_delete_request": False,
                     "can_read": True,
+                    "can_read_draft": True,
                     "can_update": False,
                     "can_delete": False,
+                    "can_search": True,
+
                     "can_community_allows_adding_records": True,
                     "can_remove_community_from_record": False,
                     "can_remove_records_from_community": False,
@@ -372,22 +395,25 @@ def sample_draft(app, db, input_data, community):
     ThesisDraft.index.refresh()
     return ThesisDraft.pid.resolve(draft_item.id, registered_only=False)
 
+
 @pytest.fixture
 def request_data_factory():
-    def _community_submission_data(community, topic, type="community-submission", creator=None, payload=None):
-        if not isinstance(community, str):
-            community_id = community.id
+    def _request_data(
+        community_id, topic_type, topic_id, request_type, creator=None, payload=None
+    ):
+        if not isinstance(community_id, str):
+            community_id = community_id.id
         else:
-            community_id = community
+            community_id = community_id
         input_data = {
             "receiver": {"oarepo_community": community_id},
-            "request_type": type,
-            "topic": {"thesis": topic["id"]}
+            "request_type": request_type,
+            "topic": {topic_type: topic_id},
         }
         if creator:
             input_data["creator"] = creator
         if payload:
             input_data["payload"] = payload
         return input_data
-    return _community_submission_data
 
+    return _request_data

@@ -1,34 +1,31 @@
-import copy
 
 import pytest
 
-from thesis.records.api import ThesisDraft, ThesisRecord
+from oarepo_communities.errors import CommunityAlreadyIncludedException, PrimaryCommunityException, \
+    CommunityNotIncludedException
+from thesis.records.api import ThesisRecord
 from thesis.resources.record_communities.config import (
     ThesisRecordCommunitiesResourceConfig,
 )
-from invenio_requests.proxies import current_requests_service
+from invenio_access.permissions import system_identity
 
 RECORD_COMMUNITIES_BASE_URL = ThesisRecordCommunitiesResourceConfig.url_prefix
 REPO_NAME = "thesis"
 
-from invenio_requests.records.api import Request
+
 
 def link_api2testclient(api_link):
-    base_string = 'https://127.0.0.1:5000/api/'
-    return api_link[len(base_string)-1:]
+    base_string = "https://127.0.0.1:5000/api/"
+    return api_link[len(base_string) - 1 :]
 
 
-def create_publish_in_community(client, input_data, community):
-    """Create a draft and publish it."""
-    # Create the draft
-    response = _create_record_in_community(client, input_data, community.id)
-    recid = response.json["id"]
-
-    # Publish it
-    response = client.post(
-        f"{RECORD_COMMUNITIES_BASE_URL}{recid}/draft/actions/publish"
-    )
-    return response
+def published_record_in_community(client, input_data, community_id, record_service, user):
+    # skip the request approval
+    response = _create_record_in_community(client, input_data, community_id)
+    record_item = record_service.publish(system_identity, response.json["id"])
+    # the client logoffs/breaks for some reason
+    user.login(client)
+    return record_item._obj
 
 
 # tested operations
@@ -61,29 +58,87 @@ def _delete_community_from_record(client, comm_id, rec_id):
 # community_records
 def _create_record_in_community(client, input_data, comm_id):
     return client.post(f"/communities/{comm_id}/records", json=input_data)
+
+
 def _list_records_by_community(client, comm_id):
     return client.get(f"/communities/{comm_id}/records")
+
 
 def _list_drafts_by_community(client, comm_id):
     return client.get(f"/communities/{comm_id}/draft/records")
 
-def _request_base_lifecycle(creator_client, receiver_client, receiver, record, community, community_submission_data_func, **extra_kwargs):
-    community_submission_data = community_submission_data_func(community, record, **extra_kwargs)
-    submission_create = creator_client.post("/requests/create", json=community_submission_data)
-    submission_submit = creator_client.post(link_api2testclient(submission_create.json['links']['actions']['submit']))
-    # todo - link should be on the record
-    request = current_requests_service.read(receiver.identity, submission_submit.json['id'])
-    accept_link = link_api2testclient(request.links["actions"]["accept"])
-    receiver_response = receiver_client.post(accept_link)
-    return submission_create, submission_submit, receiver_response
+def find_request_by_type(requests, type):
+    for request in requests:
+        if request["type"] == type:
+            return request
+    return None
 
-def _check_community_submission_and_publish(submission_create, submission_submit, receiver_response,
-                                            submission_create_code=201, submission_submit_code=200, receiver_response_code=200):
+def _create_request(creator_client,
+                    community_id,
+                    record_type,
+                    record_id,
+                    request_type,
+                    request_data_func,
+                    **kwargs):
+    request_data = request_data_func(
+        community_id, record_type, record_id, request_type, **kwargs
+    )
+    create_response = creator_client.post(
+        "/requests/", json=request_data
+    )
+    return create_response
+
+def _submit_request(creator_client,
+                    community_id,
+                    record_type,
+                    record_id,
+                    request_type,
+                    request_data_func,
+                    **kwargs):
+    create_response = _create_request(creator_client,
+                    community_id,
+                    record_type,
+                    record_id,
+                    request_type,
+                    request_data_func,
+                    **kwargs)
+
+    submit_response = creator_client.post(
+        link_api2testclient(create_response.json["links"]["actions"]["submit"])
+    )
+    return submit_response
+
+def _accept_request(
+    receiver_client,
+    type,
+    record_id,
+    is_draft=False,
+    no_accept_link=False,
+    **kwargs,):
+    if is_draft:
+        record_after_submit = receiver_client.get(f"/thesis/{record_id}/draft")
+    else:
+        record_after_submit = receiver_client.get(f"/thesis/{record_id}")
+    request_dict = find_request_by_type(record_after_submit.json["requests"], type)
+    if no_accept_link:
+        assert "accept" not in request_dict["links"]["actions"]
+        return None
+    accept_link = link_api2testclient(request_dict["links"]["actions"]["accept"])
+    receiver_response = receiver_client.post(accept_link)
+    return receiver_response
+
+
+def _check_community_submission_and_publish(
+    submission_create,
+    submission_submit,
+    receiver_response,
+    submission_create_code=201,
+    submission_submit_code=200,
+    receiver_response_code=200,
+):
     assert submission_create.status_code == submission_create_code
     assert submission_submit.status_code == submission_submit_code
     assert receiver_response.status_code == receiver_response_code
-
-
 
 
 def _remove_record_from_community(client, comm_id, rec_id):
@@ -96,13 +151,13 @@ def _remove_record_from_community(client, comm_id, rec_id):
 
 
 def _init_env(
-        client_factory,
-        community_owner,
-        community_reader,
-        community_curator,
-        community_with_permission_cf_factory,
-        inviter):
-
+    client_factory,
+    community_owner,
+    community_reader,
+    community_curator,
+    community_with_permission_cf_factory,
+    inviter,
+):
     reader_client = community_reader.login(client_factory())
     owner_client = community_owner.login(client_factory())
     curator_client = community_curator.login(client_factory())
@@ -114,6 +169,7 @@ def _init_env(
 
     return reader_client, owner_client, curator_client, community_1, community_2
 
+
 def test_cf(
     client,
     community_owner,
@@ -122,231 +178,186 @@ def test_cf(
     search_clear,
 ):
     community_owner.login(client)
-    record_resp = create_publish_in_community(client, input_data, community_with_permissions_cf)
-    assert record_resp.status_code == 202
+    record_resp = _create_record_in_community(client, input_data, community_with_permissions_cf.id)
+    assert record_resp.status_code == 201
     recid = record_resp.json["id"]
-    # sleep(5)
     response = client.get(f"{RECORD_COMMUNITIES_BASE_URL}{recid}/communities")
     assert (
         response.json["hits"]["hits"][0]["custom_fields"]
         == community_with_permissions_cf["custom_fields"]
     )
 
-
-def test_owner(
-    client,
-    community_owner,
-    input_data,
-    community_with_permission_cf_factory,
-    search_clear,
-):
-
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
-    community_2 = community_with_permission_cf_factory("comm2", community_owner)
-    owner_client = community_owner.login(client)
-
-    draft_with_community = _create_record_in_community(client, input_data, "comm1")
-
-    assert draft_with_community.status_code == 201
-    assert draft_with_community.json["parent"]["communities"]["ids"] == [community_1.id]
-    assert draft_with_community.json["parent"]["communities"]["default"] == community_1.id
-
-    record_resp = create_publish_in_community(owner_client, input_data, community_1)
-    assert record_resp.status_code == 202
-    rec_id = record_resp.json["id"]
-
-    resp_add_comm = _add_community_to_record(client, "comm2", rec_id)
-    resp_listing = _list_record_communities(client, rec_id)
-    resp_delete_community = _delete_community_from_record(client, "comm2", rec_id)
-    resp_listing2 = _list_record_communities(client, rec_id)
-
-    resp_list_records_by_community = _list_records_by_community(client, "comm1")
-    resp_remove_record = _remove_record_from_community(client, "comm1", rec_id)
-    resp_list_records_by_community2 = _list_records_by_community(client, "comm1")
-
-    assert resp_add_comm.status_code == 200
-    assert len(resp_listing.json["hits"]["hits"]) == 2
-    assert resp_delete_community == 200
-    assert len(resp_listing2.json["hits"]["hits"]) == 1
-
-    assert len(resp_list_records_by_community.json["hits"]["hits"]) == 1
-    assert resp_remove_record.status_code == 200
-    assert len(resp_list_records_by_community2.json["hits"]["hits"]) == 0
-
-    # test standard crud
-    rec_id = create_publish_in_community(owner_client, input_data, community_1).json["id"]
-    ThesisRecord.index.refresh()
-    resp_list = owner_client.get(RECORD_COMMUNITIES_BASE_URL)
-    assert len(resp_list.json["hits"]["hits"]) == 2
-    resp_read = owner_client.get(f"{RECORD_COMMUNITIES_BASE_URL}{rec_id}")
-    assert resp_read.status_code == 200
-    resp_delete = owner_client.delete(f"{RECORD_COMMUNITIES_BASE_URL}{rec_id}")
-    assert resp_delete.status_code == 204
-    resp_read = owner_client.get(f"{RECORD_COMMUNITIES_BASE_URL}{rec_id}")
-    assert resp_read.status_code == 410
-
-@pytest.fixture
-def client_factory(app):
-    def _client_factory():
-        with app.test_client() as client:
-            return client
-    return _client_factory
-
-def test_reader(
-    client,
+def test_community_publish(
     client_factory,
     community_owner,
     community_reader,
-    community_curator,
-    community_with_permission_cf_factory,
-    input_data,
-    inviter,
-    request_data_factory,
-    search_clear,
-):
-    reader_client = community_reader.login(client_factory())
-    owner_client = community_owner.login(client_factory())
-    curator_client = community_curator.login(client_factory())
-
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
-    community_2 = community_with_permission_cf_factory("comm2", community_owner)
-    inviter(community_reader.id, community_1.data["id"], "reader")
-    inviter(community_reader.id, community_2.data["id"], "reader")
-
-    create_reader = _create_record_in_community(reader_client, input_data, "comm1")
-    assert create_reader.status_code == 403
-    record_resp = create_publish_in_community(owner_client, input_data, community_1)
-    assert record_resp.status_code == 202
-    rec_id = record_resp.json["id"]
-
-    inviter(community_curator.id, community_2.data["id"], "curator")
-    resp_reader = _request_base_lifecycle(reader_client, reader_client, community_owner, record_resp.json, community_2.data["id"], request_data_factory)
-    resp_curator = _request_base_lifecycle(reader_client, curator_client, community_curator, record_resp.json,
-                                           community_2.data["id"], request_data_factory)
-    _check_community_submission_and_publish(*resp_reader, receiver_response_code=403)
-    _check_community_submission_and_publish(*resp_curator)
-    record = owner_client.get(f"/thesis/{rec_id}")
-    assert len(record.json["parent"]["communities"]["ids"]) == 2
-
-    draft_with_community = _create_record_in_community(client, input_data, "comm1")
-    assert draft_with_community.status_code == 403 # test permission
-
-
-    # todo response code when only some additions are successful
-    #resp_add_comm = _add_community_to_record(reader_client, "comm2", rec_id)
-    resp_listing = _list_record_communities(reader_client, rec_id)
-    resp_delete_community = _delete_community_from_record(
-        reader_client, "comm2", rec_id
-    )
-    resp_listing2 = _list_record_communities(reader_client, rec_id)
-
-    resp_list_records_by_community = _list_records_by_community(reader_client, "comm1")
-    resp_remove_record = _remove_record_from_community(reader_client, "comm1", rec_id)
-    resp_list_records_by_community2 = _list_records_by_community(reader_client, "comm1")
-
-    #assert resp_add_comm.status_code == 200
-    assert len(resp_listing.json["hits"]["hits"]) == 2
-    assert resp_delete_community == 400
-    assert len(resp_listing2.json["hits"]["hits"]) == 2
-
-    assert len(resp_list_records_by_community.json["hits"]["hits"]) == 1
-    assert resp_remove_record.status_code == 403
-    assert len(resp_list_records_by_community2.json["hits"]["hits"]) == 1
-
-    # test standard crud
-    #community_reader.logout(client)
-    #owner_client = community_owner.login(client)
-    rec_id = create_publish_in_community(owner_client, input_data, community_1).json["id"]
-    #community_owner.logout(client)
-    #reader_client = community_reader.login(client)
-    resp_list = reader_client.get(RECORD_COMMUNITIES_BASE_URL)
-    assert len(resp_list.json["hits"]["hits"]) == 1
-    resp_read = reader_client.get(f"{RECORD_COMMUNITIES_BASE_URL}{rec_id}")
-    assert resp_read.status_code == 200
-    resp_delete = reader_client.delete(f"{RECORD_COMMUNITIES_BASE_URL}{rec_id}")
-    assert resp_delete.status_code == 403
-    resp_read = reader_client.get(f"{RECORD_COMMUNITIES_BASE_URL}{rec_id}")
-    assert resp_read.status_code == 200
-
-
-def test_codes_and_errors(client_factory,
-    community_owner,
-    community_reader,
-    community_curator,
-    community_with_permission_cf_factory,
-    input_data,
-    inviter,
-    request_data_factory,
-    search_clear,):
-
-    reader_client, owner_client, curator_client, community_1, community_2 = _init_env(client_factory,
-    community_owner,
-    community_reader,
-    community_curator,
-    community_with_permission_cf_factory,
-    inviter)
-
-    record_resp = create_publish_in_community(owner_client, input_data, community_1)
-
-    resp = _request_base_lifecycle(reader_client, owner_client, community_owner,
-                                                record_resp.json, community_1.data["id"], request_data_factory)
-    print()
-
-
-
-
-def test_migrate(
-    client_factory,
-    community_owner,
-    community_reader,
-    community_curator,
-    community_with_permission_cf_factory,
-    input_data,
-    inviter,
-    request_data_factory,
-    search_clear,):
-
-    reader_client, owner_client, curator_client, community_1, community_2 = _init_env(client_factory,
-    community_owner,
-    community_reader,
-    community_curator,
-    community_with_permission_cf_factory,
-    inviter)
-
-    record_resp = create_publish_in_community(owner_client, input_data, community_1)
-
-    creator = {"oarepo_community": community_1.data["id"]}
-    type = "community-migration"
-    payload = {"community": community_1.data["id"]}
-    migrate_responses = _request_base_lifecycle(reader_client, owner_client, community_owner,
-                                                record_resp.json, community_2.data["id"], request_data_factory,
-                                                type=type, payload=payload)
-    assert record_resp.json["parent"]["communities"]["default"] == community_1.data["id"]
-    assert record_resp.json["parent"]["communities"]["ids"] == [community_1.data["id"]]
-    _check_community_submission_and_publish(*migrate_responses)
-    ThesisRecord.index.refresh()
-    record_reload = owner_client.get(f"/thesis/{record_resp.json['id']}")
-    assert record_reload.json["parent"]["communities"]["default"] == community_2.data["id"]
-    assert record_reload.json["parent"]["communities"]["ids"] == [community_2.data["id"]]
-
-
-
-
-
-
-
-
-
-
-def test_rando(
-    client,
-    rando_user,
     community_with_permissions_cf,
     input_data,
+    inviter,
+    request_data_factory,
+    record_service,
+    search_clear,):
+
+    reader_client = community_reader.login(client_factory())
+    owner_client = community_owner.login(client_factory())
+
+    record_id = _create_record_in_community(reader_client, input_data, community_with_permissions_cf.id).json["id"]
+    submit = _submit_request(reader_client, community_with_permissions_cf.id, "thesis_draft", record_id, "publish_draft", request_data_factory)
+    _accept_request(reader_client, type="publish_draft", record_id=record_id, is_draft=True, no_accept_link=True) #reader can accept the request
+    accept_owner = _accept_request(owner_client, type="publish_draft", record_id=record_id, is_draft=True) #owner can
+
+    resp_draft = owner_client.get(f"/thesis/{record_id}/draft")
+    resp_record = owner_client.get(f"/thesis/{record_id}")
+
+    # record was published
+    assert resp_draft.status_code == 404
+    assert resp_record.status_code == 200
+    print()
+
+def test_community_delete(
+    client_factory,
+    community_owner,
+    community_reader,
+    community_with_permissions_cf,
+    input_data,
+    inviter,
+    request_data_factory,
+    record_service,
+    search_clear,):
+
+    reader_client = community_reader.login(client_factory())
+    owner_client = community_owner.login(client_factory())
+
+    record_id = published_record_in_community(owner_client, input_data, community_with_permissions_cf.id, record_service, community_owner)["id"]
+
+    submit = _submit_request(reader_client, community_with_permissions_cf.id, "thesis", record_id, "delete_record", request_data_factory)
+    _accept_request(reader_client, type="delete_record", record_id=record_id, no_accept_link=True) #reader can accept the request
+    accept_owner = _accept_request(owner_client, type="delete_record", record_id=record_id) #owner can
+
+    resp_record = owner_client.get(f"/thesis/{record_id}")
+    resp_search = owner_client.get(f"/thesis/")
+
+    # record was published
+    assert resp_record.status_code == 410
+    assert len(resp_search.json["hits"]["hits"]) == 0
+
+def test_community_migration(
+    client_factory,
+    community_owner,
+    community_reader,
+    community_curator,
+    community_with_permission_cf_factory,
+    input_data,
+    inviter,
+    request_data_factory,
+    record_service,
     search_clear,
 ):
-    rando_client = rando_user.login(client)
-    record_resp = create_publish_in_community(
-        rando_client, input_data, community_with_permissions_cf
+    reader_client, owner_client, curator_client, community_1, community_2 = _init_env(
+        client_factory,
+        community_owner,
+        community_reader,
+        community_curator,
+        community_with_permission_cf_factory,
+        inviter,
     )
-    assert record_resp.status_code == 403
+
+    record_id = published_record_in_community(owner_client, input_data, community_1.id, record_service, community_owner)["id"]
+    record_before = owner_client.get(f"/thesis/{record_id}")
+
+    submit = _submit_request(reader_client, community_2.id, "thesis", record_id, "community_migration", request_data_factory)
+    _accept_request(reader_client, type="community_migration", record_id=record_id, no_accept_link=True) #reader can accept the request
+    accept_owner = _accept_request(owner_client, type="community_migration", record_id=record_id) #owner can
+
+    record_after = owner_client.get(f"/thesis/{record_id}")
+
+    assert (
+        record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
+    )
+    assert record_before.json["parent"]["communities"]["ids"] == [community_1.data["id"]]
+
+
+    assert (
+        record_after.json["parent"]["communities"]["default"] == community_2.data["id"]
+    )
+    assert record_after.json["parent"]["communities"]["ids"] == [
+        community_2.data["id"]
+    ]
+
+def test_community_submission_secondary(client_factory,
+    community_owner,
+    community_reader,
+    community_curator,
+    community_with_permission_cf_factory,
+    input_data,
+    inviter,
+    request_data_factory,
+    record_service,
+    search_clear,):
+    reader_client, owner_client, curator_client, community_1, community_2 = _init_env(
+        client_factory,
+        community_owner,
+        community_reader,
+        community_curator,
+        community_with_permission_cf_factory,
+        inviter,
+    )
+    record_id = published_record_in_community(owner_client, input_data, community_1.id, record_service, community_owner)["id"]
+
+    record_before = owner_client.get(f"/thesis/{record_id}")
+    with pytest.raises(CommunityAlreadyIncludedException):
+        _create_request(reader_client, community_1.id, "thesis", record_id, "secondary_community_submission",
+                                 request_data_factory)
+
+    submit = _submit_request(reader_client, community_2.id, "thesis", record_id, "secondary_community_submission", request_data_factory)
+    _accept_request(reader_client, type="secondary_community_submission", record_id=record_id, no_accept_link=True) #reader can accept the request
+    accept_owner = _accept_request(owner_client, type="secondary_community_submission", record_id=record_id) #owner can
+
+    record_after = owner_client.get(f"/thesis/{record_id}")
+
+    assert set(record_before.json["parent"]['communities']['ids']) == {community_1.id}
+    assert set(record_after.json["parent"]['communities']['ids']) == {community_1.id, community_2.id}
+def test_remove_secondary(    client_factory,
+    community_owner,
+    community_reader,
+    community_curator,
+    community_with_permission_cf_factory,
+    input_data,
+    inviter,
+    request_data_factory,
+    record_service,
+    search_clear,):
+    reader_client, owner_client, curator_client, community_1, community_2 = _init_env(
+        client_factory,
+        community_owner,
+        community_reader,
+        community_curator,
+        community_with_permission_cf_factory,
+        inviter,
+    )
+
+    record_id = published_record_in_community(owner_client, input_data, community_1.id, record_service, community_owner)["id"]
+
+    submit = _submit_request(reader_client, community_2.id, "thesis", record_id, "secondary_community_submission", request_data_factory)
+    accept_owner = _accept_request(owner_client, type="secondary_community_submission", record_id=record_id)
+
+    record_before = owner_client.get(f"/thesis/{record_id}")
+
+    with pytest.raises(PrimaryCommunityException):
+        _create_request(reader_client, community_1.id, "thesis", record_id, "remove_secondary_community",
+                                 request_data_factory)
+
+    submit = _submit_request(reader_client, community_2.id, "thesis", record_id, "remove_secondary_community", request_data_factory)
+    _accept_request(reader_client, type="remove_secondary_community", record_id=record_id, no_accept_link=True) #reader can accept the request
+    accept_owner = _accept_request(owner_client, type="remove_secondary_community", record_id=record_id) #owner can
+
+    record_after = owner_client.get(f"/thesis/{record_id}")
+    assert set(record_before.json["parent"]['communities']['ids']) == {community_1.id, community_2.id}
+    assert set(record_after.json["parent"]['communities']['ids']) == {community_1.id}
+
+    with pytest.raises(CommunityNotIncludedException):
+        _create_request(reader_client, community_2.id, "thesis", record_id, "remove_secondary_community",
+                                 request_data_factory)
+
+
+

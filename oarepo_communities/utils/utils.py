@@ -1,15 +1,3 @@
-from invenio_records_resources.proxies import current_service_registry
-from invenio_requests import current_requests_service
-from invenio_requests.resolvers.registry import ResolverRegistry
-from invenio_search.engine import dsl
-
-
-# todo cache? would have to be done by using record cls as key
-def get_matching_service(record):
-    for resolver in ResolverRegistry.get_registered_resolvers():
-        if resolver.matches_entity(record):
-            return current_service_registry.get(resolver._service_id)
-    return None
 
 
 """
@@ -35,21 +23,3 @@ def get_allowed_actions(record, identity=None):
                 allowed_actions_for_record_and_user |= {permission for permission, allowed in permissions.items() if
                                                         allowed}
                 """
-
-
-def _exists(identity, community_id, record, type_id):
-    """Return the request id if an open request already exists, else None."""
-    results = current_requests_service.search(
-        identity,
-        extra_filter=dsl.query.Bool(
-            "must",
-            must=[
-                dsl.Q("term", **{"receiver.community": community_id}),
-                dsl.Q("term", **{"topic.record": record.pid.pid_value}),
-                # todo the type is model builder generated
-                dsl.Q("term", **{"type": type_id}),
-                dsl.Q("term", **{"is_open": True}),
-            ],
-        ),
-    )
-    return next(results.hits)["id"] if results.total > 0 else None
