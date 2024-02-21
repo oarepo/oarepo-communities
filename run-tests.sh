@@ -9,7 +9,6 @@ BUILDER_VENV=".venv-builder"
 TESTS_VENV=".venv-tests"
 
 OAREPO_VERSION=${OAREPO_VERSION:-11}
-OAREPO_VERSION_MAX=$((OAREPO_VERSION+1))
 
 if test -d $BUILDER_VENV ; then
 	rm -rf $BUILDER_VENV
@@ -34,8 +33,8 @@ fi
 python3 -m venv $TESTS_VENV
 . $TESTS_VENV/bin/activate
 pip install -U setuptools pip wheel
-pip install "oarepo>=$OAREPO_VERSION,<$OAREPO_VERSION_MAX"
-pip install "./$BUILD_TEST_DIR/$MODEL[tests]"
+pip install "oarepo[tests]==${OAREPO_VERSION}.*"
+pip install "./$BUILD_TEST_DIR/${MODEL}[tests]"
 pip install .
 pip uninstall -y uritemplate
 pip install uritemplate
