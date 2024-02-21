@@ -1,8 +1,9 @@
-from oarepo_requests.types.generic import OARepoRequestType
-from oarepo_requests.utils import get_matching_service, request_exists, resolve_reference_dict, open_request_exists
 from invenio_requests.customizations import actions
-from ..errors import CommunityAlreadyIncludedException, PrimaryCommunityException, CommunityNotIncludedException
-from ..services.record_communities.service import include_record_in_community, remove
+from oarepo_requests.types.generic import OARepoRequestType
+from oarepo_requests.utils import get_matching_service_for_record, resolve_reference_dict
+
+from ..errors import CommunityNotIncludedException, PrimaryCommunityException
+from ..utils.utils import get_associated_service
 
 
 class AcceptAction(actions.AcceptAction):
@@ -11,8 +12,11 @@ class AcceptAction(actions.AcceptAction):
     def execute(self, identity, uow):
         record = self.request.topic.resolve()
         community = self.request.receiver.resolve()
-        service = get_matching_service(record)
-        remove(community.id, record, service, uow)
+        service = get_matching_service_for_record(record)
+        record_communities_service = get_associated_service(
+            service, "service_record_communities"
+        )
+        record_communities_service.remove(record, str(community.id), uow=uow)
 
         super().execute(identity, uow)
 

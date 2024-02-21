@@ -11,7 +11,7 @@ from invenio_communities.communities.records.api import Community
 from invenio_communities.generators import CommunityRoleNeed
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_resources.services.uow import RecordCommitOp, UnitOfWork
-from thesis.proxies import current_service
+from thesis.proxies import current_record_communities_service, current_service
 from thesis.records.api import ThesisDraft, ThesisRecord
 
 
@@ -21,13 +21,21 @@ def sample_metadata_list():
     docs = list(yaml.load_all(open(data_path), Loader=yaml.SafeLoader))
     return docs
 
+
 @pytest.fixture()
 def record_service():
     return current_service
 
+
+@pytest.fixture()
+def record_communities_service():
+    return current_record_communities_service
+
+
 @pytest.fixture()
 def input_data(sample_metadata_list):
     return sample_metadata_list[0]
+
 
 @pytest.fixture
 def client_factory(app):
@@ -182,45 +190,19 @@ def community_permissions_cf():
                     "can_submit_to_community": True,
                     "can_submit_secondary_community": True,
                     "can_remove_secondary_community": True,
-
+                    "can_search_drafts": True,
                     "can_publish_request": True,
                     "can_delete_request": True,
                     "can_read": True,
                     "can_read_draft": True,
                     "can_update": True,
                     "can_search": True,
-
-                    "can_community_allows_adding_records": True,
-                    "can_remove_community_from_record": True,
-                    "can_remove_records_from_community": True,
-                },
-                "manager": {
-                    "can_publish": True,
-                    "can_read": False,
-                    "can_update": False,
-                    "can_delete": False,
-                    "can_search": True,
-                    "can_community_allows_adding_records": True,
-                    "can_remove_community_from_record": True,
-                    "can_remove_records_from_community": True,
-                },
-                "curator": {
-                    "can_submit_to_community": True,
-                    "can_read": True,
-                    "can_update": True,
-                    "can_delete": False,
-                    "can_search": True,
-                    "can_community_allows_adding_records": False,
-                    "can_remove_community_from_record": True,
-                    "can_remove_records_from_community": True,
                 },
                 "reader": {
                     "can_create_in_community": True,
                     "can_submit_to_community": False,
                     "can_submit_secondary_community": False,
                     "can_remove_secondary_community": False,
-
-
                     "can_publish_request": False,
                     "can_delete_request": False,
                     "can_read": True,
@@ -228,10 +210,6 @@ def community_permissions_cf():
                     "can_update": False,
                     "can_delete": False,
                     "can_search": True,
-
-                    "can_community_allows_adding_records": True,
-                    "can_remove_community_from_record": False,
-                    "can_remove_records_from_community": False,
                 },
             }
         }

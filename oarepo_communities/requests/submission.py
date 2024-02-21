@@ -1,12 +1,10 @@
 from flask_babelex import lazy_gettext as _
-from invenio_access.permissions import system_identity
-from invenio_requests.customizations import RequestType
 from invenio_requests.customizations import actions
 from oarepo_requests.types.generic import OARepoRequestType
-from oarepo_requests.utils import get_matching_service, request_exists, resolve_reference_dict, open_request_exists
+from oarepo_requests.utils import get_matching_service_for_record, resolve_reference_dict
 
 from ..errors import CommunityAlreadyIncludedException
-from ..services.record_communities.service import include_record_in_community
+from ..utils.utils import get_associated_service
 
 
 class AcceptAction(actions.AcceptAction):
@@ -15,14 +13,20 @@ class AcceptAction(actions.AcceptAction):
     def execute(self, identity, uow):
         record = self.request.topic.resolve()
         community = self.request.receiver.resolve()
-        service = get_matching_service(record)
-        include_record_in_community(record, community, service, uow, default=self.request.type.set_as_default)
+        service = get_matching_service_for_record(record)
+        record_communities_service = get_associated_service(
+            service, "service_record_communities"
+        )
+        record_communities_service.include(
+            record, community, uow=uow, default=self.request.type.set_as_default
+        )
 
         super().execute(identity, uow)
 
 
 # Request
 #
+
 
 class CommunitySubmissionRequestType(OARepoRequestType):
     """Review request for submitting a record to a community."""
@@ -53,4 +57,4 @@ class CommunitySubmissionRequestType(OARepoRequestType):
         already_included = receiver_community_id in topic.parent.communities.ids
         if already_included:
             raise CommunityAlreadyIncludedException
-        #open_request_exists(topic, self.type_id)
+        # open_request_exists(topic, self.type_id)

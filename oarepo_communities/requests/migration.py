@@ -1,6 +1,6 @@
-import marshmallow as ma
+from oarepo_requests.utils import get_matching_service_for_record
 
-from ..services.record_communities.service import remove
+from ..utils.utils import get_associated_service
 from . import submission
 from .submission import CommunitySubmissionRequestType
 
@@ -11,8 +11,13 @@ class AcceptAction(submission.AcceptAction):
     def execute(self, identity, uow):
         record = self.request.topic.resolve()
         # todo what if it's already removed?
-        # todo move to service method?
-        remove(str(record.parent.communities.default.id), record)
+        service = get_matching_service_for_record(record)
+        record_communities_service = get_associated_service(
+            service, "service_record_communities"
+        )
+        record_communities_service.remove(
+            record, str(record.parent.communities.default.id), uow=uow
+        )
         super().execute(identity, uow)
 
 

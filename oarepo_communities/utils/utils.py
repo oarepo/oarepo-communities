@@ -1,5 +1,3 @@
-
-
 """
 def get_allowed_actions(record, identity=None):
     record_communities = set(record["parent"]["communities"]["ids"])
@@ -23,3 +21,7 @@ def get_allowed_actions(record, identity=None):
                 allowed_actions_for_record_and_user |= {permission for permission, allowed in permissions.items() if
                                                         allowed}
                 """
+
+
+def get_associated_service(record_service, service_type):
+    return getattr(record_service.config, service_type, None)

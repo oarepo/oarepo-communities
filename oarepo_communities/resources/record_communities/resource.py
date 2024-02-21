@@ -2,7 +2,6 @@ from flask import g
 from flask_resources import Resource, resource_requestctx, response_handler, route
 from invenio_records_resources.resources.errors import ErrorHandlersMixin
 from invenio_records_resources.resources.records.resource import (
-    request_data,
     request_search_args,
     request_view_args,
 )
@@ -22,8 +21,8 @@ class RecordCommunitiesResource(ErrorHandlersMixin, Resource):
         routes = self.config.routes
         url_rules = [
             route("GET", routes["list"], self.search),
-            route("POST", routes["list"], self.add),
-            route("DELETE", routes["list"], self.remove),
+            # route("POST", routes["list"], self.add),
+            # route("DELETE", routes["list"], self.remove),
         ]
         return url_rules
 
@@ -41,11 +40,11 @@ class RecordCommunitiesResource(ErrorHandlersMixin, Resource):
         )
         return items.to_dict(), 200
 
+    """
     @request_view_args
     @response_handler()
     @request_data
     def add(self):
-        """Include record in communities."""
         processed, errors = self.service.add(
             identity=g.identity,
             id_=resource_requestctx.view_args["pid_value"],
@@ -65,7 +64,6 @@ class RecordCommunitiesResource(ErrorHandlersMixin, Resource):
     @request_data
     @response_handler()
     def remove(self):
-        """Remove communities from the record."""
         processed, errors = self.service.remove(
             identity=g.identity,
             id_=resource_requestctx.view_args["pid_value"],
@@ -77,3 +75,4 @@ class RecordCommunitiesResource(ErrorHandlersMixin, Resource):
             response["errors"] = errors
 
         return response, 200 if len(processed) > 0 else 400
+    """

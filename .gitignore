@@ -83,6 +83,7 @@ sample/
 
 tests/test-sample-app
 tests/test-sample-site
+tests/thesis
 
 example_document/
 dist/

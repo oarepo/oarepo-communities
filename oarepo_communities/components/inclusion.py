@@ -1,3 +1,5 @@
+# TODO deprecated
+"""
 from invenio_records_resources.services.records.components import ServiceComponent
 
 from oarepo_communities.services.record_communities.service import (
@@ -13,3 +15,4 @@ class SetCommunityComponent(ServiceComponent):
             return
         community_id = data["community_id"]
         include_record_in_community(record, community_id, self.service, self.uow)
+"""

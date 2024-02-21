@@ -3,52 +3,16 @@ from invenio_drafts_resources.services import RecordService
 
 # from invenio_i18n import lazy_gettext as _
 # from invenio_notifications.services.uow import NotificationOp
-from invenio_pidstore.errors import PIDDoesNotExistError, PIDUnregistered
+from invenio_pidstore.errors import PIDUnregistered
 from invenio_records_resources.services import RecordIndexerMixin, ServiceSchemaWrapper
-from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import (
-    IndexRefreshOp,
     RecordCommitOp,
     RecordIndexOp,
     unit_of_work,
 )
 from invenio_search.engine import dsl
-from sqlalchemy.orm.exc import NoResultFound
 
-from oarepo_communities.services.errors import (
-    CommunityAlreadyExists,
-    RecordCommunityMissing,
-)
-
-
-def remove(community_id, record, record_service, uow):
-    """Remove a community from the record."""
-    if community_id not in record.parent.communities.ids:
-        # try if it's the community slug instead
-        community_id = str(
-            current_communities.service.record_cls.pid.resolve(community_id).id
-        )
-        if community_id not in record.parent.communities.ids:
-            raise RecordCommunityMissing(record.id, community_id)
-
-    # Default community is deleted when the exact same community is removed from the record
-    record.parent.communities.remove(community_id)
-    uow.register(RecordCommitOp(record.parent))
-    uow.register(RecordIndexOp(record, indexer=record_service.indexer))
-
-
-def include_record_in_community(
-    record, community_or_id, record_service, uow, default=None
-):
-    # integrity check, it should never happen on a published record
-    # assert not record.parent.review
-
-    # set the community to `default` if it is the first
-    if default is None:
-        default = not record.parent.communities
-    record.parent.communities.add(community_or_id, default=default)
-    uow.register(RecordCommitOp(record.parent))
-    uow.register(RecordIndexOp(record, indexer=record_service.indexer))
+from oarepo_communities.services.errors import RecordCommunityMissing
 
 
 class RecordCommunitiesService(RecordService, RecordIndexerMixin):
@@ -71,32 +35,18 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         """Factory for creating a record class."""
         return self.config.record_cls
 
-    """
-    def _exists(self, identity, community_id, record):
-
-        results = current_requests_service.search(
-            identity,
-            extra_filter=dsl.query.Bool(
-                "must",
-                must=[
-                    dsl.Q("term", **{"receiver.community": community_id}),
-                    dsl.Q("term", **{"topic.record": record.pid.pid_value}),
-                    dsl.Q("term", **{"type": CommunityInclusion.type_id}),
-                    dsl.Q("term", **{"is_open": True}),
-                ],
-            ),
-        )
-        return next(results.hits)["id"] if results.total > 0 else None
-    """
-
     def _resolve_record(self, id_):
         try:
             return self.record_cls.pid.resolve(id_)
         except PIDUnregistered:
             return self.draft_cls.pid.resolve(id_, registered_only=False)
 
+    # todo supplied by submission secondary and migrate request
+    """
     @unit_of_work()
     def add(self, identity, id_, data, uow=None):
+        
+    
         record = self._resolve_record(id_)
         valid_data, errors = self.schema.load(
             data,
@@ -150,22 +100,9 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         uow.register(IndexRefreshOp(indexer=self.indexer))
 
         return processed, errors
-
-    def include_directly(
-        self, record, community_or_id, uow, record_service=None, default=None
-    ):
-        # integrity check, it should never happen on a published record
-        # assert not record.parent.review
-        applied_record_service = record_service or self.record_service
-        if default is None:
-            default = not record.parent.communities
-        record.parent.communities.add(community_or_id, default=default)
-        uow.register(RecordCommitOp(record.parent))
-        uow.register(RecordIndexOp(record, indexer=applied_record_service.indexer))
-        return record
-
+        
+    
     def _include(self, identity, community_id, comment, require_review, record, uow):
-        """Create request to add the community to the record."""
         # check if the community exists
         # todo is it necesarry to use the service here
         community = current_communities.service.record_cls.pid.resolve(community_id)
@@ -212,11 +149,44 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         self.require_permission(
             identity, "community_allows_adding_records", community=community
         )
-        self.include_directly(
+        self.include(
             record, community, uow, record_service=self.record_service
         )
         return self.result_item()
+    """
 
+    @unit_of_work()
+    def include(
+        self, record, community_id, uow=None, record_service=None, default=None
+    ):
+        applied_record_service = record_service or self.record_service
+
+        if default is None:
+            default = not record.parent.communities
+        record.parent.communities.add(community_id, default=default)
+        uow.register(RecordCommitOp(record.parent))
+        uow.register(RecordIndexOp(record, indexer=applied_record_service.indexer))
+        return record
+
+    @unit_of_work()
+    def remove(self, record, community_id, record_service=None, uow=None):
+        """Remove a community from the record."""
+        applied_record_service = record_service or self.record_service
+        if community_id not in record.parent.communities.ids:
+            # try if it's the community slug instead
+            community_id = str(
+                current_communities.service.record_cls.pid.resolve(community_id).id
+            )
+            if community_id not in record.parent.communities.ids:
+                raise RecordCommunityMissing(record.id, community_id)
+
+        # Default community is deleted when the exact same community is removed from the record
+        record.parent.communities.remove(community_id)
+        uow.register(RecordCommitOp(record.parent))
+        uow.register(RecordIndexOp(record, indexer=applied_record_service.indexer))
+
+    # todo supplied by remove_secondary and migrate requests
+    """
     @unit_of_work()
     def remove(self, identity, id_, data, uow=None):
         record = self._resolve_record(id_)
@@ -257,6 +227,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             )
 
         return processed, errors
+    """
 
     def search(
         self,
