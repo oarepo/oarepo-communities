@@ -13,6 +13,7 @@ from invenio_records_resources.services.uow import (
 from invenio_search.engine import dsl
 
 from oarepo_communities.services.errors import RecordCommunityMissing
+from oarepo_communities.utils.utils import slug2id
 
 
 class RecordCommunitiesService(RecordService, RecordIndexerMixin):
@@ -165,7 +166,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
             default = not record.parent.communities
         record.parent.communities.add(community_id, default=default)
         uow.register(RecordCommitOp(record.parent))
-        uow.register(RecordIndexOp(record, indexer=applied_record_service.indexer))
+        uow.register(RecordIndexOp(record, indexer=applied_record_service.indexer, index_refresh=True))
         return record
 
     @unit_of_work()
@@ -174,9 +175,7 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
         applied_record_service = record_service or self.record_service
         if community_id not in record.parent.communities.ids:
             # try if it's the community slug instead
-            community_id = str(
-                current_communities.service.record_cls.pid.resolve(community_id).id
-            )
+            community_id = slug2id(community_id)
             if community_id not in record.parent.communities.ids:
                 raise RecordCommunityMissing(record.id, community_id)
 

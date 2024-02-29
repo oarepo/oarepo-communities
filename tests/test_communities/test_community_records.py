@@ -1,6 +1,6 @@
 from thesis.records.api import ThesisDraft, ThesisRecord
 
-from tests.test_permissions.utils import published_record_in_community
+from tests.test_communities.utils import published_record_in_community
 
 
 def test_create_record_in_community(

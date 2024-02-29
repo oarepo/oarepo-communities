@@ -14,26 +14,23 @@ record:
   use:
     - invenio
   requests:
-    secondary-community-submission:
-      type:
+    types:
+      secondary-community-submission:
         base-classes:
           - SecondaryCommunitySubmissionRequestType
         imports:
           - import: oarepo_communities.requests.submission_secondary.SecondaryCommunitySubmissionRequestType
-    community-migration:
-      type:
+      community-migration:
         base-classes:
           - CommunityMigrationRequestType
         imports:
           - import: oarepo_communities.requests.migration.CommunityMigrationRequestType
-    delete-record:
-      type:
+      delete-record:
         base-classes:
           - CommunityDeleteRecordRequestType
         imports:
           - import: oarepo_communities.requests.community_delete.CommunityDeleteRecordRequestType
-    remove_secondary_community:
-      type:
+      remove_secondary_community:
         base-classes:
           - RemoveSecondaryRequestType
         imports:
@@ -41,26 +38,23 @@ record:
 
   draft:
     requests:
-      secondary-community-submission:
-        type:
+      types:
+        secondary-community-submission:
           base-classes:
             - SecondaryCommunitySubmissionRequestType
           imports:
             - import: oarepo_communities.requests.submission_secondary.SecondaryCommunitySubmissionRequestType
-      community-migration:
-        type:
+        community-migration:
           base-classes:
             - CommunityMigrationRequestType
           imports:
             - import: oarepo_communities.requests.migration.CommunityMigrationRequestType
-      publish-draft:
-        type:
+        publish-draft:
           base-classes:
             - CommunityPublishDraftRequestType
           imports:
             - import: oarepo_communities.requests.community_publish.CommunityPublishDraftRequestType
-      remove_secondary_community:
-        type:
+        remove_secondary_community:
           base-classes:
             - RemoveSecondaryRequestType
           imports:
@@ -68,7 +62,7 @@ record:
 
   record-communities:
     permissions:
-      presets: [ "community", "record-communities-community" ]
+      presets: [ "community"]
 
   community-records:
     permissions:

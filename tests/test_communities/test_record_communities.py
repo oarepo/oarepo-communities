@@ -3,7 +3,7 @@ from invenio_access.permissions import system_identity
 from invenio_pidstore.errors import PIDDoesNotExistError
 
 from oarepo_communities.services.errors import RecordCommunityMissing
-from tests.test_permissions.utils import published_record_in_community
+from tests.test_communities.utils import published_record_in_community
 
 
 def test_include(

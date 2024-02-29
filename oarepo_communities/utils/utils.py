@@ -1,3 +1,4 @@
+from invenio_communities.proxies import current_communities
 """
 def get_allowed_actions(record, identity=None):
     record_communities = set(record["parent"]["communities"]["ids"])
@@ -20,8 +21,14 @@ def get_allowed_actions(record, identity=None):
                 permissions = communities_permissions[user_community][user_role_community]
                 allowed_actions_for_record_and_user |= {permission for permission, allowed in permissions.items() if
                                                         allowed}
-                """
+"""
 
 
 def get_associated_service(record_service, service_type):
     return getattr(record_service.config, service_type, None)
+
+def slug2id(slug):
+        return str(
+            current_communities.service.record_cls.pid.resolve(slug).id
+        )
+
