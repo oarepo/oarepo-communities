@@ -34,4 +34,5 @@ pip install -U setuptools pip wheel
 pip install "oarepo[tests]==${OAREPO_VERSION}.*"
 pip install "./$BUILD_TEST_DIR/${MODEL}[tests]"
 pip install .
+#editable_install /home/ron/prace/oarepo-requests
 pytest ./$CODE_TEST_DIR/test_communities
