@@ -85,6 +85,35 @@ def app_config(app_config):
     app_config["FILES_REST_DEFAULT_STORAGE_CLASS"] = "L"
 
     app_config["REQUESTS_REGISTERED_TYPES"] = [RequestType()]
+
+    def default_receiver(*args, **kwargs):
+        return args[0]
+
+    from oarepo_requests.utils import resolve_reference_dict
+    #generalize this for all receiver types once?
+    def receiver_publish(*args, **kwargs):
+        topic = resolve_reference_dict(args[2])
+        return {"oarepo_community": str(topic.parent.communities.default.id)}
+
+    def receiver_delete(*args, **kwargs):
+        topic = resolve_reference_dict(args[2])
+        return {"oarepo_community": str(topic.parent.communities.default.id)}
+
+    def receiver_adressed(*args, **kwargs):
+        data = args[4]
+        target_community = data["payload"]["oarepo_community"]
+        return {"oarepo_community": target_community}
+
+
+
+    app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = {
+        "thesis_community_migration": receiver_adressed,
+        "thesis_delete_record": receiver_delete,
+        "thesis_publish_draft": receiver_publish,
+        "thesis_remove_secondary_community": receiver_adressed,
+        "thesis_secondary_community_submission": receiver_adressed,
+    }
+
     return app_config
 
 
@@ -379,17 +408,10 @@ def request_data_factory():
     def _request_data(
         community_id, topic_type, topic_id, request_type, creator=None, payload=None
     ):
-        if not isinstance(community_id, str):
-            community_id = community_id.id
-        else:
-            community_id = community_id
         input_data = {
-            "receiver": {"oarepo_community": community_id},
             "request_type": request_type,
             "topic": {topic_type: topic_id},
         }
-        if creator:
-            input_data["creator"] = creator
         if payload:
             input_data["payload"] = payload
         return input_data

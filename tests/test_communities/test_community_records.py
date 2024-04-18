@@ -63,8 +63,9 @@ def test_search(
     assert len(response_record1.json["hits"]["hits"]) == 1
     assert len(response_record2.json["hits"]["hits"]) == 1
 
-    assert len(response_draft1.json["hits"]["hits"]) == 0
-    assert len(response_draft2.json["hits"]["hits"]) == 0
+    # this now works as user search
+    assert len(response_draft1.json["hits"]["hits"]) == 1
+    assert len(response_draft2.json["hits"]["hits"]) == 1
 
     assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]

@@ -15,7 +15,7 @@ class AcceptAction(actions.AcceptAction):
         community = self.request.receiver.resolve()
         service = get_matching_service_for_record(record)
         record_communities_service = get_associated_service(
-            service, "service_record_communities"
+            service, "record_communities"
         )
         record_communities_service.include(
             record, community, uow=uow, default=self.request.type.set_as_default

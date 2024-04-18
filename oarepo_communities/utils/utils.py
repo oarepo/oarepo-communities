@@ -1,4 +1,5 @@
 from invenio_communities.proxies import current_communities
+from invenio_records_resources.proxies import current_service_registry
 """
 def get_allowed_actions(record, identity=None):
     record_communities = set(record["parent"]["communities"]["ids"])
@@ -25,7 +26,8 @@ def get_allowed_actions(record, identity=None):
 
 
 def get_associated_service(record_service, service_type):
-    return getattr(record_service.config, service_type, None)
+    #return getattr(record_service.config, service_type, None)
+    return current_service_registry.get(f"{record_service.config.service_id}_{service_type}")
 
 def slug2id(slug):
         return str(

@@ -116,7 +116,7 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         CommunityRolePermittedInCF(community_permission_name="can_draft_update_files"),
     ]
 
-
+"""
 class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
     can_user_add_communities_to_records = [
         SystemProcess(),
@@ -130,14 +130,11 @@ class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
         SystemProcess(),
         AnyUser(),
     ]
+"""
 
 
 class CommunityRecordsEveryonePermissionPolicy(BasePermissionPolicy):
-    can_remove_records_from_community = [
-        SystemProcess(),
-        AnyUser(),
-    ]
-    can_submit_to_community = [
+    can_create_in_community = [
         SystemProcess(),
         AnyUser(),
     ]
@@ -150,12 +147,11 @@ class CommunityRecordsCommunityPermissionPolicy(BasePermissionPolicy):
     ]
 
 class CommunityRequestsPermissionPolicy(BasePermissionPolicy):
-    can_delete_request = (
-        [
+    can_delete_request = [
             SystemProcess(),
             CommunityRolePermittedInCF(community_permission_name="can_delete_request"),
         ],
-    )
+
     can_publish_request = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_publish_request"),

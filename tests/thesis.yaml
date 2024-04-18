@@ -70,11 +70,6 @@ record:
     service-config:
       extra-code: |-2
             draft_cls = {{thesis.records.api.ThesisDraft}}
-
-  service-config:
-    extra-code: |-2
-          service_community_records = {{thesis.proxies.current_community_records_service}}
-          service_record_communities = {{thesis.proxies.current_record_communities_service}}
       
 
 
