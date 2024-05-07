@@ -28,7 +28,7 @@ class AcceptAction(actions.AcceptAction):
 #
 
 
-class CommunitySubmissionRequestType(OARepoRequestType):
+class CommunitySubmissionRequestType(OARepoRequestType): #rename abstract
     """Review request for submitting a record to a community."""
 
     type_id = "community_submission"

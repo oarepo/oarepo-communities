@@ -64,21 +64,11 @@ record:
     permissions:
       presets: [ "community"]
 
-  community-records:
-    permissions:
-      presets: [ "community", "community-records-community" ]
-    service-config:
-      extra-code: |-2
-            draft_cls = {{thesis.records.api.ThesisDraft}}
-      
-
-
 
 profiles:
   - record
   - draft
   - record_communities
-  - community_records
 
 
 settings:

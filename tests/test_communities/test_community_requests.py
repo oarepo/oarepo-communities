@@ -92,14 +92,14 @@ def _accept_request(
 
 
 def _init_env(
-    client_factory,
+    logged_client,
     community_owner,
     community_reader,
     community_with_permission_cf_factory,
     inviter,
 ):
-    reader_client = community_reader.login(client_factory())
-    owner_client = community_owner.login(client_factory())
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
 
     community_1 = community_with_permission_cf_factory("comm1", community_owner)
     community_2 = community_with_permission_cf_factory("comm2", community_owner)
@@ -127,7 +127,7 @@ def test_cf(
 
 
 def test_community_publish(
-    client_factory,
+    logged_client,
     community_owner,
     community_reader,
     community_with_permissions_cf,
@@ -135,8 +135,8 @@ def test_community_publish(
     record_service,
     search_clear,
 ):
-    reader_client = community_reader.login(client_factory())
-    owner_client = community_owner.login(client_factory())
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
 
     record_id = _create_record_in_community(
         reader_client, community_with_permissions_cf.id
@@ -169,7 +169,7 @@ def test_community_publish(
 
 
 def test_community_delete(
-    client_factory,
+    logged_client,
     community_owner,
     community_reader,
     community_with_permissions_cf,
@@ -177,8 +177,8 @@ def test_community_delete(
     record_service,
     search_clear,
 ):
-    reader_client = community_reader.login(client_factory())
-    owner_client = community_owner.login(client_factory())
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
 
     record_id = published_record_in_community(
         owner_client, community_with_permissions_cf.id, record_service, community_owner
@@ -208,7 +208,7 @@ def test_community_delete(
 
 
 def test_community_migration(
-    client_factory,
+    logged_client,
     community_owner,
     community_reader,
     community_with_permission_cf_factory,
@@ -218,7 +218,7 @@ def test_community_migration(
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
-        client_factory,
+        logged_client,
         community_owner,
         community_reader,
         community_with_permission_cf_factory,
@@ -265,7 +265,7 @@ def test_community_migration(
 
 
 def test_community_submission_secondary(
-    client_factory,
+    logged_client,
     community_owner,
     community_reader,
     community_with_permission_cf_factory,
@@ -275,7 +275,7 @@ def test_community_submission_secondary(
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
-        client_factory,
+        logged_client,
         community_owner,
         community_reader,
         community_with_permission_cf_factory,
@@ -327,7 +327,7 @@ def test_community_submission_secondary(
 
 
 def test_remove_secondary(
-    client_factory,
+    logged_client,
     community_owner,
     community_reader,
     community_with_permission_cf_factory,
@@ -337,7 +337,7 @@ def test_remove_secondary(
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
-        client_factory,
+        logged_client,
         community_owner,
         community_reader,
         community_with_permission_cf_factory,

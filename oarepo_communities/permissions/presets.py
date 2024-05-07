@@ -12,13 +12,14 @@ from .record import CommunityRolePermittedInCF
 class CommunityPermissionPolicy(RecordPermissionPolicy):
     can_search = [
         SystemProcess(),
-        AuthenticatedUser(),  # the base service does not provide a way to check community in permissions
+        AuthenticatedUser(),
     ]
     can_read = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_read"),
     ]
-    can_create = [SystemProcess(), AuthenticatedUser()]
+    # can_create = [SystemProcess(), CommunityRolePermittedInCF(community_permission_name="can_create")] todo - invenio create record method doesn't seem to have a way to push community into the needs generator
+    can_create = [SystemProcess(), AuthenticatedUser()] # could be done like this, the actual permission is in can_create_in_community; the problem is that we have to still disable the endpoint?
     can_update = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_update"),

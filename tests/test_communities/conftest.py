@@ -3,7 +3,6 @@ import os
 
 import pytest
 import yaml
-from invenio_access.permissions import system_identity
 from invenio_app.factory import create_api
 from invenio_communities import current_communities
 from invenio_communities.cli import create_communities_custom_field
@@ -11,8 +10,11 @@ from invenio_communities.communities.records.api import Community
 from invenio_communities.generators import CommunityRoleNeed
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_resources.services.uow import RecordCommitOp, UnitOfWork
-from thesis.proxies import current_record_communities_service, current_service
+from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft, ThesisRecord
+from flask_security import login_user
+from invenio_access.permissions import system_identity
+from invenio_accounts.testutils import login_user_via_session
 
 
 @pytest.fixture(scope="function")
@@ -37,14 +39,60 @@ def input_data(sample_metadata_list):
     return sample_metadata_list[0]
 
 
-@pytest.fixture
-def client_factory(app):
-    def _client_factory():
-        with app.test_client() as client:
-            return client
+class LoggedClient:
+    def __init__(self, client, user_fixture):
+        self.client = client
+        self.user_fixture = user_fixture
 
-    return _client_factory
+    def _login(self):
+        login_user(self.user_fixture.user, remember=True)
+        login_user_via_session(self.client, email=self.user_fixture.email)
 
+    def post(self, *args, **kwargs):
+        self._login()
+        return self.client.post(*args, **kwargs)
+
+    def get(self, *args, **kwargs):
+        self._login()
+        return self.client.get(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        self._login()
+        return self.client.put(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self._login()
+        return self.client.delete(*args, **kwargs)
+
+
+@pytest.fixture()
+def logged_client(client):
+    def _logged_client(user):
+        return LoggedClient(client, user)
+
+    return _logged_client
+
+@pytest.fixture()
+def inviter():
+    """Add/invite a user to a community with a specific role."""
+
+    def invite(user_id, community_id, role):
+        """Add/invite a user to a community with a specific role."""
+        invitation_data = {
+            "members": [
+                {
+                    "type": "user",
+                    "id": user_id,
+                }
+            ],
+            "role": role,
+            "visible": True,
+        }
+        current_communities.service.members.add(
+            system_identity, community_id, invitation_data
+        )
+
+    return invite
 
 @pytest.fixture(scope="module")
 def create_app(instance_path, entry_points):
@@ -140,7 +188,7 @@ def example_record(app, db, input_data):
 
 
 @pytest.fixture()
-def community_owner_helper(UserFixture, app, db):
+def community_owner(UserFixture, app, db):
     """Community owner."""
     u = UserFixture(
         email="community_owner@inveniosoftware.org",
@@ -151,35 +199,38 @@ def community_owner_helper(UserFixture, app, db):
 
 
 @pytest.fixture()
-def community_curator_helper(UserFixture, app, db):
+def community_curator(UserFixture, app, db, community, inviter):
     """Community owner."""
     u = UserFixture(
         email="community_curator@inveniosoftware.org",
         password="community_curator",
     )
     u.create(app, db)
+    inviter(u.id, str(community.id), "curator")
     return u
 
 
 @pytest.fixture()
-def community_manager_helper(UserFixture, app, db):
+def community_manager(UserFixture, app, db, community, inviter):
     """Community owner."""
     u = UserFixture(
         email="community_manager@inveniosoftware.org",
         password="community_manager",
     )
     u.create(app, db)
+    inviter(u.id, str(community.id), "manager")
     return u
 
 
 @pytest.fixture()
-def community_reader_helper(UserFixture, app, db):
+def community_reader(UserFixture, app, db, community, inviter):
     """Community owner."""
     u = UserFixture(
         email="community_reader@inveniosoftware.org",
         password="community_reader",
     )
     u.create(app, db)
+    inviter(u.id, str(community.id), "reader")
     return u
 
 
@@ -226,6 +277,7 @@ def community_permissions_cf():
                     "can_read_draft": True,
                     "can_update": True,
                     "can_search": True,
+                    "can_create": True,
                 },
                 "reader": {
                     "can_create_in_community": True,
@@ -249,31 +301,7 @@ def community_permissions_cf():
 def location(location):
     return location
 
-
-@pytest.fixture()
-def inviter():
-    """Add/invite a user to a community with a specific role."""
-
-    def invite(user_id, community_id, role):
-        """Add/invite a user to a community with a specific role."""
-        invitation_data = {
-            "members": [
-                {
-                    "type": "user",
-                    "id": user_id,
-                }
-            ],
-            "role": role,
-            "visible": True,
-        }
-        current_communities.service.members.add(
-            system_identity, community_id, invitation_data
-        )
-
-    return invite
-
-
-def _community_get_or_create(community_dict, identity):
+def _community_get_or_create(identity, community_dict):
     """Util to get or create community, to avoid duplicate error."""
     slug = community_dict["slug"]
     try:
@@ -284,13 +312,14 @@ def _community_get_or_create(community_dict, identity):
             community_dict,
         )
         Community.index.refresh()
+        identity.provides.add(CommunityRoleNeed(str(c.id), "owner"))
     return c
 
 
 @pytest.fixture()
-def community(app, community_owner_helper, minimal_community):
+def community(app, minimal_community, community_owner):
     """Get the current RDM records service."""
-    return _community_get_or_create(minimal_community, community_owner_helper.identity)
+    return _community_get_or_create(community_owner.identity, minimal_community)
 
 
 @pytest.fixture()
@@ -313,7 +342,7 @@ def community_with_permission_cf_factory(
         minimal_community_actual = copy.deepcopy(minimal_community)
         minimal_community_actual["slug"] = slug
         community = _community_get_or_create(
-            minimal_community_actual, community_owner.identity
+            community_owner.identity, minimal_community_actual
         )
         community_owner.identity.provides.add(
             CommunityRoleNeed(community.data["id"], "owner")
@@ -326,39 +355,6 @@ def community_with_permission_cf_factory(
         return community
 
     return create_community
-
-
-@pytest.fixture()
-def community_owner(UserFixture, community_owner_helper, community, inviter, app, db):
-    # inviter(community_owner_helper.id, community.id, "owner")
-    community_owner_helper.identity.provides.add(
-        CommunityRoleNeed(community.data["id"], "owner")
-    )
-    return community_owner_helper
-
-
-"""
-@pytest.fixture()
-def community_manager(UserFixture, community_owner_helper, community, inviter, app, db):
-    #inviter(community_owner_helper.id, community.id, "owner")
-    community_owner_helper.identity.provides.add(CommunityRoleNeed(community.data["id"], "manager"))
-    return community_owner_helper
-"""
-
-
-@pytest.fixture()
-def community_curator(
-    UserFixture, community_curator_helper, community, inviter, app, db
-):
-    inviter(community_curator_helper.id, community.data["id"], "curator")
-    return community_curator_helper
-
-
-@pytest.fixture()
-def community_reader(UserFixture, community_reader_helper, community, inviter, app, db):
-    inviter(community_reader_helper.id, community.data["id"], "reader")
-    return community_reader_helper
-
 
 # -----
 from invenio_requests.customizations import RequestType

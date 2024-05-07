@@ -3,6 +3,7 @@ from collections import defaultdict
 from cachetools import TTLCache, cached
 from invenio_communities.generators import CommunityRoleNeed
 from invenio_records_permissions.generators import Generator
+from invenio_search.engine import dsl
 
 from ..proxies import current_communities_permissions
 
@@ -25,6 +26,24 @@ class CommunityRolePermittedInCF(Generator):
         else:
             return []
         return needs_from_community_ids(community_ids, self.community_permission_name)
+
+    def query_filter(self, identity=None, **kwargs):
+        allowed_communities = []
+        user_communities_roles = defaultdict(set)
+        if identity:
+            for need in identity.provides:
+                if need.method == "community":
+                    user_communities_roles[need.value].add(need.role)
+        permissions = record_community_permissions(frozenset(user_communities_roles.keys()))
+        if self.community_permission_name in permissions:
+            allowed_communities_roles = permissions[self.community_permission_name]
+            for community, user_community_roles in user_communities_roles.items():
+                allowed_community_roles = set(allowed_communities_roles[community])
+                community_allows = bool(user_community_roles & allowed_community_roles)
+                if community_allows:
+                    allowed_communities.append(community)
+        return dsl.Q("terms", **{"parent.communities.ids": allowed_communities})
+
 
 
 def needs_from_community_ids(community_ids, community_permission_name):

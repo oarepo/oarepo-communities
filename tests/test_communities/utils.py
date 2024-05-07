@@ -11,4 +11,4 @@ def published_record_in_community(client, community_id, record_service, user):
 
 
 def _create_record_in_community(client, comm_id):
-    return client.post(f"/communities/{comm_id}/records", json={})
+    return client.post(f"/communities/{comm_id}/thesis/records", json={})

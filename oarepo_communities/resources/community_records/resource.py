@@ -22,10 +22,9 @@ class CommunityRecordsResource(RecordResource):
         routes = self.config.routes
         url_rules = [
             route("GET", p(routes["list"]), self.search),
-            route("GET", p(routes["list-draft"]), self.search_drafts),
+            route("GET", p(routes["list-user"]), self.search_user),
             route("POST", p(routes["list"]), self.create_in_community),
-            # route("DELETE", p(routes["list"]), self.delete),
-            # route("POST", p(routes["item"]), self.community_submission)
+            route("POST", p(routes["list-model"]), self.create_in_community, endpoint="create_in_community_with_model")
         ]
 
         return url_rules
@@ -43,53 +42,26 @@ class CommunityRecordsResource(RecordResource):
         )
         return hits.to_dict(), 200
 
-    """
-    @request_view_args
-    @response_handler()
-    @request_data
-    def delete(self):
-        errors = self.service.delete(
-            identity=g.identity,
-            community_id=resource_requestctx.view_args["pid_value"],
-            data=resource_requestctx.data,
-        )
-        response = {}
-        if errors:
-            response["errors"] = errors
-        return response, 200
-    """
-
     @request_view_args
     @response_handler()
     @request_data
     def create_in_community(self):
+        model = resource_requestctx.view_args["model"] if "model" in resource_requestctx.view_args else None
         item = self.service.create_in_community(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
             data=resource_requestctx.data,
+            model=model
         )
 
         return item.to_dict(), 201
 
-    """
-    @request_view_args
-    @response_handler()
-    @request_data
-    def community_submission(self):
-        item = self.service.community_submission(
-            identity=g.identity,
-            community_id=resource_requestctx.view_args["pid_value"],
-            record_id=resource_requestctx.view_args["record_id"]
-        )
-
-        return item.to_dict(), 201
-    """
 
     @request_search_args
     @request_view_args
     @response_handler(many=True)
-    def search_drafts(self):
-        hits = self.service.search_drafts(
+    def search_user(self):
+        hits = self.service.user_search(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
             params=resource_requestctx.args,

@@ -19,6 +19,7 @@ class CommunityRecordsServiceConfig(
     # schema = RDMRecordSchema
     # record service
     record_communities_service = None
+    PERMISSIONS_PRESETS = ["community", "community-records-community"]
 
     service_id = "community-records"
     community_cls = Community

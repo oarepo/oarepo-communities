@@ -7,20 +7,20 @@ from tests.test_communities.utils import published_record_in_community
 
 
 def test_include(
-    client_factory,
+    logged_client,
     community_owner,
     community_with_permission_cf_factory,
     record_communities_service,
     record_service,
     search_clear,
 ):
-    owner_client = community_owner.login(client_factory())
+    owner_client = logged_client(community_owner)
 
     community_1 = community_with_permission_cf_factory("comm1", community_owner)
     community_2 = community_with_permission_cf_factory("comm2", community_owner)
     community_3 = community_with_permission_cf_factory("comm3", community_owner)
 
-    response = owner_client.post(f"/communities/{community_1.id}/records", json={})
+    response = owner_client.post(f"/communities/{community_1.id}/thesis/records", json={})
 
     record_id = response.json["id"]
     record = record_service.read_draft(system_identity, record_id)._obj
@@ -45,21 +45,21 @@ def test_include(
 
 
 def test_remove(
-    client_factory,
+    logged_client,
     community_owner,
     community_with_permission_cf_factory,
     record_communities_service,
     record_service,
     search_clear,
 ):
-    owner_client = community_owner.login(client_factory())
+    owner_client = logged_client(community_owner)
 
     community_1 = community_with_permission_cf_factory("comm1", community_owner)
     community_2 = community_with_permission_cf_factory("comm2", community_owner)
     community_3 = community_with_permission_cf_factory("comm3", community_owner)
     community_4 = community_with_permission_cf_factory("comm4", community_owner)
 
-    response = owner_client.post(f"/communities/{community_1.id}/records", json={})
+    response = owner_client.post(f"/communities/{community_1.id}/thesis/records", json={})
     record_id = response.json["id"]
     record = record_service.read_draft(system_identity, record_id)._obj
 
@@ -84,18 +84,18 @@ def test_remove(
 
 
 def test_search(
-    client_factory,
+    logged_client,
     community_owner,
     community_with_permission_cf_factory,
     record_communities_service,
     record_service,
     search_clear,
 ):
-    owner_client = community_owner.login(client_factory())
+    owner_client = logged_client(community_owner)
 
     community_1 = community_with_permission_cf_factory("comm1", community_owner)
 
-    response = owner_client.post(f"/communities/{community_1.id}/records", json={})
+    response = owner_client.post(f"/communities/{community_1.id}/thesis/records", json={})
     record_id = response.json["id"]
     draft_search = owner_client.get(f"/thesis/{record_id}/communities")
     assert len(draft_search.json["hits"]["hits"]) == 1
