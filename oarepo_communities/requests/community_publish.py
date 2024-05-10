@@ -1,4 +1,3 @@
-
 from invenio_access.permissions import system_identity
 from oarepo_requests.actions.publish_draft import PublishDraftAcceptAction
 from oarepo_requests.types.publish_draft import PublishDraftRequestType

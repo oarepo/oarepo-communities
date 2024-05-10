@@ -3,6 +3,9 @@ import os
 
 import pytest
 import yaml
+from flask_security import login_user
+from invenio_access.permissions import system_identity
+from invenio_accounts.testutils import login_user_via_session
 from invenio_app.factory import create_api
 from invenio_communities import current_communities
 from invenio_communities.cli import create_communities_custom_field
@@ -12,9 +15,6 @@ from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_resources.services.uow import RecordCommitOp, UnitOfWork
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft, ThesisRecord
-from flask_security import login_user
-from invenio_access.permissions import system_identity
-from invenio_accounts.testutils import login_user_via_session
 
 
 @pytest.fixture(scope="function")
@@ -72,6 +72,14 @@ def logged_client(client):
 
     return _logged_client
 
+
+@pytest.fixture()
+def init_cf(app, db, cache):
+    from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
+
+    prepare_cf_indices()
+
+
 @pytest.fixture()
 def inviter():
     """Add/invite a user to a community with a specific role."""
@@ -94,6 +102,7 @@ def inviter():
 
     return invite
 
+
 @pytest.fixture(scope="module")
 def create_app(instance_path, entry_points):
     """Application factory fixture."""
@@ -104,12 +113,12 @@ def create_app(instance_path, entry_points):
 def app_config(app_config):
     """Mimic an instance's configuration."""
     app_config["JSONSCHEMAS_HOST"] = "localhost"
-    app_config[
-        "RECORDS_REFRESOLVER_CLS"
-    ] = "invenio_records.resolver.InvenioRefResolver"
-    app_config[
-        "RECORDS_REFRESOLVER_STORE"
-    ] = "invenio_jsonschemas.proxies.current_refresolver_store"
+    app_config["RECORDS_REFRESOLVER_CLS"] = (
+        "invenio_records.resolver.InvenioRefResolver"
+    )
+    app_config["RECORDS_REFRESOLVER_STORE"] = (
+        "invenio_jsonschemas.proxies.current_refresolver_store"
+    )
     app_config["RATELIMIT_AUTHENTICATED_USER"] = "200 per second"
     app_config["SEARCH_HOSTS"] = [
         {
@@ -138,7 +147,8 @@ def app_config(app_config):
         return args[0]
 
     from oarepo_requests.utils import resolve_reference_dict
-    #generalize this for all receiver types once?
+
+    # generalize this for all receiver types once?
     def receiver_publish(*args, **kwargs):
         topic = resolve_reference_dict(args[2])
         return {"oarepo_community": str(topic.parent.communities.default.id)}
@@ -151,8 +161,6 @@ def app_config(app_config):
         data = args[4]
         target_community = data["payload"]["oarepo_community"]
         return {"oarepo_community": target_community}
-
-
 
     app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = {
         "thesis_community_migration": receiver_adressed,
@@ -301,6 +309,7 @@ def community_permissions_cf():
 def location(location):
     return location
 
+
 def _community_get_or_create(identity, community_dict):
     """Util to get or create community, to avoid duplicate error."""
     slug = community_dict["slug"]
@@ -355,6 +364,7 @@ def community_with_permission_cf_factory(
         return community
 
     return create_community
+
 
 # -----
 from invenio_requests.customizations import RequestType

@@ -34,7 +34,9 @@ class CommunityRolePermittedInCF(Generator):
             for need in identity.provides:
                 if need.method == "community":
                     user_communities_roles[need.value].add(need.role)
-        permissions = record_community_permissions(frozenset(user_communities_roles.keys()))
+        permissions = record_community_permissions(
+            frozenset(user_communities_roles.keys())
+        )
         if self.community_permission_name in permissions:
             allowed_communities_roles = permissions[self.community_permission_name]
             for community, user_community_roles in user_communities_roles.items():
@@ -43,7 +45,6 @@ class CommunityRolePermittedInCF(Generator):
                 if community_allows:
                     allowed_communities.append(community)
         return dsl.Q("terms", **{"parent.communities.ids": allowed_communities})
-
 
 
 def needs_from_community_ids(community_ids, community_permission_name):

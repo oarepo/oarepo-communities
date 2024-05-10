@@ -24,7 +24,12 @@ class CommunityRecordsResource(RecordResource):
             route("GET", p(routes["list"]), self.search),
             route("GET", p(routes["list-user"]), self.search_user),
             route("POST", p(routes["list"]), self.create_in_community),
-            route("POST", p(routes["list-model"]), self.create_in_community, endpoint="create_in_community_with_model")
+            route(
+                "POST",
+                p(routes["list-model"]),
+                self.create_in_community,
+                endpoint="create_in_community_with_model",
+            ),
         ]
 
         return url_rules
@@ -46,16 +51,19 @@ class CommunityRecordsResource(RecordResource):
     @response_handler()
     @request_data
     def create_in_community(self):
-        model = resource_requestctx.view_args["model"] if "model" in resource_requestctx.view_args else None
+        model = (
+            resource_requestctx.view_args["model"]
+            if "model" in resource_requestctx.view_args
+            else None
+        )
         item = self.service.create_in_community(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
             data=resource_requestctx.data,
-            model=model
+            model=model,
         )
 
         return item.to_dict(), 201
-
 
     @request_search_args
     @request_view_args

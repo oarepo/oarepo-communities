@@ -8,19 +8,17 @@
 """RDM Community Records Service."""
 
 from invenio_communities.proxies import current_communities
-from invenio_records_resources.services import (
-    LinksTemplate,
-    RecordService,
-    ServiceSchemaWrapper,
-)
+from invenio_records_resources.proxies import current_service_registry
+from invenio_records_resources.services import RecordService, ServiceSchemaWrapper
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
-from oarepo_global_search.proxies import current_global_search
 
-from oarepo_communities.utils.utils import get_global_search_service, get_global_user_search_service, \
-    get_associated_service, get_service_from_schema_type
-from invenio_records_resources.proxies import current_service_registry
-
+from oarepo_communities.utils.utils import (
+    get_associated_service,
+    get_global_search_service,
+    get_global_user_search_service,
+    get_service_from_schema_type,
+)
 
 # from invenio_rdm_records.proxies import current_record_communities_service
 
@@ -66,7 +64,9 @@ class CommunityRecordsService(RecordService):
         **kwargs,
     ):
         community = self.community_cls.pid.resolve(community_id)
-        self.require_permission(identity, "search", community=community) # different permission instead?
+        self.require_permission(
+            identity, "search", community=community
+        )  # different permission instead?
         params = params or {}
 
         community_filter = dsl.Q(
@@ -75,12 +75,8 @@ class CommunityRecordsService(RecordService):
         if extra_filter is not None:
             community_filter = community_filter & extra_filter
         return get_global_search_service().global_search(
-            identity,
-            params,
-            extra_filter=community_filter,
-            community=community
+            identity, params, extra_filter=community_filter, community=community
         )
-
 
     def user_search(
         self,
@@ -103,14 +99,14 @@ class CommunityRecordsService(RecordService):
             community_filter = community_filter & extra_filter
 
         return get_global_user_search_service().global_search(
-            identity,
-            params,
-            extra_filter=community_filter,
-            community=community
+            identity, params, extra_filter=community_filter, community=community
         )
 
     @unit_of_work()
-    def create_in_community(self, identity, community_id, data, model=None, uow=None, expand=False):
+    def create_in_community(
+        self, identity, community_id, data, model=None, uow=None, expand=False
+    ):
+        # should the dumper put the entries thing into search? ref CommunitiesField#110, not in rdm; it is in new rdm, i had quite old version
         # community_id may be the slug coming from resource
         if model:
             record_service = current_service_registry.get(model)
@@ -120,7 +116,7 @@ class CommunityRecordsService(RecordService):
             raise ValueError(f"No service found for requested model {model}.")
         community = current_communities.service.record_cls.pid.resolve(community_id)
         self.require_permission(identity, "create_in_community", community=community)
-        # todo add record service in mb ext
+
         record = record_service.create(identity, data, uow=uow, expand=expand)._record
 
         record_communities_service = get_associated_service(
@@ -130,7 +126,7 @@ class CommunityRecordsService(RecordService):
         # todo this should probably be reconcetualized, how to return the actual record item with the updated parent?
         record_with_community_in_parent = record_communities_service.include(
             record,
-            community,
+            community_id,
             record_service=record_service,
             uow=uow,
         )

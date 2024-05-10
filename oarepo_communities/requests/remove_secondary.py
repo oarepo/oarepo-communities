@@ -1,6 +1,9 @@
 from invenio_requests.customizations import actions
 from oarepo_requests.types.generic import OARepoRequestType
-from oarepo_requests.utils import get_matching_service_for_record, resolve_reference_dict
+from oarepo_requests.utils import (
+    get_matching_service_for_record,
+    resolve_reference_dict,
+)
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
 from ..utils.utils import get_associated_service

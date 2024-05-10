@@ -19,7 +19,10 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         CommunityRolePermittedInCF(community_permission_name="can_read"),
     ]
     # can_create = [SystemProcess(), CommunityRolePermittedInCF(community_permission_name="can_create")] todo - invenio create record method doesn't seem to have a way to push community into the needs generator
-    can_create = [SystemProcess(), AuthenticatedUser()] # could be done like this, the actual permission is in can_create_in_community; the problem is that we have to still disable the endpoint?
+    can_create = [
+        SystemProcess(),
+        AuthenticatedUser(),
+    ]  # could be done like this, the actual permission is in can_create_in_community; the problem is that we have to still disable the endpoint?
     can_update = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_update"),
@@ -117,6 +120,7 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         CommunityRolePermittedInCF(community_permission_name="can_draft_update_files"),
     ]
 
+
 """
 class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
     can_user_add_communities_to_records = [
@@ -147,11 +151,14 @@ class CommunityRecordsCommunityPermissionPolicy(BasePermissionPolicy):
         CommunityRolePermittedInCF(community_permission_name="can_create_in_community"),
     ]
 
+
 class CommunityRequestsPermissionPolicy(BasePermissionPolicy):
-    can_delete_request = [
+    can_delete_request = (
+        [
             SystemProcess(),
             CommunityRolePermittedInCF(community_permission_name="can_delete_request"),
         ],
+    )
 
     can_publish_request = [
         SystemProcess(),

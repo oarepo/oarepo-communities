@@ -20,7 +20,9 @@ def test_include(
     community_2 = community_with_permission_cf_factory("comm2", community_owner)
     community_3 = community_with_permission_cf_factory("comm3", community_owner)
 
-    response = owner_client.post(f"/communities/{community_1.id}/thesis/records", json={})
+    response = owner_client.post(
+        f"/communities/{community_1.id}/thesis/records", json={}
+    )
 
     record_id = response.json["id"]
     record = record_service.read_draft(system_identity, record_id)._obj
@@ -59,7 +61,9 @@ def test_remove(
     community_3 = community_with_permission_cf_factory("comm3", community_owner)
     community_4 = community_with_permission_cf_factory("comm4", community_owner)
 
-    response = owner_client.post(f"/communities/{community_1.id}/thesis/records", json={})
+    response = owner_client.post(
+        f"/communities/{community_1.id}/thesis/records", json={}
+    )
     record_id = response.json["id"]
     record = record_service.read_draft(system_identity, record_id)._obj
 
@@ -95,7 +99,9 @@ def test_search(
 
     community_1 = community_with_permission_cf_factory("comm1", community_owner)
 
-    response = owner_client.post(f"/communities/{community_1.id}/thesis/records", json={})
+    response = owner_client.post(
+        f"/communities/{community_1.id}/thesis/records", json={}
+    )
     record_id = response.json["id"]
     draft_search = owner_client.get(f"/thesis/{record_id}/communities")
     assert len(draft_search.json["hits"]["hits"]) == 1

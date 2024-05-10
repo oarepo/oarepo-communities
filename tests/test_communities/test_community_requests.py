@@ -193,7 +193,10 @@ def test_community_delete(
         request_data_factory,
     )
     _accept_request(
-        reader_client, type="thesis_delete_record", record_id=record_id, no_accept_link=True
+        reader_client,
+        type="thesis_delete_record",
+        record_id=record_id,
+        no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
         owner_client, type="thesis_delete_record", record_id=record_id
@@ -237,7 +240,7 @@ def test_community_migration(
         record_id,
         "thesis_community_migration",
         request_data_factory,
-        payload={"oarepo_community": str(community_2.id)}
+        payload={"oarepo_community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
@@ -294,7 +297,7 @@ def test_community_submission_secondary(
             record_id,
             "thesis_secondary_community_submission",
             request_data_factory,
-            payload={"oarepo_community": str(community_1.id)}
+            payload={"oarepo_community": str(community_1.id)},
         )
 
     submit = _submit_request(
@@ -304,7 +307,7 @@ def test_community_submission_secondary(
         record_id,
         "thesis_secondary_community_submission",
         request_data_factory,
-        payload={"oarepo_community": str(community_2.id)}
+        payload={"oarepo_community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
@@ -355,7 +358,7 @@ def test_remove_secondary(
         record_id,
         "thesis_secondary_community_submission",
         request_data_factory,
-        payload={"oarepo_community": str(community_2.id)}
+        payload={"oarepo_community": str(community_2.id)},
     )
     accept_owner = _accept_request(
         owner_client, type="thesis_secondary_community_submission", record_id=record_id
@@ -371,7 +374,7 @@ def test_remove_secondary(
             record_id,
             "thesis_remove_secondary_community",
             request_data_factory,
-            payload={"oarepo_community": str(community_1.id)}
+            payload={"oarepo_community": str(community_1.id)},
         )
 
     submit = _submit_request(
@@ -381,7 +384,7 @@ def test_remove_secondary(
         record_id,
         "thesis_remove_secondary_community",
         request_data_factory,
-        payload={"oarepo_community": str(community_2.id)}
+        payload={"oarepo_community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
@@ -408,5 +411,5 @@ def test_remove_secondary(
             record_id,
             "thesis_remove_secondary_community",
             request_data_factory,
-            payload={"oarepo_community": str(community_2.id)}
+            payload={"oarepo_community": str(community_2.id)},
         )

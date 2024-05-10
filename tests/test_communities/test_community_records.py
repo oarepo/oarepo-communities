@@ -2,6 +2,7 @@ from thesis.records.api import ThesisDraft, ThesisRecord
 
 from tests.test_communities.utils import published_record_in_community
 
+
 def test_create_record_in_community(
     logged_client,
     community_owner,
@@ -30,6 +31,7 @@ def test_create_record_in_community(
         == community_with_permissions_cf.id
     )
 
+
 def test_create_record_in_community_without_model_in_url(
     logged_client,
     community_owner,
@@ -39,7 +41,8 @@ def test_create_record_in_community_without_model_in_url(
     owner_client = logged_client(community_owner)
 
     response = owner_client.post(
-        f"/communities/{community_with_permissions_cf.id}/records", json={"$schema": "local://thesis-1.0.0.json"}
+        f"/communities/{community_with_permissions_cf.id}/records",
+        json={"$schema": "local://thesis-1.0.0.json"},
     )
     assert response.json["parent"]["communities"]["ids"] == [
         community_with_permissions_cf.id
@@ -60,6 +63,7 @@ def test_create_record_in_community_without_model_in_url(
 
 
 def test_search(
+    init_cf,
     logged_client,
     community_owner,
     community_with_permission_cf_factory,
@@ -99,6 +103,7 @@ def test_search(
 
 
 def test_user_search(
+    init_cf,
     logged_client,
     community_owner,
     community_with_permission_cf_factory,
@@ -109,8 +114,12 @@ def test_user_search(
     community_1 = community_with_permission_cf_factory("comm1", community_owner)
     community_2 = community_with_permission_cf_factory("comm2", community_owner)
 
-    record1 = owner_client.post(f"/communities/{community_1.id}/thesis/records", json={}).json
-    record2 = owner_client.post(f"/communities/{community_2.id}/thesis/records", json={}).json
+    record1 = owner_client.post(
+        f"/communities/{community_1.id}/thesis/records", json={}
+    ).json
+    record2 = owner_client.post(
+        f"/communities/{community_2.id}/thesis/records", json={}
+    ).json
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
