@@ -7,11 +7,11 @@
 
 """RDM Community Records Service."""
 
+from invenio_access.permissions import system_identity
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.proxies import current_service_registry
 from invenio_records_resources.services import RecordService, ServiceSchemaWrapper
 from invenio_records_resources.services.uow import unit_of_work
-from invenio_search.engine import dsl
 
 from oarepo_communities.utils.utils import (
     get_associated_service,
@@ -19,8 +19,6 @@ from oarepo_communities.utils.utils import (
     get_global_user_search_service,
     get_service_from_schema_type,
 )
-
-# from invenio_rdm_records.proxies import current_record_communities_service
 
 
 class CommunityRecordsService(RecordService):
@@ -64,18 +62,10 @@ class CommunityRecordsService(RecordService):
         **kwargs,
     ):
         community = self.community_cls.pid.resolve(community_id)
-        self.require_permission(
-            identity, "search", community=community
-        )  # different permission instead?
         params = params or {}
 
-        community_filter = dsl.Q(
-            "term", **{"parent.communities.ids.keyword": str(community.id)}
-        )
-        if extra_filter is not None:
-            community_filter = community_filter & extra_filter
         return get_global_search_service().global_search(
-            identity, params, extra_filter=community_filter, community=community
+            identity, params, community=community
         )
 
     def user_search(
@@ -89,17 +79,10 @@ class CommunityRecordsService(RecordService):
         **kwargs,
     ):
         community = self.community_cls.pid.resolve(community_id)
-        self.require_permission(identity, "search_drafts", community=community)
         params = params or {}
 
-        community_filter = dsl.Q(
-            "term", **{"parent.communities.ids.keyword": str(community.id)}
-        )
-        if extra_filter is not None:
-            community_filter = community_filter & extra_filter
-
         return get_global_user_search_service().global_search(
-            identity, params, extra_filter=community_filter, community=community
+            identity, params, community=community
         )
 
     @unit_of_work()
@@ -117,7 +100,9 @@ class CommunityRecordsService(RecordService):
         community = current_communities.service.record_cls.pid.resolve(community_id)
         self.require_permission(identity, "create_in_community", community=community)
 
-        record = record_service.create(identity, data, uow=uow, expand=expand)._record
+        record = record_service.create(
+            system_identity, data, uow=uow, expand=expand
+        )._record
 
         record_communities_service = get_associated_service(
             record_service, "record_communities"

@@ -1,11 +1,16 @@
 from collections import defaultdict
 
 from cachetools import TTLCache, cached
+from invenio_access.permissions import authenticated_user
 from invenio_communities.generators import CommunityRoleNeed
 from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
 
 from ..proxies import current_communities_permissions
+
+SPECIAL_ROLES_MAPPING = {
+    "authenticated_user": lambda *args, **kwargs: authenticated_user
+}
 
 
 class CommunityRolePermittedInCF(Generator):
@@ -27,24 +32,55 @@ class CommunityRolePermittedInCF(Generator):
             return []
         return needs_from_community_ids(community_ids, self.community_permission_name)
 
-    def query_filter(self, identity=None, **kwargs):
-        allowed_communities = []
-        user_communities_roles = defaultdict(set)
-        if identity:
-            for need in identity.provides:
-                if need.method == "community":
-                    user_communities_roles[need.value].add(need.role)
+    def _query_filter_community_roles(self, user_communities_roles):
+        allowed_communities = set()
         permissions = record_community_permissions(
             frozenset(user_communities_roles.keys())
         )
         if self.community_permission_name in permissions:
             allowed_communities_roles = permissions[self.community_permission_name]
             for community, user_community_roles in user_communities_roles.items():
-                allowed_community_roles = set(allowed_communities_roles[community])
+                allowed_community_roles = set(
+                    [
+                        role
+                        for role in allowed_communities_roles[community]
+                        if role not in SPECIAL_ROLES_MAPPING
+                    ]
+                )
                 community_allows = bool(user_community_roles & allowed_community_roles)
                 if community_allows:
-                    allowed_communities.append(community)
-        return dsl.Q("terms", **{"parent.communities.ids": allowed_communities})
+                    allowed_communities.add(community)
+        return allowed_communities
+
+    def _query_filter_special_roles(self, user_needs):
+        allowed_communities = set()
+        # todo
+        # doing search each time is possibly too expensive - user cache or some new global register?
+        # for need in user_needs:
+        #    allowed_communities &= globally_allowed_communities(need)
+        return allowed_communities
+
+    def query_filter(self, identity=None, **kwargs):
+        user_communities_needs = defaultdict(set)
+        user_general_needs = []
+
+        if identity:
+            for need in identity.provides:
+                if need.method == "community":
+                    user_communities_needs[need.value].add(need.role)
+                else:
+                    user_general_needs.append(need)
+
+        allowed_through_community_cf = self._query_filter_community_roles(
+            user_communities_needs
+        )
+        allowed_through_general_needs = self._query_filter_special_roles(
+            user_general_needs
+        )
+        allowed_communities = (
+            allowed_through_community_cf | allowed_through_general_needs
+        )
+        return dsl.Q("terms", **{"parent.communities.ids": list(allowed_communities)})
 
 
 def needs_from_community_ids(community_ids, community_permission_name):
@@ -54,7 +90,10 @@ def needs_from_community_ids(community_ids, community_permission_name):
         community2role_list = by_community_permission[community_permission_name]
         for community_id, roles in community2role_list.items():
             for role in roles:
-                _needs.add(CommunityRoleNeed(community_id, role))
+                if role not in SPECIAL_ROLES_MAPPING:
+                    _needs.add(CommunityRoleNeed(community_id, role))
+                else:
+                    _needs.add(SPECIAL_ROLES_MAPPING[role](community_id))
     return _needs
 
 

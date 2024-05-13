@@ -74,13 +74,6 @@ def logged_client(client):
 
 
 @pytest.fixture()
-def init_cf(app, db, cache):
-    from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
-
-    prepare_cf_indices()
-
-
-@pytest.fixture()
 def inviter():
     """Add/invite a user to a community with a specific role."""
 
@@ -174,7 +167,7 @@ def app_config(app_config):
 
 
 @pytest.fixture()
-def vocab_cf(app, db, cache):
+def init_cf(app, db, cache):
     from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
 
     prepare_cf_indices()
@@ -268,7 +261,7 @@ def minimal_community():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def community_permissions_cf():
     return {
         "custom_fields": {
@@ -305,6 +298,16 @@ def community_permissions_cf():
     }
 
 
+@pytest.fixture
+def community_permissions_cf_authenticated_user_read(community_permissions_cf):
+    ret = copy.deepcopy(community_permissions_cf)
+    ret["custom_fields"]["permissions"]["authenticated_user"] = {
+        "can_read": True,
+        "can_read_draft": True,
+    }
+    return ret
+
+
 @pytest.fixture(scope="module", autouse=True)
 def location(location):
     return location
@@ -332,7 +335,7 @@ def community(app, minimal_community, community_owner):
 
 
 @pytest.fixture()
-def community_with_permissions_cf(community, community_permissions_cf, vocab_cf):
+def community_with_permissions_cf(community, community_permissions_cf, init_cf):
     data = current_communities.service.read(system_identity, community.id).data
     data |= community_permissions_cf
     community = current_communities.service.update(system_identity, data["id"], data)
@@ -342,7 +345,7 @@ def community_with_permissions_cf(community, community_permissions_cf, vocab_cf)
 
 @pytest.fixture()
 def community_with_permission_cf_factory(
-    minimal_community, vocab_cf, community_permissions_cf
+    minimal_community, init_cf, community_permissions_cf
 ):
     def create_community(slug, community_owner, community_permissions_cf_custom=None):
         community_permissions_cf_actual = (
@@ -423,3 +426,16 @@ def request_data_factory():
         return input_data
 
     return _request_data
+
+
+@pytest.fixture
+def ui_serialized_community():
+    def _ui_serialized_community(community_id):
+        return {
+            "label": "My Community",
+            "link": f"https://127.0.0.1:5000/api/communities/{community_id}",
+            "reference": {"oarepo_community": community_id},
+            "type": "community",
+        }
+
+    return _ui_serialized_community

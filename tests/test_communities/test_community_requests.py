@@ -413,3 +413,45 @@ def test_remove_secondary(
             request_data_factory,
             payload={"oarepo_community": str(community_2.id)},
         )
+
+
+def test_ui_serialization(
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_permissions_cf,
+    request_data_factory,
+    record_service,
+    ui_serialized_community,
+    search_clear,
+):
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
+
+    record_id = _create_record_in_community(
+        reader_client, community_with_permissions_cf.id
+    ).json["id"]
+
+    submit = _submit_request(
+        reader_client,
+        community_with_permissions_cf.id,
+        "thesis_draft",
+        record_id,
+        "thesis_publish_draft",
+        request_data_factory,
+    )
+
+    request = owner_client.get(
+        f"/requests/extended/{submit.json['id']}",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+    assert request.json["receiver"] == ui_serialized_community(
+        community_with_permissions_cf.id
+    )
+    request_list = owner_client.get(
+        "/requests/",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+    assert request_list.json["hits"]["hits"][0]["receiver"] == ui_serialized_community(
+        community_with_permissions_cf.id
+    )

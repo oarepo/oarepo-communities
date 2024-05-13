@@ -1,10 +1,5 @@
-from collections import defaultdict
-
-from invenio_records_resources.services.records.components import ServiceComponent
-
-from ..proxies import current_communities_permissions
-
-
+"""
+deprecated?
 class AllowedActionsComponent(ServiceComponent):
     def _get_available_actions(self, identity, record, dict_to_save_result, **kwargs):
         record_communities = set(record["parent"]["communities"]["ids"])
@@ -36,3 +31,4 @@ class AllowedActionsComponent(ServiceComponent):
 
     def before_ui_detail(self, identity, data=None, record=None, errors=None, **kwargs):
         self._get_available_actions(identity, record, "extra_context", **kwargs)
+"""

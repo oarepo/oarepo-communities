@@ -5,8 +5,6 @@ def published_record_in_community(client, community_id, record_service, user):
     # skip the request approval
     response = _create_record_in_community(client, community_id)
     record_item = record_service.publish(system_identity, response.json["id"])
-    # the client logoffs/breaks for some reason
-    user.login(client)
     return record_item._obj
 
 

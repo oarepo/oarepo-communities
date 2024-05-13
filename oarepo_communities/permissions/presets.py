@@ -10,19 +10,23 @@ from .record import CommunityRolePermittedInCF
 
 
 class CommunityPermissionPolicy(RecordPermissionPolicy):
+    # todo imo this might be any or authenticated, unless the ability to search at all is being restricted by community membership
+    # that would also allow communities to limit searching of their own records, though is that really meaningful?
+    # we also can't do the only system process trick here bc it query filter needs the right identity to work correctly
     can_search = [
         SystemProcess(),
         AuthenticatedUser(),
     ]
+    # the actual search query filter works through this
     can_read = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_read"),
     ]
-    # can_create = [SystemProcess(), CommunityRolePermittedInCF(community_permission_name="can_create")] todo - invenio create record method doesn't seem to have a way to push community into the needs generator
+    # for this to work we have to disable create entrypoint and use only create in community, where the actual permission is set
+    # alternatively, put the permission here, and then we have to rewrite the service method because invenio has no way to push the users community
     can_create = [
         SystemProcess(),
-        AuthenticatedUser(),
-    ]  # could be done like this, the actual permission is in can_create_in_community; the problem is that we have to still disable the endpoint?
+    ]
     can_update = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_update"),
@@ -72,9 +76,10 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_new_version"),
     ]
+    # todo?
     can_search_drafts = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_search_drafts"),
+        AuthenticatedUser(),
     ]
     can_read_draft = [
         SystemProcess(),
@@ -119,23 +124,6 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_draft_update_files"),
     ]
-
-
-"""
-class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
-    can_user_add_communities_to_records = [
-        SystemProcess(),
-        AnyUser(),
-    ]
-    can_community_allows_adding_records = [
-        SystemProcess(),
-        AnyUser(),
-    ]
-    can_remove_community_from_record = [
-        SystemProcess(),
-        AnyUser(),
-    ]
-"""
 
 
 class CommunityRecordsEveryonePermissionPolicy(BasePermissionPolicy):

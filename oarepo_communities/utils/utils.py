@@ -27,6 +27,7 @@ def get_global_user_search_service():
 
 
 def get_service_from_schema_type(schema_type):
+    # should global search be referenced in runtime?
     for service in current_global_search.model_services:
         if (
             hasattr(service, "record_cls")
