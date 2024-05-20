@@ -1,8 +1,11 @@
+from functools import cached_property
+
 from .cache import aai_mapping, permissions_cache
 from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
+from .utils.utils import get_urlprefix_service_id_mapping
 
 
 class OARepoCommunities(object):
@@ -35,6 +38,10 @@ class OARepoCommunities(object):
 
         self.permissions_cache = permissions_cache
         self.aai_mapping = aai_mapping
+
+    @cached_property
+    def urlprefix_serviceid_mapping(self):
+        return get_urlprefix_service_id_mapping()
 
     def init_services(self, app):
         """Initialize communities service."""

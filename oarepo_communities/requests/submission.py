@@ -1,10 +1,7 @@
 from flask_babelex import lazy_gettext as _
 from invenio_requests.customizations import actions
 from oarepo_requests.types.generic import OARepoRequestType
-from oarepo_requests.utils import (
-    get_matching_service_for_record,
-    resolve_reference_dict,
-)
+from oarepo_requests.utils import get_matching_service_for_record
 
 from ..errors import CommunityAlreadyIncludedException
 from ..utils.utils import get_associated_service
@@ -43,7 +40,7 @@ class CommunitySubmissionRequestType(OARepoRequestType):  # rename abstract
     creator_can_be_none = False
     topic_can_be_none = False
     allowed_creator_ref_types = ["user"]
-    allowed_receiver_ref_types = ["oarepo_community"]
+    allowed_receiver_ref_types = ["community"]
     allowed_topic_ref_types = ["record"]
 
     needs_context = {"community_permission_name": "can_submit_to_community"}
@@ -56,7 +53,6 @@ class CommunitySubmissionRequestType(OARepoRequestType):  # rename abstract
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
         receiver_community_id = list(receiver.values())[0]
-        topic = resolve_reference_dict(topic)
         already_included = receiver_community_id in topic.parent.communities.ids
         if already_included:
             raise CommunityAlreadyIncludedException

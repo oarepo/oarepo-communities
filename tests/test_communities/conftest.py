@@ -139,21 +139,19 @@ def app_config(app_config):
     def default_receiver(*args, **kwargs):
         return args[0]
 
-    from oarepo_requests.utils import resolve_reference_dict
-
     # generalize this for all receiver types once?
     def receiver_publish(*args, **kwargs):
-        topic = resolve_reference_dict(args[2])
-        return {"oarepo_community": str(topic.parent.communities.default.id)}
+        topic = args[2]
+        return {"community": str(topic.parent.communities.default.id)}
 
     def receiver_delete(*args, **kwargs):
-        topic = resolve_reference_dict(args[2])
-        return {"oarepo_community": str(topic.parent.communities.default.id)}
+        topic = args[2]
+        return {"community": str(topic.parent.communities.default.id)}
 
     def receiver_adressed(*args, **kwargs):
         data = args[4]
-        target_community = data["payload"]["oarepo_community"]
-        return {"oarepo_community": target_community}
+        target_community = data["payload"]["community"]
+        return {"community": target_community}
 
     app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = {
         "thesis_community_migration": receiver_adressed,
@@ -387,7 +385,7 @@ def create_publish_request(requests_service):
 
     def _create_request(identity, receiver, **kwargs):
         """Create a request."""
-        RequestType.allowed_receiver_ref_types = ["oarepo_community"]
+        RequestType.allowed_receiver_ref_types = ["community"]
         RequestType.needs_context = {
             "community_permission_name": "can_publish",
         }
@@ -434,7 +432,7 @@ def ui_serialized_community():
         return {
             "label": "My Community",
             "link": f"https://127.0.0.1:5000/api/communities/{community_id}",
-            "reference": {"oarepo_community": community_id},
+            "reference": {"community": community_id},
             "type": "community",
         }
 

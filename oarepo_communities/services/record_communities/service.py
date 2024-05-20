@@ -1,10 +1,10 @@
 from invenio_communities.proxies import current_communities
-from invenio_drafts_resources.services import RecordService
 
 # from invenio_i18n import lazy_gettext as _
 # from invenio_notifications.services.uow import NotificationOp
 from invenio_pidstore.errors import PIDUnregistered
 from invenio_records_resources.services import RecordIndexerMixin, ServiceSchemaWrapper
+from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.uow import (
     RecordCommitOp,
     RecordIndexOp,
@@ -16,7 +16,7 @@ from oarepo_communities.services.errors import RecordCommunityMissing
 from oarepo_communities.utils.utils import slug2id
 
 
-class RecordCommunitiesService(RecordService, RecordIndexerMixin):
+class RecordCommunitiesService(Service, RecordIndexerMixin):
     """Record communities service.
 
     The communities service is in charge of managing communities of a given record.
@@ -35,6 +35,11 @@ class RecordCommunitiesService(RecordService, RecordIndexerMixin):
     def record_cls(self):
         """Factory for creating a record class."""
         return self.config.record_cls
+
+    @property
+    def draft_cls(self):
+        """Factory for creating a record class."""
+        return self.config.draft_cls
 
     def _resolve_record(self, id_):
         try:

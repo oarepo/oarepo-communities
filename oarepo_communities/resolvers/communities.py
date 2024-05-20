@@ -26,7 +26,7 @@ class OARepoCommunityPKProxy(CommunityPKProxy):
 
 
 class OARepoCommunityResolver(CommunityResolver):
-    type_id = "oarepo_community"
+    type_id = "community"
 
     def __init__(self):
         """Initialize the default record resolver."""

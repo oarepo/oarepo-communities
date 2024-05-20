@@ -11,10 +11,11 @@ def test_receiver_permissions_community_role_perm_undefined(
     create_publish_request,
     community_owner,
     community_curator,
+    search_clear,
 ):
     publish_request = create_publish_request(
         identity=community_owner.identity,
-        receiver={"oarepo_community": community_with_permissions_cf.id},
+        receiver={"community": community_with_permissions_cf.id},
     )
     requests_service.execute_action(
         identity=community_owner.identity, id_=publish_request.id, action="submit"
@@ -26,7 +27,7 @@ def test_receiver_permissions_community_role_perm_undefined(
         )
 
 
-def test_disabled_entrypoints(
+def test_disabled_endpoints(
     init_cf,
     logged_client,
     community_owner,
@@ -65,6 +66,9 @@ def test_community_allows_every_authenticated_user(
     record_service,
     search_clear,
 ):
+    from oarepo_communities.cache import allowed_communities_cache
+
+    allowed_communities_cache.cache_clear()
     owner_client = logged_client(community_owner)
     user_client = logged_client(rando_user)
 
@@ -91,8 +95,10 @@ def test_community_allows_every_authenticated_user(
     assert response_record1.status_code == 403
     assert response_record2.status_code == 200
 
-    # todo test query filter
-    # assert len(response_record1.json["hits"]["hits"]) == 0
-    # assert len(response_record2.json["hits"]["hits"]) == 1
+    search1 = user_client.get(f"/communities/{community_1.id}/records")
+    search2 = user_client.get(f"/communities/{community_2.id}/records")
+    search_model = user_client.get("/thesis/")
 
-    # assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+    assert len(search1.json["hits"]["hits"]) == 0
+    assert len(search2.json["hits"]["hits"]) == 1
+    assert len(search_model.json["hits"]["hits"]) == 1

@@ -30,6 +30,16 @@ class CommunityRecordsResource(RecordResource):
                 self.create_in_community,
                 endpoint="create_in_community_with_model",
             ),
+            route(
+                "GET",
+                p(routes["list-model"]),
+                self.search_model,
+            ),
+            route(
+                "GET",
+                p(routes["list-user-model"]),
+                self.search_user_model,
+            ),
         ]
 
         return url_rules
@@ -42,6 +52,20 @@ class CommunityRecordsResource(RecordResource):
         hits = self.service.search(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
+            params=resource_requestctx.args,
+            search_preference=search_preference(),
+        )
+        return hits.to_dict(), 200
+
+    @request_search_args
+    @request_view_args
+    @response_handler(many=True)
+    def search_model(self):
+        """Perform a search over the community's records."""
+        hits = self.service.search_model(
+            identity=g.identity,
+            community_id=resource_requestctx.view_args["pid_value"],
+            model_url=resource_requestctx.view_args["model"],
             params=resource_requestctx.args,
             search_preference=search_preference(),
         )
@@ -72,6 +96,19 @@ class CommunityRecordsResource(RecordResource):
         hits = self.service.user_search(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
+            params=resource_requestctx.args,
+            search_preference=search_preference(),
+        )
+        return hits.to_dict(), 200
+
+    @request_search_args
+    @request_view_args
+    @response_handler(many=True)
+    def search_user_model(self):
+        hits = self.service.user_search_model(
+            identity=g.identity,
+            community_id=resource_requestctx.view_args["pid_value"],
+            model_url=resource_requestctx.view_args["model"],
             params=resource_requestctx.args,
             search_preference=search_preference(),
         )

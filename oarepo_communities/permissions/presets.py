@@ -22,18 +22,12 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_read"),
     ]
-    # for this to work we have to disable create entrypoint and use only create in community, where the actual permission is set
-    # alternatively, put the permission here, and then we have to rewrite the service method because invenio has no way to push the users community
-    can_create = [
-        SystemProcess(),
-    ]
+    can_create = [SystemProcess(), AnyUser()]
     can_update = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_update"),
     ]
-    can_delete = [
-        SystemProcess(),
-    ]
+    can_delete = [SystemProcess(), AnyUser()]
     can_manage = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_manage"),
@@ -93,9 +87,7 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_delete_draft"),
     ]
-    can_publish = [
-        SystemProcess(),
-    ]
+    can_publish = [SystemProcess(), AnyUser()]
     can_draft_create_files = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_draft_create_files"),
@@ -125,15 +117,6 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         CommunityRolePermittedInCF(community_permission_name="can_draft_update_files"),
     ]
 
-
-class CommunityRecordsEveryonePermissionPolicy(BasePermissionPolicy):
-    can_create_in_community = [
-        SystemProcess(),
-        AnyUser(),
-    ]
-
-
-class CommunityRecordsCommunityPermissionPolicy(BasePermissionPolicy):
     can_create_in_community = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_create_in_community"),

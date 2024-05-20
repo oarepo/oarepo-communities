@@ -17,48 +17,43 @@ record:
     types:
       secondary-community-submission:
         base-classes:
-          - SecondaryCommunitySubmissionRequestType
-        imports:
-          - import: oarepo_communities.requests.submission_secondary.SecondaryCommunitySubmissionRequestType
+          - oarepo_communities.requests.submission_secondary.SecondaryCommunitySubmissionRequestType
+
       community-migration:
         base-classes:
-          - CommunityMigrationRequestType
-        imports:
-          - import: oarepo_communities.requests.migration.CommunityMigrationRequestType
-      delete-record:
-        base-classes:
-          - CommunityDeleteRecordRequestType
-        imports:
-          - import: oarepo_communities.requests.community_delete.CommunityDeleteRecordRequestType
+          - oarepo_communities.requests.migration.CommunityMigrationRequestType
+
       remove_secondary_community:
         base-classes:
-          - RemoveSecondaryRequestType
-        imports:
-          - import: oarepo_communities.requests.remove_secondary.RemoveSecondaryRequestType
+          - oarepo_communities.requests.remove_secondary.RemoveSecondaryRequestType
+      edit-record:
+        base-classes:
+        - oarepo_requests.types.edit_record.EditRecordRequestType
+
+      delete-record:
+        base-classes:
+        - oarepo_communities.requests.community_delete.CommunityDeleteRecordRequestType
+        allowed-receiver-ref-types: [ "community" ]
 
   draft:
     requests:
       types:
         secondary-community-submission:
           base-classes:
-            - SecondaryCommunitySubmissionRequestType
-          imports:
-            - import: oarepo_communities.requests.submission_secondary.SecondaryCommunitySubmissionRequestType
+          - oarepo_communities.requests.submission_secondary.SecondaryCommunitySubmissionRequestType
+
         community-migration:
           base-classes:
-            - CommunityMigrationRequestType
-          imports:
-            - import: oarepo_communities.requests.migration.CommunityMigrationRequestType
-        publish-draft:
-          base-classes:
-            - CommunityPublishDraftRequestType
-          imports:
-            - import: oarepo_communities.requests.community_publish.CommunityPublishDraftRequestType
+          - oarepo_communities.requests.migration.CommunityMigrationRequestType
+
         remove_secondary_community:
           base-classes:
-            - RemoveSecondaryRequestType
-          imports:
-            - import: oarepo_communities.requests.remove_secondary.RemoveSecondaryRequestType
+          - oarepo_communities.requests.remove_secondary.RemoveSecondaryRequestType
+
+        publish-draft:
+          base-classes:
+          - oarepo_communities.requests.community_publish.CommunityPublishDraftRequestType
+          allowed-receiver-ref-types: [ "community" ]
 
   record-communities:
     permissions:
