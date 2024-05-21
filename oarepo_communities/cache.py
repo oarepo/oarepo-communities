@@ -27,7 +27,6 @@ def allowed_communities_cache(user_type, action):
         result = {hit["id"] for hit in list(result.hits)}
         return result
     except KeyError:
-        # todo log
         return {}
 
 
@@ -37,5 +36,4 @@ def aai_mapping(community_id):
             "custom_fields"
         ]["aai_mapping"]
     except KeyError:
-        # todo log
         return {}

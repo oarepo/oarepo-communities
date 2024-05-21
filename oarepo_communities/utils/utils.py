@@ -28,8 +28,9 @@ def get_global_user_search_service():
     return GlobalUserSearchService()
 
 
-def get_model_services():
+def get_record_services():
     # todo temporary patch, do this correctly
+    # get record services in oarepo_runtime doesn't work due to inclusion of published service
     return current_global_search.model_services
 
 
@@ -40,8 +41,7 @@ def get_service_by_urlprefix(url_prefix):
 
 
 def get_service_from_schema_type(schema_type):
-    # should global search be referenced in runtime?
-    for service in current_global_search.model_services:
+    for service in get_record_services():
         if (
             hasattr(service, "record_cls")
             and hasattr(service.record_cls, "schema")
@@ -53,7 +53,7 @@ def get_service_from_schema_type(schema_type):
 
 def get_urlprefix_service_id_mapping():
     ret = {}
-    services = get_model_services()
+    services = get_record_services()
     for service in services:
         if hasattr(service, "config") and hasattr(service.config, "url_prefix"):
             url_prefix = service.config.url_prefix.replace(

@@ -8,7 +8,9 @@ class RecordSchema(Schema):
 
 
 class CommunityRecordsSchema(Schema):
-    """Record's communities schema."""
+    """
+    From rdm
+    """
 
     records = fields.List(
         fields.Nested(RecordSchema), validate=validate.Length(min=1), required=True

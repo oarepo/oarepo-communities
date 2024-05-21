@@ -8,8 +8,8 @@
 """RDM Community Records Service."""
 
 from invenio_communities.proxies import current_communities
+from invenio_drafts_resources.services.records.service import RecordService
 from invenio_records_resources.services import ServiceSchemaWrapper
-from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
 
@@ -23,7 +23,7 @@ from oarepo_communities.utils.utils import (
 # from oarepo_runtime.datastreams.utils import get_service_from_schema_type
 
 
-class CommunityRecordsService(Service):
+class CommunityRecordsService(RecordService):
     """Community records service.
 
     The record communities service is in charge of managing the records of a given community.
@@ -67,6 +67,7 @@ class CommunityRecordsService(Service):
         expand=False,
         **kwargs,
     ):
+        # todo generate correct links?
         params = params or {}
         default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
         if extra_filter is not None:

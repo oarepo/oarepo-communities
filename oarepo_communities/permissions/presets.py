@@ -10,9 +10,6 @@ from .record import CommunityRolePermittedInCF
 
 
 class CommunityPermissionPolicy(RecordPermissionPolicy):
-    # todo imo this might be any or authenticated, unless the ability to search at all is being restricted by community membership
-    # that would also allow communities to limit searching of their own records, though is that really meaningful?
-    # we also can't do the only system process trick here bc it query filter needs the right identity to work correctly
     can_search = [
         SystemProcess(),
         AuthenticatedUser(),
@@ -70,7 +67,6 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_new_version"),
     ]
-    # todo?
     can_search_drafts = [
         SystemProcess(),
         AuthenticatedUser(),
