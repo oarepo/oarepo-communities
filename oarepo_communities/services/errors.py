@@ -18,3 +18,16 @@ class RecordCommunityMissing(Exception):
         return "The record {record_id} in not included in the community {community_id}.".format(
             record_id=self.record_id, community_id=self.community_id
         )
+
+
+class OpenRequestAlreadyExists(Exception):
+    """An open request already exists."""
+
+    def __init__(self, request_id):
+        """Initialize exception."""
+        self.request_id = request_id
+
+    @property
+    def description(self):
+        """Exception's description."""
+        return _("There is already an open inclusion request for this community.")

@@ -10,23 +10,24 @@ from .record import CommunityRolePermittedInCF
 
 
 class CommunityPermissionPolicy(RecordPermissionPolicy):
+    # todo imo this might be any or authenticated, unless the ability to search at all is being restricted by community membership
+    # that would also allow communities to limit searching of their own records, though is that really meaningful?
+    # we also can't do the only system process trick here bc it query filter needs the right identity to work correctly
     can_search = [
         SystemProcess(),
-        AuthenticatedUser(), #the base service does not provide a way to check community in permissions
+        AuthenticatedUser(),
     ]
+    # the actual search query filter works through this
     can_read = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_read"),
     ]
-    can_create = [SystemProcess(), AuthenticatedUser()]
+    can_create = [SystemProcess(), AnyUser()]
     can_update = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_update"),
     ]
-    can_delete = [
-        SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_delete"),
-    ]
+    can_delete = [SystemProcess(), AnyUser()]
     can_manage = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_manage"),
@@ -44,9 +45,10 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_get_content_files"),
     ]
-    can_commit_files = [SystemProcess()], CommunityRolePermittedInCF(
-        community_permission_name="can_commit_files"
-    )
+    can_commit_files = [
+        SystemProcess(),
+        CommunityRolePermittedInCF(community_permission_name="can_commit_files"),
+    ]
     can_read_files = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_read_files"),
@@ -68,9 +70,10 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_new_version"),
     ]
+    # todo?
     can_search_drafts = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_search_drafts"),
+        AuthenticatedUser(),
     ]
     can_read_draft = [
         SystemProcess(),
@@ -84,10 +87,7 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_delete_draft"),
     ]
-    can_publish = [
-        SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_publish"),
-    ]
+    can_publish = [SystemProcess(), AnyUser()]
     can_draft_create_files = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_draft_create_files"),
@@ -117,49 +117,27 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         CommunityRolePermittedInCF(community_permission_name="can_draft_update_files"),
     ]
 
-
-class RecordCommunitiesEveryonePermissionPolicy(BasePermissionPolicy):
-    can_user_add_communities_to_records = [
+    can_create_in_community = [
         SystemProcess(),
-        AnyUser(),
-    ]
-    can_community_allows_adding_records = [
-        SystemProcess(),
-        AnyUser(),
-    ]
-    can_remove_community_from_record = [
-        SystemProcess(),
-        AnyUser(),
+        CommunityRolePermittedInCF(community_permission_name="can_create_in_community"),
     ]
 
 
+class CommunityRequestsPermissionPolicy(BasePermissionPolicy):
+    can_delete_request = (
+        [
+            SystemProcess(),
+            CommunityRolePermittedInCF(community_permission_name="can_delete_request"),
+        ],
+    )
 
-class CommunityRecordsEveryonePermissionPolicy(BasePermissionPolicy):
-    can_remove_records_from_community = [
+    can_publish_request = [
         SystemProcess(),
-        AnyUser(),
+        CommunityRolePermittedInCF(community_permission_name="can_publish_request"),
     ]
-
-
-class RecordCommunitiesCommunityPermissionPolicy(BasePermissionPolicy):
-    can_user_add_communities_to_records = [
-        SystemProcess(),
-        AuthenticatedUser(),
-    ]
-    can_community_allows_adding_records = [
+    can_add_secondary_community = [
         SystemProcess(),
         CommunityRolePermittedInCF(
-            community_permission_name="can_community_allows_adding_records"
+            community_permission_name="can_submit_secondary_community"
         ),
-    ]
-    can_remove_community_from_record = [
-        SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_remove_community_from_record"),
-    ]
-
-
-class CommunityRecordsCommunityPermissionPolicy(BasePermissionPolicy):
-    can_remove_records_from_community = [
-        SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_remove_records_from_community"),
     ]

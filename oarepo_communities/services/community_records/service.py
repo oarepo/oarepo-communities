@@ -7,38 +7,36 @@
 
 """RDM Community Records Service."""
 
-from invenio_pidstore.errors import PIDDoesNotExistError
-from invenio_records_resources.services import (
-    LinksTemplate,
-    RecordService,
-    ServiceSchemaWrapper,
-)
-from invenio_records_resources.services.errors import PermissionDeniedError
+from invenio_communities.proxies import current_communities
+from invenio_records_resources.services import ServiceSchemaWrapper
+from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
 
-# from invenio_rdm_records.proxies import current_record_communities_service
+from oarepo_communities.utils.utils import (
+    get_global_search_service,
+    get_global_user_search_service,
+    get_service_by_urlprefix,
+    get_service_from_schema_type,
+)
+
+# from oarepo_runtime.datastreams.utils import get_service_from_schema_type
 
 
-class CommunityRecordsService(RecordService):
+class CommunityRecordsService(Service):
     """Community records service.
 
     The record communities service is in charge of managing the records of a given community.
     """
 
-    def __init__(self, config, record_communities_service=None):
+    def __init__(self, config, record_service=None):
         super().__init__(config)
-        self.record_communities_service = record_communities_service
+        self.record_service = record_service
 
     @property
     def community_record_schema(self):
         """Returns the community schema instance."""
         return ServiceSchemaWrapper(self, schema=self.config.community_record_schema)
-
-    @property
-    def community_cls(self):
-        """Factory for creating a community class."""
-        return self.config.community_cls
 
     def search(
         self,
@@ -47,103 +45,118 @@ class CommunityRecordsService(RecordService):
         params=None,
         search_preference=None,
         extra_filter=None,
+        expand=False,
         **kwargs,
     ):
-        community = self.community_cls.pid.resolve(
-            community_id
-        )
-        self.require_permission(identity, "search", community=community)
         params = params or {}
-
-        community_filter = dsl.Q(
-            "term", **{"parent.communities.ids.keyword": str(community.id)}
-        )
+        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
         if extra_filter is not None:
-            community_filter = community_filter & extra_filter
-        # todo drafts?
-        search = self._search(
-            "search",
-            identity,
-            params,
-            search_preference,
-            extra_filter=community_filter,
-            permission_action="read",
-            **kwargs,
-        )
-        search_result = search.execute()
-
-        """
-        return self.result_list(
-            self,
-            identity,
-            search_result,
-            params,
-            links_tpl=LinksTemplate(self.config.links_search, context={"args": params}),
-            links_item_tpl=self.links_item_tpl,
-            expandable_fields=self.expandable_fields,
-            expand=expand,
-        )
-        """
-
-        return self.result_list(
-            self,
-            identity,
-            search_result,
-            params,
-            links_tpl=LinksTemplate(
-                self.config.links_search_community_records,
-                context={
-                    "args": params,
-                    "id": str(community.id),
-                },
-            ),
-            links_item_tpl=self.links_item_tpl,
+            default_filter = default_filter & extra_filter
+        return get_global_search_service().global_search(
+            identity, params, extra_filter=default_filter
         )
 
-    def _remove(self, community, record, identity):
-        """Remove a community from the record."""
-        data = dict(communities=[dict(id=str(community.id))])
-        _, errors = self.record_communities_service.remove(
-            identity, id_=record.pid.pid_value, data=data
+    def search_model(
+        self,
+        identity,
+        community_id,
+        model_url,
+        params=None,
+        search_preference=None,
+        extra_filter=None,
+        expand=False,
+        **kwargs,
+    ):
+        params = params or {}
+        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
+        if extra_filter is not None:
+            default_filter = default_filter & extra_filter
+        service = get_service_by_urlprefix(model_url)
+        return service.search(identity, params, extra_filter=default_filter)
+
+    def user_search(
+        self,
+        identity,
+        community_id,
+        params=None,
+        search_preference=None,
+        extra_filter=None,
+        expand=False,
+        **kwargs,
+    ):
+        params = params or {}
+        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
+        if extra_filter is not None:
+            default_filter = default_filter & extra_filter
+
+        return get_global_user_search_service().global_search(
+            identity, params, extra_filter=default_filter
         )
 
-        return errors
+    def user_search_model(
+        self,
+        identity,
+        community_id,
+        model_url,
+        params=None,
+        search_preference=None,
+        extra_filter=None,
+        expand=False,
+        **kwargs,
+    ):
+        params = params or {}
+        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
+        if extra_filter is not None:
+            default_filter = default_filter & extra_filter
+
+        service = get_service_by_urlprefix(model_url)
+        return service.search_drafts(identity, params, extra_filter=default_filter)
 
     @unit_of_work()
-    def delete(self, identity, community_id, data, revision_id=None, uow=None):
-        """Remove records from a community."""
-        community = self.community_cls.pid.resolve(community_id)
-
-        self.require_permission(identity, "remove_records_from_community", community=community)
-
-        valid_data, errors = self.community_record_schema.load(
-            data,
-            context={
-                "identity": identity,
-                "max_number": self.config.max_number_of_removals,
-            },
-            raise_errors=True,
+    def create_in_community(
+        self, identity, community_id, data, model=None, uow=None, expand=False
+    ):
+        # should the dumper put the entries thing into search? ref CommunitiesField#110, not in rdm; it is in new rdm, i had quite old version
+        # community_id may be the slug coming from resource
+        if model:
+            record_service = get_service_by_urlprefix(model)
+        else:
+            record_service = get_service_from_schema_type(data["$schema"])
+        if not record_service:
+            raise ValueError(f"No service found for requested model {model}.")
+        community = current_communities.service.record_cls.pid.resolve(community_id)
+        try:
+            data["parent"]["communities"]["default"]
+        except KeyError:
+            data |= {"parent": {"communities": {"default": community_id}}}
+        return record_service.create(
+            identity, data, uow=uow, expand=expand, community=community
         )
-        records_dict = valid_data["records"]
+        """
+        record = record_service.create(
+            identity, data, uow=uow, expand=expand, community=community
+        )._record
+        
 
-        for record_dict in records_dict:
-            record_id = record_dict["id"]
-            try:
-                record = self.record_cls.pid.resolve(record_id)
-                errors += self._remove(community, record, identity)
-            except PIDDoesNotExistError:
-                errors.append(
-                    {
-                        "record": record_id,
-                        "message": "The record does not exist.",
-                    }
-                )
-            except PermissionDeniedError:
-                errors.append(
-                    {
-                        "record": record_id,
-                        "message": "Permission denied.",
-                    }
-                )
+        record_communities_service = get_associated_service(
+            record_service, "record_communities"
+        )
+        
+        # todo this should probably be reconcetualized, how to return the actual record item with the updated parent?
+        record_with_community_in_parent = record_communities_service.include(
+            record,
+            community_id,
+            record_service=record_service,
+            uow=uow,
+        )
+        record_item = record_service.result_item(
+            record_service,
+            identity,
+            record_with_community_in_parent,
+            links_tpl=record_service.links_item_tpl,
+            expandable_fields=record_service.expandable_fields,
+            expand=expand,
+        )
 
-        return errors
+        return record_item
+        """
