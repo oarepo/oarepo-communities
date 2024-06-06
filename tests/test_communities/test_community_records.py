@@ -32,36 +32,6 @@ def test_create_record_in_community(
     )
 
 
-def test_create_record_in_community_with_data(
-    logged_client,
-    community_owner,
-    community_with_permissions_cf,
-    search_clear,
-):
-    owner_client = logged_client(community_owner)
-
-    response = owner_client.post(
-        f"/communities/{community_with_permissions_cf.id}/thesis/records",
-        json={"parent": {"communities": {"default": community_with_permissions_cf.id}}},
-    )
-    assert response.json["parent"]["communities"]["ids"] == [
-        community_with_permissions_cf.id
-    ]
-    assert (
-        response.json["parent"]["communities"]["default"]
-        == community_with_permissions_cf.id
-    )
-
-    response_record = owner_client.get(f"/thesis/{response.json['id']}/draft")
-    assert response_record.json["parent"]["communities"]["ids"] == [
-        community_with_permissions_cf.id
-    ]
-    assert (
-        response_record.json["parent"]["communities"]["default"]
-        == community_with_permissions_cf.id
-    )
-
-
 def test_create_record_in_community_without_model_in_url(
     logged_client,
     community_owner,

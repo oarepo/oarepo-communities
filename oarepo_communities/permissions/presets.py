@@ -1,11 +1,8 @@
 from invenio_records_permissions import RecordPermissionPolicy
-from invenio_records_permissions.generators import (
-    AnyUser,
-    AuthenticatedUser,
-    SystemProcess,
-)
+from invenio_records_permissions.generators import AuthenticatedUser, SystemProcess
 from invenio_records_permissions.policies.base import BasePermissionPolicy
 
+from .generators import RequestActive
 from .record import CommunityRolePermittedInCF
 
 
@@ -19,12 +16,12 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_read"),
     ]
-    can_create = [SystemProcess(), AnyUser()]
+    can_create = [SystemProcess()]
     can_update = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_update"),
     ]
-    can_delete = [SystemProcess(), AnyUser()]
+    can_delete = [SystemProcess(), RequestActive()]
     can_manage = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_manage"),
@@ -33,6 +30,7 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
     can_create_files = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_create_files"),
+        # WorkflowPermission(state='draft', role'=editor')
     ]
     can_set_content_files = [
         SystemProcess(),
@@ -83,7 +81,7 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_delete_draft"),
     ]
-    can_publish = [SystemProcess(), AnyUser()]
+    can_publish = [SystemProcess(), RequestActive()]
     can_draft_create_files = [
         SystemProcess(),
         CommunityRolePermittedInCF(community_permission_name="can_draft_create_files"),

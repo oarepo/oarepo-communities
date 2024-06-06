@@ -1,8 +1,9 @@
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.proxies import current_service_registry
-from oarepo_global_search.proxies import current_global_search
 
 from oarepo_communities.proxies import current_oarepo_communities
+
+# from oarepo_runtime.datastreams.utils import get_record_services
 
 
 def get_associated_service(record_service, service_type):
@@ -29,9 +30,9 @@ def get_global_user_search_service():
 
 
 def get_record_services():
-    # todo temporary patch, do this correctly
-    # get record services in oarepo_runtime doesn't work due to inclusion of published service
-    return current_global_search.model_services
+    from oarepo_communities.proxies import current_oarepo_communities
+
+    return current_oarepo_communities.community_records_services
 
 
 def get_service_by_urlprefix(url_prefix):
@@ -51,6 +52,7 @@ def get_service_from_schema_type(schema_type):
     return None
 
 
+# todo add community records services into config, use here as temp fix
 def get_urlprefix_service_id_mapping():
     ret = {}
     services = get_record_services()

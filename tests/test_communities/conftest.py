@@ -10,11 +10,17 @@ from invenio_app.factory import create_api
 from invenio_communities import current_communities
 from invenio_communities.cli import create_communities_custom_field
 from invenio_communities.communities.records.api import Community
-from invenio_communities.generators import CommunityRoleNeed
+from invenio_communities.generators import (
+    CommunityCurators,
+    CommunityMembers,
+    CommunityRoleNeed,
+)
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_resources.services.uow import RecordCommitOp, UnitOfWork
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft, ThesisRecord
+
+from oarepo_communities.records.models import CommunityWorkflowModel
 
 
 @pytest.fixture(scope="function")
@@ -135,6 +141,12 @@ def app_config(app_config):
     app_config["FILES_REST_DEFAULT_STORAGE_CLASS"] = "L"
 
     app_config["REQUESTS_REGISTERED_TYPES"] = [RequestType()]
+    app_config["GLOBAL_SEARCH_MODELS"] = [
+        {
+            "model_service": "thesis.services.records.service.ThesisService",
+            "service_config": "thesis.services.records.config.ThesisServiceConfig",
+        }
+    ]
 
     def default_receiver(*args, **kwargs):
         return args[0]
@@ -159,6 +171,80 @@ def app_config(app_config):
         "thesis_publish_draft": receiver_publish,
         "thesis_remove_secondary_community": receiver_adressed,
         "thesis_secondary_community_submission": receiver_adressed,
+    }
+
+    publish_states = {"pending": "publish_pending", "accept": "published"}
+    create = {
+        "states": {},
+        "creators": [CommunityCurators()],
+        "receivers": [],
+    }
+
+    app_config["RECORD_WORKFLOW"] = {
+        "default": {
+            "draft": {
+                "roles": {
+                    "readers": [CommunityMembers()],
+                    "editors": [CommunityMembers()],
+                },
+                "requests": {
+                    "thesis_publish_draft": {
+                        "states": publish_states,
+                        "creators": [CommunityCurators()],
+                        "receivers": [],
+                    },
+                    "thesis_secondary_community_submission": create,
+                    "thesis_remove_secondary_community": create,
+                    "thesis_community_migration": create,
+                },
+            },
+            "publish_pending": {
+                "roles": {
+                    "readers": [CommunityMembers()],
+                    "editors": [CommunityMembers()],
+                },
+                "requests": {
+                    "thesis_publish_draft": {
+                        "states": publish_states,
+                        "creators": [],
+                        "receivers": [CommunityCurators()],
+                    },
+                    "thesis_secondary_community_submission": create,
+                    "thesis_remove_secondary_community": create,
+                    "thesis_community_migration": create,
+                },
+            },
+        },
+        "autopublish": {
+            "draft": {
+                "roles": {
+                    "readers": [CommunityMembers()],
+                    "editors": [CommunityMembers()],
+                },
+                "requests": {
+                    "thesis_publish_draft": create,
+                    "thesis_secondary_community_submission": create,
+                    "thesis_remove_secondary_community": create,
+                    "thesis_community_migration": create,
+                },
+            },
+            "publish_pending": {
+                "roles": {
+                    "readers": [CommunityMembers()],
+                    "editors": [CommunityMembers()],
+                },
+                "requests": {
+                    "thesis_publish_draft": {
+                        "states": {},
+                        "creators": [],
+                        "receivers": [CommunityCurators()],
+                    },
+                    "thesis_secondary_community_submission": create,
+                    "thesis_remove_secondary_community": create,
+                    "thesis_community_migration": create,
+                },
+            },
+        },
     }
 
     return app_config
@@ -275,6 +361,7 @@ def community_permissions_cf():
                     "can_read": True,
                     "can_read_draft": True,
                     "can_update": True,
+                    "can_update_draft": True,
                     "can_search": True,
                     "can_create": True,
                 },
@@ -288,6 +375,7 @@ def community_permissions_cf():
                     "can_read": True,
                     "can_read_draft": True,
                     "can_update": False,
+                    "can_update_draft": False,
                     "can_delete": False,
                     "can_search": True,
                 },
@@ -391,7 +479,11 @@ def create_publish_request(requests_service):
         }
         # Need to use the service to get the id
         item = requests_service.create(
-            identity, {}, RequestType, receiver=receiver, **kwargs
+            identity=identity,
+            data={},
+            request_type=RequestType,
+            receiver=receiver,
+            **kwargs,
         )
         return item._request
 
@@ -437,3 +529,25 @@ def ui_serialized_community():
         }
 
     return _ui_serialized_community
+
+
+from sqlalchemy.exc import NoResultFound
+
+
+@pytest.fixture
+def set_community_scenario(db):
+    def _set_community_scenario(workflow, community_id):
+        try:
+            record = CommunityWorkflowModel.query.filter(
+                CommunityWorkflowModel.community_id == community_id
+            ).one()
+            record.query.update({"workflow": workflow})
+            db.session.commit()
+        except NoResultFound:
+            obj = CommunityWorkflowModel(
+                community_id=str(community_id),
+                workflow=workflow,
+            )
+            db.session.add(obj)
+
+    return _set_community_scenario

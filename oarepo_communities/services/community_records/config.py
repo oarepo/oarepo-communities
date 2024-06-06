@@ -14,7 +14,7 @@ class CommunityRecordsServiceConfig(
     PERMISSIONS_PRESETS = ["community"]
     service_id = "community-records"
     community_record_schema = CommunityRecordsSchema
-
+    # todo correct links
     links_search_community_records = pagination_links(
         "{+api}/communities/{id}/records{?args*}"
     )

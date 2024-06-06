@@ -2,6 +2,7 @@ from invenio_records_resources.services.custom_fields import BaseCF
 from marshmallow import fields as ma_fields
 
 
+# todo deprecated
 class PermissionsCF(BaseCF):
     @property
     def mapping(self):

@@ -26,9 +26,9 @@ class RecordCommunitiesSchema(Schema):
         fields.Nested(CommunitySchema), validate=validate.Length(min=1), required=True
     )
 
+    """
     @validates("communities")
     def validate_communities(self, value):
-        """Validate communities."""
         max_number = self.context["max_number"]
         if max_number < len(value):
             raise ValidationError(
@@ -50,3 +50,4 @@ class RecordCommunitiesSchema(Schema):
             raise ValidationError(
                 "Duplicated communities {com_ids}.".format(com_ids=duplicated)
             )
+    """

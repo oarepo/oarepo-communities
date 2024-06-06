@@ -18,6 +18,7 @@ class OARepoCommunities(object):
 
     def init_app(self, app):
         """Flask application initialization."""
+        self.app = app
         self.init_config(app)
         self.init_services(app)
         self.init_resources(app)
@@ -42,6 +43,14 @@ class OARepoCommunities(object):
     @cached_property
     def urlprefix_serviceid_mapping(self):
         return get_urlprefix_service_id_mapping()
+
+    @property
+    def record_workflow(self):
+        return self.app.config["RECORD_WORKFLOW"]
+
+    @property
+    def community_records_services(self):
+        return self.app.config["COMMUNITY_RECORDS_SERVICES"]
 
     def init_services(self, app):
         """Initialize communities service."""

@@ -12,6 +12,7 @@ from invenio_drafts_resources.services.records.service import RecordService
 from invenio_records_resources.services import ServiceSchemaWrapper
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
+from invenio_records_resources.services.base.links import LinksTemplate
 
 from oarepo_communities.utils.utils import (
     get_global_search_service,
@@ -52,9 +53,11 @@ class CommunityRecordsService(RecordService):
         default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
         if extra_filter is not None:
             default_filter = default_filter & extra_filter
-        return get_global_search_service().global_search(
+        ret = get_global_search_service().global_search(
             identity, params, extra_filter=default_filter
         )
+        ret._links_tpl = LinksTemplate(self.config.links_search_community_records, context={"args": params, "id": community_id})
+        return ret
 
     def search_model(
         self,
@@ -126,38 +129,7 @@ class CommunityRecordsService(RecordService):
         if not record_service:
             raise ValueError(f"No service found for requested model {model}.")
         community = current_communities.service.record_cls.pid.resolve(community_id)
-        try:
-            data["parent"]["communities"]["default"]
-        except KeyError:
-            data |= {"parent": {"communities": {"default": community_id}}}
+
         return record_service.create(
             identity, data, uow=uow, expand=expand, community=community
         )
-        """
-        record = record_service.create(
-            identity, data, uow=uow, expand=expand, community=community
-        )._record
-        
-
-        record_communities_service = get_associated_service(
-            record_service, "record_communities"
-        )
-        
-        # todo this should probably be reconcetualized, how to return the actual record item with the updated parent?
-        record_with_community_in_parent = record_communities_service.include(
-            record,
-            community_id,
-            record_service=record_service,
-            uow=uow,
-        )
-        record_item = record_service.result_item(
-            record_service,
-            identity,
-            record_with_community_in_parent,
-            links_tpl=record_service.links_item_tpl,
-            expandable_fields=record_service.expandable_fields,
-            expand=expand,
-        )
-
-        return record_item
-        """

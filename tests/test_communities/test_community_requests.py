@@ -79,9 +79,11 @@ def _accept_request(
     **kwargs,
 ):
     if is_draft:
-        record_after_submit = receiver_client.get(f"/thesis/{record_id}/draft")
+        record_after_submit = receiver_client.get(
+            f"/thesis/{record_id}/draft?expand=true"
+        )
     else:
-        record_after_submit = receiver_client.get(f"/thesis/{record_id}")
+        record_after_submit = receiver_client.get(f"/thesis/{record_id}?expand=true")
     request_dict = find_request_by_type(record_after_submit.json["requests"], type)
     if no_accept_link:
         assert "accept" not in request_dict["links"]["actions"]
