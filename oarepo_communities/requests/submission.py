@@ -43,7 +43,6 @@ class CommunitySubmissionRequestType(OARepoRequestType):  # rename abstract
     allowed_receiver_ref_types = ["community"]
     allowed_topic_ref_types = ["record"]
 
-    needs_context = {"community_permission_name": "can_submit_to_community"}
 
     available_actions = {
         **OARepoRequestType.available_actions,

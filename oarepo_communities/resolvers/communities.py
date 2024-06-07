@@ -14,14 +14,12 @@ else:
 
 from invenio_communities.communities.services.config import CommunityServiceConfig
 
-from ..permissions.record import needs_from_community_ids
-
 
 class OARepoCommunityPKProxy(CommunityPKProxy):
     def get_needs(self, ctx=None):
         """Return community member need."""
         comid = str(self._parse_ref_dict_id())
-        needs = needs_from_community_ids({comid}, ctx["community_permission_name"])
+        needs = []
         return needs
 
 

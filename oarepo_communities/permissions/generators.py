@@ -4,6 +4,7 @@ from itertools import chain
 from invenio_records.dictutils import dict_lookup
 from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
+from invenio_communities.generators import current_roles
 
 from ..proxies import current_oarepo_communities
 from .identity import request_active
@@ -105,3 +106,5 @@ class RequestActive(Generator):
             return dsl.Q("match_all")
         else:
             return []
+
+

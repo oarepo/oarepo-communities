@@ -1,6 +1,6 @@
 import copy
 import os
-
+from invenio_records_permissions.generators import SystemProcess
 import pytest
 import yaml
 from flask_security import login_user
@@ -17,6 +17,8 @@ from invenio_communities.generators import (
 )
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_resources.services.uow import RecordCommitOp, UnitOfWork
+
+from oarepo_communities.permissions.generators import WorkflowRequestPermission, RequestActive, WorkflowPermission
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft, ThesisRecord
 
@@ -190,7 +192,7 @@ def app_config(app_config):
                 "requests": {
                     "thesis_publish_draft": {
                         "states": publish_states,
-                        "creators": [CommunityCurators()],
+                        "creators": [CommunityMembers()],
                         "receivers": [],
                     },
                     "thesis_secondary_community_submission": create,
@@ -421,17 +423,18 @@ def community(app, minimal_community, community_owner):
 
 
 @pytest.fixture()
-def community_with_permissions_cf(community, community_permissions_cf, init_cf):
+def community_with_permissions_cf(community, community_permissions_cf, init_cf, set_community_scenario):
     data = current_communities.service.read(system_identity, community.id).data
     data |= community_permissions_cf
     community = current_communities.service.update(system_identity, data["id"], data)
     Community.index.refresh()
+    set_community_scenario(community.id)
     return community
 
 
 @pytest.fixture()
 def community_with_permission_cf_factory(
-    minimal_community, init_cf, community_permissions_cf
+    minimal_community, init_cf, community_permissions_cf, set_community_scenario
 ):
     def create_community(slug, community_owner, community_permissions_cf_custom=None):
         community_permissions_cf_actual = (
@@ -450,6 +453,7 @@ def community_with_permission_cf_factory(
             system_identity, data["id"], data
         )
         Community.index.refresh()
+        set_community_scenario(community.id)
         return community
 
     return create_community
@@ -536,7 +540,7 @@ from sqlalchemy.exc import NoResultFound
 
 @pytest.fixture
 def set_community_scenario(db):
-    def _set_community_scenario(workflow, community_id):
+    def _set_community_scenario(community_id, workflow="default"):
         try:
             record = CommunityWorkflowModel.query.filter(
                 CommunityWorkflowModel.community_id == community_id
@@ -551,3 +555,41 @@ def set_community_scenario(db):
             db.session.add(obj)
 
     return _set_community_scenario
+
+@pytest.fixture()
+def requests_service_config():
+    from invenio_requests.services.requests.config import RequestsServiceConfig
+
+    return RequestsServiceConfig
+
+@pytest.fixture()
+def scenario_permissions():
+    from invenio_requests.services.permissions import PermissionPolicy
+
+    requests = type(
+        "RequestsPermissionPolicy",
+        (PermissionPolicy,),
+        dict(
+            can_create=[
+                SystemProcess(),
+                WorkflowRequestPermission(access_key="creators"),
+                RequestActive(),
+            ],
+            can_action_accept=[SystemProcess(), WorkflowRequestPermission(access_key="receivers")],
+            can_action_submit=[SystemProcess(), WorkflowRequestPermission(access_key="creators")],
+            can_action_cancel=[SystemProcess(), WorkflowRequestPermission(access_key="creators")],
+            can_action_expire=[SystemProcess(), WorkflowRequestPermission(access_key="creators")],
+            can_action_decline=[SystemProcess(), WorkflowRequestPermission(access_key="receivers")],
+        ),
+    )
+
+    return requests
+
+
+@pytest.fixture()
+def patch_requests_permissions(
+    requests_service,
+    requests_service_config,
+    scenario_permissions,
+):
+    setattr(requests_service_config, "permission_policy_cls", scenario_permissions)

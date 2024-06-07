@@ -1,3 +1,4 @@
+"""
 from collections import defaultdict
 
 from cachetools import TTLCache, cached
@@ -20,7 +21,7 @@ SPECIAL_NEEDS_MAPPING = {
 
 
 class CommunityRolePermittedInCF(Generator):
-    """Allows system_process role."""
+
 
     def __init__(self, community_permission_name):
         self.community_permission_name = community_permission_name
@@ -126,3 +127,4 @@ def record_community_permissions(record_communities):
                 if val:
                     by_actions[action][community_id].append(role)
     return by_actions
+"""

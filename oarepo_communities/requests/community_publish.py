@@ -17,8 +17,6 @@ class CommunityPublishDraftAcceptAction(PublishChangeRecordStatusMixin, PublishD
 class CommunityPublishDraftRequestType(PublishDraftRequestType):
     allowed_receiver_ref_types = ["community"]
 
-    needs_context = {"community_permission_name": "can_publish_request"}
-
     available_actions = {
         **PublishDraftRequestType.available_actions,
         "submit": StatusChangingSubmitAction,

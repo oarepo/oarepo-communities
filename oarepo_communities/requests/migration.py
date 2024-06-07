@@ -31,5 +31,3 @@ class CommunityMigrationRequestType(CommunitySubmissionRequestType):
         **CommunitySubmissionRequestType.available_actions,
         "accept": AcceptAction,
     }
-
-    needs_context = {"community_permission_name": "can_submit_to_community"}

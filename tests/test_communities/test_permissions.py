@@ -1,12 +1,8 @@
 import pytest
 from invenio_records_resources.services.errors import PermissionDeniedError
+
 from thesis.records.api import ThesisDraft, ThesisRecord
 
-from oarepo_communities.permissions.generators import (
-    RequestActive,
-    WorkflowPermission,
-    WorkflowRequestPermission,
-)
 from tests.test_communities.utils import (
     _create_record_in_community,
     link_api2testclient,
@@ -117,11 +113,7 @@ def test_community_allows_every_authenticated_user(
     assert len(search_model.json["hits"]["hits"]) == 1
 
 
-@pytest.fixture()
-def requests_service_config():
-    from invenio_requests.services.requests.config import RequestsServiceConfig
 
-    return RequestsServiceConfig
 
 
 @pytest.fixture()
@@ -137,47 +129,6 @@ def requests_service():
     from invenio_requests.proxies import current_requests_service
 
     return current_requests_service
-
-
-@pytest.fixture()
-def scenario_permissions():
-    from invenio_requests.services.permissions import PermissionPolicy
-
-    requests = type(
-        "RequestsPermissionPolicy",
-        (PermissionPolicy,),
-        dict(
-            can_create=[
-                WorkflowRequestPermission(access_key="creators"),
-                RequestActive(),
-            ],
-            can_action_accept=[WorkflowRequestPermission(access_key="receivers")],
-        ),
-    )
-
-    from oarepo_communities.permissions.presets import CommunityPermissionPolicy
-
-    record = type(
-        "PermissionPolicy",
-        (CommunityPermissionPolicy,),
-        dict(
-            can_update_draft=[WorkflowPermission(access_key="editors")],
-        ),
-    )
-
-    return record, requests
-
-
-@pytest.fixture()
-def patch_requests_permissions(
-    requests_service,
-    monkeypatch,
-    requests_service_config,
-    service_config,
-    scenario_permissions,
-):
-    setattr(service_config, "permission_policy_cls", scenario_permissions[0])
-    setattr(requests_service_config, "permission_policy_cls", scenario_permissions[1])
 
 
 def test_scenarios(

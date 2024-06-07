@@ -39,7 +39,7 @@ class PublishChangeRecordStatusMixin:
         uow.register(RecordCommitOp(topic, indexer=service.indexer))
 
     def execute(self, identity, uow, *args, **kwargs):
-        super().execute(identity, uow, *args, **kwargs)
+        record = super().execute(identity, uow, *args, **kwargs)
         request = self.request
         topic = request.topic.resolve()
         request_type = request.type
@@ -52,9 +52,11 @@ class PublishChangeRecordStatusMixin:
         except KeyError:
             return
         if "accept" in request_states:
-            record = kwargs["published_record"]
             record.status = request_states["accept"]
             self._commit_topic(record, uow)
 
 class StatusChangingSubmitAction(ChangeRecordStatusMixin, actions.SubmitAction):
     action = "submit"
+
+class StatusChangingDeclineAction(ChangeRecordStatusMixin, actions.SubmitAction):
+    action = "decline"

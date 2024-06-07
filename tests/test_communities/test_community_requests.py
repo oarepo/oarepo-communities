@@ -19,7 +19,7 @@ REPO_NAME = "thesis"
 
 def link_api2testclient(api_link):
     base_string = "https://127.0.0.1:5000/api/"
-    return api_link[len(base_string) - 1 :]
+    return api_link[len(base_string) - 1:]
 
 
 def find_request_by_type(requests, type):
@@ -30,13 +30,13 @@ def find_request_by_type(requests, type):
 
 
 def _create_request(
-    creator_client,
-    community_id,
-    record_type,
-    record_id,
-    request_type,
-    request_data_func,
-    **kwargs,
+        creator_client,
+        community_id,
+        record_type,
+        record_id,
+        request_type,
+        request_data_func,
+        **kwargs,
 ):
     request_data = request_data_func(
         community_id, record_type, record_id, request_type, **kwargs
@@ -46,13 +46,13 @@ def _create_request(
 
 
 def _submit_request(
-    creator_client,
-    community_id,
-    record_type,
-    record_id,
-    request_type,
-    request_data_func,
-    **kwargs,
+        creator_client,
+        community_id,
+        record_type,
+        record_id,
+        request_type,
+        request_data_func,
+        **kwargs,
 ):
     create_response = _create_request(
         creator_client,
@@ -71,12 +71,12 @@ def _submit_request(
 
 
 def _accept_request(
-    receiver_client,
-    type,
-    record_id,
-    is_draft=False,
-    no_accept_link=False,
-    **kwargs,
+        receiver_client,
+        type,
+        record_id,
+        is_draft=False,
+        no_accept_link=False,
+        **kwargs,
 ):
     if is_draft:
         record_after_submit = receiver_client.get(
@@ -94,11 +94,11 @@ def _accept_request(
 
 
 def _init_env(
-    logged_client,
-    community_owner,
-    community_reader,
-    community_with_permission_cf_factory,
-    inviter,
+        logged_client,
+        community_owner,
+        community_reader,
+        community_with_permission_cf_factory,
+        inviter,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
@@ -111,31 +111,15 @@ def _init_env(
     return reader_client, owner_client, community_1, community_2
 
 
-def test_cf(
-    client,
-    community_owner,
-    community_with_permissions_cf,
-    search_clear,
-):
-    community_owner.login(client)
-    record_resp = _create_record_in_community(client, community_with_permissions_cf.id)
-    assert record_resp.status_code == 201
-    recid = record_resp.json["id"]
-    response = client.get(f"{RECORD_COMMUNITIES_BASE_URL}{recid}/communities")
-    assert (
-        response.json["hits"]["hits"][0]["custom_fields"]
-        == community_with_permissions_cf["custom_fields"]
-    )
-
-
 def test_community_publish(
-    logged_client,
-    community_owner,
-    community_reader,
-    community_with_permissions_cf,
-    request_data_factory,
-    record_service,
-    search_clear,
+        logged_client,
+        community_owner,
+        community_reader,
+        community_with_permissions_cf,
+        request_data_factory,
+        record_service,
+        # patch_requests_permissions,
+        search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
@@ -171,13 +155,13 @@ def test_community_publish(
 
 
 def test_community_delete(
-    logged_client,
-    community_owner,
-    community_reader,
-    community_with_permissions_cf,
-    request_data_factory,
-    record_service,
-    search_clear,
+        logged_client,
+        community_owner,
+        community_reader,
+        community_with_permissions_cf,
+        request_data_factory,
+        record_service,
+        search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
@@ -213,14 +197,14 @@ def test_community_delete(
 
 
 def test_community_migration(
-    logged_client,
-    community_owner,
-    community_reader,
-    community_with_permission_cf_factory,
-    request_data_factory,
-    record_service,
-    inviter,
-    search_clear,
+        logged_client,
+        community_owner,
+        community_reader,
+        community_with_permission_cf_factory,
+        request_data_factory,
+        record_service,
+        inviter,
+        search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
@@ -257,27 +241,27 @@ def test_community_migration(
     record_after = owner_client.get(f"/thesis/{record_id}")
 
     assert (
-        record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
+            record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
     )
     assert record_before.json["parent"]["communities"]["ids"] == [
         community_1.data["id"]
     ]
 
     assert (
-        record_after.json["parent"]["communities"]["default"] == community_2.data["id"]
+            record_after.json["parent"]["communities"]["default"] == community_2.data["id"]
     )
     assert record_after.json["parent"]["communities"]["ids"] == [community_2.data["id"]]
 
 
 def test_community_submission_secondary(
-    logged_client,
-    community_owner,
-    community_reader,
-    community_with_permission_cf_factory,
-    inviter,
-    request_data_factory,
-    record_service,
-    search_clear,
+        logged_client,
+        community_owner,
+        community_reader,
+        community_with_permission_cf_factory,
+        inviter,
+        request_data_factory,
+        record_service,
+        search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
@@ -332,14 +316,14 @@ def test_community_submission_secondary(
 
 
 def test_remove_secondary(
-    logged_client,
-    community_owner,
-    community_reader,
-    community_with_permission_cf_factory,
-    inviter,
-    request_data_factory,
-    record_service,
-    search_clear,
+        logged_client,
+        community_owner,
+        community_reader,
+        community_with_permission_cf_factory,
+        inviter,
+        request_data_factory,
+        record_service,
+        search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
@@ -418,14 +402,14 @@ def test_remove_secondary(
 
 
 def test_ui_serialization(
-    logged_client,
-    community_owner,
-    community_reader,
-    community_with_permissions_cf,
-    request_data_factory,
-    record_service,
-    ui_serialized_community,
-    search_clear,
+        logged_client,
+        community_owner,
+        community_reader,
+        community_with_permissions_cf,
+        request_data_factory,
+        record_service,
+        ui_serialized_community,
+        search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)

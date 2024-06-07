@@ -7,5 +7,4 @@ class SecondaryCommunitySubmissionRequestType(CommunitySubmissionRequestType):
     type_id = "secondary_community_submission"
     name = "Secondary_community_submission"
 
-    needs_context = {"community_permission_name": "can_submit_secondary_community"}
     set_as_default = False

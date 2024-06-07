@@ -15,8 +15,6 @@ class CommunityDeleteTopicAcceptAction(DeleteTopicAcceptAction):
 class CommunityDeleteRecordRequestType(DeleteRecordRequestType):
     allowed_receiver_ref_types = ["community"]
 
-    needs_context = {"community_permission_name": "can_delete_request"}
-
     available_actions = {
         **DeleteRecordRequestType.available_actions,
         "accept": CommunityDeleteTopicAcceptAction,

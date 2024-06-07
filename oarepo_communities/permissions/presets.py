@@ -1,9 +1,9 @@
 from invenio_records_permissions import RecordPermissionPolicy
 from invenio_records_permissions.generators import AuthenticatedUser, SystemProcess
 from invenio_records_permissions.policies.base import BasePermissionPolicy
+from invenio_communities.generators import CommunityMembers
 
-from .generators import RequestActive
-from .record import CommunityRolePermittedInCF
+from .generators import RequestActive, WorkflowPermission, WorkflowRequestPermission
 
 
 class CommunityPermissionPolicy(RecordPermissionPolicy):
@@ -14,56 +14,56 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
     # the actual search query filter works through this
     can_read = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_read"),
+        WorkflowPermission(access_key="readers"),
     ]
-    can_create = [SystemProcess()]
+    can_create = [SystemProcess(), CommunityMembers()]
     can_update = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_update"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_delete = [SystemProcess(), RequestActive()]
     can_manage = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_manage"),
+        WorkflowPermission(access_key="editors"),
     ]
 
     can_create_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_create_files"),
+        WorkflowPermission(access_key="editors"),
         # WorkflowPermission(state='draft', role'=editor')
     ]
     can_set_content_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_set_content_files"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_get_content_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_get_content_files"),
+        WorkflowPermission(access_key="readers"),
     ]
     can_commit_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_commit_files"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_read_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_read_files"),
+        WorkflowPermission(access_key="readers"),
     ]
     can_update_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_update_files"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_delete_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_delete_files"),
+        WorkflowPermission(access_key="editors"),
     ]
 
     can_edit = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_edit"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_new_version = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_new_version"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_search_drafts = [
         SystemProcess(),
@@ -71,49 +71,45 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
     ]
     can_read_draft = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_read_draft"),
+        WorkflowPermission(access_key="readers"),
     ]
     can_update_draft = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_update_draft"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_delete_draft = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_delete_draft"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_publish = [SystemProcess(), RequestActive()]
     can_draft_create_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_draft_create_files"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_draft_set_content_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(
-            community_permission_name="can_draft_set_content_files"
-        ),
+        WorkflowPermission(access_key="editors"),
     ]
     can_draft_get_content_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(
-            community_permission_name="can_draft_get_content_files"
-        ),
+        WorkflowPermission(access_key="editors"),
     ]
     can_draft_commit_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_draft_commit_files"),
+        WorkflowPermission(access_key="editors"),
     ]
     can_draft_read_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_draft_read_files"),
+        WorkflowPermission(access_key="readers"),
     ]
     can_draft_update_files = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_draft_update_files"),
+        WorkflowPermission(access_key="editors"),
     ]
 
     can_create_in_community = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_create_in_community"),
+        CommunityMembers(),
     ]
 
 
@@ -121,17 +117,15 @@ class CommunityRequestsPermissionPolicy(BasePermissionPolicy):
     can_delete_request = (
         [
             SystemProcess(),
-            CommunityRolePermittedInCF(community_permission_name="can_delete_request"),
+            WorkflowRequestPermission(access_key="creators"),
         ],
     )
 
     can_publish_request = [
         SystemProcess(),
-        CommunityRolePermittedInCF(community_permission_name="can_publish_request"),
+        WorkflowRequestPermission(access_key="creators"),
     ]
     can_add_secondary_community = [
         SystemProcess(),
-        CommunityRolePermittedInCF(
-            community_permission_name="can_submit_secondary_community"
-        ),
+        WorkflowRequestPermission(access_key="creators"),
     ]
