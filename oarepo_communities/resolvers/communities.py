@@ -21,6 +21,8 @@ class OARepoCommunityPKProxy(CommunityPKProxy):
     def get_needs(self, ctx=None):
         """Return community member need."""
         comid = str(self._parse_ref_dict_id())
+        if "community_permission_name" not in ctx:
+            return []
         needs = needs_from_community_ids({comid}, ctx["community_permission_name"])
         return needs
 

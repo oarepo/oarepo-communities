@@ -18,6 +18,7 @@ class OARepoCommunities(object):
 
     def init_app(self, app):
         """Flask application initialization."""
+        self.app = app
         self.init_config(app)
         self.init_services(app)
         self.init_resources(app)
@@ -57,3 +58,7 @@ class OARepoCommunities(object):
             config=CommunityRecordsResourceConfig.build(app),
             service=self.community_records_service,
         )
+
+    @property
+    def communities_resource(self):
+        return self.app.extensions['invenio-communities'].communities_resource
