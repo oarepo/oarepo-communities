@@ -4,10 +4,30 @@ from itertools import chain
 from invenio_records.dictutils import dict_lookup
 from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
-from invenio_communities.generators import current_roles
 
 from ..proxies import current_oarepo_communities
 from .identity import request_active
+
+
+def needs_from_workflow(
+    workflow, status, request_type, access_key, record=None, community_id=None, **kwargs
+):
+    try:
+        generators = current_oarepo_communities.record_workflow[workflow][status][
+            "requests"
+        ][request_type]
+        generators = dict_lookup(generators, access_key)
+    except KeyError:
+        return []
+    needs = [
+        g.needs(
+            record=record,
+            community_id=community_id,
+            **kwargs,
+        )
+        for g in generators
+    ]
+    return set(chain.from_iterable(needs))
 
 
 class WorkflowRequestPermission(Generator):
@@ -106,5 +126,3 @@ class RequestActive(Generator):
             return dsl.Q("match_all")
         else:
             return []
-
-

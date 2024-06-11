@@ -16,7 +16,9 @@ class RecordService(InvenioRecordService):
         self, identity, data, *args, community, uow=None, expand=False, **kwargs
     ):
         # todo can create - members of community
-        self.require_permission(identity, "create_in_community", community_id=community.id)
+        self.require_permission(
+            identity, "create_in_community", community_id=community.id
+        )
         result_item = super().create(identity, data, uow=uow, expand=expand)
         record_communities_service = get_associated_service(self, "record_communities")
 

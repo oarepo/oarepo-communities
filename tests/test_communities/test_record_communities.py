@@ -9,16 +9,16 @@ from tests.test_communities.utils import published_record_in_community
 def test_include(
     logged_client,
     community_owner,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     record_communities_service,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
-    community_2 = community_with_permission_cf_factory("comm2", community_owner)
-    community_3 = community_with_permission_cf_factory("comm3", community_owner)
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
+    community_3 = community_with_workflow_factory("comm3", community_owner)
 
     response = owner_client.post(
         f"/communities/{community_1.id}/thesis/records", json={}
@@ -49,17 +49,17 @@ def test_include(
 def test_remove(
     logged_client,
     community_owner,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     record_communities_service,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
-    community_2 = community_with_permission_cf_factory("comm2", community_owner)
-    community_3 = community_with_permission_cf_factory("comm3", community_owner)
-    community_4 = community_with_permission_cf_factory("comm4", community_owner)
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
+    community_3 = community_with_workflow_factory("comm3", community_owner)
+    community_4 = community_with_workflow_factory("comm4", community_owner)
 
     response = owner_client.post(
         f"/communities/{community_1.id}/thesis/records", json={}
@@ -90,14 +90,14 @@ def test_remove(
 def test_search(
     logged_client,
     community_owner,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     record_communities_service,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
+    community_1 = community_with_workflow_factory("comm1", community_owner)
 
     response = owner_client.post(
         f"/communities/{community_1.id}/thesis/records", json={}

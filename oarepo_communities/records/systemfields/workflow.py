@@ -14,14 +14,8 @@ class WorkflowField(MappingSystemFieldMixin, SystemField):
                 "type": "keyword",
             },
         }
-    # todo use some cache or another way to avoid the database queries
-    def __init__(self, record_workflow_model, key="workflow"):
-        self._workflow = None  # added in db
-        self._record_workflow_model = record_workflow_model
-        super().__init__(key=key)
 
-    def post_init(self, record, data, model=None, **kwargs):
-        super().post_init(record, data, model=None, **kwargs)
+    def _get_workflow(self, record):
         if record.id is None:
             return
         try:
@@ -30,9 +24,14 @@ class WorkflowField(MappingSystemFieldMixin, SystemField):
                 .filter(self._record_workflow_model.record_id == record.id)
                 .one()
             )
-            self._workflow = res.workflow
+            return res[0]
         except NoResultFound:
-            return
+            return None
+
+    def __init__(self, record_workflow_model, key="workflow"):
+        self._workflow = None  # added in db
+        self._record_workflow_model = record_workflow_model
+        super().__init__(key=key)
 
     def pre_commit(self, record):
         super().pre_commit(record)
@@ -64,4 +63,4 @@ class WorkflowField(MappingSystemFieldMixin, SystemField):
         """Get the persistent identifier."""
         if record is None:
             return self
-        return self._workflow
+        return self._get_workflow(record)

@@ -1,6 +1,5 @@
 from functools import cached_property
 
-from .cache import aai_mapping, permissions_cache
 from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
 from .services.community_records.config import CommunityRecordsServiceConfig
@@ -36,9 +35,6 @@ class OARepoCommunities(object):
                 app.config["OAREPO_PERMISSIONS_PRESETS"][k] = (
                     ext_config.OAREPO_PERMISSIONS_PRESETS[k]
                 )
-
-        self.permissions_cache = permissions_cache
-        self.aai_mapping = aai_mapping
 
     @cached_property
     def urlprefix_serviceid_mapping(self):

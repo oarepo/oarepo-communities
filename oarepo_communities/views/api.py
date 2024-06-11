@@ -1,4 +1,3 @@
-
 from oarepo_communities.resolvers.communities import OARepoCommunityResolver
 
 

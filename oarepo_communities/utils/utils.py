@@ -52,7 +52,6 @@ def get_service_from_schema_type(schema_type):
     return None
 
 
-# todo add community records services into config, use here as temp fix
 def get_urlprefix_service_id_mapping():
     ret = {}
     services = get_record_services()

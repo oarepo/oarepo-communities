@@ -1,6 +1,6 @@
 import copy
 import os
-from invenio_records_permissions.generators import SystemProcess
+
 import pytest
 import yaml
 from flask_security import login_user
@@ -16,12 +16,14 @@ from invenio_communities.generators import (
     CommunityRoleNeed,
 )
 from invenio_pidstore.errors import PIDDoesNotExistError
-from invenio_records_resources.services.uow import RecordCommitOp, UnitOfWork
-
-from oarepo_communities.permissions.generators import WorkflowRequestPermission, RequestActive, WorkflowPermission
+from invenio_records_permissions.generators import SystemProcess
 from thesis.proxies import current_record_communities_service
-from thesis.records.api import ThesisDraft, ThesisRecord
+from thesis.records.api import ThesisDraft
 
+from oarepo_communities.permissions.generators import (
+    RequestActive,
+    WorkflowRequestPermission,
+)
 from oarepo_communities.records.models import CommunityWorkflowModel
 
 
@@ -131,10 +133,6 @@ def app_config(app_config):
     app_config["CACHE_TYPE"] = "SimpleCache"  # Flask-Caching related configs
     app_config["CACHE_DEFAULT_TIMEOUT"] = 300
 
-    from oarepo_communities.cf.permissions import PermissionsCF
-
-    app_config["COMMUNITIES_CUSTOM_FIELDS"] = [PermissionsCF("permissions")]
-
     app_config["FILES_REST_STORAGE_CLASS_LIST"] = {
         "L": "Local",
         "F": "Fetch",
@@ -178,8 +176,8 @@ def app_config(app_config):
     publish_states = {"pending": "publish_pending", "accept": "published"}
     create = {
         "states": {},
-        "creators": [CommunityCurators()],
-        "receivers": [],
+        "creators": [CommunityMembers()],
+        "receivers": [CommunityCurators()],
     }
 
     app_config["RECORD_WORKFLOW"] = {
@@ -193,11 +191,13 @@ def app_config(app_config):
                     "thesis_publish_draft": {
                         "states": publish_states,
                         "creators": [CommunityMembers()],
-                        "receivers": [],
+                        "receivers": [CommunityCurators()],
                     },
                     "thesis_secondary_community_submission": create,
                     "thesis_remove_secondary_community": create,
                     "thesis_community_migration": create,
+                    "thesis_edit_record": create,
+                    "thesis_delete_record": create,
                 },
             },
             "publish_pending": {
@@ -214,6 +214,21 @@ def app_config(app_config):
                     "thesis_secondary_community_submission": create,
                     "thesis_remove_secondary_community": create,
                     "thesis_community_migration": create,
+                    "thesis_edit_record": create,
+                    "thesis_delete_record": create,
+                },
+            },
+            "published": {
+                "roles": {
+                    "readers": [CommunityMembers()],
+                    "editors": [CommunityMembers()],
+                },
+                "requests": {
+                    "thesis_secondary_community_submission": create,
+                    "thesis_remove_secondary_community": create,
+                    "thesis_community_migration": create,
+                    "thesis_edit_record": create,
+                    "thesis_delete_record": create,
                 },
             },
         },
@@ -263,20 +278,8 @@ def init_cf(app, db, cache):
     Community.index.refresh()
 
 
-@pytest.fixture
-def example_record(app, db, input_data):
-    # record = current_service.create(system_identity, sample_data[0])
-    # return record
-    with UnitOfWork(db.session) as uow:
-        record = ThesisRecord.create(input_data)
-        uow.register(RecordCommitOp(record, current_service.indexer, True))
-        uow.commit()
-        return record
-
-
 @pytest.fixture()
 def community_owner(UserFixture, app, db):
-    """Community owner."""
     u = UserFixture(
         email="community_owner@inveniosoftware.org",
         password="community_owner",
@@ -287,7 +290,6 @@ def community_owner(UserFixture, app, db):
 
 @pytest.fixture()
 def community_curator(UserFixture, app, db, community, inviter):
-    """Community owner."""
     u = UserFixture(
         email="community_curator@inveniosoftware.org",
         password="community_curator",
@@ -298,20 +300,7 @@ def community_curator(UserFixture, app, db, community, inviter):
 
 
 @pytest.fixture()
-def community_manager(UserFixture, app, db, community, inviter):
-    """Community owner."""
-    u = UserFixture(
-        email="community_manager@inveniosoftware.org",
-        password="community_manager",
-    )
-    u.create(app, db)
-    inviter(u.id, str(community.id), "manager")
-    return u
-
-
-@pytest.fixture()
 def community_reader(UserFixture, app, db, community, inviter):
-    """Community owner."""
     u = UserFixture(
         email="community_reader@inveniosoftware.org",
         password="community_reader",
@@ -347,55 +336,6 @@ def minimal_community():
     }
 
 
-@pytest.fixture
-def community_permissions_cf():
-    return {
-        "custom_fields": {
-            "permissions": {
-                "owner": {
-                    "can_create_in_community": True,
-                    "can_submit_to_community": True,
-                    "can_submit_secondary_community": True,
-                    "can_remove_secondary_community": True,
-                    "can_search_drafts": True,
-                    "can_publish_request": True,
-                    "can_delete_request": True,
-                    "can_read": True,
-                    "can_read_draft": True,
-                    "can_update": True,
-                    "can_update_draft": True,
-                    "can_search": True,
-                    "can_create": True,
-                },
-                "reader": {
-                    "can_create_in_community": True,
-                    "can_submit_to_community": False,
-                    "can_submit_secondary_community": False,
-                    "can_remove_secondary_community": False,
-                    "can_publish_request": False,
-                    "can_delete_request": False,
-                    "can_read": True,
-                    "can_read_draft": True,
-                    "can_update": False,
-                    "can_update_draft": False,
-                    "can_delete": False,
-                    "can_search": True,
-                },
-            }
-        }
-    }
-
-
-@pytest.fixture
-def community_permissions_cf_authenticated_user_read(community_permissions_cf):
-    ret = copy.deepcopy(community_permissions_cf)
-    ret["custom_fields"]["permissions"]["authenticated_user"] = {
-        "can_read": True,
-        "can_read_draft": True,
-    }
-    return ret
-
-
 @pytest.fixture(scope="module", autouse=True)
 def location(location):
     return location
@@ -418,28 +358,18 @@ def _community_get_or_create(identity, community_dict):
 
 @pytest.fixture()
 def community(app, minimal_community, community_owner):
-    """Get the current RDM records service."""
     return _community_get_or_create(community_owner.identity, minimal_community)
 
 
 @pytest.fixture()
-def community_with_permissions_cf(community, community_permissions_cf, init_cf, set_community_scenario):
-    data = current_communities.service.read(system_identity, community.id).data
-    data |= community_permissions_cf
-    community = current_communities.service.update(system_identity, data["id"], data)
-    Community.index.refresh()
-    set_community_scenario(community.id)
+def community_with_default_workflow(community, init_cf, set_community_workflow):
+    set_community_workflow(community.id)
     return community
 
 
 @pytest.fixture()
-def community_with_permission_cf_factory(
-    minimal_community, init_cf, community_permissions_cf, set_community_scenario
-):
-    def create_community(slug, community_owner, community_permissions_cf_custom=None):
-        community_permissions_cf_actual = (
-            community_permissions_cf_custom or community_permissions_cf
-        )
+def community_with_workflow_factory(minimal_community, init_cf, set_community_workflow):
+    def create_community(slug, community_owner, workflow="default"):
         minimal_community_actual = copy.deepcopy(minimal_community)
         minimal_community_actual["slug"] = slug
         community = _community_get_or_create(
@@ -448,12 +378,7 @@ def community_with_permission_cf_factory(
         community_owner.identity.provides.add(
             CommunityRoleNeed(community.data["id"], "owner")
         )
-        data = community.data | community_permissions_cf_actual
-        community = current_communities.service.update(
-            system_identity, data["id"], data
-        )
-        Community.index.refresh()
-        set_community_scenario(community.id)
+        set_community_workflow(community.id, workflow=workflow)
         return community
 
     return create_community
@@ -539,8 +464,8 @@ from sqlalchemy.exc import NoResultFound
 
 
 @pytest.fixture
-def set_community_scenario(db):
-    def _set_community_scenario(community_id, workflow="default"):
+def set_community_workflow(db):
+    def _set_community_workflow(community_id, workflow="default"):
         try:
             record = CommunityWorkflowModel.query.filter(
                 CommunityWorkflowModel.community_id == community_id
@@ -554,13 +479,15 @@ def set_community_scenario(db):
             )
             db.session.add(obj)
 
-    return _set_community_scenario
+    return _set_community_workflow
+
 
 @pytest.fixture()
 def requests_service_config():
     from invenio_requests.services.requests.config import RequestsServiceConfig
 
     return RequestsServiceConfig
+
 
 @pytest.fixture()
 def scenario_permissions():
@@ -575,17 +502,33 @@ def scenario_permissions():
                 WorkflowRequestPermission(access_key="creators"),
                 RequestActive(),
             ],
-            can_action_accept=[SystemProcess(), WorkflowRequestPermission(access_key="receivers")],
-            can_action_submit=[SystemProcess(), WorkflowRequestPermission(access_key="creators")],
-            can_action_cancel=[SystemProcess(), WorkflowRequestPermission(access_key="creators")],
-            can_action_expire=[SystemProcess(), WorkflowRequestPermission(access_key="creators")],
-            can_action_decline=[SystemProcess(), WorkflowRequestPermission(access_key="receivers")],
+            can_action_accept=[
+                SystemProcess(),
+                WorkflowRequestPermission(access_key="receivers"),
+            ],
+            can_action_submit=[
+                SystemProcess(),
+                WorkflowRequestPermission(access_key="creators"),
+            ],
+            can_action_cancel=[
+                SystemProcess(),
+                WorkflowRequestPermission(access_key="creators"),
+            ],
+            can_action_expire=[
+                SystemProcess(),
+                WorkflowRequestPermission(access_key="creators"),
+            ],
+            can_action_decline=[
+                SystemProcess(),
+                WorkflowRequestPermission(access_key="receivers"),
+            ],
         ),
     )
 
     return requests
 
 
+# todo solve this in forked invenio requests
 @pytest.fixture()
 def patch_requests_permissions(
     requests_service,

@@ -19,7 +19,7 @@ REPO_NAME = "thesis"
 
 def link_api2testclient(api_link):
     base_string = "https://127.0.0.1:5000/api/"
-    return api_link[len(base_string) - 1:]
+    return api_link[len(base_string) - 1 :]
 
 
 def find_request_by_type(requests, type):
@@ -30,13 +30,13 @@ def find_request_by_type(requests, type):
 
 
 def _create_request(
-        creator_client,
-        community_id,
-        record_type,
-        record_id,
-        request_type,
-        request_data_func,
-        **kwargs,
+    creator_client,
+    community_id,
+    record_type,
+    record_id,
+    request_type,
+    request_data_func,
+    **kwargs,
 ):
     request_data = request_data_func(
         community_id, record_type, record_id, request_type, **kwargs
@@ -46,13 +46,13 @@ def _create_request(
 
 
 def _submit_request(
-        creator_client,
-        community_id,
-        record_type,
-        record_id,
-        request_type,
-        request_data_func,
-        **kwargs,
+    creator_client,
+    community_id,
+    record_type,
+    record_id,
+    request_type,
+    request_data_func,
+    **kwargs,
 ):
     create_response = _create_request(
         creator_client,
@@ -71,12 +71,12 @@ def _submit_request(
 
 
 def _accept_request(
-        receiver_client,
-        type,
-        record_id,
-        is_draft=False,
-        no_accept_link=False,
-        **kwargs,
+    receiver_client,
+    type,
+    record_id,
+    is_draft=False,
+    no_accept_link=False,
+    **kwargs,
 ):
     if is_draft:
         record_after_submit = receiver_client.get(
@@ -94,11 +94,11 @@ def _accept_request(
 
 
 def _init_env(
-        logged_client,
-        community_owner,
-        community_reader,
-        community_with_permission_cf_factory,
-        inviter,
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_permission_cf_factory,
+    inviter,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
@@ -112,24 +112,24 @@ def _init_env(
 
 
 def test_community_publish(
-        logged_client,
-        community_owner,
-        community_reader,
-        community_with_permissions_cf,
-        request_data_factory,
-        record_service,
-        # patch_requests_permissions,
-        search_clear,
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_default_workflow,
+    request_data_factory,
+    record_service,
+    patch_requests_permissions,
+    search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
     record_id = _create_record_in_community(
-        reader_client, community_with_permissions_cf.id
+        reader_client, community_with_default_workflow.id
     ).json["id"]
     submit = _submit_request(
         reader_client,
-        community_with_permissions_cf.id,
+        community_with_default_workflow.id,
         "thesis_draft",
         record_id,
         "thesis_publish_draft",
@@ -155,24 +155,28 @@ def test_community_publish(
 
 
 def test_community_delete(
-        logged_client,
-        community_owner,
-        community_reader,
-        community_with_permissions_cf,
-        request_data_factory,
-        record_service,
-        search_clear,
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_default_workflow,
+    request_data_factory,
+    record_service,
+    patch_requests_permissions,
+    search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
     record_id = published_record_in_community(
-        owner_client, community_with_permissions_cf.id, record_service, community_owner
+        owner_client,
+        community_with_default_workflow.id,
+        record_service,
+        community_owner,
     )["id"]
 
     submit = _submit_request(
         reader_client,
-        community_with_permissions_cf.id,
+        community_with_default_workflow.id,
         "thesis",
         record_id,
         "thesis_delete_record",
@@ -197,20 +201,21 @@ def test_community_delete(
 
 
 def test_community_migration(
-        logged_client,
-        community_owner,
-        community_reader,
-        community_with_permission_cf_factory,
-        request_data_factory,
-        record_service,
-        inviter,
-        search_clear,
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_workflow_factory,
+    request_data_factory,
+    record_service,
+    inviter,
+    patch_requests_permissions,
+    search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
         community_reader,
-        community_with_permission_cf_factory,
+        community_with_workflow_factory,
         inviter,
     )
 
@@ -241,33 +246,34 @@ def test_community_migration(
     record_after = owner_client.get(f"/thesis/{record_id}")
 
     assert (
-            record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
+        record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
     )
     assert record_before.json["parent"]["communities"]["ids"] == [
         community_1.data["id"]
     ]
 
     assert (
-            record_after.json["parent"]["communities"]["default"] == community_2.data["id"]
+        record_after.json["parent"]["communities"]["default"] == community_2.data["id"]
     )
     assert record_after.json["parent"]["communities"]["ids"] == [community_2.data["id"]]
 
 
 def test_community_submission_secondary(
-        logged_client,
-        community_owner,
-        community_reader,
-        community_with_permission_cf_factory,
-        inviter,
-        request_data_factory,
-        record_service,
-        search_clear,
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_workflow_factory,
+    inviter,
+    request_data_factory,
+    record_service,
+    patch_requests_permissions,
+    search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
         community_reader,
-        community_with_permission_cf_factory,
+        community_with_workflow_factory,
         inviter,
     )
     record_id = published_record_in_community(
@@ -316,20 +322,21 @@ def test_community_submission_secondary(
 
 
 def test_remove_secondary(
-        logged_client,
-        community_owner,
-        community_reader,
-        community_with_permission_cf_factory,
-        inviter,
-        request_data_factory,
-        record_service,
-        search_clear,
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_workflow_factory,
+    inviter,
+    request_data_factory,
+    record_service,
+    patch_requests_permissions,
+    search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
         community_reader,
-        community_with_permission_cf_factory,
+        community_with_workflow_factory,
         inviter,
     )
 
@@ -402,25 +409,26 @@ def test_remove_secondary(
 
 
 def test_ui_serialization(
-        logged_client,
-        community_owner,
-        community_reader,
-        community_with_permissions_cf,
-        request_data_factory,
-        record_service,
-        ui_serialized_community,
-        search_clear,
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_default_workflow,
+    request_data_factory,
+    record_service,
+    ui_serialized_community,
+    patch_requests_permissions,
+    search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
     record_id = _create_record_in_community(
-        reader_client, community_with_permissions_cf.id
+        reader_client, community_with_default_workflow.id
     ).json["id"]
 
     submit = _submit_request(
         reader_client,
-        community_with_permissions_cf.id,
+        community_with_default_workflow.id,
         "thesis_draft",
         record_id,
         "thesis_publish_draft",
@@ -432,12 +440,12 @@ def test_ui_serialization(
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
     assert request.json["receiver"] == ui_serialized_community(
-        community_with_permissions_cf.id
+        community_with_default_workflow.id
     )
     request_list = owner_client.get(
         "/requests/",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
     assert request_list.json["hits"]["hits"][0]["receiver"] == ui_serialized_community(
-        community_with_permissions_cf.id
+        community_with_default_workflow.id
     )

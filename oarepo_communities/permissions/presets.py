@@ -1,7 +1,7 @@
+from invenio_communities.generators import CommunityMembers
 from invenio_records_permissions import RecordPermissionPolicy
 from invenio_records_permissions.generators import AuthenticatedUser, SystemProcess
 from invenio_records_permissions.policies.base import BasePermissionPolicy
-from invenio_communities.generators import CommunityMembers
 
 from .generators import RequestActive, WorkflowPermission, WorkflowRequestPermission
 

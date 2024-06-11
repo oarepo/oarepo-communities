@@ -1,3 +1,4 @@
+from invenio_access.permissions import system_identity
 from thesis.records.api import ThesisDraft, ThesisRecord
 
 from tests.test_communities.utils import published_record_in_community
@@ -6,59 +7,59 @@ from tests.test_communities.utils import published_record_in_community
 def test_create_record_in_community(
     logged_client,
     community_owner,
-    community_with_permissions_cf,
+    community_with_default_workflow,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
     response = owner_client.post(
-        f"/communities/{community_with_permissions_cf.id}/thesis/records", json={}
+        f"/communities/{community_with_default_workflow.id}/thesis/records", json={}
     )
     assert response.json["parent"]["communities"]["ids"] == [
-        community_with_permissions_cf.id
+        community_with_default_workflow.id
     ]
     assert (
         response.json["parent"]["communities"]["default"]
-        == community_with_permissions_cf.id
+        == community_with_default_workflow.id
     )
 
     response_record = owner_client.get(f"/thesis/{response.json['id']}/draft")
     assert response_record.json["parent"]["communities"]["ids"] == [
-        community_with_permissions_cf.id
+        community_with_default_workflow.id
     ]
     assert (
         response_record.json["parent"]["communities"]["default"]
-        == community_with_permissions_cf.id
+        == community_with_default_workflow.id
     )
 
 
 def test_create_record_in_community_without_model_in_url(
     logged_client,
     community_owner,
-    community_with_permissions_cf,
+    community_with_default_workflow,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
     response = owner_client.post(
-        f"/communities/{community_with_permissions_cf.id}/records",
+        f"/communities/{community_with_default_workflow.id}/records",
         json={"$schema": "local://thesis-1.0.0.json"},
     )
     assert response.json["parent"]["communities"]["ids"] == [
-        community_with_permissions_cf.id
+        community_with_default_workflow.id
     ]
     assert (
         response.json["parent"]["communities"]["default"]
-        == community_with_permissions_cf.id
+        == community_with_default_workflow.id
     )
 
     response_record = owner_client.get(f"/thesis/{response.json['id']}/draft")
     assert response_record.json["parent"]["communities"]["ids"] == [
-        community_with_permissions_cf.id
+        community_with_default_workflow.id
     ]
     assert (
         response_record.json["parent"]["communities"]["default"]
-        == community_with_permissions_cf.id
+        == community_with_default_workflow.id
     )
 
 
@@ -67,14 +68,14 @@ def test_search(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
-    community_2 = community_with_permission_cf_factory("comm2", community_owner)
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
 
     record1 = published_record_in_community(
         owner_client, community_1.id, record_service, community_owner
@@ -108,14 +109,14 @@ def test_search_model(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
-    community_2 = community_with_permission_cf_factory("comm2", community_owner)
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
 
     record1 = published_record_in_community(
         owner_client, community_1.id, record_service, community_owner
@@ -142,15 +143,15 @@ def test_user_search(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     inviter,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
-    community_2 = community_with_permission_cf_factory("comm2", community_owner)
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
     inviter("2", community_1.id, "reader")
 
     record1 = owner_client.post(
@@ -187,7 +188,7 @@ def test_user_search_model(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     record_service,
     inviter,
     search_clear,
@@ -195,8 +196,8 @@ def test_user_search_model(
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
-    community_1 = community_with_permission_cf_factory("comm1", community_owner)
-    community_2 = community_with_permission_cf_factory("comm2", community_owner)
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
     inviter("2", community_1.id, "reader")
 
     record1 = owner_client.post(
@@ -224,3 +225,12 @@ def test_user_search_model(
 
     assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+
+
+def test_create_published(
+    init_cf, community_owner, community_with_default_workflow, search_clear
+):
+    from thesis.proxies import current_published_service
+
+    record = current_published_service.create(system_identity, {})
+    assert record._record.status == "published"

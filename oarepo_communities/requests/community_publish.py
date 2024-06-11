@@ -2,11 +2,17 @@ from oarepo_requests.actions.publish_draft import PublishDraftAcceptAction
 from oarepo_requests.types.publish_draft import PublishDraftRequestType
 
 from oarepo_communities.permissions.identity import RequestIdentity
-from oarepo_communities.requests.actions import StatusChangingSubmitAction, PublishChangeRecordStatusMixin
+from oarepo_communities.requests.actions import (
+    PublishChangeRecordStatusMixin,
+    StatusChangingSubmitAction,
+)
 
 
-class CommunityPublishDraftAcceptAction(PublishChangeRecordStatusMixin, PublishDraftAcceptAction):
+class CommunityPublishDraftAcceptAction(
+    PublishChangeRecordStatusMixin, PublishDraftAcceptAction
+):
     action = "accept"
+
     def execute(self, identity, uow, *args, **kwargs):
         identity = RequestIdentity(identity)
         super().execute(

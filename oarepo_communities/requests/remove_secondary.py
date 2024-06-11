@@ -37,7 +37,6 @@ class RemoveSecondaryRequestType(OARepoRequestType):
     allowed_receiver_ref_types = ["community"]
     allowed_topic_ref_types = ["record"]
 
-
     available_actions = {
         **OARepoRequestType.available_actions,
         "accept": AcceptAction,
