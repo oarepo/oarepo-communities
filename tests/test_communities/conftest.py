@@ -452,7 +452,10 @@ def ui_serialized_community():
     def _ui_serialized_community(community_id):
         return {
             "label": "My Community",
-            "link": f"https://127.0.0.1:5000/api/communities/{community_id}",
+            "links": {
+                "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
+                "self_html": "https://127.0.0.1:5000/communities/public",
+            },
             "reference": {"community": community_id},
             "type": "community",
         }
