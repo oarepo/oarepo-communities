@@ -3,7 +3,7 @@ from invenio_communities.proxies import current_communities
 # from invenio_i18n import lazy_gettext as _
 # from invenio_notifications.services.uow import NotificationOp
 from invenio_pidstore.errors import PIDUnregistered
-from invenio_records_resources.services import RecordIndexerMixin, ServiceSchemaWrapper
+from invenio_records_resources.services import RecordIndexerMixin
 from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.uow import (
     RecordCommitOp,
@@ -25,11 +25,6 @@ class RecordCommunitiesService(Service, RecordIndexerMixin):
     def __init__(self, config, record_service=None):
         super().__init__(config)
         self.record_service = record_service
-
-    @property
-    def schema(self):
-        """Returns the data schema instance."""
-        return ServiceSchemaWrapper(self, schema=self.config.schema)
 
     @property
     def record_cls(self):

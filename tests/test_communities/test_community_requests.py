@@ -353,6 +353,7 @@ def test_remove_secondary(
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
+
     accept_owner = _accept_request(
         owner_client, type="thesis_secondary_community_submission", record_id=record_id
     )

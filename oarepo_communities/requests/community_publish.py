@@ -3,16 +3,12 @@ from oarepo_requests.types.publish_draft import PublishDraftRequestType
 
 from oarepo_communities.permissions.identity import RequestIdentity
 from oarepo_communities.requests.actions import (
-    PublishChangeRecordStatusMixin,
+    StatusChangingDeclineAction,
     StatusChangingSubmitAction,
 )
 
 
-class CommunityPublishDraftAcceptAction(
-    PublishChangeRecordStatusMixin, PublishDraftAcceptAction
-):
-    action = "accept"
-
+class CommunityPublishDraftAcceptAction(PublishDraftAcceptAction):
     def execute(self, identity, uow, *args, **kwargs):
         identity = RequestIdentity(identity)
         super().execute(
@@ -26,5 +22,6 @@ class CommunityPublishDraftRequestType(PublishDraftRequestType):
     available_actions = {
         **PublishDraftRequestType.available_actions,
         "submit": StatusChangingSubmitAction,
+        "decline": StatusChangingDeclineAction,
         "accept": CommunityPublishDraftAcceptAction,
     }

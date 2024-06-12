@@ -9,15 +9,11 @@ class CommunityWorkflowModel(db.Model):
     __versioned__ = {}
     __tablename__ = "community_scenario"
 
-    @declared_attr
-    def community_id(cls):
-        """Foreign key to the related communithy."""
-        return db.Column(
-            UUIDType,
-            db.ForeignKey(CommunityMetadata.id, ondelete="CASCADE"),
-            primary_key=True,
-        )
-
+    community_id = db.Column(
+        UUIDType,
+        db.ForeignKey(CommunityMetadata.id, ondelete="CASCADE"),
+        primary_key=True,
+    )
     workflow = db.Column(String)
 
 
@@ -26,11 +22,18 @@ class RecordWorkflowModelMixin:
 
     @declared_attr
     def record_id(cls):
-        """Foreign key to the related record."""
         return db.Column(
             UUIDType,
             db.ForeignKey(cls.__record_model__.id, ondelete="CASCADE"),
             primary_key=True,
         )
+
+    """
+    record_id = db.Column(
+            UUIDType,
+            db.ForeignKey(__record_model__.id, ondelete="CASCADE"),
+            primary_key=True,
+        )
+    """
 
     workflow = db.Column(String)

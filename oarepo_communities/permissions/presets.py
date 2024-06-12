@@ -2,6 +2,7 @@ from invenio_communities.generators import CommunityMembers
 from invenio_records_permissions import RecordPermissionPolicy
 from invenio_records_permissions.generators import AuthenticatedUser, SystemProcess
 from invenio_records_permissions.policies.base import BasePermissionPolicy
+from oarepo_runtime.services.generators import RecordOwners
 
 from .generators import RequestActive, WorkflowPermission, WorkflowRequestPermission
 
@@ -72,14 +73,17 @@ class CommunityPermissionPolicy(RecordPermissionPolicy):
     can_read_draft = [
         SystemProcess(),
         WorkflowPermission(access_key="readers"),
+        RecordOwners(),
     ]
     can_update_draft = [
         SystemProcess(),
         WorkflowPermission(access_key="editors"),
+        RecordOwners(),
     ]
     can_delete_draft = [
         SystemProcess(),
         WorkflowPermission(access_key="editors"),
+        RecordOwners(),
     ]
     can_publish = [SystemProcess(), RequestActive()]
     can_draft_create_files = [

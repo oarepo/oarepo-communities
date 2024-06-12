@@ -21,8 +21,6 @@ class RecordCommunitiesResource(ErrorHandlersMixin, Resource):
         routes = self.config.routes
         url_rules = [
             route("GET", routes["list"], self.search),
-            # route("POST", routes["list"], self.add),
-            # route("DELETE", routes["list"], self.remove),
         ]
         return url_rules
 

@@ -6,9 +6,11 @@ from oarepo_communities.proxies import current_oarepo_communities
 
 
 class ChangeRecordStatusMixin:
-    def _commit_topic(self, topic, uow):
-        service = get_matching_service_for_record(topic)
-        uow.register(RecordCommitOp(topic, indexer=service.indexer))
+    def _try_state_change(self, action, state, request_states, topic, uow):
+        if self.action == action and state in request_states:
+            topic.status = request_states[state]
+            service = get_matching_service_for_record(topic)
+            uow.register(RecordCommitOp(topic, indexer=service.indexer))
 
     def execute(self, identity, uow, *args, **kwargs):
         super().execute(identity, uow, *args, **kwargs)
@@ -23,38 +25,9 @@ class ChangeRecordStatusMixin:
             ]["requests"][request_type.type_id]["states"]
         except KeyError:
             return
-        if self.action == "submit" and "pending" in request_states:
-            topic.status = request_states["pending"]
-            self._commit_topic(topic, uow)
-        if self.action == "accept" and "accept" in request_states:
-            topic.status = request_states["accept"]
-            self._commit_topic(topic, uow)
-        if self.action == "decline" and "decline" in request_states:
-            topic.status = request_states["decline"]
-            self._commit_topic(topic, uow)
-
-
-class PublishChangeRecordStatusMixin:
-    def _commit_topic(self, topic, uow):
-        service = get_matching_service_for_record(topic)
-        uow.register(RecordCommitOp(topic, indexer=service.indexer))
-
-    def execute(self, identity, uow, *args, **kwargs):
-        record = super().execute(identity, uow, *args, **kwargs)
-        request = self.request
-        topic = request.topic.resolve()
-        request_type = request.type
-        workflow = getattr(topic.parent, "workflow", None)
-        status = topic.status
-        try:
-            request_states = current_oarepo_communities.record_workflow[workflow][
-                status
-            ]["requests"][request_type.type_id]["states"]
-        except KeyError:
-            return
-        if "accept" in request_states:
-            record.status = request_states["accept"]
-            self._commit_topic(record, uow)
+        self._try_state_change("submit", "pending", request_states, topic, uow)
+        self._try_state_change("accept", "accept", request_states, topic, uow)
+        self._try_state_change("decline", "decline", request_states, topic, uow)
 
 
 class StatusChangingSubmitAction(ChangeRecordStatusMixin, actions.SubmitAction):

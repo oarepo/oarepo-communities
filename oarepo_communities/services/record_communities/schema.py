@@ -7,9 +7,8 @@
 
 """Record communities schema."""
 
-
 from invenio_requests.customizations import CommentEventType
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, ValidationError, fields, validate, validates
 
 
 class CommunitySchema(Schema):
@@ -26,7 +25,6 @@ class RecordCommunitiesSchema(Schema):
         fields.Nested(CommunitySchema), validate=validate.Length(min=1), required=True
     )
 
-    """
     @validates("communities")
     def validate_communities(self, value):
         max_number = self.context["max_number"]
@@ -50,4 +48,3 @@ class RecordCommunitiesSchema(Schema):
             raise ValidationError(
                 "Duplicated communities {com_ids}.".format(com_ids=duplicated)
             )
-    """

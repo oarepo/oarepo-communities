@@ -39,13 +39,8 @@ class WorkflowField(MappingSystemFieldMixin, SystemField):
             comm_id = str(record.communities.default.id)
         except AttributeError:
             return
-        try:
-            res = (
-                db.session.query(self._record_workflow_model.workflow)
-                .filter(self._record_workflow_model.record_id == record.id)
-                .one()
-            )
-        except NoResultFound:
+        workflow = self._get_workflow(record)
+        if not workflow:
             try:
                 res = (
                     db.session.query(CommunityWorkflowModel.workflow)

@@ -9,14 +9,13 @@ from ..proxies import current_oarepo_communities
 from .identity import request_active
 
 
-def needs_from_workflow(
-    workflow, status, request_type, access_key, record=None, community_id=None, **kwargs
+
+def _needs_from_workflow(
+    access_path, access_key, record=None, community_id=None, **kwargs
 ):
     try:
-        generators = current_oarepo_communities.record_workflow[workflow][status][
-            "requests"
-        ][request_type]
-        generators = dict_lookup(generators, access_key)
+        path = dict_lookup(current_oarepo_communities.record_workflow, access_path)
+        generators = dict_lookup(path, access_key)
     except KeyError:
         return []
     needs = [
@@ -28,6 +27,12 @@ def needs_from_workflow(
         for g in generators
     ]
     return set(chain.from_iterable(needs))
+
+def needs_from_workflow(
+    workflow, status, request_type, access_key, topic=None, community_id=None, **kwargs
+):
+    access_path = f"{workflow}.{status}.requests.{request_type}"
+    return _needs_from_workflow(access_path, access_key, topic, community_id, **kwargs)
 
 
 class WorkflowRequestPermission(Generator):
@@ -48,39 +53,25 @@ class WorkflowRequestPermission(Generator):
                 return locals["request_type"], locals["topic"]
         return None
 
-    def needs(self, record=None, request_type=None, **kwargs):
+    def needs(self, topic=None, request_type=None, **kwargs):
         if (
-            not record or not request_type
+            not topic or not request_type
         ):  # invenio requests service does not have a way to input these
             if "request" in kwargs:
                 request = kwargs["request"]
-                record = request.topic.resolve()
+                topic = request.topic.resolve()
                 request_type = request.type
             else:
                 ret = self._get_topic_and_request_type_from_stack()
                 if not ret:
                     return []
                 request_type = ret[0]
-                record = ret[1]
-        workflow = getattr(record.parent, "workflow", None)
-        status = record.status
-        try:
-            generators = current_oarepo_communities.record_workflow[workflow][status][
-                "requests"
-            ][request_type.type_id]
-            generators = dict_lookup(generators, self.access_key)
-        except KeyError:
-            return []
-        needs = [
-            g.needs(
-                record=record,
-                community_id=str(record.parent.communities.default.id),
-                **kwargs,
-            )
-            for g in generators
-        ]
-        return set(chain.from_iterable(needs))
+                topic = ret[1]
+        workflow = getattr(topic.parent, "workflow", None)
+        status = topic.status
 
+        access_path = f"{workflow}.{status}.requests.{request_type.type_id}"
+        return _needs_from_workflow(access_path, self.access_key, topic, str(topic.parent.communities.default.id), **kwargs)
 
 class WorkflowPermission(Generator):
     def __init__(self, access_key):
@@ -95,22 +86,10 @@ class WorkflowPermission(Generator):
             return []
         workflow = getattr(record.parent, "workflow", None)
         status = self._get_status(record)
-        try:
-            generators = current_oarepo_communities.record_workflow[workflow][status][
-                "roles"
-            ]
-            generators = dict_lookup(generators, self.access_key)
-        except KeyError:
-            return []
-        needs = [
-            g.needs(
-                record=record,
-                community_id=str(record.parent.communities.default.id),
-                **kwargs,
-            )
-            for g in generators
-        ]
-        return set(chain.from_iterable(needs))
+
+        access_path = f"{workflow}.{status}.roles"
+        return _needs_from_workflow(access_path, self.access_key, record, str(record.parent.communities.default.id),
+                                    **kwargs)
 
 
 class RequestActive(Generator):

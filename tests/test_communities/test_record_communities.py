@@ -115,3 +115,9 @@ def test_search(
     )
     assert len(published_record_search.json["hits"]["hits"]) == 1
     assert published_record_search.json["hits"]["hits"][0]["id"] == community_1.id
+
+    published_record_ui_serialization = owner_client.get(
+        f"/thesis/{published_record['id']}/communities",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+    print()
