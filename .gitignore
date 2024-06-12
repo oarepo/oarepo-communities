@@ -90,3 +90,6 @@ dist/
 
 .model_venv/
 .vscode
+
+.venv-builder
+.venv-tests
