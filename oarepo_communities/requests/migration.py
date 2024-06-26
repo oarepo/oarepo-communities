@@ -2,7 +2,8 @@ from oarepo_requests.utils import get_matching_service_for_record
 
 from ..utils.utils import get_associated_service
 from . import submission
-from .submission import CommunitySubmissionRequestType
+from .submission import AbstractCommunitySubmissionRequestType
+from oarepo_runtime.i18n import lazy_gettext as _
 
 
 class AcceptAction(submission.AcceptAction):
@@ -21,13 +22,13 @@ class AcceptAction(submission.AcceptAction):
         super().execute(identity, uow)
 
 
-class CommunityMigrationRequestType(CommunitySubmissionRequestType):
+class CommunityMigrationRequestType(AbstractCommunitySubmissionRequestType):
     """Review request for submitting a record to a community."""
 
-    type_id = "community_migration"
-    name = "Community-migration"
+    type_id = "community-migration"
+    name = _("Community-migration")
 
     available_actions = {
-        **CommunitySubmissionRequestType.available_actions,
+        **AbstractCommunitySubmissionRequestType.available_actions,
         "accept": AcceptAction,
     }

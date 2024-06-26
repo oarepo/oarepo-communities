@@ -42,7 +42,7 @@ class OARepoCommunities(object):
 
     @property
     def record_workflow(self):
-        return self.app.config["RECORD_WORKFLOW"]
+        return self.app.config["RECORD_WORKFLOWS"]
 
     @property
     def community_records_services(self):

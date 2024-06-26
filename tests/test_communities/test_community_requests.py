@@ -132,18 +132,18 @@ def test_community_publish(
         community_with_default_workflow.id,
         "thesis_draft",
         record_id,
-        "thesis_publish_draft",
+        "publish-draft",
         request_data_factory,
     )
     _accept_request(
         reader_client,
-        type="thesis_publish_draft",
+        type="publish-draft",
         record_id=record_id,
         is_draft=True,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_publish_draft", record_id=record_id, is_draft=True
+        owner_client, type="publish-draft", record_id=record_id, is_draft=True
     )  # owner can
 
     resp_draft = owner_client.get(f"/thesis/{record_id}/draft")
@@ -179,17 +179,17 @@ def test_community_delete(
         community_with_default_workflow.id,
         "thesis",
         record_id,
-        "thesis_delete_record",
+        "delete-published-record",
         request_data_factory,
     )
     _accept_request(
         reader_client,
-        type="thesis_delete_record",
+        type="delete-published-record",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_delete_record", record_id=record_id
+        owner_client, type="delete-published-record", record_id=record_id
     )  # owner can
 
     resp_record = owner_client.get(f"/thesis/{record_id}")
@@ -229,18 +229,18 @@ def test_community_migration(
         community_2.id,
         "thesis",
         record_id,
-        "thesis_community_migration",
+        "community-migration",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
-        type="thesis_community_migration",
+        type="community-migration",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_community_migration", record_id=record_id
+        owner_client, type="community-migration", record_id=record_id
     )  # owner can
 
     record_after = owner_client.get(f"/thesis/{record_id}")
@@ -287,7 +287,7 @@ def test_community_submission_secondary(
             community_1.id,
             "thesis",
             record_id,
-            "thesis_secondary_community_submission",
+            "secondary-community-submission",
             request_data_factory,
             payload={"community": str(community_1.id)},
         )
@@ -297,18 +297,18 @@ def test_community_submission_secondary(
         community_2.id,
         "thesis",
         record_id,
-        "thesis_secondary_community_submission",
+        "secondary-community-submission",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
-        type="thesis_secondary_community_submission",
+        type="secondary-community-submission",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_secondary_community_submission", record_id=record_id
+        owner_client, type="secondary-community-submission", record_id=record_id
     )  # owner can
     record_after = owner_client.get(f"/thesis/{record_id}")
 
@@ -349,13 +349,13 @@ def test_remove_secondary(
         community_2.id,
         "thesis",
         record_id,
-        "thesis_secondary_community_submission",
+        "secondary-community-submission",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
 
     accept_owner = _accept_request(
-        owner_client, type="thesis_secondary_community_submission", record_id=record_id
+        owner_client, type="secondary-community-submission", record_id=record_id
     )
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -366,7 +366,7 @@ def test_remove_secondary(
             community_1.id,
             "thesis",
             record_id,
-            "thesis_remove_secondary_community",
+            "remove-secondary-community",
             request_data_factory,
             payload={"community": str(community_1.id)},
         )
@@ -376,18 +376,18 @@ def test_remove_secondary(
         community_2.id,
         "thesis",
         record_id,
-        "thesis_remove_secondary_community",
+        "remove-secondary-community",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
-        type="thesis_remove_secondary_community",
+        type="remove-secondary-community",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_remove_secondary_community", record_id=record_id
+        owner_client, type="remove-secondary-community", record_id=record_id
     )  # owner can
 
     record_after = owner_client.get(f"/thesis/{record_id}")
@@ -403,7 +403,7 @@ def test_remove_secondary(
             community_2.id,
             "thesis",
             record_id,
-            "thesis_remove_secondary_community",
+            "remove-secondary-community",
             request_data_factory,
             payload={"community": str(community_2.id)},
         )
@@ -432,7 +432,7 @@ def test_ui_serialization(
         community_with_default_workflow.id,
         "thesis_draft",
         record_id,
-        "thesis_publish_draft",
+        "publish-draft",
         request_data_factory,
     )
 

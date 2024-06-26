@@ -6,7 +6,6 @@ from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
 
 from ..proxies import current_oarepo_communities
-from .identity import request_active
 
 
 
@@ -70,8 +69,9 @@ class WorkflowRequestPermission(Generator):
         workflow = getattr(topic.parent, "workflow", None)
         status = topic.status
 
-        access_path = f"{workflow}.{status}.requests.{request_type.type_id}"
-        return _needs_from_workflow(access_path, self.access_key, topic, str(topic.parent.communities.default.id), **kwargs)
+        request_type_id = request_type.type_id if not isinstance(request_type, str) else request_type
+        access_path = f"{workflow}.{status}.requests.{request_type_id}"
+        return _needs_from_workflow(access_path, self.access_key, community_id=str(topic.parent.communities.default.id), **kwargs)
 
 class WorkflowPermission(Generator):
     def __init__(self, access_key):
@@ -90,18 +90,3 @@ class WorkflowPermission(Generator):
         access_path = f"{workflow}.{status}.roles"
         return _needs_from_workflow(access_path, self.access_key, record, str(record.parent.communities.default.id),
                                     **kwargs)
-
-
-class RequestActive(Generator):
-    """Allows system_process role."""
-
-    def needs(self, **kwargs):
-        """Enabling Needs."""
-        return [request_active]
-
-    def query_filter(self, identity=None, **kwargs):
-        """Filters for current identity as system process."""
-        if request_active in identity.provides:
-            return dsl.Q("match_all")
-        else:
-            return []

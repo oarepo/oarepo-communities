@@ -1,10 +1,15 @@
-from oarepo_communities.requests.submission import CommunitySubmissionRequestType
+from oarepo_requests.types import ModelRefTypes
+
+from oarepo_communities.requests.submission import AbstractCommunitySubmissionRequestType
+from oarepo_runtime.i18n import lazy_gettext as _
 
 
-class SecondaryCommunitySubmissionRequestType(CommunitySubmissionRequestType):
+class SecondaryCommunitySubmissionRequestType(AbstractCommunitySubmissionRequestType):
     """Review request for submitting a record to a community."""
 
-    type_id = "secondary_community_submission"
-    name = "Secondary_community_submission"
+    type_id = "secondary-community-submission"
+    name = _("Secondary community submission")
+
+    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
 
     set_as_default = False

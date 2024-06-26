@@ -17,11 +17,12 @@ from invenio_communities.generators import (
 )
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_permissions.generators import SystemProcess
+from oarepo_requests.permissions.generators import RequestActive
+
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft
 
 from oarepo_communities.permissions.generators import (
-    RequestActive,
     WorkflowRequestPermission,
 )
 from oarepo_communities.records.models import CommunityWorkflowModel
@@ -148,39 +149,36 @@ def app_config(app_config):
         }
     ]
 
-    def default_receiver(*args, **kwargs):
-        return args[0]
-
-    # generalize this for all receiver types once?
-    def receiver_publish(*args, **kwargs):
-        topic = args[2]
+    def receiver_community(*args, **kwargs):
+        topic = kwargs["topic"]
         return {"community": str(topic.parent.communities.default.id)}
 
-    def receiver_delete(*args, **kwargs):
-        topic = args[2]
-        return {"community": str(topic.parent.communities.default.id)}
-
-    def receiver_adressed(*args, **kwargs):
-        data = args[4]
+    def receiver_adressed_community(*args, **kwargs):
+        data = kwargs["data"]
         target_community = data["payload"]["community"]
         return {"community": target_community}
 
-    app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = {
-        "thesis_community_migration": receiver_adressed,
-        "thesis_delete_record": receiver_delete,
-        "thesis_publish_draft": receiver_publish,
-        "thesis_remove_secondary_community": receiver_adressed,
-        "thesis_secondary_community_submission": receiver_adressed,
-    }
+    def default_receiver(*args, request_type=None, **kwargs):
+        dct = {
+            "community-migration": receiver_adressed_community,
+            "delete-record": receiver_community,
+            "publish-draft": receiver_community,
+            "remove-secondary-community": receiver_adressed_community,
+            "secondary-community-submission": receiver_adressed_community,
+        }
+        return dct[request_type](*args, **kwargs)
 
-    publish_states = {"pending": "publish_pending", "accept": "published"}
+    app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = default_receiver
+
+
+    publish_states = {"pending": "publishing", "accept": "published"}
     create = {
         "states": {},
         "creators": [CommunityMembers()],
         "receivers": [CommunityCurators()],
     }
 
-    app_config["RECORD_WORKFLOW"] = {
+    app_config["RECORD_WORKFLOWS"] = {
         "default": {
             "draft": {
                 "roles": {
@@ -188,34 +186,34 @@ def app_config(app_config):
                     "editors": [CommunityMembers()],
                 },
                 "requests": {
-                    "thesis_publish_draft": {
+                    "publish-draft": {
                         "states": publish_states,
                         "creators": [CommunityMembers()],
                         "receivers": [CommunityCurators()],
                     },
-                    "thesis_secondary_community_submission": create,
-                    "thesis_remove_secondary_community": create,
-                    "thesis_community_migration": create,
-                    "thesis_edit_record": create,
-                    "thesis_delete_record": create,
+                    "secondary-community-submission": create,
+                    "remove-secondary-community": create,
+                    "community-migration": create,
+                    "edit-published-record": create,
+                    "delete-published-record": create,
                 },
             },
-            "publish_pending": {
+            "publishing": {
                 "roles": {
                     "readers": [CommunityMembers()],
                     "editors": [CommunityMembers()],
                 },
                 "requests": {
-                    "thesis_publish_draft": {
+                    "publish-draft": {
                         "states": publish_states,
                         "creators": [],
                         "receivers": [CommunityCurators()],
                     },
-                    "thesis_secondary_community_submission": create,
-                    "thesis_remove_secondary_community": create,
-                    "thesis_community_migration": create,
-                    "thesis_edit_record": create,
-                    "thesis_delete_record": create,
+                    "secondary-community-submission": create,
+                    "remove-secondary-community": create,
+                    "community-migration": create,
+                    "edit-published-record": create,
+                    "delete-published-record": create,
                 },
             },
             "published": {
@@ -224,11 +222,11 @@ def app_config(app_config):
                     "editors": [CommunityMembers()],
                 },
                 "requests": {
-                    "thesis_secondary_community_submission": create,
-                    "thesis_remove_secondary_community": create,
-                    "thesis_community_migration": create,
-                    "thesis_edit_record": create,
-                    "thesis_delete_record": create,
+                    "secondary-community-submission": create,
+                    "remove-secondary-community": create,
+                    "community-migration": create,
+                    "edit-published-record": create,
+                    "delete-published-record": create,
                 },
             },
         },
@@ -263,6 +261,8 @@ def app_config(app_config):
             },
         },
     }
+
+    app_config["REQUESTS_ALLOWED_RECEIVERS"] = ["community"]
 
     return app_config
 

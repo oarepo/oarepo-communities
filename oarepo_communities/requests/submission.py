@@ -1,5 +1,6 @@
 from flask_babelex import lazy_gettext as _
 from invenio_requests.customizations import actions
+from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_requests.utils import get_matching_service_for_record
 
@@ -28,20 +29,11 @@ class AcceptAction(actions.AcceptAction):
 #
 
 
-class CommunitySubmissionRequestType(OARepoRequestType):  # rename abstract
-    """Review request for submitting a record to a community."""
-
-    type_id = "community_submission"
-    name = _("Community submission")
-
-    block_publish = True
-    set_as_default = True
+class AbstractCommunitySubmissionRequestType(OARepoRequestType):  # rename abstract
 
     creator_can_be_none = False
     topic_can_be_none = False
-    allowed_creator_ref_types = ["user"]
-    allowed_receiver_ref_types = ["community"]
-    allowed_topic_ref_types = ["record"]
+    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
 
     available_actions = {
         **OARepoRequestType.available_actions,

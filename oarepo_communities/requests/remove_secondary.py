@@ -1,9 +1,11 @@
 from invenio_requests.customizations import actions
+from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_requests.utils import get_matching_service_for_record
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
 from ..utils.utils import get_associated_service
+from oarepo_runtime.i18n import lazy_gettext as _
 
 
 class AcceptAction(actions.AcceptAction):
@@ -26,16 +28,12 @@ class AcceptAction(actions.AcceptAction):
 class RemoveSecondaryRequestType(OARepoRequestType):
     """Review request for submitting a record to a community."""
 
-    type_id = "remove_secondary_community"
-
-    block_publish = True
-    set_as_default = True
+    type_id = "remove-secondary-community"
+    name = _("Remove secondary community")
 
     creator_can_be_none = False
     topic_can_be_none = False
-    allowed_creator_ref_types = ["user"]
-    allowed_receiver_ref_types = ["community"]
-    allowed_topic_ref_types = ["record"]
+    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
 
     available_actions = {
         **OARepoRequestType.available_actions,
