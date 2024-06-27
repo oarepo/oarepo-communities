@@ -1,4 +1,3 @@
-from flask_babelex import lazy_gettext as _
 from invenio_requests.customizations import actions
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType

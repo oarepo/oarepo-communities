@@ -233,4 +233,4 @@ def test_create_published(
     from thesis.proxies import current_published_service
 
     record = current_published_service.create(system_identity, {})
-    assert record._record.status == "published"
+    assert record._record.state == "published"

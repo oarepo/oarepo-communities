@@ -2,10 +2,10 @@ from invenio_requests.customizations import actions
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_requests.utils import get_matching_service_for_record
+from oarepo_runtime.i18n import lazy_gettext as _
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
 from ..utils.utils import get_associated_service
-from oarepo_runtime.i18n import lazy_gettext as _
 
 
 class AcceptAction(actions.AcceptAction):

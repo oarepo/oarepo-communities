@@ -3,12 +3,12 @@ from itertools import chain
 
 from invenio_records.dictutils import dict_lookup
 from invenio_records_permissions.generators import Generator
-from invenio_search.engine import dsl
+
+from invenio_communities.communities.records.api import Community
 
 from ..proxies import current_oarepo_communities
 
-
-
+"""
 def _needs_from_workflow(
     access_path, access_key, record=None, community_id=None, **kwargs
 ):
@@ -26,6 +26,7 @@ def _needs_from_workflow(
         for g in generators
     ]
     return set(chain.from_iterable(needs))
+
 
 def needs_from_workflow(
     workflow, status, request_type, access_key, topic=None, community_id=None, **kwargs
@@ -67,11 +68,19 @@ class WorkflowRequestPermission(Generator):
                 request_type = ret[0]
                 topic = ret[1]
         workflow = getattr(topic.parent, "workflow", None)
-        status = topic.status
+        status = topic.state
 
-        request_type_id = request_type.type_id if not isinstance(request_type, str) else request_type
+        request_type_id = (
+            request_type.type_id if not isinstance(request_type, str) else request_type
+        )
         access_path = f"{workflow}.{status}.requests.{request_type_id}"
-        return _needs_from_workflow(access_path, self.access_key, community_id=str(topic.parent.communities.default.id), **kwargs)
+        return _needs_from_workflow(
+            access_path,
+            self.access_key,
+            community_id=str(topic.parent.communities.default.id),
+            **kwargs,
+        )
+
 
 class WorkflowPermission(Generator):
     def __init__(self, access_key):
@@ -88,5 +97,54 @@ class WorkflowPermission(Generator):
         status = self._get_status(record)
 
         access_path = f"{workflow}.{status}.roles"
-        return _needs_from_workflow(access_path, self.access_key, record, str(record.parent.communities.default.id),
-                                    **kwargs)
+        return _needs_from_workflow(
+            access_path,
+            self.access_key,
+            record,
+            str(record.parent.communities.default.id),
+            **kwargs,
+        )
+"""
+from invenio_communities.generators import CommunityRoleNeed
+class CommunityRole(Generator):
+
+    def __init__(self, role):
+        self.role = role
+
+    def roles(self, **kwargs):
+        return [self.role]
+
+    def communities(self, identity):
+
+        raise NotImplementedError
+
+    def needs(self, record=None, community_id=None, **kwargs):
+
+        if community_id is None:
+            # todo this could be problem for invenio too, as they have the same
+            # community_id = record.id and what is record depends on context - see the need for unified meaning of
+            # permission kwargs
+            # we shouldn't have to write complicated checks like this
+            # this is hack that falls apart with different communityrecord class
+            if isinstance(record, Community):
+                community_id = record.id
+            else:
+                try:
+                    community_id = record.parent.communities.default.id
+                except AttributeError:
+                    return []
+
+        assert community_id, "No community id provided."
+        community_id = str(community_id)
+
+        roles = self.roles(**kwargs)
+        if roles:
+            needs = [CommunityRoleNeed(community_id, role) for role in roles]
+            return needs
+        return []
+
+    """
+    def query_filter(self, identity=None, **kwargs):
+        # Gives access to all community members.
+        return dsl.Q("terms", **{"_id": self.communities(identity)})
+    """

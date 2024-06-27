@@ -15,16 +15,16 @@ from invenio_communities.generators import (
     CommunityMembers,
     CommunityRoleNeed,
 )
+from invenio_i18n import lazy_gettext as _
 from invenio_pidstore.errors import PIDDoesNotExistError
-from invenio_records_permissions.generators import SystemProcess
+from invenio_records_permissions.generators import RecordOwners, SystemProcess
 from oarepo_requests.permissions.generators import RequestActive
+from oarepo_workflows.permissions.generators import IfInState
+from oarepo_workflows.permissions.policy import WorkflowPermissionPolicy
 
+from oarepo_communities.permissions.presets import CommunityDefaultWorkflowPermissions
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft
-
-from oarepo_communities.permissions.generators import (
-    WorkflowRequestPermission,
-)
 from oarepo_communities.records.models import CommunityWorkflowModel
 
 
@@ -82,6 +82,57 @@ def logged_client(client):
         return LoggedClient(client, user)
 
     return _logged_client
+
+
+def receiver_community(*args, **kwargs):
+    topic = kwargs["topic"]
+    return {"community": str(topic.parent.communities.default.id)}
+
+
+def receiver_adressed_community(*args, **kwargs):
+    data = kwargs["data"]
+    target_community = data["payload"]["community"]
+    return {"community": target_community}
+
+
+# --- workflows
+
+community_changers = {
+    "transitions": {},
+    "requesters": [CommunityMembers()],
+    "recipients": receiver_adressed_community,
+    "receivers": [CommunityCurators()],
+}
+# todo - recipients jako funkce prirazujici receivers vs. needs receiveru
+DEFAULT_WORKFLOW_REQUESTS = {
+    "publish-draft": {
+        "requesters": [IfInState("draft", [RecordOwners()])],
+        "recipients": receiver_community,
+        "receivers": [CommunityCurators()],
+        "transitions": {
+            "submit": "publishing",
+            "accept": "published",
+            "decline": "draft",
+        },
+    },
+    "delete-published-record": {
+        "requesters": [IfInState("published", [RecordOwners()])],
+        "recipients": receiver_community,
+        "receivers": [CommunityCurators()],
+        "transitions": {"submit": "deleting", "accept": "deleted"},
+    },
+    "secondary-community-submission": community_changers,
+    "remove-secondary-community": community_changers,
+    "community-migration": community_changers,
+}
+
+WORKFLOWS = {
+    "default": {
+        "label": _("Default workflow"),
+        "permissions": CommunityDefaultWorkflowPermissions,
+        "requests": DEFAULT_WORKFLOW_REQUESTS,
+    },
+}
 
 
 @pytest.fixture()
@@ -149,19 +200,10 @@ def app_config(app_config):
         }
     ]
 
-    def receiver_community(*args, **kwargs):
-        topic = kwargs["topic"]
-        return {"community": str(topic.parent.communities.default.id)}
-
-    def receiver_adressed_community(*args, **kwargs):
-        data = kwargs["data"]
-        target_community = data["payload"]["community"]
-        return {"community": target_community}
-
     def default_receiver(*args, request_type=None, **kwargs):
         dct = {
             "community-migration": receiver_adressed_community,
-            "delete-record": receiver_community,
+            "delete-published-record": receiver_community,
             "publish-draft": receiver_community,
             "remove-secondary-community": receiver_adressed_community,
             "secondary-community-submission": receiver_adressed_community,
@@ -170,7 +212,6 @@ def app_config(app_config):
 
     app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = default_receiver
 
-
     publish_states = {"pending": "publishing", "accept": "published"}
     create = {
         "states": {},
@@ -178,7 +219,10 @@ def app_config(app_config):
         "receivers": [CommunityCurators()],
     }
 
-    app_config["RECORD_WORKFLOWS"] = {
+    app_config["RECORD_WORKFLOWS"] = WORKFLOWS
+
+    """
+    {
         "default": {
             "draft": {
                 "roles": {
@@ -261,6 +305,7 @@ def app_config(app_config):
             },
         },
     }
+    """
 
     app_config["REQUESTS_ALLOWED_RECEIVERS"] = ["community"]
 
@@ -492,6 +537,7 @@ def requests_service_config():
     return RequestsServiceConfig
 
 
+"""
 @pytest.fixture()
 def scenario_permissions():
     from invenio_requests.services.permissions import PermissionPolicy
@@ -539,3 +585,4 @@ def patch_requests_permissions(
     scenario_permissions,
 ):
     setattr(requests_service_config, "permission_policy_cls", scenario_permissions)
+"""

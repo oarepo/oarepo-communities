@@ -16,7 +16,8 @@ from tests.test_communities.utils import (
 RECORD_COMMUNITIES_BASE_URL = ThesisRecordCommunitiesResourceConfig.url_prefix
 REPO_NAME = "thesis"
 
-
+# todo we should have unified framework for naming kwargs in permissions; it's chaos now
+# ie. we "record", "parent", "community", "community_id" should always represent the same entity, not record=community record etc.
 def link_api2testclient(api_link):
     base_string = "https://127.0.0.1:5000/api/"
     return api_link[len(base_string) - 1 :]
@@ -84,7 +85,7 @@ def _accept_request(
         )
     else:
         record_after_submit = receiver_client.get(f"/thesis/{record_id}?expand=true")
-    request_dict = find_request_by_type(record_after_submit.json["requests"], type)
+    request_dict = find_request_by_type(record_after_submit.json["expanded"]["requests"], type)
     if no_accept_link:
         assert "accept" not in request_dict["links"]["actions"]
         return None
@@ -118,7 +119,6 @@ def test_community_publish(
     community_with_default_workflow,
     request_data_factory,
     record_service,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
@@ -161,7 +161,6 @@ def test_community_delete(
     community_with_default_workflow,
     request_data_factory,
     record_service,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
@@ -208,7 +207,6 @@ def test_community_migration(
     request_data_factory,
     record_service,
     inviter,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -266,7 +264,6 @@ def test_community_submission_secondary(
     inviter,
     request_data_factory,
     record_service,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -329,7 +326,6 @@ def test_remove_secondary(
     inviter,
     request_data_factory,
     record_service,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -417,7 +413,6 @@ def test_ui_serialization(
     request_data_factory,
     record_service,
     ui_serialized_community,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)

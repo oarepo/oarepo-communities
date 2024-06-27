@@ -83,7 +83,7 @@ def test_scenarios(
     record4 = _create_record_in_community(reader_client, community_1.id)
 
     request_should_be_allowed = owner_client.post(
-        f"/thesis/{record1.json['id']}/draft/requests/thesis_publish_draft"
+        f"/thesis/{record1.json['id']}/draft/requests/publish-draft"
     )
     submit = owner_client.post(
         link_api2testclient(
@@ -110,11 +110,11 @@ def test_scenarios(
     set_community_workflow(str(community_1.id), "wawawa")
 
     request_should_still_work = owner_client.post(
-        f"/thesis/{record2.json['id']}/draft/requests/thesis_publish_draft"
+        f"/thesis/{record2.json['id']}/draft/requests/publish-draft"
     )
     record5 = _create_record_in_community(owner_client, community_1.id)
     request_should_be_forbidden = owner_client.post(
-        f"/thesis/{record5.json['id']}/draft/requests/thesis_publish_draft"
+        f"/thesis/{record5.json['id']}/draft/requests/publish-draft"
     )
     assert request_should_still_work.status_code == 201
     assert request_should_be_forbidden.status_code == 403

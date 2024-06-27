@@ -18,23 +18,9 @@ class OARepoCommunities(object):
     def init_app(self, app):
         """Flask application initialization."""
         self.app = app
-        self.init_config(app)
         self.init_services(app)
         self.init_resources(app)
         app.extensions["oarepo-communities"] = self
-
-    def init_config(self, app):
-        """Initialize configuration."""
-        from . import ext_config
-
-        if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
-            app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
-
-        for k in ext_config.OAREPO_PERMISSIONS_PRESETS:
-            if k not in app.config["OAREPO_PERMISSIONS_PRESETS"]:
-                app.config["OAREPO_PERMISSIONS_PRESETS"][k] = (
-                    ext_config.OAREPO_PERMISSIONS_PRESETS[k]
-                )
 
     @cached_property
     def urlprefix_serviceid_mapping(self):

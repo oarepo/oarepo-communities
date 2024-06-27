@@ -1,7 +1,9 @@
 from oarepo_requests.types import ModelRefTypes
-
-from oarepo_communities.requests.submission import AbstractCommunitySubmissionRequestType
 from oarepo_runtime.i18n import lazy_gettext as _
+
+from oarepo_communities.requests.submission import (
+    AbstractCommunitySubmissionRequestType,
+)
 
 
 class SecondaryCommunitySubmissionRequestType(AbstractCommunitySubmissionRequestType):
