@@ -19,7 +19,8 @@ def init_addons(state):
     resolvers = app.extensions["invenio-requests"].entity_resolvers_registry
     resolvers._registered_types["community"] = OARepoCommunityResolver()
 
-    # todo hack
+    # todo hack; doesn't seem to work
+    """
     permissions = type(
         "RequestsPermissionPolicy",
         (PermissionPolicy,),
@@ -30,6 +31,7 @@ def init_addons(state):
             ],
         ),
     )
-    app.extensions["invenio-requests"].requests_service.config.permission_policy_cls = (
-        permissions
-    )
+
+    setattr(app.extensions["invenio-requests"].requests_service.config, "permission_policy_cls", permissions)
+    print()
+    """

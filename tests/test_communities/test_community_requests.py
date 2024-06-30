@@ -119,6 +119,7 @@ def test_community_publish(
     community_with_default_workflow,
     request_data_factory,
     record_service,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
@@ -161,13 +162,14 @@ def test_community_delete(
     community_with_default_workflow,
     request_data_factory,
     record_service,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
     record_id = published_record_in_community(
-        owner_client,
+        reader_client,
         community_with_default_workflow.id,
         record_service,
         community_owner,
@@ -207,6 +209,7 @@ def test_community_migration(
     request_data_factory,
     record_service,
     inviter,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -218,9 +221,9 @@ def test_community_migration(
     )
 
     record_id = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
+        reader_client, community_1.id, record_service, community_owner
     )["id"]
-    record_before = owner_client.get(f"/thesis/{record_id}")
+    record_before = reader_client.get(f"/thesis/{record_id}")
 
     submit = _submit_request(
         reader_client,
@@ -264,6 +267,7 @@ def test_community_submission_secondary(
     inviter,
     request_data_factory,
     record_service,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -274,7 +278,7 @@ def test_community_submission_secondary(
         inviter,
     )
     record_id = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
+        reader_client, community_1.id, record_service, community_owner
     )["id"]
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -326,6 +330,7 @@ def test_remove_secondary(
     inviter,
     request_data_factory,
     record_service,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -337,7 +342,7 @@ def test_remove_secondary(
     )
 
     record_id = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
+        reader_client, community_1.id, record_service, community_owner
     )["id"]
 
     submit = _submit_request(
@@ -413,6 +418,7 @@ def test_ui_serialization(
     request_data_factory,
     record_service,
     ui_serialized_community,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)

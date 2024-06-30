@@ -10,22 +10,47 @@ from invenio_app.factory import create_api
 from invenio_communities import current_communities
 from invenio_communities.cli import create_communities_custom_field
 from invenio_communities.communities.records.api import Community
-from invenio_communities.generators import (
-    CommunityCurators,
-    CommunityMembers,
-    CommunityRoleNeed,
-)
 from invenio_i18n import lazy_gettext as _
 from invenio_pidstore.errors import PIDDoesNotExistError
-from invenio_records_permissions.generators import RecordOwners, SystemProcess
-from oarepo_requests.permissions.generators import RequestActive
+from invenio_records_permissions.generators import SystemProcess
+from oarepo_requests.permissions.generators import CreatorsFromWorkflow
 from oarepo_workflows.permissions.generators import IfInState
-from oarepo_workflows.permissions.policy import WorkflowPermissionPolicy
+from oarepo_runtime.services.generators import RecordOwners
+
 
 from oarepo_communities.permissions.presets import CommunityDefaultWorkflowPermissions
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft
 from oarepo_communities.records.models import CommunityWorkflowModel
+
+from oarepo_communities.permissions.generators import CommunityMembers, CommunityCurators
+from invenio_communities.generators import CommunityRoleNeed
+
+
+@pytest.fixture()
+def scenario_permissions():
+    from invenio_requests.services.permissions import PermissionPolicy
+
+    requests = type(
+        "RequestsPermissionPolicy",
+        (PermissionPolicy,),
+        dict(
+            can_create=[
+                SystemProcess(),
+                CreatorsFromWorkflow(),
+            ],
+
+        ),
+    )
+
+    return requests
+
+@pytest.fixture
+def patch_requests_permissions(
+    requests_service_config,
+    scenario_permissions,
+):
+    setattr(requests_service_config, "permission_policy_cls", scenario_permissions)
 
 
 @pytest.fixture(scope="function")
@@ -103,6 +128,13 @@ community_changers = {
     "recipients": receiver_adressed_community,
     "receivers": [CommunityCurators()],
 }
+
+no_community_changers = {
+    "transitions": {},
+    "requesters": [],
+    "recipients": receiver_adressed_community,
+    "receivers": [],
+}
 # todo - recipients jako funkce prirazujici receivers vs. needs receiveru
 DEFAULT_WORKFLOW_REQUESTS = {
     "publish-draft": {
@@ -126,11 +158,40 @@ DEFAULT_WORKFLOW_REQUESTS = {
     "community-migration": community_changers,
 }
 
+NO_WORKFLOW_REQUESTS = {
+    "publish-draft": {
+        "requesters": [],
+        "recipients": receiver_community,
+        "receivers": [],
+        "transitions": {
+            "submit": "publishing",
+            "accept": "published",
+            "decline": "draft",
+        },
+    },
+    "delete-published-record": {
+        "requesters": [],
+        "recipients": receiver_community,
+        "receivers": [],
+        "transitions": {"submit": "deleting", "accept": "deleted"},
+    },
+    "secondary-community-submission": community_changers,
+    "remove-secondary-community": community_changers,
+    "community-migration": community_changers,
+}
+
+
+
 WORKFLOWS = {
     "default": {
         "label": _("Default workflow"),
         "permissions": CommunityDefaultWorkflowPermissions,
         "requests": DEFAULT_WORKFLOW_REQUESTS,
+    },
+    "no": {
+        "label": _("Nope"),
+        "permissions": CommunityDefaultWorkflowPermissions,
+        "requests": NO_WORKFLOW_REQUESTS,
     },
 }
 
@@ -211,101 +272,8 @@ def app_config(app_config):
         return dct[request_type](*args, **kwargs)
 
     app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = default_receiver
-
-    publish_states = {"pending": "publishing", "accept": "published"}
-    create = {
-        "states": {},
-        "creators": [CommunityMembers()],
-        "receivers": [CommunityCurators()],
-    }
-
     app_config["RECORD_WORKFLOWS"] = WORKFLOWS
 
-    """
-    {
-        "default": {
-            "draft": {
-                "roles": {
-                    "readers": [CommunityMembers()],
-                    "editors": [CommunityMembers()],
-                },
-                "requests": {
-                    "publish-draft": {
-                        "states": publish_states,
-                        "creators": [CommunityMembers()],
-                        "receivers": [CommunityCurators()],
-                    },
-                    "secondary-community-submission": create,
-                    "remove-secondary-community": create,
-                    "community-migration": create,
-                    "edit-published-record": create,
-                    "delete-published-record": create,
-                },
-            },
-            "publishing": {
-                "roles": {
-                    "readers": [CommunityMembers()],
-                    "editors": [CommunityMembers()],
-                },
-                "requests": {
-                    "publish-draft": {
-                        "states": publish_states,
-                        "creators": [],
-                        "receivers": [CommunityCurators()],
-                    },
-                    "secondary-community-submission": create,
-                    "remove-secondary-community": create,
-                    "community-migration": create,
-                    "edit-published-record": create,
-                    "delete-published-record": create,
-                },
-            },
-            "published": {
-                "roles": {
-                    "readers": [CommunityMembers()],
-                    "editors": [CommunityMembers()],
-                },
-                "requests": {
-                    "secondary-community-submission": create,
-                    "remove-secondary-community": create,
-                    "community-migration": create,
-                    "edit-published-record": create,
-                    "delete-published-record": create,
-                },
-            },
-        },
-        "autopublish": {
-            "draft": {
-                "roles": {
-                    "readers": [CommunityMembers()],
-                    "editors": [CommunityMembers()],
-                },
-                "requests": {
-                    "thesis_publish_draft": create,
-                    "thesis_secondary_community_submission": create,
-                    "thesis_remove_secondary_community": create,
-                    "thesis_community_migration": create,
-                },
-            },
-            "publish_pending": {
-                "roles": {
-                    "readers": [CommunityMembers()],
-                    "editors": [CommunityMembers()],
-                },
-                "requests": {
-                    "thesis_publish_draft": {
-                        "states": {},
-                        "creators": [],
-                        "receivers": [CommunityCurators()],
-                    },
-                    "thesis_secondary_community_submission": create,
-                    "thesis_remove_secondary_community": create,
-                    "thesis_community_migration": create,
-                },
-            },
-        },
-    }
-    """
 
     app_config["REQUESTS_ALLOWED_RECEIVERS"] = ["community"]
 

@@ -1,5 +1,6 @@
 import pytest
 
+from oarepo_communities.records.models import CommunityWorkflowModel
 from tests.test_communities.utils import (
     _create_record_in_community,
     link_api2testclient,
@@ -55,16 +56,16 @@ def requests_service():
     return current_requests_service
 
 
-def test_scenarios(
+def test_scenario_change(
     init_cf,
     logged_client,
     community_owner,
     community_reader,
     community_with_workflow_factory,
-    patch_requests_permissions,
     inviter,
     set_community_workflow,
     service_config,
+    patch_requests_permissions,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
@@ -107,11 +108,19 @@ def test_scenarios(
     assert update_draft.status_code == 200
     assert update_draft.json["metadata"]["title"] == "should do"
 
-    set_community_workflow(str(community_1.id), "wawawa")
+    def check_community_workflow_change(community_id, workflow):
+        record = CommunityWorkflowModel.query.filter(
+            CommunityWorkflowModel.community_id == community_id
+        ).one()
+        assert record.workflow == workflow
 
+
+    set_community_workflow(str(community_1.id), "no")
+    check_community_workflow_change(str(community_1.id), "no")
     request_should_still_work = owner_client.post(
         f"/thesis/{record2.json['id']}/draft/requests/publish-draft"
     )
+    # todo add workflow to marshmallow
     record5 = _create_record_in_community(owner_client, community_1.id)
     request_should_be_forbidden = owner_client.post(
         f"/thesis/{record5.json['id']}/draft/requests/publish-draft"
