@@ -4,7 +4,7 @@ from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
-from .utils.utils import get_urlprefix_service_id_mapping
+from .utils import get_urlprefix_service_id_mapping
 
 
 class OARepoCommunities(object):

@@ -1,7 +1,7 @@
 from oarepo_requests.utils import get_matching_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
 
-from ..utils.utils import get_associated_service
+from ..utils import get_associated_service
 from . import submission
 from .submission import AbstractCommunitySubmissionRequestType
 

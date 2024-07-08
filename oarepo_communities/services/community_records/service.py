@@ -14,11 +14,11 @@ from invenio_records_resources.services.base.links import LinksTemplate
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
 
-from oarepo_communities.utils.utils import (
+from oarepo_communities.utils import (
     get_global_search_service,
     get_global_user_search_service,
     get_service_by_urlprefix,
-    get_service_from_schema_type,
+    get_service_from_schema_type, get_associated_service,
 )
 
 # from oarepo_runtime.datastreams.utils import get_service_from_schema_type
@@ -56,10 +56,10 @@ class CommunityRecordsService(RecordService):
         ret = get_global_search_service().global_search(
             identity, params, extra_filter=default_filter
         )
-        ret._links_tpl = LinksTemplate(
-            self.config.links_search_community_records,
-            context={"args": params, "id": community_id},
-        )
+        #ret._links_tpl = LinksTemplate(
+        #    self.config.links_search_community_records,
+        #    context={"args": params, "id": community_id},
+        #)
         return ret
 
     def search_model(
@@ -119,6 +119,7 @@ class CommunityRecordsService(RecordService):
         service = get_service_by_urlprefix(model_url)
         return service.search_drafts(identity, params, extra_filter=default_filter)
 
+    """
     @unit_of_work()
     def create_in_community(
         self, identity, community_id, data, model=None, uow=None, expand=False
@@ -136,3 +137,34 @@ class CommunityRecordsService(RecordService):
         return record_service.create(
             identity, data, uow=uow, expand=expand, community=community
         )
+    """
+
+
+    @unit_of_work()
+    def create_in_community(
+        self, identity, community_id, data, model=None, uow=None, expand=False
+    ):
+        # should the dumper put the entries thing into search? ref CommunitiesField#110, not in rdm; it is in new rdm, i had quite old version
+        # community_id may be the slug coming from resource
+        if model:
+            record_service = get_service_by_urlprefix(model)
+        else:
+            record_service = get_service_from_schema_type(data["$schema"])
+        if not record_service:
+            raise ValueError(f"No service found for requested model {model}.")
+        community = current_communities.service.record_cls.pid.resolve(community_id)
+
+        result_item = record_service.create(
+            identity, data, uow=uow, expand=expand, record=community
+        )
+        record_communities_service = get_associated_service(
+            record_service, "record_communities"
+        )
+
+        record_communities_service.include(
+            result_item._record,
+            community.id,
+            record_service=record_service,
+            uow=uow,
+        )
+        return result_item

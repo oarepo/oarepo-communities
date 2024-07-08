@@ -17,7 +17,7 @@ def init_addons(state):
     app = state.app
 
     resolvers = app.extensions["invenio-requests"].entity_resolvers_registry
-    resolvers._registered_types["community"] = OARepoCommunityResolver()
+    # resolvers._registered_types["community"] = OARepoCommunityResolver()
 
     # todo hack; doesn't seem to work
     """

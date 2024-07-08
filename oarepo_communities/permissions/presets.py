@@ -1,12 +1,9 @@
-from invenio_communities.generators import CommunityMembers
-from invenio_records_permissions import RecordPermissionPolicy
 from invenio_records_permissions.generators import AuthenticatedUser, SystemProcess, AnyUser
-from invenio_records_permissions.policies.base import BasePermissionPolicy
 from oarepo_requests.permissions.generators import RequestActive
 from oarepo_runtime.services.generators import RecordOwners
 from oarepo_workflows.permissions.generators import IfInState
 
-from oarepo_communities.permissions.generators import CommunityRole
+from oarepo_communities.permissions.generators import CommunityRole, CommunityMembers
 
 """
 class CommunityRequestsPermissionPolicy(BasePermissionPolicy):
@@ -27,9 +24,10 @@ class CommunityRequestsPermissionPolicy(BasePermissionPolicy):
     ]
 """
 
-from invenio_records_permissions import RecordPermissionPolicy
-from oarepo_workflows.permissions.policy import WorkflowPermissionPolicy
-class CommunityDefaultWorkflowPermissions(WorkflowPermissionPolicy):
+from oarepo_workflows.permissions.policy import DefaultWorkflowPermissionPolicy
+
+
+class CommunityDefaultWorkflowPermissions(DefaultWorkflowPermissionPolicy):
     can_create_in_community = [
         CommunityMembers(),
     ]

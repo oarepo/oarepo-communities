@@ -19,18 +19,20 @@ from oarepo_runtime.services.generators import RecordOwners
 
 
 from oarepo_communities.permissions.presets import CommunityDefaultWorkflowPermissions
+from oarepo_communities.utils import workflow_receiver_function
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft
 from oarepo_communities.records.models import CommunityWorkflowModel
 
-from oarepo_communities.permissions.generators import CommunityMembers, CommunityCurators
+from oarepo_communities.permissions.generators import CommunityMembers, CommunityCurators, CommunityInTopicReceiver, \
+    CommunityReceiver
 from invenio_communities.generators import CommunityRoleNeed
 
 
 @pytest.fixture()
 def scenario_permissions():
     from invenio_requests.services.permissions import PermissionPolicy
-
+    # RecipientsFromWorkflow
     requests = type(
         "RequestsPermissionPolicy",
         (PermissionPolicy,),
@@ -125,22 +127,19 @@ def receiver_adressed_community(*args, **kwargs):
 community_changers = {
     "transitions": {},
     "requesters": [CommunityMembers()],
-    "recipients": receiver_adressed_community,
-    "receivers": [CommunityCurators()],
+    "recipients": [CommunityReceiver("data.payload.community", "owner")], # access key can possibly be delegated to request type
 }
 
 no_community_changers = {
     "transitions": {},
     "requesters": [],
-    "recipients": receiver_adressed_community,
-    "receivers": [],
+    "recipients": [],
 }
 # todo - recipients jako funkce prirazujici receivers vs. needs receiveru
 DEFAULT_WORKFLOW_REQUESTS = {
     "publish-draft": {
         "requesters": [IfInState("draft", [RecordOwners()])],
-        "recipients": receiver_community,
-        "receivers": [CommunityCurators()],
+        "recipients": [CommunityReceiver("record.parent.communities.default.id", "owner")],
         "transitions": {
             "submit": "publishing",
             "accept": "published",
@@ -149,8 +148,7 @@ DEFAULT_WORKFLOW_REQUESTS = {
     },
     "delete-published-record": {
         "requesters": [IfInState("published", [RecordOwners()])],
-        "recipients": receiver_community,
-        "receivers": [CommunityCurators()],
+        "recipients": [CommunityReceiver("record.parent.communities.default.id", "owner")],
         "transitions": {"submit": "deleting", "accept": "deleted"},
     },
     "secondary-community-submission": community_changers,
@@ -161,8 +159,7 @@ DEFAULT_WORKFLOW_REQUESTS = {
 NO_WORKFLOW_REQUESTS = {
     "publish-draft": {
         "requesters": [],
-        "recipients": receiver_community,
-        "receivers": [],
+        "recipients": [CommunityReceiver("record.parent.communities.default.id", "owner")],
         "transitions": {
             "submit": "publishing",
             "accept": "published",
@@ -171,8 +168,7 @@ NO_WORKFLOW_REQUESTS = {
     },
     "delete-published-record": {
         "requesters": [],
-        "recipients": receiver_community,
-        "receivers": [],
+        "recipients": [CommunityReceiver("record.parent.communities.default.id", "owner")],
         "transitions": {"submit": "deleting", "accept": "deleted"},
     },
     "secondary-community-submission": community_changers,
@@ -261,21 +257,12 @@ def app_config(app_config):
         }
     ]
 
-    def default_receiver(*args, request_type=None, **kwargs):
-        dct = {
-            "community-migration": receiver_adressed_community,
-            "delete-published-record": receiver_community,
-            "publish-draft": receiver_community,
-            "remove-secondary-community": receiver_adressed_community,
-            "secondary-community-submission": receiver_adressed_community,
-        }
-        return dct[request_type](*args, **kwargs)
-
-    app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = default_receiver
+    app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = workflow_receiver_function
     app_config["RECORD_WORKFLOWS"] = WORKFLOWS
 
 
     app_config["REQUESTS_ALLOWED_RECEIVERS"] = ["community"]
+
 
     return app_config
 

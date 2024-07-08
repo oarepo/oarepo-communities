@@ -1,128 +1,93 @@
-import inspect
-from itertools import chain
 from invenio_search.engine import dsl
-from invenio_records.dictutils import dict_lookup
 from invenio_records_permissions.generators import Generator
-
-from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_roles
-
-from ..proxies import current_oarepo_communities
-
-"""
-def _needs_from_workflow(
-    access_path, access_key, record=None, community_id=None, **kwargs
-):
-    try:
-        path = dict_lookup(current_oarepo_communities.record_workflow, access_path)
-        generators = dict_lookup(path, access_key)
-    except KeyError:
-        return []
-    needs = [
-        g.needs(
-            record=record,
-            community_id=community_id,
-            **kwargs,
-        )
-        for g in generators
-    ]
-    return set(chain.from_iterable(needs))
-
-
-def needs_from_workflow(
-    workflow, status, request_type, access_key, topic=None, community_id=None, **kwargs
-):
-    access_path = f"{workflow}.{status}.requests.{request_type}"
-    return _needs_from_workflow(access_path, access_key, topic, community_id, **kwargs)
-
-
-class WorkflowRequestPermission(Generator):
-    def __init__(self, access_key):
-        super().__init__()
-        self.access_key = access_key
-
-    def _get_topic_and_request_type_from_stack(self):
-        stack = inspect.stack(0)
-        for frame_info in stack:
-            locals = frame_info.frame.f_locals
-            if (
-                "request_type" in locals
-                and locals["request_type"] is not None
-                and "topic" in locals
-                and locals["topic"] is not None
-            ):
-                return locals["request_type"], locals["topic"]
-        return None
-
-    def needs(self, topic=None, request_type=None, **kwargs):
-        if (
-            not topic or not request_type
-        ):  # invenio requests service does not have a way to input these
-            if "request" in kwargs:
-                request = kwargs["request"]
-                topic = request.topic.resolve()
-                request_type = request.type
-            else:
-                ret = self._get_topic_and_request_type_from_stack()
-                if not ret:
-                    return []
-                request_type = ret[0]
-                topic = ret[1]
-        workflow = getattr(topic.parent, "workflow", None)
-        status = topic.state
-
-        request_type_id = (
-            request_type.type_id if not isinstance(request_type, str) else request_type
-        )
-        access_path = f"{workflow}.{status}.requests.{request_type_id}"
-        return _needs_from_workflow(
-            access_path,
-            self.access_key,
-            community_id=str(topic.parent.communities.default.id),
-            **kwargs,
-        )
-
-
-class WorkflowPermission(Generator):
-    def __init__(self, access_key):
-        super().__init__()
-        self.access_key = access_key
-
-    def _get_status(self, record):
-        return "draft" if getattr(record, "is_draft") else "published"
-
-    def needs(self, record=None, **kwargs):
-        if not record:  # invenio requests service does not have a way to input these
-            return []
-        workflow = getattr(record.parent, "workflow", None)
-        status = self._get_status(record)
-
-        access_path = f"{workflow}.{status}.roles"
-        return _needs_from_workflow(
-            access_path,
-            self.access_key,
-            record,
-            str(record.parent.communities.default.id),
-            **kwargs,
-        )
-"""
 from invenio_communities.generators import CommunityRoleNeed
 
-def _get_community_id(record, community_id):
-    if community_id is None:
-        # todo this could be problem for invenio too, as they have the same
-        # community_id = record.id and what is record depends on context - see the need for unified meaning of
-        # permission kwargs
-        # we shouldn't have to write complicated checks like this
-        # this is hack that falls apart with different communityrecord class
-        if isinstance(record, Community):
-            community_id = record.id
-        else:
-            try:
-                community_id = record.parent.communities.default.id
-            except AttributeError:
-                return None
-    return community_id
+from invenio_requests.services.generators import Receiver
+from oarepo_requests.utils import get_from_requests_workflow, workflow_from_record
+from oarepo_workflows.permissions.generators import needs_from_generators, \
+    reference_receiver_from_generators
+
+from ..utils import community_id_from_record, mixed_dict_lookup
+
+
+# todo add workflow ids into reference
+
+class CommunityInTopicReceiver(Receiver):
+    def ref(self, **kwargs):
+        topic = kwargs["record"]
+        return {"community": str(topic.parent.communities.default.id)}
+
+class CommunityInPayloadReceiver(Receiver):
+    def ref(self, **kwargs):
+        data = kwargs["data"]
+        target_community = data["payload"]["community"]
+        return {"community": target_community}
+
+class CommunityReceiver(Receiver):
+    def __init__(self, access_key, role, type_key="community"):
+        """Initialize need entity generator."""
+        self._access_key = access_key
+        self._role = role
+        self._type_key = type_key
+        super().__init__()
+
+    def reference_receiver(self, **kwargs):
+        from invenio_communities.communities.records.api import Community
+
+        community_id = mixed_dict_lookup(kwargs, self._access_key)
+        community = Community.pid.resolve(community_id)
+        topic = kwargs["record"]
+        workflow_id = workflow_from_record(topic)
+        community.workflow_id = workflow_id
+
+        from invenio_requests.proxies import current_requests
+        resolver_registry = current_requests.entity_resolvers_registry
+        resolver = resolver_registry._registered_types["community"]
+        ref = resolver._reference_entity(community)
+        return ref
+
+    def needs(self, community_id=None, **kwargs):
+        return [CommunityRoleNeed(community_id, self._role)]
+
+
+"""
+class CommunityReceiver(Receiver):
+
+    def ref(self, **kwargs):
+        access_key = kwargs["request_type"] # maybe??; if we already have predefined payloads, then it might make sense?
+        target_community = dict_lookup(kwargs, access_key)
+        return {"community": target_community}
+"""
+
+class RecipientsFromWorkflow(Generator):
+    def _get_workflow_id(self, request_type, *args, **kwargs):
+        # todo move into outside function
+        if "record" in kwargs:
+            return kwargs["record"].parent["workflow"]
+        return "default"
+    def needs(self, request_type, **kwargs):
+        # todo load from community
+        workflow_id = self._get_workflow_id(request_type, **kwargs)
+        try:
+            recipients_generators = get_from_requests_workflow(workflow_id, request_type.type_id, "recipients")
+        except KeyError:
+            return []
+        needs = needs_from_generators(recipients_generators, request_type=request_type, **kwargs)
+        return needs
+
+    """
+    def ref(self, request_type=None, **kwargs):
+        workflow_id = self._get_workflow_id(request_type, **kwargs)
+        try:
+            recipients_generators = get_from_requests_workflow(workflow_id, request_type.type_id, "recipients")
+        except KeyError:
+            return None
+        return reference_receiver_from_generators(recipients_generators, request_type=request_type, **kwargs)
+    """
+    # todo query_filter?
+
+
 class CommunityRole(Generator):
 
     def __init__(self, role):
@@ -136,8 +101,8 @@ class CommunityRole(Generator):
         raise NotImplementedError
 
     def needs(self, record=None, community_id=None, **kwargs):
-
-        community_id = _get_community_id(record, community_id)
+        if not community_id:
+            community_id = community_id_from_record(record)
         if not community_id:
             print("No community id provided.")
             return []
@@ -170,12 +135,12 @@ class CommunityRoles(Generator):
 
     def needs(self, record=None, community_id=None, **kwargs):
         """Enabling Needs."""
-        community_id = _get_community_id(record, community_id)
+        if not community_id:
+            community_id = community_id_from_record(record)
         if not community_id:
             print("No community id provided.")
             return []
 
-        assert community_id, "No community id provided."
         community_id = str(community_id)
 
         roles = self.roles(**kwargs)

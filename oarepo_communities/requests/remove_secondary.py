@@ -5,7 +5,8 @@ from oarepo_requests.utils import get_matching_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
-from ..utils.utils import get_associated_service
+from ..resolvers.communities import parse_community_ref_dict_id
+from ..utils import get_associated_service
 
 
 class AcceptAction(actions.AcceptAction):
@@ -42,7 +43,7 @@ class RemoveSecondaryRequestType(OARepoRequestType):
 
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
-        receiver_community_id = list(receiver.values())[0]
+        receiver_community_id = parse_community_ref_dict_id(list(receiver.values())[0])
         not_included = receiver_community_id not in topic.parent.communities
         if not_included:
             raise CommunityNotIncludedException

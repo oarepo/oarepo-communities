@@ -18,14 +18,9 @@ def test_disabled_endpoints(
 ):
 
     owner_client = logged_client(community_owner)
-
     # create should work only through community
-    # todo error handling
-    try:
-        create = owner_client.post("/thesis/", json={})
-    except TypeError:
-        pass
-    # assert create.status_code == 403
+    create = owner_client.post("/thesis/", json={})
+    assert create.status_code == 403
 
     community_1 = community_with_workflow_factory("comm1", community_owner)
     draft = owner_client.post(

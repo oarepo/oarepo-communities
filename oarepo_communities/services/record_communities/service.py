@@ -13,7 +13,7 @@ from invenio_records_resources.services.uow import (
 from invenio_search.engine import dsl
 
 from oarepo_communities.services.errors import RecordCommunityMissing
-from oarepo_communities.utils.utils import slug2id
+from oarepo_communities.utils import slug2id
 from oarepo_workflows.proxies import current_oarepo_workflows
 from invenio_access.permissions import system_identity
 
