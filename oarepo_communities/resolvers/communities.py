@@ -1,10 +1,6 @@
 from invenio_communities.communities.records.api import Community
-from invenio_db import db
-from oarepo import __version__ as oarepo_version
-from invenio_records.dictutils import dict_lookup
-from oarepo_workflows.permissions.generators import needs_from_generators
-from oarepo_workflows.proxies import current_oarepo_workflows
-from oarepo_communities.records.models import CommunityWorkflowModel
+from sqlalchemy.exc import StatementError
+from sqlalchemy.orm.exc import NoResultFound
 
 from invenio_records_resources.references.entity_resolvers import (
     RecordPKProxy,
@@ -19,34 +15,50 @@ from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
 from invenio_communities.communities.services.config import CommunityServiceConfig
 
 
-def parse_community_ref_dict_id(ref_dict):
-    return ref_dict.split()[1]
+def parse_community_ref_dict_community_id(ref_dict):
+    return ref_dict.split(":")[0].strip()
+
+def parse_community_ref_dict_role(ref_dict):
+    return ref_dict.split(":")[1].strip()
 
 
-class CommunityRole:
+class CommunityRoleObj:
+    community_cls = Community
 
     def __init__(self, community, role):
         self.community = community
         self.role = role
 
+    @classmethod
+    def get_record(cls, id_):
+        return cls.community_cls.get_record(id_)
+
 
 class CommunityRolePKProxy(RecordPKProxy):
     # todo - list of roles perhaps?
-    def _parse_ref_dict_community_role(self):
+    def _resolve(self):
+        """Resolve the Record from the proxy's reference dict."""
+        id_ = self._parse_ref_dict_community_id()
+        try:
+            return self.record_cls.get_record(id_)
+        except StatementError as exc:
+            raise NoResultFound() from exc
+
+    def _parse_ref_dict_community_id(self):
         """Parse the ID from the reference dict."""
-        val = self._parse_ref_dict()[1]
-        return parse_community_ref_dict_id(val)
+        val = self._parse_ref_dict_id()
+        return parse_community_ref_dict_community_id(val)
 
     def _parse_ref_dict_role(self):
         """Parse the ID from the reference dict."""
-        val = self._parse_ref_dict()[1]
-        return val.split()[0]
+        val = self._parse_ref_dict_id()
+        return parse_community_ref_dict_role(val)
 
     def get_needs(self, ctx=None):
         """Return community member need."""
-        comid = str(self._parse_ref_dict_id())
+        comid = self._parse_ref_dict_community_id()
         role = self._parse_ref_dict_role()
-        return CommunityRoleNeed(comid, role)
+        return [CommunityRoleNeed(comid, role)]
 
 
 class CommunityRoleResolver(RecordResolver):
@@ -62,7 +74,7 @@ class CommunityRoleResolver(RecordResolver):
     def __init__(self):
         """Initialize the default record resolver."""
         super().__init__(
-            CommunityRole,
+            CommunityRoleObj,
             CommunityServiceConfig.service_id,  # todo
             type_key=self.type_id,
             proxy_cls=CommunityRolePKProxy,

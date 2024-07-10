@@ -4,7 +4,7 @@ from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_requests.utils import get_matching_service_for_record
 
 from ..errors import CommunityAlreadyIncludedException
-from ..resolvers.communities import parse_community_ref_dict_id
+from ..resolvers.communities import parse_community_ref_dict_community_id
 from ..utils import get_associated_service, community_in_payload_entity_ref
 
 
@@ -32,8 +32,6 @@ class AbstractCommunitySubmissionRequestType(OARepoRequestType):  # rename abstr
     # todo default receiver func by mela byt konfigurovatelná
 
 
-    default_receiver_func = community_in_payload_entity_ref
-
     @staticmethod
     def entity_ref(cls, **kwargs):
         return cls.default_receiver_func(**kwargs)
@@ -49,7 +47,7 @@ class AbstractCommunitySubmissionRequestType(OARepoRequestType):  # rename abstr
 
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
-        receiver_community_id = parse_community_ref_dict_id(list(receiver.values())[0])
+        receiver_community_id = parse_community_ref_dict_community_id(list(receiver.values())[0])
         already_included = receiver_community_id in topic.parent.communities.ids
         if already_included:
             raise CommunityAlreadyIncludedException

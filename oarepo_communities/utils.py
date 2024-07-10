@@ -68,11 +68,7 @@ def get_urlprefix_service_id_mapping():
 
 
 def community_id_from_record(record):
-        # todo this could be problem for invenio too, as they have the same
-        # community_id = record.id and what is record depends on context - see the need for unified meaning of
-        # permission kwargs
-        # we shouldn't have to write complicated checks like this
-        # this is hack that falls apart with different communityrecord class
+
     if isinstance(record, Community):
         community_id = record.id
     else:
@@ -82,27 +78,6 @@ def community_id_from_record(record):
         except AttributeError:
             return None
     return community_id
-
-def workflow_receiver_function(record=None, request_type=None, **kwargs):
-    workflow_id = workflow_from_record(record)
-    try:
-        recipients_generators = get_from_requests_workflow(workflow_id, request_type.type_id, "recipients")
-    except KeyError:
-        return None
-    return reference_receiver_from_generators(recipients_generators, record=record, request_type=request_type, **kwargs)
-
-def parse_community_ref_value(value):
-    return value.split()
-
-
-def community_in_payload_entity_ref(**kwargs):
-    data = kwargs["data"]
-    target_community = data["payload"]["community"]
-    return {"community": target_community}
-
-def community_in_topic_entity_ref(**kwargs):
-    topic = kwargs["topic"]
-    return {"community": str(topic.parent.communities.default.id)}
 
 
 from invenio_records.dictutils import parse_lookup_key

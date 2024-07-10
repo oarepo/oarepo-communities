@@ -43,7 +43,6 @@ class CommunityDefaultWorkflowPermissions(DefaultWorkflowPermissionPolicy):
     ]
 
     can_update = [
-        IfInState("draft", [RecordOwners()]),
         IfInState("publishing", [RecordOwners()]),
         IfInState("published", [CommunityRole("owner")]),
     ]
@@ -51,7 +50,7 @@ class CommunityDefaultWorkflowPermissions(DefaultWorkflowPermissionPolicy):
     can_delete = [
         IfInState("draft", [RecordOwners()]),
         IfInState("publishing", [RecordOwners()]),
-        IfInState("published", [RequestActive()]),
+        IfInState("deleting", [RequestActive()]),
     ]
 
     can_publish = [RequestActive()]

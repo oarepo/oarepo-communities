@@ -2,7 +2,6 @@ from invenio_records_permissions.generators import SystemProcess
 from invenio_requests.services.permissions import PermissionPolicy
 from oarepo_requests.permissions.generators import CreatorsFromWorkflow
 
-from oarepo_communities.resolvers.communities import OARepoCommunityResolver
 
 
 def create_oarepo_communities(app):
