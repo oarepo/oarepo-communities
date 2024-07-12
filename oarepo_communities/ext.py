@@ -20,7 +20,27 @@ class OARepoCommunities(object):
         self.app = app
         self.init_services(app)
         self.init_resources(app)
+        self.init_config(app)
+        self.init_registry(app)
         app.extensions["oarepo-communities"] = self
+
+    def init_config(self, app):
+        """Initialize configuration."""
+
+        from . import config
+
+        app.config.setdefault("REQUESTS_REGISTERED_TYPES", []).extend(
+            config.REQUESTS_REGISTERED_TYPES
+        )
+        app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(
+            config.REQUESTS_ALLOWED_RECEIVERS
+        )
+        app.config.setdefault("REQUESTS_ENTITY_RESOLVERS", []).extend(
+            config.REQUESTS_ENTITY_RESOLVERS
+        )
+        app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(
+            config.ENTITY_REFERENCE_UI_RESOLVERS
+        )
 
     @cached_property
     def urlprefix_serviceid_mapping(self):
@@ -48,3 +68,14 @@ class OARepoCommunities(object):
             config=CommunityRecordsResourceConfig.build(app),
             service=self.community_records_service,
         )
+
+    def init_registry(self, app):
+        # resolvers aren't registered if they are intiated after invenio-requests
+        # the same problem could happen for all stuff that needs to be registered?
+        # ? perhaps we should have one method somewhere for registering everything after the ext init phase
+        if "invenio-requests" in app.extensions:
+            requests = app.extensions["invenio-requests"]
+            resolvers = app.config.get("REQUESTS_ENTITY_RESOLVERS", [])
+            registry = requests.entity_resolvers_registry
+            for resolver in resolvers:
+                registry.register_type(resolver, force=False)
