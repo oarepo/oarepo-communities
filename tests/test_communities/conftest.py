@@ -10,28 +10,32 @@ from invenio_app.factory import create_api
 from invenio_communities import current_communities
 from invenio_communities.cli import create_communities_custom_field
 from invenio_communities.communities.records.api import Community
+from invenio_communities.generators import CommunityRoleNeed
 from invenio_i18n import lazy_gettext as _
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_permissions.generators import SystemProcess
-from oarepo_requests.permissions.generators import CreatorsFromWorkflow
-from oarepo_workflows.permissions.generators import IfInState
+from oarepo_requests.receiver import default_workflow_receiver_function
 from oarepo_runtime.services.generators import RecordOwners
-
-
-from oarepo_communities.permissions.presets import CommunityDefaultWorkflowPermissions
-from oarepo_communities.utils import workflow_receiver_function
+from oarepo_workflows import (
+    AutoApprove,
+    Workflow,
+    WorkflowRequest,
+    WorkflowRequestPolicy,
+    WorkflowTransitions,
+)
+from oarepo_workflows.permissions.generators import CreatorsFromWorkflow, IfInState
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft
-from oarepo_communities.records.models import CommunityWorkflowModel
 
-from oarepo_communities.permissions.generators import CommunityMembers, CommunityCurators, CommunityInTopicReceiver, \
-    CommunityReceiver
-from invenio_communities.generators import CommunityRoleNeed
+from oarepo_communities.permissions.generators import CommunityMembers, CommunityRole
+from oarepo_communities.permissions.presets import CommunityDefaultWorkflowPermissions
+from oarepo_communities.records.models import CommunityWorkflowModel
 
 
 @pytest.fixture()
 def scenario_permissions():
     from invenio_requests.services.permissions import PermissionPolicy
+
     # RecipientsFromWorkflow
     requests = type(
         "RequestsPermissionPolicy",
@@ -41,11 +45,11 @@ def scenario_permissions():
                 SystemProcess(),
                 CreatorsFromWorkflow(),
             ],
-
         ),
     )
 
     return requests
+
 
 @pytest.fixture
 def patch_requests_permissions(
@@ -111,84 +115,99 @@ def logged_client(client):
     return _logged_client
 
 
-def receiver_community(*args, **kwargs):
-    topic = kwargs["topic"]
-    return {"community": str(topic.parent.communities.default.id)}
+class DefaultRequests(WorkflowRequestPolicy):
+    publish_draft = WorkflowRequest(
+        requesters=[IfInState("draft", [RecordOwners()])],
+        recipients=[
+            CommunityRole("owner", access_key="record.parent.communities.default.id")
+        ],
+        transitions=WorkflowTransitions(
+            submitted="publishing", approved="published", rejected="draft"
+        ),
+    )
+    delete_published_record = WorkflowRequest(
+        requesters=[IfInState("published", [RecordOwners()])],
+        recipients=[
+            CommunityRole("owner", access_key="record.parent.communities.default.id")
+        ],
+        transitions=WorkflowTransitions(
+            submitted="deleting", approved="deleted", rejected="published"
+        ),
+    )
+    edit_published_record = WorkflowRequest(
+        requesters=[IfInState("published", [RecordOwners()])],
+        recipients=[AutoApprove()],
+        transitions=WorkflowTransitions(),
+    )
+    secondary_community_submission = WorkflowRequest(
+        requesters=[CommunityMembers()],
+        recipients=[CommunityRole("owner", access_key="data.payload.community")],
+        transitions=WorkflowTransitions(),
+    )
+    remove_secondary_community = WorkflowRequest(
+        requesters=[CommunityMembers()],
+        recipients=[CommunityRole("owner", access_key="data.payload.community")],
+        transitions=WorkflowTransitions(),
+    )
+    community_migration = WorkflowRequest(
+        requesters=[CommunityMembers()],
+        recipients=[CommunityRole("owner", access_key="data.payload.community")],
+        transitions=WorkflowTransitions(),
+    )
 
 
-def receiver_adressed_community(*args, **kwargs):
-    data = kwargs["data"]
-    target_community = data["payload"]["community"]
-    return {"community": target_community}
-
-
-# --- workflows
-
-community_changers = {
-    "transitions": {},
-    "requesters": [CommunityMembers()],
-    "recipients": [CommunityReceiver("data.payload.community", "owner")], # access key can possibly be delegated to request type
-}
-
-no_community_changers = {
-    "transitions": {},
-    "requesters": [],
-    "recipients": [],
-}
-# todo - recipients jako funkce prirazujici receivers vs. needs receiveru
-DEFAULT_WORKFLOW_REQUESTS = {
-    "publish-draft": {
-        "requesters": [IfInState("draft", [RecordOwners()])],
-        "recipients": [CommunityReceiver("record.parent.communities.default.id", "owner")],
-        "transitions": {
-            "submit": "publishing",
-            "accept": "published",
-            "decline": "draft",
-        },
-    },
-    "delete-published-record": {
-        "requesters": [IfInState("published", [RecordOwners()])],
-        "recipients": [CommunityReceiver("record.parent.communities.default.id", "owner")],
-        "transitions": {"submit": "deleting", "accept": "deleted"},
-    },
-    "secondary-community-submission": community_changers,
-    "remove-secondary-community": community_changers,
-    "community-migration": community_changers,
-}
-
-NO_WORKFLOW_REQUESTS = {
-    "publish-draft": {
-        "requesters": [],
-        "recipients": [CommunityReceiver("record.parent.communities.default.id", "owner")],
-        "transitions": {
-            "submit": "publishing",
-            "accept": "published",
-            "decline": "draft",
-        },
-    },
-    "delete-published-record": {
-        "requesters": [],
-        "recipients": [CommunityReceiver("record.parent.communities.default.id", "owner")],
-        "transitions": {"submit": "deleting", "accept": "deleted"},
-    },
-    "secondary-community-submission": community_changers,
-    "remove-secondary-community": community_changers,
-    "community-migration": community_changers,
-}
-
+class NoRequests(WorkflowRequestPolicy):
+    publish_draft = WorkflowRequest(
+        requesters=[],
+        recipients=[
+            CommunityRole("owner", access_key="record.parent.communities.default.id")
+        ],
+        transitions=WorkflowTransitions(
+            submitted="publishing", approved="published", rejected="draft"
+        ),
+    )
+    delete_published_record = WorkflowRequest(
+        requesters=[],
+        recipients=[
+            CommunityRole("owner", access_key="record.parent.communities.default.id")
+        ],
+        transitions=WorkflowTransitions(
+            submitted="deleting", approved="deleted", rejected="published"
+        ),
+    )
+    edit_published_record = WorkflowRequest(
+        requesters=[],
+        recipients=[AutoApprove()],
+        transitions=WorkflowTransitions(),
+    )
+    secondary_community_submission = WorkflowRequest(
+        requesters=[],
+        recipients=[CommunityRole("owner", access_key="data.payload.community")],
+        transitions=WorkflowTransitions(),
+    )
+    remove_secondary_community = WorkflowRequest(
+        requesters=[],
+        recipients=[CommunityRole("owner", access_key="data.payload.community")],
+        transitions=WorkflowTransitions(),
+    )
+    community_migration = WorkflowRequest(
+        requesters=[],
+        recipients=[CommunityRole("owner", access_key="data.payload.community")],
+        transitions=WorkflowTransitions(),
+    )
 
 
 WORKFLOWS = {
-    "default": {
-        "label": _("Default workflow"),
-        "permissions": CommunityDefaultWorkflowPermissions,
-        "requests": DEFAULT_WORKFLOW_REQUESTS,
-    },
-    "no": {
-        "label": _("Nope"),
-        "permissions": CommunityDefaultWorkflowPermissions,
-        "requests": NO_WORKFLOW_REQUESTS,
-    },
+    "default": Workflow(
+        label=_("Default workflow"),
+        permissions_cls=CommunityDefaultWorkflowPermissions,
+        requests_cls=DefaultRequests,
+    ),
+    "no": Workflow(
+        label=_("Workflow with approval process"),
+        permissions_cls=CommunityDefaultWorkflowPermissions,
+        requests_cls=NoRequests,
+    ),
 }
 
 
@@ -257,12 +276,12 @@ def app_config(app_config):
         }
     ]
 
-    app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = workflow_receiver_function
-    app_config["RECORD_WORKFLOWS"] = WORKFLOWS
+    app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = default_workflow_receiver_function
+    app_config["WORKFLOWS"] = WORKFLOWS
 
-
-    app_config["REQUESTS_ALLOWED_RECEIVERS"] = ["community"]
-
+    app_config["REQUEST_TYPE_RECEIVER_ACCESS_KEYS"] = {  # possibility
+        "publish_draft": {"community_role": "record.parent.communities.default.id"}
+    }
 
     return app_config
 
@@ -451,13 +470,13 @@ def request_data_factory():
 def ui_serialized_community():
     def _ui_serialized_community(community_id):
         return {
-            "label": "My Community",
+            "label": "My Community : owner",
             "links": {
                 "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
-                "self_html": "https://127.0.0.1:5000/communities/public",
+                "self_html": "https://127.0.0.1:5000/communities/public",  # todo is this correct?
             },
-            "reference": {"community": community_id},
-            "type": "community",
+            "reference": {"community_role": f"{community_id} : owner"},
+            "type": "community role",
         }
 
     return _ui_serialized_community
@@ -490,54 +509,3 @@ def requests_service_config():
     from invenio_requests.services.requests.config import RequestsServiceConfig
 
     return RequestsServiceConfig
-
-
-"""
-@pytest.fixture()
-def scenario_permissions():
-    from invenio_requests.services.permissions import PermissionPolicy
-
-    requests = type(
-        "RequestsPermissionPolicy",
-        (PermissionPolicy,),
-        dict(
-            can_create=[
-                SystemProcess(),
-                WorkflowRequestPermission(access_key="creators"),
-                RequestActive(),
-            ],
-            can_action_accept=[
-                SystemProcess(),
-                WorkflowRequestPermission(access_key="receivers"),
-            ],
-            can_action_submit=[
-                SystemProcess(),
-                WorkflowRequestPermission(access_key="creators"),
-            ],
-            can_action_cancel=[
-                SystemProcess(),
-                WorkflowRequestPermission(access_key="creators"),
-            ],
-            can_action_expire=[
-                SystemProcess(),
-                WorkflowRequestPermission(access_key="creators"),
-            ],
-            can_action_decline=[
-                SystemProcess(),
-                WorkflowRequestPermission(access_key="receivers"),
-            ],
-        ),
-    )
-
-    return requests
-
-
-# todo solve this in forked invenio requests
-@pytest.fixture()
-def patch_requests_permissions(
-    requests_service,
-    requests_service_config,
-    scenario_permissions,
-):
-    setattr(requests_service_config, "permission_policy_cls", scenario_permissions)
-"""

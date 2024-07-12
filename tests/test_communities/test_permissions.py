@@ -79,7 +79,7 @@ def test_scenario_change(
     record4 = _create_record_in_community(reader_client, community_1.id)
 
     request_should_be_allowed = owner_client.post(
-        f"/thesis/{record1.json['id']}/draft/requests/publish-draft"
+        f"/thesis/{record1.json['id']}/draft/requests/publish_draft"
     )
     submit = owner_client.post(
         link_api2testclient(
@@ -109,16 +109,15 @@ def test_scenario_change(
         ).one()
         assert record.workflow == workflow
 
-
     set_community_workflow(str(community_1.id), "no")
     check_community_workflow_change(str(community_1.id), "no")
     request_should_still_work = owner_client.post(
-        f"/thesis/{record2.json['id']}/draft/requests/publish-draft"
+        f"/thesis/{record2.json['id']}/draft/requests/publish_draft"
     )
     # todo add workflow to marshmallow
     record5 = _create_record_in_community(owner_client, community_1.id)
     request_should_be_forbidden = owner_client.post(
-        f"/thesis/{record5.json['id']}/draft/requests/publish-draft"
+        f"/thesis/{record5.json['id']}/draft/requests/publish_draft"
     )
     assert request_should_still_work.status_code == 201
     assert request_should_be_forbidden.status_code == 403
