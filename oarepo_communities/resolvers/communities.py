@@ -1,22 +1,17 @@
+from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
 from invenio_communities.communities.records.api import Community
-from sqlalchemy.exc import StatementError
-from sqlalchemy.orm.exc import NoResultFound
-
+from invenio_communities.communities.services.config import CommunityServiceConfig
 from invenio_records_resources.references.entity_resolvers import (
     RecordPKProxy,
     RecordResolver,
 )
-
-from invenio_communities.communities.entity_resolvers import (
-    CommunityPKProxy,
-    CommunityResolver,
-)
-from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
-from invenio_communities.communities.services.config import CommunityServiceConfig
+from sqlalchemy.exc import StatementError
+from sqlalchemy.orm.exc import NoResultFound
 
 
 def parse_community_ref_dict_community_id(ref_dict):
     return ref_dict.split(":")[0].strip()
+
 
 def parse_community_ref_dict_role(ref_dict):
     return ref_dict.split(":")[1].strip()
@@ -31,6 +26,7 @@ class CommunityRoleObj:
 
     @classmethod
     def get_record(cls, id_):
+        # todo this should return communityroleobj, but since it's not saved in neither db nor search (fix this?)
         return cls.community_cls.get_record(id_)
 
 
@@ -39,8 +35,10 @@ class CommunityRolePKProxy(RecordPKProxy):
     def _resolve(self):
         """Resolve the Record from the proxy's reference dict."""
         id_ = self._parse_ref_dict_community_id()
+        role = self._parse_ref_dict_role()
         try:
-            return self.record_cls.get_record(id_)
+            community = self.record_cls.get_record(id_)
+            return CommunityRoleObj(community, role)
         except StatementError as exc:
             raise NoResultFound() from exc
 
@@ -60,6 +58,9 @@ class CommunityRolePKProxy(RecordPKProxy):
         role = self._parse_ref_dict_role()
         return [CommunityRoleNeed(comid, role)]
 
+    def community_reference(self):
+        return {"community": self._parse_ref_dict_community_id()}
+
 
 class CommunityRoleResolver(RecordResolver):
     """Community entity resolver.
@@ -75,7 +76,7 @@ class CommunityRoleResolver(RecordResolver):
         """Initialize the default record resolver."""
         super().__init__(
             CommunityRoleObj,
-            CommunityServiceConfig.service_id,  # todo
+            CommunityServiceConfig.service_id,
             type_key=self.type_id,
             proxy_cls=CommunityRolePKProxy,
         )
@@ -83,7 +84,7 @@ class CommunityRoleResolver(RecordResolver):
     def _reference_entity(self, entity):
         """Create a reference dict for the given record."""
         return {self.type_key: f"{entity.community.id} : {entity.role}"}
-
+# todo should test with community as receiver, now everything gets community role
 """
 class OARepoCommunityPKProxy(CommunityPKProxy):
     def _parse_ref_dict_id(self):

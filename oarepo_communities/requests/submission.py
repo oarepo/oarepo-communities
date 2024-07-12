@@ -5,7 +5,7 @@ from oarepo_requests.utils import get_matching_service_for_record
 
 from ..errors import CommunityAlreadyIncludedException
 from ..resolvers.communities import parse_community_ref_dict_community_id
-from ..utils import get_associated_service, community_in_payload_entity_ref
+from ..utils import get_associated_service, resolve_community
 
 
 class AcceptAction(actions.AcceptAction):
@@ -14,6 +14,7 @@ class AcceptAction(actions.AcceptAction):
     def execute(self, identity, uow):
         record = self.request.topic.resolve()
         community = self.request.receiver.resolve()
+        community = resolve_community(community)
         service = get_matching_service_for_record(record)
         record_communities_service = get_associated_service(
             service, "record_communities"
@@ -28,9 +29,9 @@ class AcceptAction(actions.AcceptAction):
 # Request
 #
 
+
 class AbstractCommunitySubmissionRequestType(OARepoRequestType):  # rename abstract
     # todo default receiver func by mela byt konfigurovatelná
-
 
     @staticmethod
     def entity_ref(cls, **kwargs):
@@ -47,7 +48,9 @@ class AbstractCommunitySubmissionRequestType(OARepoRequestType):  # rename abstr
 
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
-        receiver_community_id = parse_community_ref_dict_community_id(list(receiver.values())[0])
+        receiver_community_id = parse_community_ref_dict_community_id(
+            list(receiver.values())[0]
+        )
         already_included = receiver_community_id in topic.parent.communities.ids
         if already_included:
             raise CommunityAlreadyIncludedException

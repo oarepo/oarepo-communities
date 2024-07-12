@@ -6,7 +6,7 @@ from oarepo_runtime.i18n import lazy_gettext as _
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
 from ..resolvers.communities import parse_community_ref_dict_community_id
-from ..utils import get_associated_service
+from ..utils import get_associated_service, resolve_community
 
 
 class AcceptAction(actions.AcceptAction):
@@ -15,6 +15,7 @@ class AcceptAction(actions.AcceptAction):
     def execute(self, identity, uow):
         record = self.request.topic.resolve()
         community = self.request.receiver.resolve()
+        community = resolve_community(community)
         service = get_matching_service_for_record(record)
         record_communities_service = get_associated_service(
             service, "record_communities"
@@ -29,7 +30,7 @@ class AcceptAction(actions.AcceptAction):
 class RemoveSecondaryRequestType(OARepoRequestType):
     """Review request for submitting a record to a community."""
 
-    type_id = "remove-secondary-community"
+    type_id = "remove_secondary_community"
     name = _("Remove secondary community")
 
     creator_can_be_none = False
@@ -43,7 +44,9 @@ class RemoveSecondaryRequestType(OARepoRequestType):
 
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
-        receiver_community_id = parse_community_ref_dict_community_id(list(receiver.values())[0])
+        receiver_community_id = parse_community_ref_dict_community_id(
+            list(receiver.values())[0]
+        )
         not_included = receiver_community_id not in topic.parent.communities
         if not_included:
             raise CommunityNotIncludedException
