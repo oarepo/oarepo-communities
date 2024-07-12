@@ -5,7 +5,6 @@ from invenio_records_resources.proxies import current_service_registry
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.resolvers.communities import CommunityRoleObj
 
-
 # from oarepo_runtime.datastreams.utils import get_record_services
 
 
@@ -122,6 +121,7 @@ def mixed_dict_lookup(source, lookup_key, parent=False):
         except (TypeError, IndexError, ValueError, KeyError) as exc:
             raise KeyError(lookup_key) from exc
     return value
+
 
 def resolve_community(community_obj):
     if isinstance(community_obj, Community):

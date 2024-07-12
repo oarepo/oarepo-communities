@@ -84,6 +84,8 @@ class CommunityRoleResolver(RecordResolver):
     def _reference_entity(self, entity):
         """Create a reference dict for the given record."""
         return {self.type_key: f"{entity.community.id} : {entity.role}"}
+
+
 # todo should test with community as receiver, now everything gets community role
 """
 class OARepoCommunityPKProxy(CommunityPKProxy):

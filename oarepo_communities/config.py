@@ -1,5 +1,3 @@
-
-
 from oarepo_communities.requests.migration import CommunityMigrationRequestType
 from oarepo_communities.requests.remove_secondary import RemoveSecondaryRequestType
 from oarepo_communities.requests.submission_secondary import (

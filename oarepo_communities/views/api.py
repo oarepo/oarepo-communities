@@ -10,4 +10,3 @@ def init_addons(state):
     app = state.app
 
     resolvers = app.extensions["invenio-requests"].entity_resolvers_registry
-
