@@ -9,7 +9,7 @@ from oarepo_communities.requests.submission import (
 class SecondaryCommunitySubmissionRequestType(AbstractCommunitySubmissionRequestType):
     """Review request for submitting a record to a community."""
 
-    type_id = "secondary-community-submission"
+    type_id = "secondary_community_submission"
     name = _("Secondary community submission")
 
     allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)

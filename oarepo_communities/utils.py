@@ -1,10 +1,10 @@
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.proxies import current_service_registry
-from oarepo_requests.utils import get_from_requests_workflow, workflow_from_record
-from oarepo_workflows.permissions.generators import reference_receiver_from_generators
 
 from oarepo_communities.proxies import current_oarepo_communities
+from oarepo_communities.resolvers.communities import CommunityRoleObj
+
 
 # from oarepo_runtime.datastreams.utils import get_record_services
 
@@ -81,6 +81,8 @@ def community_id_from_record(record):
 
 
 from invenio_records.dictutils import parse_lookup_key
+
+
 def mixed_dict_lookup(source, lookup_key, parent=False):
     """Make a lookup into a dict based on a dot notation.
 
@@ -120,3 +122,10 @@ def mixed_dict_lookup(source, lookup_key, parent=False):
         except (TypeError, IndexError, ValueError, KeyError) as exc:
             raise KeyError(lookup_key) from exc
     return value
+
+def resolve_community(community_obj):
+    if isinstance(community_obj, Community):
+        return community_obj
+    elif isinstance(community_obj, CommunityRoleObj):
+        return community_obj.community
+    return None

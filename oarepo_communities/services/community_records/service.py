@@ -10,15 +10,15 @@
 from invenio_communities.proxies import current_communities
 from invenio_drafts_resources.services.records.service import RecordService
 from invenio_records_resources.services import ServiceSchemaWrapper
-from invenio_records_resources.services.base.links import LinksTemplate
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
 
 from oarepo_communities.utils import (
+    get_associated_service,
     get_global_search_service,
     get_global_user_search_service,
     get_service_by_urlprefix,
-    get_service_from_schema_type, get_associated_service,
+    get_service_from_schema_type,
 )
 
 # from oarepo_runtime.datastreams.utils import get_service_from_schema_type
@@ -56,10 +56,10 @@ class CommunityRecordsService(RecordService):
         ret = get_global_search_service().global_search(
             identity, params, extra_filter=default_filter
         )
-        #ret._links_tpl = LinksTemplate(
+        # ret._links_tpl = LinksTemplate(
         #    self.config.links_search_community_records,
         #    context={"args": params, "id": community_id},
-        #)
+        # )
         return ret
 
     def search_model(
@@ -138,7 +138,6 @@ class CommunityRecordsService(RecordService):
             identity, data, uow=uow, expand=expand, community=community
         )
     """
-
 
     @unit_of_work()
     def create_in_community(

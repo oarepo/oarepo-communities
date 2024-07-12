@@ -1,3 +1,4 @@
+from invenio_access.permissions import system_identity
 from invenio_communities.proxies import current_communities
 
 # from invenio_i18n import lazy_gettext as _
@@ -11,11 +12,10 @@ from invenio_records_resources.services.uow import (
     unit_of_work,
 )
 from invenio_search.engine import dsl
+from oarepo_workflows.proxies import current_oarepo_workflows
 
 from oarepo_communities.services.errors import RecordCommunityMissing
 from oarepo_communities.utils import slug2id
-from oarepo_workflows.proxies import current_oarepo_workflows
-from invenio_access.permissions import system_identity
 
 
 class RecordCommunitiesService(Service, RecordIndexerMixin):
@@ -53,8 +53,12 @@ class RecordCommunitiesService(Service, RecordIndexerMixin):
         if default is None:
             default = not record.parent.communities
         record.parent.communities.add(community_id, default=default)
-        community_workflow = current_oarepo_workflows.get_default_workflow(record=record.parent)
-        current_oarepo_workflows.set_workflow(system_identity, record=record, value=community_workflow)
+        community_workflow = current_oarepo_workflows.get_default_workflow(
+            record=record.parent
+        )
+        current_oarepo_workflows.set_workflow(
+            system_identity, record=record, value=community_workflow
+        )
         uow.register(RecordCommitOp(record.parent))
         uow.register(
             RecordIndexOp(

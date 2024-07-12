@@ -25,8 +25,8 @@ class AcceptAction(submission.AcceptAction):
 class CommunityMigrationRequestType(AbstractCommunitySubmissionRequestType):
     """Review request for submitting a record to a community."""
 
-    type_id = "community-migration"
-    name = _("Community-migration")
+    type_id = "community_migration"
+    name = _("Community migration")
 
     set_as_default = True
 
