@@ -6,23 +6,22 @@ from invenio_communities.generators import (
 )
 from invenio_records_permissions.generators import Generator
 from invenio_requests.proxies import current_requests
-from oarepo_workflows import RecipientGeneratorMixin
+from oarepo_workflows.requests.policy import RecipientGeneratorMixin
 
-from ..resolvers.communities import CommunityRoleObj
-from ..utils import community_id_from_record, mixed_dict_lookup
+from oarepo_communities.resolvers.communities import CommunityRoleObj
+from oarepo_communities.utils import community_id_from_record, dict_obj_lookup
 
 
 class OARepoCommunityRolesMixin:
+    # Invenio generators do not capture all situations where we need community id from record
     def needs(self, record=None, community_id=None, **kwargs):
 
         if not community_id:
             community_id = community_id_from_record(record)
+        community_id = str(community_id)
         if not community_id:
             print("No community id provided.")
             return []
-
-        assert community_id, "No community id provided."
-        community_id = str(community_id)
 
         roles = self.roles(**kwargs)
         if roles:
@@ -32,11 +31,9 @@ class OARepoCommunityRolesMixin:
 
 
 class CommunityRole(RecipientGeneratorMixin, OARepoCommunityRolesMixin, Generator):
-    def __init__(
-        self, role, access_key=None, type_key="community"
-    ):  # todo access key is not always used, might be moved from here to request type, issue is that it needs to overwrite/add hooks to request type needs context
+    access_key = "record.parent.communities.default.id"
 
-        self._access_key = access_key
+    def __init__(self, role, type_key="community"):
         self._role = role
         self._type_key = type_key
         super().__init__()
@@ -45,13 +42,17 @@ class CommunityRole(RecipientGeneratorMixin, OARepoCommunityRolesMixin, Generato
         return [self._role]
 
     def reference_receivers(self, **kwargs):
-        community_id = mixed_dict_lookup(kwargs, self._access_key)
+        community_id = dict_obj_lookup(kwargs, self.access_key)
         community = Community.pid.resolve(community_id)
         obj = CommunityRoleObj(community, self._role)
         resolver_registry = current_requests.entity_resolvers_registry
         resolver = resolver_registry._registered_types["community_role"]
         ref = resolver._reference_entity(obj)
         return [ref]
+
+
+class TargetCommunityRole(CommunityRole):
+    access_key = "data.payload.community"
 
 
 class CommunityMembers(OARepoCommunityRolesMixin, CommunityMembers):

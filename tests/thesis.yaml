@@ -28,6 +28,14 @@ record:
     fields:
       workflow: "{{oarepo_workflows.records.systemfields.workflow.WorkflowField}}()"
 
+  service-config:
+    components:
+      - "{{oarepo_workflows.services.components.workflow.WorkflowComponent}}"
+
+  parent-record-marshmallow:
+    base-classes:
+      - oarepo_workflows.services.records.schema.WorkflowParentSchema
+
   draft-parent-record-metadata:
     base-classes:
       - oarepo_workflows.records.models.RecordWorkflowParentModelMixin

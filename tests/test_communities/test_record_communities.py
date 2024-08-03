@@ -120,4 +120,3 @@ def test_search(
         f"/thesis/{published_record['id']}/communities",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
-    print()

@@ -2,9 +2,14 @@ from functools import cached_property
 
 from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
+from .resources.oarepo.config import OARepoCommunityConfig
+from .resources.oarepo.resource import OARepoCommunityResource
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
+from .services.oarepo.config import OARepoCommunityServiceConfig
+from .services.oarepo.service import OARepoCommunityService
 from .utils import get_urlprefix_service_id_mapping
+from .workflow import community_default_workflow
 
 
 class OARepoCommunities(object):
@@ -21,30 +26,34 @@ class OARepoCommunities(object):
         self.init_services(app)
         self.init_resources(app)
         self.init_config(app)
-        self.init_registry(app)
         app.extensions["oarepo-communities"] = self
 
     def init_config(self, app):
         """Initialize configuration."""
 
-        from . import config
+        from . import config, ext_config
 
-        app.config.setdefault("REQUESTS_REGISTERED_TYPES", []).extend(
-            config.REQUESTS_REGISTERED_TYPES
-        )
         app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(
             config.REQUESTS_ALLOWED_RECEIVERS
-        )
-        app.config.setdefault("REQUESTS_ENTITY_RESOLVERS", []).extend(
-            config.REQUESTS_ENTITY_RESOLVERS
         )
         app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(
             config.ENTITY_REFERENCE_UI_RESOLVERS
         )
+        if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
+            app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
+
+        for k in ext_config.OAREPO_PERMISSIONS_PRESETS:
+            if k not in app.config["OAREPO_PERMISSIONS_PRESETS"]:
+                app.config["OAREPO_PERMISSIONS_PRESETS"][k] = (
+                    ext_config.OAREPO_PERMISSIONS_PRESETS[k]
+                )
 
     @cached_property
     def urlprefix_serviceid_mapping(self):
         return get_urlprefix_service_id_mapping()
+
+    def get_community_deafult_workflow(self, **kwargs):
+        return community_default_workflow(**kwargs)
 
     @property
     def record_workflow(self):
@@ -60,6 +69,9 @@ class OARepoCommunities(object):
         self.community_records_service = CommunityRecordsService(
             config=CommunityRecordsServiceConfig.build(app),
         )
+        self.oarepo_community_service = OARepoCommunityService(
+            OARepoCommunityServiceConfig()
+        )
 
     def init_resources(self, app):
         """Initialize communities resources."""
@@ -68,14 +80,7 @@ class OARepoCommunities(object):
             config=CommunityRecordsResourceConfig.build(app),
             service=self.community_records_service,
         )
-
-    def init_registry(self, app):
-        # resolvers aren't registered if they are intiated after invenio-requests
-        # the same problem could happen for all stuff that needs to be registered?
-        # ? perhaps we should have one method somewhere for registering everything after the ext init phase
-        if "invenio-requests" in app.extensions:
-            requests = app.extensions["invenio-requests"]
-            resolvers = app.config.get("REQUESTS_ENTITY_RESOLVERS", [])
-            registry = requests.entity_resolvers_registry
-            for resolver in resolvers:
-                registry.register_type(resolver, force=False)
+        self.oarepo_community_resource = OARepoCommunityResource(
+            config=OARepoCommunityConfig(),
+            service=self.oarepo_community_service,
+        )

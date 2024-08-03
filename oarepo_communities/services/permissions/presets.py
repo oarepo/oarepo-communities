@@ -1,10 +1,17 @@
-from invenio_records_permissions.generators import AnyUser
-from oarepo_requests.permissions.generators import RequestActive
-from oarepo_runtime.services.generators import RecordOwners
-from oarepo_workflows.permissions.generators import IfInState
-from oarepo_workflows.permissions.policy import DefaultWorkflowPermissionPolicy
+from invenio_records_permissions import RecordPermissionPolicy
+from invenio_records_permissions.generators import AnyUser, AuthenticatedUser
+from oarepo_requests.services.permissions.generators import RequestActive
+from oarepo_runtime.services.permissions import RecordOwners
+from oarepo_workflows import (
+    DefaultWorkflowPermissionPolicy,
+    IfInState,
+    WorkflowPermission,
+)
 
-from oarepo_communities.permissions.generators import CommunityMembers, CommunityRole
+from oarepo_communities.services.permissions.generators import (
+    CommunityMembers,
+    CommunityRole,
+)
 
 
 class CommunityDefaultWorkflowPermissions(DefaultWorkflowPermissionPolicy):
@@ -16,6 +23,7 @@ class CommunityDefaultWorkflowPermissions(DefaultWorkflowPermissionPolicy):
     ]
     can_read = [
         RecordOwners(),
+        AuthenticatedUser(),  # need for request receivers - temporary
         CommunityRole("owner"),
         IfInState(
             "published",
@@ -36,3 +44,10 @@ class CommunityDefaultWorkflowPermissions(DefaultWorkflowPermissionPolicy):
     ]
 
     can_publish = [RequestActive()]
+
+    can_set_workflow = [CommunityMembers()]
+
+
+class OARepoCommunityWorkflowPermissionPolicy(RecordPermissionPolicy):
+
+    can_set_workflow = [WorkflowPermission("can_set_workflow")]

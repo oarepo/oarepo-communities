@@ -9,7 +9,7 @@ class CommunityRecordsServiceConfig(
 ):
     """Community records service config."""
 
-    PERMISSIONS_PRESETS = ["community"]
+    PERMISSIONS_PRESETS = ["workflow"]
     service_id = "community-records"
     # todo correct links
     links_search_community_records = pagination_links(

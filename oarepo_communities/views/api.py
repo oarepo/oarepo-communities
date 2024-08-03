@@ -1,8 +1,23 @@
+from oarepo_communities.resolvers.communities import CommunityRoleResolver
+
+
 def create_oarepo_communities(app):
     """Create requests blueprint."""
     ext = app.extensions["oarepo-communities"]
     blueprint = ext.community_records_resource.as_blueprint()
-    blueprint.record_once(init_addons)
+    blueprint.record_once(register_community_role_entity_resolver)
+    return blueprint
+
+def register_community_role_entity_resolver(state):
+
+    app = state.app
+    requests = app.extensions["invenio-requests"]
+    requests.entity_resolvers_registry.register_type(CommunityRoleResolver())
+
+def create_oarepo_community(app):
+    """Create requests blueprint."""
+    ext = app.extensions["oarepo-communities"]
+    blueprint = ext.oarepo_community_resource.as_blueprint()
     return blueprint
 
 

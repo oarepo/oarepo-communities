@@ -69,6 +69,10 @@ def _submit_request(
     submit_response = creator_client.post(
         link_api2testclient(create_response.json["links"]["actions"]["submit"])
     )
+    if submit_response.status == 400:
+        creator_client.post(
+            link_api2testclient(create_response.json["links"]["actions"]["submit"])
+        )
     return submit_response
 
 
@@ -233,22 +237,23 @@ def test_community_migration(
         community_2.id,
         "thesis",
         record_id,
-        "community_migration",
+        "initiate_community_migration",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
-        type="community_migration",
+        type="initiate_community_migration",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
-    accept_owner = _accept_request(
-        owner_client, type="community_migration", record_id=record_id
-    )  # owner can
-
-    record_after = owner_client.get(f"/thesis/{record_id}")
-
+    accept_initiate_request_owner = _accept_request(
+        owner_client, type="initiate_community_migration", record_id=record_id
+    )  # confirm should be created and submitted automatically
+    accept_confirm_request_owner = _accept_request(
+        owner_client, type="confirm_community_migration", record_id=record_id
+    )
+    record_after = owner_client.get(f"/thesis/{record_id}?expand=true")
     assert (
         record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
     )

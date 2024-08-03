@@ -82,7 +82,7 @@ def community_id_from_record(record):
 from invenio_records.dictutils import parse_lookup_key
 
 
-def mixed_dict_lookup(source, lookup_key, parent=False):
+def dict_obj_lookup(source, lookup_key, parent=False):
     """Make a lookup into a dict based on a dot notation.
 
     Examples of the supported dot notation:

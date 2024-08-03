@@ -1,18 +1,10 @@
-from invenio_access.permissions import system_identity
 from invenio_communities.proxies import current_communities
-
-# from invenio_i18n import lazy_gettext as _
-# from invenio_notifications.services.uow import NotificationOp
+from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_pidstore.errors import PIDUnregistered
 from invenio_records_resources.services import RecordIndexerMixin
 from invenio_records_resources.services.base.service import Service
-from invenio_records_resources.services.uow import (
-    RecordCommitOp,
-    RecordIndexOp,
-    unit_of_work,
-)
+from invenio_records_resources.services.uow import RecordIndexOp, unit_of_work
 from invenio_search.engine import dsl
-from oarepo_workflows.proxies import current_oarepo_workflows
 
 from oarepo_communities.services.errors import RecordCommunityMissing
 from oarepo_communities.utils import slug2id
@@ -53,18 +45,30 @@ class RecordCommunitiesService(Service, RecordIndexerMixin):
         if default is None:
             default = not record.parent.communities
         record.parent.communities.add(community_id, default=default)
-        community_workflow = current_oarepo_workflows.get_default_workflow(
-            record=record.parent
+
+        uow.register(
+            ParentRecordCommitOp(
+                record.parent, indexer_context=dict(service=applied_record_service)
+            )
         )
-        current_oarepo_workflows.set_workflow(
-            system_identity, record=record, value=community_workflow
-        )
-        uow.register(RecordCommitOp(record.parent))
+        # comment from RDM:
+        # this indexed record might not be the latest version: in this case, it might
+        # not be immediately visible in the community's records, when the `all versions`
+        # facet is not toggled
         uow.register(
             RecordIndexOp(
                 record, indexer=applied_record_service.indexer, index_refresh=True
             )
         )
+        """
+        uow.register(
+            NotificationOp(
+                CommunityInclusionAcceptNotificationBuilder.build(
+                    identity=identity, request=self.request
+                )
+            )
+        )
+        """
         return record
 
     @unit_of_work()
@@ -79,8 +83,17 @@ class RecordCommunitiesService(Service, RecordIndexerMixin):
 
         # Default community is deleted when the exact same community is removed from the record
         record.parent.communities.remove(community_id)
-        uow.register(RecordCommitOp(record.parent))
-        uow.register(RecordIndexOp(record, indexer=applied_record_service.indexer))
+        uow.register(
+            ParentRecordCommitOp(
+                record.parent,
+                indexer_context=dict(service=applied_record_service),
+            )
+        )
+        uow.register(
+            RecordIndexOp(
+                record, indexer=applied_record_service.indexer, index_refresh=True
+            )
+        )
 
     def search(
         self,

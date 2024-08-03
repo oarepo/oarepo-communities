@@ -1,28 +1,25 @@
-from invenio_requests.customizations import actions
+from oarepo_requests.actions.generic import OARepoAcceptAction
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType
-from oarepo_requests.utils import get_matching_service_for_record
+from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
-from ..resolvers.communities import parse_community_ref_dict_community_id
+from ..resolvers.communities import CommunityRoleObj
 from ..utils import get_associated_service, resolve_community
 
 
-class AcceptAction(actions.AcceptAction):
+class CommunityRemoveSecondaryAcceptAction(OARepoAcceptAction):
     """Accept action."""
 
-    def execute(self, identity, uow):
-        record = self.request.topic.resolve()
+    def apply(self, identity, request_type, topic, uow, *args, **kwargs):
         community = self.request.receiver.resolve()
         community = resolve_community(community)
-        service = get_matching_service_for_record(record)
+        service = get_record_service_for_record(topic)
         record_communities_service = get_associated_service(
             service, "record_communities"
         )
-        record_communities_service.remove(record, str(community.id), uow=uow)
-
-        super().execute(identity, uow)
+        record_communities_service.remove(topic, str(community.id), uow=uow)
 
 
 # Request
@@ -39,13 +36,15 @@ class RemoveSecondaryRequestType(OARepoRequestType):
 
     available_actions = {
         **OARepoRequestType.available_actions,
-        "accept": AcceptAction,
+        "accept": CommunityRemoveSecondaryAcceptAction,
     }
 
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
-        receiver_community_id = parse_community_ref_dict_community_id(
-            list(receiver.values())[0]
+        receiver_community_id = (
+            CommunityRoleObj.community_role_or_community_ref_get_community_id(
+                list(receiver.values())[0]
+            )
         )
         not_included = receiver_community_id not in topic.parent.communities
         if not_included:
