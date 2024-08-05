@@ -267,6 +267,51 @@ def test_community_migration(
     assert record_after.json["parent"]["communities"]["ids"] == [community_2.data["id"]]
 
 
+def test_community_migration_workflow_change(
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_workflow_factory,
+    request_data_factory,
+    record_service,
+    inviter,
+    patch_requests_permissions,
+    search_clear,
+):
+    reader_client, owner_client, community_1, community_2 = _init_env(
+        logged_client,
+        community_owner,
+        community_reader,
+        community_with_workflow_factory,
+        inviter,
+    )
+    owner_client.post(f"/communities/{community_2.id}/workflow/custom")
+    record_id = published_record_in_community(
+        reader_client, community_1.id, record_service, community_owner
+    )["id"]
+    record_item = record_service.read(community_owner.identity, record_id)
+    assert record_item._record.parent.workflow == "default"
+    _submit_request(
+        reader_client,
+        community_2.id,
+        "thesis",
+        record_id,
+        "initiate_community_migration",
+        request_data_factory,
+        payload={"community": str(community_2.id)},
+    )
+    _accept_request(
+        owner_client, type="initiate_community_migration", record_id=record_id
+    )  # confirm should be created and submitted automatically
+    _accept_request(
+        owner_client, type="confirm_community_migration", record_id=record_id
+    )
+
+    # todo add workflow on parent marshmallow?
+    record_item = record_service.read(community_owner.identity, record_id)
+    assert record_item._record.parent.workflow == "custom"
+
+
 def test_community_submission_secondary(
     logged_client,
     community_owner,
@@ -418,7 +463,51 @@ def test_remove_secondary(
         )
 
 
-def test_ui_serialization(
+def test_community_role_ui_serialization(
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_default_workflow,
+    request_data_factory,
+    record_service,
+    ui_serialized_community_role,
+    patch_requests_permissions,
+    search_clear,
+):
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
+
+    record_id = _create_record_in_community(
+        reader_client, community_with_default_workflow.id
+    ).json["id"]
+
+    submit = _submit_request(
+        reader_client,
+        community_with_default_workflow.id,
+        "thesis_draft",
+        record_id,
+        "publish_draft",
+        request_data_factory,
+    )
+
+    request = owner_client.get(
+        f"/requests/extended/{submit.json['id']}",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+    assert request.json["receiver"] == ui_serialized_community_role(
+        community_with_default_workflow.id
+    )
+    request_list = owner_client.get(
+        "/requests/",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+    # todo test cache use in search requests with multiple results
+    assert request_list.json["hits"]["hits"][0][
+        "receiver"
+    ] == ui_serialized_community_role(community_with_default_workflow.id)
+
+
+def test_community_ui_serialization(
     logged_client,
     community_owner,
     community_reader,
@@ -431,7 +520,9 @@ def test_ui_serialization(
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
-
+    owner_client.post(
+        f"/communities/{community_with_default_workflow.id}/workflow/custom"
+    )
     record_id = _create_record_in_community(
         reader_client, community_with_default_workflow.id
     ).json["id"]
@@ -456,10 +547,7 @@ def test_ui_serialization(
         "/requests/",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
-    # todo test cache use
+    # todo test cache use in search requests with multiple results
     assert request_list.json["hits"]["hits"][0]["receiver"] == ui_serialized_community(
         community_with_default_workflow.id
     )
-
-
-# todo test for community serialization (above is for role)

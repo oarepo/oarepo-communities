@@ -230,6 +230,7 @@ def test_user_search_model(
 def test_create_published(
     init_cf, community_owner, community_with_default_workflow, search_clear
 ):
+    # todo how is workflow used in published service?
     from thesis.proxies import current_published_service
 
     record = current_published_service.create(system_identity, {})

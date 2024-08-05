@@ -13,7 +13,13 @@ from invenio_communities.communities.records.api import Community
 from invenio_communities.generators import CommunityRoleNeed
 from invenio_i18n import lazy_gettext as _
 from invenio_pidstore.errors import PIDDoesNotExistError
+from invenio_records_permissions.generators import (
+    AnyUser,
+    AuthenticatedUser,
+    SystemProcess,
+)
 from oarepo_requests.receiver import default_workflow_receiver_function
+from oarepo_requests.services.permissions.generators import RequestActive
 from oarepo_requests.services.permissions.workflow_policies import (
     CreatorsFromWorkflowPermissionPolicy,
 )
@@ -26,19 +32,20 @@ from oarepo_workflows import (
     WorkflowTransitions,
 )
 from oarepo_workflows.base import Workflow
-from oarepo_workflows.services.permissions.generators import AutoRequest
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft
 
 from oarepo_communities.records.models import CommunityWorkflowModel
 from oarepo_communities.services.permissions.generators import (
+    CommunityCurators,
     CommunityMembers,
     CommunityRole,
     TargetCommunityRole,
 )
-from oarepo_communities.services.permissions.presets import (
+from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
+from oarepo_communities.utils import dict_obj_lookup
 
 
 @pytest.fixture()
@@ -111,6 +118,32 @@ def logged_client(client):
     return _logged_client
 
 
+class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
+    can_read = [
+        RecordOwners(),
+        AuthenticatedUser(),  # need for request receivers - temporary
+        CommunityRole("owner"),
+        IfInState(
+            "published",
+            [AnyUser()],
+        ),
+    ]
+
+    can_update = [
+        IfInState("draft", [RecordOwners()]),
+        IfInState("publishing", [RecordOwners()]),
+        IfInState("published", [CommunityRole("owner")]),
+    ]
+
+    can_delete = [
+        IfInState("draft", [RecordOwners()]),
+        IfInState("publishing", [RecordOwners()]),
+        IfInState("deleting", [RequestActive()]),
+    ]
+
+    can_set_workflow = [CommunityMembers()]
+
+
 class DefaultRequests(WorkflowRequestPolicy):
     publish_draft = WorkflowRequest(
         requesters=[IfInState("draft", [RecordOwners()])],
@@ -144,14 +177,35 @@ class DefaultRequests(WorkflowRequestPolicy):
     initiate_community_migration = WorkflowRequest(
         requesters=[CommunityMembers()],
         recipients=[CommunityRole("owner")],
-        transitions=WorkflowTransitions(
-            accepted="migrating",
-        ),
+        transitions=WorkflowTransitions(),
     )
     confirm_community_migration = WorkflowRequest(
-        requesters=[IfInState("migrating", [AutoRequest()])],
+        requesters=[SystemProcess()],
         recipients=[TargetCommunityRole("owner")],
-        transitions=WorkflowTransitions(accepted="published", declined="published"),
+        transitions=WorkflowTransitions(),
+    )
+
+
+from oarepo_workflows.requests.policy import RecipientGeneratorMixin
+
+
+class TestInvenioCommunity(RecipientGeneratorMixin, CommunityCurators):
+    access_key = "record.parent.communities.default.id"
+
+    def reference_receivers(self, **kwargs):
+        community_id = dict_obj_lookup(kwargs, self.access_key)
+        return [{"community": str(community_id)}]
+
+    """"""
+
+
+class InvenioCommunityReceiverPublishRequests(DefaultRequests):
+    publish_draft = WorkflowRequest(
+        requesters=[IfInState("draft", [RecordOwners()])],
+        recipients=[TestInvenioCommunity()],
+        transitions=WorkflowTransitions(
+            submitted="publishing", accepted="published", declined="draft"
+        ),
     )
 
 
@@ -195,12 +249,17 @@ class NoRequests(WorkflowRequestPolicy):
 WORKFLOWS = {
     "default": Workflow(
         label=_("Default workflow"),
-        permission_policy_cls=CommunityDefaultWorkflowPermissions,
+        permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=DefaultRequests,
     ),
+    "custom": Workflow(
+        label=_("For checking if workflow changed."),
+        permission_policy_cls=TestCommunityWorkflowPermissions,
+        request_policy_cls=InvenioCommunityReceiverPublishRequests,
+    ),
     "no": Workflow(
-        label=_("Workflow with approval process"),
-        permission_policy_cls=CommunityDefaultWorkflowPermissions,
+        label=_("Can't do any requests."),
+        permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=NoRequests,
     ),
 }
@@ -462,7 +521,7 @@ def request_data_factory():
 
 
 @pytest.fixture
-def ui_serialized_community():
+def ui_serialized_community_role():
     def _ui_serialized_community(community_id):
         return {
             "label": "My Community : owner",
@@ -472,6 +531,22 @@ def ui_serialized_community():
             },
             "reference": {"community_role": f"{community_id} : owner"},
             "type": "community role",
+        }
+
+    return _ui_serialized_community
+
+
+@pytest.fixture
+def ui_serialized_community():
+    def _ui_serialized_community(community_id):
+        return {
+            "label": "My Community",
+            "links": {
+                "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
+                "self_html": "https://127.0.0.1:5000/communities/public",  # todo is this correct?
+            },
+            "reference": {"community": community_id},
+            "type": "community",
         }
 
     return _ui_serialized_community
