@@ -11,10 +11,13 @@ from ..utils import get_associated_service, resolve_community
 class CommunitySubmissionAcceptAction(OARepoAcceptAction):
 
     def apply(self, identity, request_type, topic, uow, *args, **kwargs):
-        community = self.request.receiver.resolve()
-        community = resolve_community(
-            community
-        )  # resolve receiver, can be either community or community_role
+        if "community" not in kwargs:
+            community = self.request.receiver.resolve()
+            community = resolve_community(
+                community
+            )  # resolve receiver, can be either community or community_role
+        else:
+            community = kwargs["community"]
         service = get_record_service_for_record(topic)
         record_communities_service = get_associated_service(
             service, "record_communities"
@@ -30,10 +33,13 @@ class AbstractCommunitySubmissionRequestType(OARepoRequestType):  # rename abstr
     topic_can_be_none = False
     allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
 
-    available_actions = {
-        **OARepoRequestType.available_actions,
-        "accept": CommunitySubmissionAcceptAction,
-    }
+    @classmethod
+    @property
+    def available_actions(cls):
+        return {
+            **super().available_actions,
+            "accept": CommunitySubmissionAcceptAction,
+        }
 
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
