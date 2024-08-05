@@ -16,10 +16,9 @@ class CommunityWorkflowCommitOp(Operation):
 
     def on_register(self, uow):
         try:
-            record = CommunityWorkflowModel.query.filter(
+            db.session.query(CommunityWorkflowModel).filter(
                 CommunityWorkflowModel.community_id == self._community_id
-            ).one()
-            record.query.update({"workflow": self._workflow})
+            ).update({"workflow": self._workflow})
             db.session.commit()
         except NoResultFound:
             obj = CommunityWorkflowModel(
