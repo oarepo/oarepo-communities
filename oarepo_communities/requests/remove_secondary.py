@@ -34,10 +34,13 @@ class RemoveSecondaryRequestType(OARepoRequestType):
     topic_can_be_none = False
     allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
 
-    available_actions = {
-        **OARepoRequestType.available_actions,
-        "accept": CommunityRemoveSecondaryAcceptAction,
-    }
+    @classmethod
+    @property
+    def available_actions(cls):
+        return {
+            **super().available_actions,
+            "accept": CommunityRemoveSecondaryAcceptAction,
+        }
 
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)

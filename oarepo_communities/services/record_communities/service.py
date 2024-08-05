@@ -107,7 +107,7 @@ class RecordCommunitiesService(Service, RecordIndexerMixin):
     ):
         """Search for record's communities."""
         record = self._resolve_record(id_)
-        self.require_permission(identity, "read", record=record)
+        self.require_permission(identity, "read", record=record, **kwargs)
 
         communities_ids = record.parent.communities.ids
         communities_filter = dsl.Q("terms", **{"id": [id_ for id_ in communities_ids]})

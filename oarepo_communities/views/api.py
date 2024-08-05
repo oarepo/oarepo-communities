@@ -8,11 +8,13 @@ def create_oarepo_communities(app):
     blueprint.record_once(register_community_role_entity_resolver)
     return blueprint
 
+
 def register_community_role_entity_resolver(state):
 
     app = state.app
     requests = app.extensions["invenio-requests"]
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())
+
 
 def create_oarepo_community(app):
     """Create requests blueprint."""

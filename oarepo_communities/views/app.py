@@ -10,6 +10,7 @@ def create_app_blueprint(app):
     blueprint.record_once(register_community_role_entity_resolver)
     return blueprint
 
+
 def register_community_role_entity_resolver(state):
 
     app = state.app

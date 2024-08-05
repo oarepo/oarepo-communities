@@ -52,7 +52,7 @@ class OARepoCommunities(object):
     def urlprefix_serviceid_mapping(self):
         return get_urlprefix_service_id_mapping()
 
-    def get_community_deafult_workflow(self, **kwargs):
+    def get_community_default_workflow(self, **kwargs):
         return community_default_workflow(**kwargs)
 
     @property

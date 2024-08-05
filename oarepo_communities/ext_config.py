@@ -1,4 +1,4 @@
-from oarepo_communities.services.permissions.presets import (
+from oarepo_communities.services.permissions.policy import (
     OARepoCommunityWorkflowPermissionPolicy,
 )
 

@@ -1,4 +1,3 @@
-
 from oarepo_communities.requests.migration import (
     ConfirmCommunityMigrationRequestType,
     InitiateCommunityMigrationRequestType,

@@ -5,7 +5,7 @@ from invenio_records_resources.resources.records.resource import request_view_ar
 
 
 class OARepoCommunityResource(Resource):
-    #todo This was supposed to allow changing of default workflows for community in api calls
+    # todo This was supposed to allow changing of default workflows for community in api calls
     # but idk how that is actually planned to work, I realized that this is some kind of administration/superuser thing
     # which I don't know how it works?
 

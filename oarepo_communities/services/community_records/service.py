@@ -138,7 +138,7 @@ class CommunityRecordsService(RecordService):
         except KeyError:
             data |= {
                 "parent": {
-                    "workflow": current_oarepo_communities.get_community_deafult_workflow(
+                    "workflow": current_oarepo_communities.get_community_default_workflow(
                         community_id=community_id
                     )
                 }
