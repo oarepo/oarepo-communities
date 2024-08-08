@@ -5,7 +5,7 @@ from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
 
 from ..errors import CommunityAlreadyIncludedException
-from ..utils import get_associated_service
+from ..proxies import current_oarepo_communities
 
 
 class CommunitySubmissionAcceptAction(OARepoAcceptAction):
@@ -14,10 +14,12 @@ class CommunitySubmissionAcceptAction(OARepoAcceptAction):
 
         community_id = self.request.receiver.resolve().community_id
         service = get_record_service_for_record(topic)
-        record_communities_service = get_associated_service(
-            service, "record_communities"
+        community_inclusion_service = (
+            current_oarepo_communities.community_inclusion_service
         )
-        record_communities_service.include(topic, community_id, uow=uow, default=False)
+        community_inclusion_service.include(
+            topic, community_id, record_service=service, uow=uow, default=False
+        )
 
 
 class SecondaryCommunitySubmissionRequestType(OARepoRequestType):

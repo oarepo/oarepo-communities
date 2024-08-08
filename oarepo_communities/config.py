@@ -24,6 +24,4 @@ ENTITY_REFERENCE_UI_RESOLVERS = {
     "community_role": CommunityRoleUIResolver("community_role"),
 }
 
-DEFAULT_COMMUNITIES_CUSTOM_FIELDS = [WorkflowCF(
-        name="workflow"
-    )]
+DEFAULT_COMMUNITIES_CUSTOM_FIELDS = [WorkflowCF(name="workflow")]

@@ -7,10 +7,10 @@ from flask_security import login_user
 from invenio_access.permissions import system_identity
 from invenio_accounts.testutils import login_user_via_session
 from invenio_app.factory import create_api
-from invenio_communities import current_communities
 from invenio_communities.cli import create_communities_custom_field
 from invenio_communities.communities.records.api import Community
 from invenio_communities.generators import CommunityRoleNeed
+from invenio_communities.proxies import current_communities
 from invenio_i18n import lazy_gettext as _
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_permissions.generators import (
@@ -32,18 +32,15 @@ from oarepo_workflows import (
     WorkflowTransitions,
 )
 from oarepo_workflows.base import Workflow
-
-from oarepo_communities.services.custom_fields.workflow import WorkflowCF
-from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft
 
-from oarepo_communities.records.models import CommunityWorkflowModel
+from oarepo_communities.proxies import current_oarepo_communities
+from oarepo_communities.services.custom_fields.workflow import WorkflowCF
 from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
     CommunityRole,
-    CommunityRole,
+    DefaultCommunityRole,
     TargetCommunityRole,
-    TargetCommunityRole, DefaultCommunityRole,
 )
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
@@ -77,8 +74,8 @@ def record_service():
 
 
 @pytest.fixture()
-def record_communities_service():
-    return current_record_communities_service
+def community_inclusion_service():
+    return current_oarepo_communities.community_inclusion_service
 
 
 @pytest.fixture()
@@ -187,10 +184,6 @@ class DefaultRequests(WorkflowRequestPolicy):
         recipients=[TargetCommunityRole("owner")],
         transitions=WorkflowTransitions(),
     )
-
-
-from oarepo_workflows.requests.policy import RecipientGeneratorMixin
-
 
 
 class NoRequests(WorkflowRequestPolicy):
@@ -316,10 +309,8 @@ def app_config(app_config):
 
     app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = default_workflow_receiver_function
     app_config["WORKFLOWS"] = WORKFLOWS
-    from invenio_records_resources.services.custom_fields import KeywordCF
-    app_config["COMMUNITIES_CUSTOM_FIELDS"] = [WorkflowCF(
-        name="workflow"
-    )]
+
+    app_config["COMMUNITIES_CUSTOM_FIELDS"] = [WorkflowCF(name="workflow")]
 
     return app_config
 
@@ -345,17 +336,6 @@ def community_owner(UserFixture, app, db):
 
 
 @pytest.fixture()
-def community_curator(UserFixture, app, db, community, inviter):
-    u = UserFixture(
-        email="community_curator@inveniosoftware.org",
-        password="community_curator",
-    )
-    u.create(app, db)
-    inviter(u.id, str(community.id), "curator")
-    return u
-
-
-@pytest.fixture()
 def community_reader(UserFixture, app, db, community, inviter):
     u = UserFixture(
         email="community_reader@inveniosoftware.org",
@@ -363,17 +343,6 @@ def community_reader(UserFixture, app, db, community, inviter):
     )
     u.create(app, db)
     inviter(u.id, str(community.id), "reader")
-    return u
-
-
-@pytest.fixture()
-def rando_user(UserFixture, app, db):
-    """Community owner."""
-    u = UserFixture(
-        email="rando@inveniosoftware.org",
-        password="rando",
-    )
-    u.create(app, db)
     return u
 
 
@@ -414,13 +383,9 @@ def _community_get_or_create(identity, community_dict, workflow=None):
 
 @pytest.fixture()
 def community(app, minimal_community, community_owner):
-    return _community_get_or_create(community_owner.identity, minimal_community, workflow="default")
-
-
-@pytest.fixture()
-def community_with_default_workflow(community, set_community_workflow):
-    set_community_workflow(community.id)
-    return community
+    return _community_get_or_create(
+        community_owner.identity, minimal_community, workflow="default"
+    )
 
 
 @pytest.fixture()
@@ -535,24 +500,15 @@ def ui_serialized_community():
     return _ui_serialized_community
 
 
-from sqlalchemy.exc import NoResultFound
-
-
 @pytest.fixture
-def set_community_workflow(db):
+def set_community_workflow():
     def _set_community_workflow(community_id, workflow="default"):
-        try:
-            record = CommunityWorkflowModel.query.filter(
-                CommunityWorkflowModel.community_id == community_id
-            ).one()
-            record.query.update({"workflow": workflow})
-            db.session.commit()
-        except NoResultFound:
-            obj = CommunityWorkflowModel(
-                community_id=str(community_id),
-                workflow=workflow,
-            )
-            db.session.add(obj)
+        community_item = current_communities.service.read(system_identity, community_id)
+        current_communities.service.update(
+            system_identity,
+            community_id,
+            data={**community_item.data, "custom_fields": {"workflow": workflow}},
+        )
 
     return _set_community_workflow
 

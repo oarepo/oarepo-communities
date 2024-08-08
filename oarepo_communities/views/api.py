@@ -15,9 +15,3 @@ def register_community_role_entity_resolver(state):
     app = state.app
     requests = app.extensions["invenio-requests"]
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())
-
-
-def init_addons(state):
-    app = state.app
-
-    resolvers = app.extensions["invenio-requests"].entity_resolvers_registry

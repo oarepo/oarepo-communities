@@ -1,9 +1,7 @@
-from invenio_db import db
-from sqlalchemy.exc import NoResultFound
-
-from oarepo_communities.records.models import CommunityWorkflowModel
-from oarepo_communities.utils import community_id_from_record
 from invenio_communities.communities.records.api import Community
+
+from oarepo_communities.utils import community_id_from_record
+
 
 def community_default_workflow(**kwargs):
     if "record" not in kwargs and "community_id" not in kwargs:

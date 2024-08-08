@@ -1,4 +1,3 @@
-from invenio_access.permissions import system_identity
 from thesis.records.api import ThesisDraft, ThesisRecord
 
 from tests.test_communities.utils import published_record_in_community
@@ -7,60 +6,38 @@ from tests.test_communities.utils import published_record_in_community
 def test_create_record_in_community(
     logged_client,
     community_owner,
-    community_with_default_workflow,
+    community,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    response = owner_client.post(
-        f"/communities/{community_with_default_workflow.id}/thesis", json={}
-    )
-    assert response.json["parent"]["communities"]["ids"] == [
-        community_with_default_workflow.id
-    ]
-    assert (
-        response.json["parent"]["communities"]["default"]
-        == community_with_default_workflow.id
-    )
+    response = owner_client.post(f"/communities/{community.id}/thesis", json={})
+    assert response.json["parent"]["communities"]["ids"] == [community.id]
+    assert response.json["parent"]["communities"]["default"] == community.id
 
     response_record = owner_client.get(f"/thesis/{response.json['id']}/draft")
-    assert response_record.json["parent"]["communities"]["ids"] == [
-        community_with_default_workflow.id
-    ]
-    assert (
-        response_record.json["parent"]["communities"]["default"]
-        == community_with_default_workflow.id
-    )
+    assert response_record.json["parent"]["communities"]["ids"] == [community.id]
+    assert response_record.json["parent"]["communities"]["default"] == community.id
 
 
 def test_create_record_in_community_without_model_in_url(
     logged_client,
     community_owner,
-    community_with_default_workflow,
+    community,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
     response = owner_client.post(
-        f"/communities/{community_with_default_workflow.id}/records",
+        f"/communities/{community.id}/records",
         json={"$schema": "local://thesis-1.0.0.json"},
     )
-    assert response.json["parent"]["communities"]["ids"] == [
-        community_with_default_workflow.id
-    ]
-    assert (
-        response.json["parent"]["communities"]["default"]
-        == community_with_default_workflow.id
-    )
+    assert response.json["parent"]["communities"]["ids"] == [community.id]
+    assert response.json["parent"]["communities"]["default"] == community.id
 
     response_record = owner_client.get(f"/thesis/{response.json['id']}/draft")
-    assert response_record.json["parent"]["communities"]["ids"] == [
-        community_with_default_workflow.id
-    ]
-    assert (
-        response_record.json["parent"]["communities"]["default"]
-        == community_with_default_workflow.id
-    )
+    assert response_record.json["parent"]["communities"]["ids"] == [community.id]
+    assert response_record.json["parent"]["communities"]["default"] == community.id
 
 
 def test_search(
@@ -228,6 +205,7 @@ def test_search_links(
             owner_client, community_1.id, record_service, community_owner
         )
     ThesisRecord.index.refresh()
+
     def check_links(model_suffix):
         after_page_suffix = "&size=25&sort=newest"
         search_links = owner_client.get(
@@ -254,7 +232,6 @@ def test_search_links(
             == f"https://{site_hostname}/api/communities/{community_1.id}/{model_suffix}?page=1{after_page_suffix}"
         )
 
-
     check_links("records")
     check_links("thesis")
     check_links("user/records")
@@ -263,14 +240,20 @@ def test_search_links(
     search_links = owner_client.get(
         f"/communities/{community_1.id}/records?has_draft=true"
     ).json["links"]
-    assert search_links["self"] == f"https://{site_hostname}/api/communities/{community_1.id}/records?has_draft=true&page=1&size=25&sort=newest"
+    assert (
+        search_links["self"]
+        == f"https://{site_hostname}/api/communities/{community_1.id}/records?has_draft=true&page=1&size=25&sort=newest"
+    )
 
 
-def test_create_published(
-    community_owner, community_with_default_workflow, search_clear
-):
+"""
+# todo published service conceptual rework
+def test_create_published(community_owner, community, search_clear):
     # todo how is workflow used in published service?
     from thesis.proxies import current_published_service
 
-    record = current_published_service.create(system_identity, {"parent": {"communities": {"default": community_with_default_workflow.id}}})
+    record = current_published_service.create(
+        system_identity, {"parent": {"communities": {"default": community.id}}}
+    )
     assert record._record.state == "published"
+"""

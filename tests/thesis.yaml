@@ -17,15 +17,10 @@ record:
 
   draft: {}
 
-  record-communities:
-    permissions:
-      presets: [ "workflow"]
-
 
 profiles:
   - record
   - draft
-  - record_communities
 
 
 settings:

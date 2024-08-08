@@ -1,6 +1,6 @@
 import pytest
+from invenio_communities.communities.records.api import Community
 
-from oarepo_communities.records.models import CommunityWorkflowModel
 from tests.test_communities.utils import (
     _create_record_in_community,
     link_api2testclient,
@@ -20,7 +20,7 @@ def test_disabled_endpoints(
     owner_client = logged_client(community_owner)
     # create should work only through community
     create = owner_client.post("/thesis/", json=default_workflow_json)
-    assert create.status_code == 403
+    assert create.status_code == 400
 
     community_1 = community_with_workflow_factory("comm1", community_owner)
     draft = owner_client.post(
@@ -102,14 +102,9 @@ def test_scenario_change(
     assert update_draft.status_code == 200
     assert update_draft.json["metadata"]["title"] == "should do"
 
-    def check_community_workflow_change(community_id, workflow):
-        record = CommunityWorkflowModel.query.filter(
-            CommunityWorkflowModel.community_id == community_id
-        ).one()
-        assert record.workflow == workflow
-
     set_community_workflow(str(community_1.id), "no")
-    check_community_workflow_change(str(community_1.id), "no")
+    record = Community.get_record(str(community_1.id))
+    assert record.custom_fields["workflow"] == "no"
     request_should_still_work = owner_client.post(
         f"/thesis/{record2.json['id']}/draft/requests/publish_draft"
     )

@@ -22,5 +22,6 @@ class PrimaryCommunityException(Exception):
 class MissingDefaultCommunityError(ValidationError):
     """"""
 
+
 class MissingCommunitiesError(ValidationError):
     """"""

@@ -1,7 +1,4 @@
 import pytest
-from thesis.resources.record_communities.config import (
-    ThesisRecordCommunitiesResourceConfig,
-)
 
 from oarepo_communities.errors import (
     CommunityAlreadyIncludedException,
@@ -13,7 +10,6 @@ from tests.test_communities.utils import (
     published_record_in_community,
 )
 
-RECORD_COMMUNITIES_BASE_URL = ThesisRecordCommunitiesResourceConfig.url_prefix
 REPO_NAME = "thesis"
 
 
@@ -123,7 +119,7 @@ def test_community_publish(
     logged_client,
     community_owner,
     community_reader,
-    community_with_default_workflow,
+    community,
     request_data_factory,
     record_service,
     patch_requests_permissions,
@@ -132,12 +128,10 @@ def test_community_publish(
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record_id = _create_record_in_community(
-        reader_client, community_with_default_workflow.id
-    ).json["id"]
+    record_id = _create_record_in_community(reader_client, community.id).json["id"]
     submit = _submit_request(
         reader_client,
-        community_with_default_workflow.id,
+        community.id,
         "thesis_draft",
         record_id,
         "publish_draft",
@@ -166,7 +160,7 @@ def test_community_delete(
     logged_client,
     community_owner,
     community_reader,
-    community_with_default_workflow,
+    community,
     request_data_factory,
     record_service,
     patch_requests_permissions,
@@ -177,14 +171,14 @@ def test_community_delete(
 
     record_id = published_record_in_community(
         reader_client,
-        community_with_default_workflow.id,
+        community.id,
         record_service,
         community_owner,
     )["id"]
 
     submit = _submit_request(
         reader_client,
-        community_with_default_workflow.id,
+        community.id,
         "thesis",
         record_id,
         "delete_published_record",
@@ -422,7 +416,7 @@ def test_community_role_ui_serialization(
     logged_client,
     community_owner,
     community_reader,
-    community_with_default_workflow,
+    community,
     request_data_factory,
     record_service,
     ui_serialized_community_role,
@@ -432,13 +426,11 @@ def test_community_role_ui_serialization(
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record_id = _create_record_in_community(
-        reader_client, community_with_default_workflow.id
-    ).json["id"]
+    record_id = _create_record_in_community(reader_client, community.id).json["id"]
 
     submit = _submit_request(
         reader_client,
-        community_with_default_workflow.id,
+        community.id,
         "thesis_draft",
         record_id,
         "publish_draft",
@@ -449,9 +441,7 @@ def test_community_role_ui_serialization(
         f"/requests/extended/{submit.json['id']}",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
-    assert request.json["receiver"] == ui_serialized_community_role(
-        community_with_default_workflow.id
-    )
+    assert request.json["receiver"] == ui_serialized_community_role(community.id)
     request_list = owner_client.get(
         "/requests/",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
@@ -459,4 +449,4 @@ def test_community_role_ui_serialization(
     # todo test cache use in search requests with multiple results
     assert request_list.json["hits"]["hits"][0][
         "receiver"
-    ] == ui_serialized_community_role(community_with_default_workflow.id)
+    ] == ui_serialized_community_role(community.id)

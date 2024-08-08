@@ -1,13 +1,8 @@
-from invenio_communities.proxies import current_communities
 from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
-from invenio_pidstore.errors import PIDUnregistered
-from invenio_records_resources.services import RecordIndexerMixin
 from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.uow import RecordIndexOp, unit_of_work
-from invenio_search.engine import dsl
 
-from oarepo_communities.services.errors import RecordCommunityMissing
-from oarepo_communities.utils import slug2id
+from oarepo_communities.errors import CommunityNotIncludedException
 
 
 class CommunityInclusionService(Service):
@@ -17,9 +12,7 @@ class CommunityInclusionService(Service):
     """
 
     @unit_of_work()
-    def include(
-        self, record, community_id, uow=None, record_service=None, default=None
-    ):
+    def include(self, record, community_id, record_service, uow=None, default=None):
         if default is None:
             default = not record.parent.communities
         record.parent.communities.add(community_id, default=default)
@@ -35,9 +28,7 @@ class CommunityInclusionService(Service):
         # facet is not toggled
         # todo how to synchronize with rdm sources
         uow.register(
-            RecordIndexOp(
-                record, indexer=record_service.indexer, index_refresh=True
-            )
+            RecordIndexOp(record, indexer=record_service.indexer, index_refresh=True)
         )
         """
         uow.register(
@@ -51,17 +42,13 @@ class CommunityInclusionService(Service):
         return record
 
     @unit_of_work()
-    def remove(self, record, community_id, record_service=None, uow=None):
+    def remove(self, record, community_id, record_service, uow=None):
         """Remove a community from the record."""
-        # todo unslug somewhere else
-        if community_id not in record.parent.communities.ids:
-            # try if it's the community slug instead
-            community_id = slug2id(community_id)
-            if community_id not in record.parent.communities.ids:
-                raise RecordCommunityMissing(record.id, community_id)
 
         # Default community is deleted when the exact same community is removed from the record
-        record.parent.communities.remove(community_id)
+        if community_id not in record.parent.communities.ids:
+            raise CommunityNotIncludedException
+        record.parent.communities.remove(str(community_id))
         uow.register(
             ParentRecordCommitOp(
                 record.parent,
@@ -69,9 +56,7 @@ class CommunityInclusionService(Service):
             )
         )
         uow.register(
-            RecordIndexOp(
-                record, indexer=record_service.indexer, index_refresh=True
-            )
+            RecordIndexOp(record, indexer=record_service.indexer, index_refresh=True)
         )
 
     # todo links to communities on record (through record service config)

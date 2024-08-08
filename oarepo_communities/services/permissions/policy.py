@@ -4,7 +4,7 @@ from oarepo_requests.services.permissions.workflow_policies import (
 )
 from oarepo_workflows import WorkflowPermission
 
-from oarepo_communities.services.permissions.generators import CommunityMembers, DefaultCommunityMembers
+from oarepo_communities.services.permissions.generators import DefaultCommunityMembers
 
 
 # todo specify

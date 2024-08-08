@@ -13,7 +13,7 @@ from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
 
 from ..errors import CommunityAlreadyIncludedException
-from ..utils import get_associated_service
+from ..proxies import current_oarepo_communities
 
 
 class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
@@ -54,13 +54,18 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
         community_id = self.request.receiver.resolve().community_id
 
         service = get_record_service_for_record(topic)
-        record_communities_service = get_associated_service(
-            service, "record_communities"
+        community_inclusion_service = (
+            current_oarepo_communities.community_inclusion_service
         )
-        record_communities_service.remove(
-            topic, str(topic.parent.communities.default.id), uow=uow
+        community_inclusion_service.remove(
+            topic,
+            str(topic.parent.communities.default.id),
+            record_service=service,
+            uow=uow,
         )
-        record_communities_service.include(topic, community_id, uow=uow, default=True)
+        community_inclusion_service.include(
+            topic, community_id, record_service=service, uow=uow, default=True
+        )
 
 
 class InitiateCommunityMigrationRequestType(OARepoRequestType):
