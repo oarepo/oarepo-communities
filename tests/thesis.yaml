@@ -15,32 +15,7 @@ record:
   permissions:
     presets: [ 'workflow' ]
 
-  record:
-    fields:
-      state: "{{oarepo_workflows.records.systemfields.state.RecordStateField}}(initial='published')"
-
-  draft:
-    record:
-      fields:
-        state: "{{oarepo_workflows.records.systemfields.state.RecordStateField}}()"
-
-  draft-parent-record:
-    fields:
-      workflow: "{{oarepo_workflows.records.systemfields.workflow.WorkflowField}}()"
-
-  service-config:
-    components:
-      - "{{oarepo_workflows.services.components.workflow.WorkflowComponent}}"
-
-  parent-record-marshmallow:
-    base-classes:
-      - oarepo_workflows.services.records.schema.WorkflowParentSchema
-
-  draft-parent-record-metadata:
-    base-classes:
-      - oarepo_workflows.records.models.RecordWorkflowParentModelMixin
-      - invenio_db.db{db.Model}
-      - invenio_records.models.RecordMetadataBase
+  draft: {}
 
   record-communities:
     permissions:

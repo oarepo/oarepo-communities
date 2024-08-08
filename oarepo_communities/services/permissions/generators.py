@@ -1,63 +1,139 @@
-from invenio_communities.communities.records.api import Community
+import abc
+
 from invenio_communities.generators import (
     CommunityCurators,
     CommunityMembers,
-    CommunityRoleNeed,
+    CommunityRoleNeed, CommunityRoles,
 )
+from invenio_communities.proxies import current_roles
+from invenio_rdm_records.services.generators import RecordCommunitiesAction
 from invenio_records_permissions.generators import Generator
-from invenio_requests.proxies import current_requests
 from oarepo_workflows.requests.policy import RecipientGeneratorMixin
 
-from oarepo_communities.resolvers.communities import CommunityRoleObj
-from oarepo_communities.utils import community_id_from_record, dict_obj_lookup
+from oarepo_communities.errors import MissingDefaultCommunityError, MissingCommunitiesError
+from oarepo_communities.proxies import current_oarepo_communities
 
+class CommunityRoleMixin:
+    def _get_record_communities(self, record=None, **kwargs):
+        try:
+            return record.parent.communities.ids
+        except AttributeError:
+            raise MissingCommunitiesError(f"Communities missing on record {record}.")
 
-class OARepoCommunityRolesMixin:
+    def _get_data_communities(self, data=None, **kwargs):
+        community_ids = (
+            (data or {})
+            .get("parent", {})
+            .get("communities", {})
+            .get("ids")
+        )
+        if not community_ids:
+            raise MissingCommunitiesError("Communities not defined in input data.")
+        return community_ids
+
+class DefaultCommunityRoleMixin:
+    def _get_record_communities(self, record=None, **kwargs):
+        try:
+            return [str(record.parent.communities.default.id)]
+        except AttributeError:
+            raise MissingDefaultCommunityError(f"Default community missing on record {record}.")
+
+    def _get_data_communities(self, data=None, **kwargs):
+        community_id = (
+            (data or {})
+            .get("parent", {})
+            .get("communities", {})
+            .get("default")
+        )
+        if not community_id:
+            raise MissingDefaultCommunityError("Default community not defined in input data.")
+        return [community_id]
+
+class OARepoCommunityRoles(CommunityRoles):
     # Invenio generators do not capture all situations where we need community id from record
-    def needs(self, record=None, community_id=None, **kwargs):
+    def communities(self, identity):
+        """Communities that an identity can manage."""
+        roles = self.roles(identity=identity)
+        community_ids = set()
+        for n in identity.provides:
+            if n.method == "community" and n.role in roles:
+                community_ids.add(n.value)
+        return list(community_ids)
+    @abc.abstractmethod
+    def _get_record_communities(self, record=None, **kwargs):
+        raise NotImplemented()
 
-        if not community_id:
-            community_id = community_id_from_record(record)
-        community_id = str(community_id)
-        if not community_id:
-            print("No community id provided.")
-            return []
+    @abc.abstractmethod
+    def _get_data_communities(self, data=None, **kwargs):
+        raise NotImplemented()
 
-        roles = self.roles(**kwargs)
-        if roles:
-            needs = [CommunityRoleNeed(community_id, role) for role in roles]
-            return needs
-        return []
+    @abc.abstractmethod
+    def roles(self, **kwargs):
+        raise NotImplemented()
+
+    def needs(self, record=None, data=None, **kwargs):
+        """Set of Needs granting permission."""
+        if record:
+            community_ids = self._get_record_communities(record)
+        else:
+            community_ids = self._get_data_communities(data)
+
+        _needs = set()
+        for c in community_ids:
+            for role in self.roles(**kwargs):
+                _needs.add(CommunityRoleNeed(c, role))
+        return _needs
 
 
-class CommunityRole(RecipientGeneratorMixin, OARepoCommunityRolesMixin, Generator):
-    access_key = "record.parent.communities.default.id"
+class CommunityRole(CommunityRoleMixin, OARepoCommunityRoles):
 
-    def __init__(self, role, type_key="community"):
+    def __init__(self, role):
         self._role = role
-        self._type_key = type_key
         super().__init__()
+    def roles(self, **kwargs):
+        return [self._role]
 
+
+
+class DefaultCommunityRole(DefaultCommunityRoleMixin, RecipientGeneratorMixin, OARepoCommunityRoles):
+
+    def __init__(self, role):
+        self._role = role
+        super().__init__()
     def roles(self, **kwargs):
         return [self._role]
 
     def reference_receivers(self, **kwargs):
-        community_id = dict_obj_lookup(kwargs, self.access_key)
-        community = Community.pid.resolve(community_id)
-        obj = CommunityRoleObj(community, self._role)
-        resolver_registry = current_requests.entity_resolvers_registry
-        resolver = resolver_registry._registered_types["community_role"]
-        ref = resolver._reference_entity(obj)
-        return [ref]
+        community_id = self._get_record_communities(**kwargs)[0]
+        return [{"community_role": f"{community_id} : {self._role}"}]
 
 
 class TargetCommunityRole(CommunityRole):
-    access_key = "data.payload.community"
+
+    def _get_data_communities(self, data=None, **kwargs):
+        try:
+            community_id = data["payload"]["community"]
+        except KeyError:
+            raise MissingDefaultCommunityError("Community not defined in request payload.")
+        return [community_id]
+
+    def reference_receivers(self, **kwargs):
+        community_id = self._get_data_communities(**kwargs)[0]
+        return [{"community_role": f"{community_id} : {self._role}"}]
 
 
-class CommunityMembers(OARepoCommunityRolesMixin, CommunityMembers):
-    """"""
+
+class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):
+
+    def roles(self, **kwargs):
+        """Roles."""
+        return [r.name for r in current_roles]
+
+class DefaultCommunityMembers(DefaultCommunityRoleMixin, OARepoCommunityRoles):
+
+    def roles(self, **kwargs):
+        """Roles."""
+        return [r.name for r in current_roles]
 
 
-class CommunityCurators(OARepoCommunityRolesMixin, CommunityCurators):
     """"""

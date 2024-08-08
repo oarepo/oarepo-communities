@@ -8,6 +8,8 @@ from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
 from .services.oarepo.config import OARepoCommunityServiceConfig
 from .services.oarepo.service import OARepoCommunityService
+from .services.record_communities.config import CommunityInclusionServiceConfig
+from .services.record_communities.service import CommunityInclusionService
 from .utils import get_urlprefix_service_id_mapping
 from .workflow import community_default_workflow
 
@@ -36,6 +38,9 @@ class OARepoCommunities(object):
         app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(
             config.REQUESTS_ALLOWED_RECEIVERS
         )
+        app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS", []).extend(
+            config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS
+        )
         app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(
             config.ENTITY_REFERENCE_UI_RESOLVERS
         )
@@ -55,20 +60,15 @@ class OARepoCommunities(object):
     def get_community_default_workflow(self, **kwargs):
         return community_default_workflow(**kwargs)
 
-    @property
-    def record_workflow(self):
-        return self.app.config["RECORD_WORKFLOWS"]
-
-    @property
-    def community_records_services(self):
-        return self.app.config["COMMUNITY_RECORDS_SERVICES"]
-
     def init_services(self, app):
         """Initialize communities service."""
         # Services
         self.community_records_service = CommunityRecordsService(
             config=CommunityRecordsServiceConfig.build(app),
         )
+
+        self.community_inclusion_service = CommunityInclusionService(CommunityInclusionServiceConfig())
+
         self.oarepo_community_service = OARepoCommunityService(
             OARepoCommunityServiceConfig()
         )
@@ -84,3 +84,44 @@ class OARepoCommunities(object):
             config=OARepoCommunityConfig(),
             service=self.oarepo_community_service,
         )
+
+    def get_default_community_from_record(self, record, **kwargs):
+        record = record.parent if hasattr(record, "parent") else record
+        try:
+            return record.communities.default.id
+        except AttributeError:
+            return None
+
+
+def api_finalize_app(app):
+    """Finalize app."""
+    init(app)
+
+
+def finalize_app(app):
+    """Finalize app."""
+    init(app)
+
+
+def init(app):
+    """Init app."""
+    # Register services - cannot be done in extension because
+    # Invenio-Records-Resources might not have been initialized.
+    rr_ext = app.extensions["invenio-records-resources"]
+    # idx_ext = app.extensions["invenio-indexer"]
+    ext = app.extensions["oarepo-communities"]
+
+    # services
+    rr_ext.registry.register(
+        ext.community_records_service,
+        service_id=ext.community_records_service.config.service_id,
+    )
+    # indexers
+    # idx_ext.registry.register(ext.community_records_service.indexer, indexer_id="communities")
+
+    for cf in app.config["DEFAULT_COMMUNITIES_CUSTOM_FIELDS"]:
+        for target_cf in app.config["COMMUNITIES_CUSTOM_FIELDS"]:
+            if cf.name == target_cf.name:
+                break
+        else:
+            app.config["COMMUNITIES_CUSTOM_FIELDS"].append(cf)

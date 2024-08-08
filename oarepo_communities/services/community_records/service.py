@@ -6,16 +6,16 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """RDM Community Records Service."""
+import copy
 
-from invenio_communities.proxies import current_communities
 from invenio_drafts_resources.services.records.service import RecordService
 from invenio_records_resources.services import ServiceSchemaWrapper
+from invenio_records_resources.services.base.links import LinksTemplate
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
 
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.utils import (
-    get_associated_service,
     get_global_search_service,
     get_global_user_search_service,
     get_service_by_urlprefix,
@@ -31,14 +31,40 @@ class CommunityRecordsService(RecordService):
     The record communities service is in charge of managing the records of a given community.
     """
 
+    """
     def __init__(self, config, record_service=None):
         super().__init__(config)
         self.record_service = record_service
+    """
 
     @property
     def community_record_schema(self):
         """Returns the community schema instance."""
         return ServiceSchemaWrapper(self, schema=self.config.community_record_schema)
+
+    def _search(
+        self,
+        identity,
+        community_id,
+        search_service,
+        search_method,
+        links_template,
+        params=None,
+        search_preference=None,
+        extra_filter=None,
+        expand=False,
+        **kwargs,
+    ):
+        params = params or {}
+        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
+        if extra_filter is not None:
+            default_filter = default_filter & extra_filter
+        ret = getattr(search_service, search_method)(
+            identity, params, extra_filter=default_filter
+        )
+        links_template.context["args"] |= ret._links_tpl.context["args"]
+        ret._links_tpl = links_template
+        return ret
 
     def search(
         self,
@@ -50,37 +76,51 @@ class CommunityRecordsService(RecordService):
         expand=False,
         **kwargs,
     ):
-        params = params or {}
-        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
-        if extra_filter is not None:
-            default_filter = default_filter & extra_filter
-        ret = get_global_search_service().global_search(
-            identity, params, extra_filter=default_filter
+        params_copy = copy.deepcopy(params)
+        facets = params_copy.pop("facets")
+        params_copy.update(facets)
+        return self._search(
+            identity,
+            community_id,
+            search_service=get_global_search_service(),
+            search_method="global_search",
+            links_template=LinksTemplate(
+                self.config.links_search_community_records,
+                context={"args": params_copy, "id": community_id},
+            ),
+            params=params,
+            search_preference=search_preference,
+            extra_filter=extra_filter,
+            expand=expand,
+            **kwargs,
         )
-        # ret._links_tpl = LinksTemplate(
-        #    self.config.links_search_community_records,
-        #    context={"args": params, "id": community_id},
-        # )
-        return ret
 
     def search_model(
         self,
         identity,
         community_id,
-        model_url,
+        model_url_name,
         params=None,
         search_preference=None,
         extra_filter=None,
         expand=False,
         **kwargs,
     ):
-        # todo generate correct links?
-        params = params or {}
-        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
-        if extra_filter is not None:
-            default_filter = default_filter & extra_filter
-        service = get_service_by_urlprefix(model_url)
-        return service.search(identity, params, extra_filter=default_filter)
+        return self._search(
+            identity,
+            community_id,
+            search_service=get_service_by_urlprefix(model_url_name),
+            search_method="search",
+            links_template=LinksTemplate(
+                self.config.links_search_community_model_records,
+                context={"args": params, "id": community_id, "model": model_url_name},
+            ),
+            params=params,
+            search_preference=search_preference,
+            extra_filter=extra_filter,
+            expand=expand,
+            **kwargs,
+        )
 
     def user_search(
         self,
@@ -92,33 +132,51 @@ class CommunityRecordsService(RecordService):
         expand=False,
         **kwargs,
     ):
-        params = params or {}
-        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
-        if extra_filter is not None:
-            default_filter = default_filter & extra_filter
-
-        return get_global_user_search_service().global_search(
-            identity, params, extra_filter=default_filter
+        params_copy = copy.deepcopy(params)
+        facets = params_copy.pop("facets")
+        params_copy.update(facets)
+        return self._search(
+            identity,
+            community_id,
+            search_service=get_global_user_search_service(),
+            search_method="global_search",
+            links_template=LinksTemplate(
+                self.config.links_search_community_user_records,
+                context={"args": params_copy, "id": community_id},
+            ),
+            params=params,
+            search_preference=search_preference,
+            extra_filter=extra_filter,
+            expand=expand,
+            **kwargs,
         )
 
     def user_search_model(
         self,
         identity,
         community_id,
-        model_url,
+        model_url_name,
         params=None,
         search_preference=None,
         extra_filter=None,
         expand=False,
         **kwargs,
     ):
-        params = params or {}
-        default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
-        if extra_filter is not None:
-            default_filter = default_filter & extra_filter
-
-        service = get_service_by_urlprefix(model_url)
-        return service.search_drafts(identity, params, extra_filter=default_filter)
+        return self._search(
+            identity,
+            community_id,
+            search_service=get_service_by_urlprefix(model_url_name),
+            search_method="search_drafts",
+            links_template=LinksTemplate(
+                self.config.links_search_community_model_user_records,
+                context={"args": params, "id": community_id, "model": model_url_name},
+            ),
+            params=params,
+            search_preference=search_preference,
+            extra_filter=extra_filter,
+            expand=expand,
+            **kwargs,
+        )
 
     @unit_of_work()
     def create_in_community(
@@ -132,28 +190,18 @@ class CommunityRecordsService(RecordService):
             record_service = get_service_from_schema_type(data["$schema"])
         if not record_service:
             raise ValueError(f"No service found for requested model {model}.")
-        community = current_communities.service.record_cls.pid.resolve(community_id)
+        data.setdefault("parent", {}).setdefault("communities", {})[
+            "default"
+        ] = community_id
         try:
             data["parent"]["workflow"]
         except KeyError:
-            data |= {
-                "parent": {
-                    "workflow": current_oarepo_communities.get_community_default_workflow(
-                        community_id=community_id
-                    )
-                }
-            }
+            data["parent"]["workflow"] = (
+                current_oarepo_communities.get_community_default_workflow(
+                    community_id=community_id
+                )
+            )
         result_item = record_service.create(
-            identity, data, uow=uow, expand=expand, community_id=community_id, **kwargs
-        )
-        record_communities_service = get_associated_service(
-            record_service, "record_communities"
-        )
-
-        record_communities_service.include(
-            result_item._record,
-            community.id,
-            record_service=record_service,
-            uow=uow,
+            identity, data, uow=uow, expand=expand, **kwargs
         )
         return result_item

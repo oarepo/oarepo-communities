@@ -10,9 +10,9 @@ class CommunityRecordsResourceConfig(RecordResourceConfig, ConfiguratorMixin):
     url_prefix = "/communities/"
     routes = {
         "list": "<pid_value>/records",
-        "list-model": "<pid_value>/<model>/records",
+        "list-model": "<pid_value>/<model>",
         "list-user": "<pid_value>/user/records",
-        "list-user-model": "<pid_value>/user/<model>/records",
+        "list-user-model": "<pid_value>/user/<model>",
     }
     request_view_args = {
         **RecordResourceConfig.request_view_args,

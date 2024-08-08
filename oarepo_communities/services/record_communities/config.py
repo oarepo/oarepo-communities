@@ -4,7 +4,7 @@ from invenio_records_resources.services.base.config import (
 )
 
 
-class RecordCommunitiesServiceConfig(ServiceConfig, ConfiguratorMixin):
+class CommunityInclusionServiceConfig(ServiceConfig, ConfiguratorMixin):
     """Record communities service config."""
 
     components = []

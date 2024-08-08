@@ -16,7 +16,7 @@ fi
 python3 -m venv $BUILDER_VENV
 . $BUILDER_VENV/bin/activate
 pip install -U setuptools pip wheel
-pip install oarepo-model-builder oarepo-model-builder-requests oarepo-model-builder-drafts oarepo-model-builder-communities
+pip install oarepo-model-builder oarepo-model-builder-requests oarepo-model-builder-drafts oarepo-model-builder-communities oarepo-model-builder-workflows
 editable_install /home/ron/prace/oarepo-model-builder-communities
 curl -L -o forked_install.sh https://github.com/oarepo/nrp-devtools/raw/main/tests/forked_install.sh
 if test -d $BUILD_TEST_DIR/$MODEL; then
@@ -37,6 +37,9 @@ pip install .
 pip install oarepo-workflows
 pip install oarepo-global-search
 sh forked_install.sh invenio-records-resources
-sh forked_install.sh invenio-requests
-sh forked_install.sh invenio-drafts-resources
+#sh forked_install.sh invenio-requests
+#sh forked_install.sh invenio-drafts-resources
+pip install -U --force-reinstall --no-deps https://github.com/oarepo/invenio-requests/archive/oarepo-4.1.0.zip
+pip install -U --force-reinstall --no-deps https://github.com/oarepo/invenio-drafts-resources/archive/oarepo-3.1.1.zip
+pip install -U --force-reinstall --no-deps https://github.com/oarepo/invenio-rdm-records/archive/oarepo-10.8.0.zip
 pytest ./$CODE_TEST_DIR/test_communities

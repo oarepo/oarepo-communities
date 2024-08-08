@@ -3,7 +3,7 @@ from sqlalchemy.exc import NoResultFound
 
 from oarepo_communities.records.models import CommunityWorkflowModel
 from oarepo_communities.utils import community_id_from_record
-
+from invenio_communities.communities.records.api import Community
 
 def community_default_workflow(**kwargs):
     if "record" not in kwargs and "community_id" not in kwargs:
@@ -14,12 +14,6 @@ def community_default_workflow(**kwargs):
             return None
     else:
         community_id = kwargs["community_id"]
-    try:
-        res = (
-            db.session.query(CommunityWorkflowModel.workflow)
-            .filter(CommunityWorkflowModel.community_id == community_id)
-            .one()
-        )
-    except NoResultFound:
-        return None
-    return res[0]
+
+    community = Community.get_record(community_id)
+    return community.custom_fields.get("workflow")

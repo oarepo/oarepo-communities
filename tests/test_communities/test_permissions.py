@@ -25,7 +25,7 @@ def test_disabled_endpoints(
 
     community_1 = community_with_workflow_factory("comm1", community_owner)
     draft = owner_client.post(
-        f"/communities/{community_1.id}/thesis/records", json=default_workflow_json
+        f"/communities/{community_1.id}/thesis", json=default_workflow_json
     ).json
     published_record = published_record_in_community(
         owner_client, community_1.id, record_service, community_owner

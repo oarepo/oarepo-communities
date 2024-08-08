@@ -24,9 +24,7 @@ def test_include(
     community_2 = community_with_workflow_factory("comm2", community_owner)
     community_3 = community_with_workflow_factory("comm3", community_owner)
 
-    response = owner_client.post(
-        f"/communities/{community_1.id}/thesis/records", json={}
-    )
+    response = owner_client.post(f"/communities/{community_1.id}/thesis", json={})
 
     record_id = response.json["id"]
     record = record_service.read_draft(system_identity, record_id)._obj
@@ -65,9 +63,7 @@ def test_remove(
     community_3 = community_with_workflow_factory("comm3", community_owner)
     community_4 = community_with_workflow_factory("comm4", community_owner)
 
-    response = owner_client.post(
-        f"/communities/{community_1.id}/thesis/records", json={}
-    )
+    response = owner_client.post(f"/communities/{community_1.id}/thesis", json={})
     record_id = response.json["id"]
     record = record_service.read_draft(system_identity, record_id)._obj
 
@@ -107,7 +103,7 @@ def test_search(
     community_3 = community_with_workflow_factory("comm3", community_owner)
 
     draft_in_community = owner_client.post(
-        f"/communities/{community_1.id}/thesis/records", json={}
+        f"/communities/{community_1.id}/thesis", json={}
     )
     draft_id = draft_in_community.json["id"]
     draft_search = owner_client.get(f"/thesis/{draft_id}/communities")
@@ -124,7 +120,7 @@ def test_search(
     assert published_record_search.json["hits"]["hits"][0]["id"] == community_1.id
 
     draft2_in_community = owner_client.post(
-        f"/communities/{community_1.id}/thesis/records", json={}
+        f"/communities/{community_1.id}/thesis", json={}
     )
     draft2_id = draft2_in_community.json["id"]
     # add draft to secondary community
@@ -148,9 +144,9 @@ def test_search(
     assert len(draft_search.json["hits"]["hits"]) == 1
     assert len(draft2_search.json["hits"]["hits"]) == 2
 
-    """
     published_record_ui_serialization = owner_client.get(
         f"/thesis/{published_record['id']}/communities",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
-    """
+
+    print()

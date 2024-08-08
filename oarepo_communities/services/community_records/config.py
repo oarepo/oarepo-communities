@@ -11,7 +11,15 @@ class CommunityRecordsServiceConfig(
 
     PERMISSIONS_PRESETS = ["workflow"]
     service_id = "community-records"
-    # todo correct links
     links_search_community_records = pagination_links(
         "{+api}/communities/{id}/records{?args*}"
+    )
+    links_search_community_user_records = pagination_links(
+        "{+api}/communities/{id}/user/records{?args*}"
+    )
+    links_search_community_model_records = pagination_links(
+        "{+api}/communities/{id}/{model}{?args*}"
+    )
+    links_search_community_model_user_records = pagination_links(
+        "{+api}/communities/{id}/user/{model}{?args*}"
     )

@@ -32,20 +32,22 @@ from oarepo_workflows import (
     WorkflowTransitions,
 )
 from oarepo_workflows.base import Workflow
+
+from oarepo_communities.services.custom_fields.workflow import WorkflowCF
 from thesis.proxies import current_record_communities_service
 from thesis.records.api import ThesisDraft
 
 from oarepo_communities.records.models import CommunityWorkflowModel
 from oarepo_communities.services.permissions.generators import (
-    CommunityCurators,
     CommunityMembers,
     CommunityRole,
+    CommunityRole,
     TargetCommunityRole,
+    TargetCommunityRole, DefaultCommunityRole,
 )
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
-from oarepo_communities.utils import dict_obj_lookup
 
 
 @pytest.fixture()
@@ -122,6 +124,7 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     can_read = [
         RecordOwners(),
         AuthenticatedUser(),  # need for request receivers - temporary
+        # CommunityRole("owner"),
         CommunityRole("owner"),
         IfInState(
             "published",
@@ -147,14 +150,14 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
 class DefaultRequests(WorkflowRequestPolicy):
     publish_draft = WorkflowRequest(
         requesters=[IfInState("draft", [RecordOwners()])],
-        recipients=[CommunityRole("owner")],
+        recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
             submitted="publishing", accepted="published", declined="draft"
         ),
     )
     delete_published_record = WorkflowRequest(
         requesters=[IfInState("published", [RecordOwners()])],
-        recipients=[CommunityRole("owner")],
+        recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
             submitted="deleting", accepted="deleted", declined="published"
         ),
@@ -176,7 +179,7 @@ class DefaultRequests(WorkflowRequestPolicy):
     )
     initiate_community_migration = WorkflowRequest(
         requesters=[CommunityMembers()],
-        recipients=[CommunityRole("owner")],
+        recipients=[TargetCommunityRole("owner")],
         transitions=WorkflowTransitions(),
     )
     confirm_community_migration = WorkflowRequest(
@@ -188,25 +191,6 @@ class DefaultRequests(WorkflowRequestPolicy):
 
 from oarepo_workflows.requests.policy import RecipientGeneratorMixin
 
-
-class TestInvenioCommunity(RecipientGeneratorMixin, CommunityCurators):
-    access_key = "record.parent.communities.default.id"
-
-    def reference_receivers(self, **kwargs):
-        community_id = dict_obj_lookup(kwargs, self.access_key)
-        return [{"community": str(community_id)}]
-
-    """"""
-
-
-class InvenioCommunityReceiverPublishRequests(DefaultRequests):
-    publish_draft = WorkflowRequest(
-        requesters=[IfInState("draft", [RecordOwners()])],
-        recipients=[TestInvenioCommunity()],
-        transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft"
-        ),
-    )
 
 
 class NoRequests(WorkflowRequestPolicy):
@@ -255,7 +239,7 @@ WORKFLOWS = {
     "custom": Workflow(
         label=_("For checking if workflow changed."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
-        request_policy_cls=InvenioCommunityReceiverPublishRequests,
+        request_policy_cls=DefaultRequests,
     ),
     "no": Workflow(
         label=_("Can't do any requests."),
@@ -332,10 +316,10 @@ def app_config(app_config):
 
     app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = default_workflow_receiver_function
     app_config["WORKFLOWS"] = WORKFLOWS
-
-    app_config["REQUEST_TYPE_RECEIVER_ACCESS_KEYS"] = {  # possibility
-        "publish_draft": {"community_role": "record.parent.communities.default.id"}
-    }
+    from invenio_records_resources.services.custom_fields import KeywordCF
+    app_config["COMMUNITIES_CUSTOM_FIELDS"] = [WorkflowCF(
+        name="workflow"
+    )]
 
     return app_config
 
@@ -345,7 +329,6 @@ def init_cf(app, db, cache):
     from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
 
     prepare_cf_indices()
-
     result = app.test_cli_runner().invoke(create_communities_custom_field, [])
     assert result.exit_code == 0
     Community.index.refresh()
@@ -414,7 +397,7 @@ def location(location):
     return location
 
 
-def _community_get_or_create(identity, community_dict):
+def _community_get_or_create(identity, community_dict, workflow=None):
     """Util to get or create community, to avoid duplicate error."""
     slug = community_dict["slug"]
     try:
@@ -422,7 +405,7 @@ def _community_get_or_create(identity, community_dict):
     except PIDDoesNotExistError:
         c = current_communities.service.create(
             identity,
-            community_dict,
+            {**community_dict, "custom_fields": {"workflow": workflow or "default"}},
         )
         Community.index.refresh()
         identity.provides.add(CommunityRoleNeed(str(c.id), "owner"))
@@ -431,7 +414,7 @@ def _community_get_or_create(identity, community_dict):
 
 @pytest.fixture()
 def community(app, minimal_community, community_owner):
-    return _community_get_or_create(community_owner.identity, minimal_community)
+    return _community_get_or_create(community_owner.identity, minimal_community, workflow="default")
 
 
 @pytest.fixture()

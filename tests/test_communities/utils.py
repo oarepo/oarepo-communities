@@ -9,7 +9,7 @@ def published_record_in_community(client, community_id, record_service, user):
 
 
 def _create_record_in_community(client, comm_id):
-    return client.post(f"/communities/{comm_id}/thesis/records", json={})
+    return client.post(f"/communities/{comm_id}/thesis", json={})
 
 
 def link_api2testclient(api_link):

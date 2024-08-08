@@ -1,11 +1,11 @@
+from flask import current_app
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.proxies import current_service_registry
+from oarepo_global_search.services.records.service import GlobalSearchService
+from oarepo_global_search.services.records.user_service import GlobalUserSearchService
 
 from oarepo_communities.proxies import current_oarepo_communities
-from oarepo_communities.resolvers.communities import CommunityRoleObj
-
-# from oarepo_runtime.datastreams.utils import get_record_services
 
 
 def get_associated_service(record_service, service_type):
@@ -19,10 +19,7 @@ def slug2id(slug):
     return str(current_communities.service.record_cls.pid.resolve(slug).id)
 
 
-from oarepo_global_search.services.records.service import GlobalSearchService
-from oarepo_global_search.services.records.user_service import GlobalUserSearchService
-
-
+# todo load from proxies
 def get_global_search_service():
     return GlobalSearchService()
 
@@ -32,9 +29,10 @@ def get_global_user_search_service():
 
 
 def get_record_services():
-    from oarepo_communities.proxies import current_oarepo_communities
-
-    return current_oarepo_communities.community_records_services
+    services = []
+    for service_id in set(current_app.config["OAREPO_PRIMARY_RECORD_SERVICE"].values()):
+        services.append(current_service_registry.get(service_id))
+    return services
 
 
 def get_service_by_urlprefix(url_prefix):
@@ -77,55 +75,3 @@ def community_id_from_record(record):
         except AttributeError:
             return None
     return community_id
-
-
-from invenio_records.dictutils import parse_lookup_key
-
-
-def dict_obj_lookup(source, lookup_key, parent=False):
-    """Make a lookup into a dict based on a dot notation.
-
-    Examples of the supported dot notation:
-
-    - ``'a'`` - Equivalent to ``source['a']``
-    - ``'a.b'`` - Equivalent to ``source['a']['b']``
-    - ``'a.b.0'`` - Equivalent to ``source['a']['b'][0]`` (for lists)
-
-    List notation is also supported:
-
-    - `['a']``
-    - ``['a','b']``
-    - ``['a','b', 0]``
-
-    :param source: The dictionary object to perform the lookup in.
-    :param parent: If parent argument is True, returns the parent node of
-                   matched object.
-    :param lookup_key: A string using dot notation, or a list of keys.
-    """
-    # Copied from dictdiffer (CERN contributed part) and slightly modified.
-    keys = parse_lookup_key(lookup_key)
-
-    if parent:
-        keys = keys[:-1]
-
-    # Lookup the key
-    value = source
-    for key in keys:
-        try:
-            if isinstance(value, list):
-                key = int(key)
-            if hasattr(value, key):
-                value = getattr(value, key)
-            else:
-                value = value[key]
-        except (TypeError, IndexError, ValueError, KeyError) as exc:
-            raise KeyError(lookup_key) from exc
-    return value
-
-
-def resolve_community(community_obj):
-    if isinstance(community_obj, Community):
-        return community_obj
-    elif isinstance(community_obj, CommunityRoleObj):
-        return community_obj.community
-    return None

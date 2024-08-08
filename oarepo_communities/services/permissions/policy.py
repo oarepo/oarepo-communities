@@ -4,16 +4,16 @@ from oarepo_requests.services.permissions.workflow_policies import (
 )
 from oarepo_workflows import WorkflowPermission
 
-from oarepo_communities.services.permissions.generators import CommunityMembers
+from oarepo_communities.services.permissions.generators import CommunityMembers, DefaultCommunityMembers
 
 
 # todo specify
 class CommunityDefaultWorkflowPermissions(DefaultWithRequestsWorkflowPermissionPolicy):
     can_create = [
-        CommunityMembers(),
+        DefaultCommunityMembers(),
     ]
 
-    can_set_workflow = [CommunityMembers()]
+    can_set_workflow = [DefaultCommunityMembers()]
 
 
 class OARepoCommunityWorkflowPermissionPolicy(RecordPermissionPolicy):

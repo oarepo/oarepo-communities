@@ -5,7 +5,7 @@ from invenio_search.engine import dsl
 from oarepo_requests.resolvers.ui import OARepoUIResolver, fallback_label_result
 
 
-class OARepoCommunityReferenceUIResolver(OARepoUIResolver):
+class CommunityRoleUIResolver(OARepoUIResolver):
     def _resolve_community_label(self, record, reference):
         if (
             "metadata" not in record or "title" not in record["metadata"]
@@ -19,41 +19,10 @@ class OARepoCommunityReferenceUIResolver(OARepoUIResolver):
         return label
 
     def _get_id(self, result):
-        return result["id"]
-
-    def _search_many(self, identity, values, *args, **kwargs):
-        if not values:
-            return []
-        service = current_communities.service
-        filter = dsl.Q("terms", **{"id": list(values)})
-        return list(service.search(identity, extra_filter=filter).hits)
-
-    def _search_one(self, identity, reference, *args, **kwargs):
-        value = list(reference.values())[0]
-        try:
-            community = current_communities.service.read(identity, value).data
-            return community
-        except PermissionDeniedError:
-            return None
-
-    def _resolve(self, record, reference):
-        label = self._resolve_community_label(record, reference)
-        ret = {
-            "reference": reference,
-            "type": "community",
-            "label": label,
-            "links": self._resolve_links(record),
-        }
-        return ret
-
-
-class CommunityRoleUIResolver(OARepoCommunityReferenceUIResolver):
-    def _get_id(self, result):
         # reuse reference_entity somehow?
         return f"{result['community']['id']} : {result['role']}"
 
     def _search_many(self, identity, values, *args, **kwargs):
-        # todo this is kind of awkward but idk if it can be done better without persistently saving communityrole objects
         if not values:
             return []
         values_map = {
@@ -70,11 +39,13 @@ class CommunityRoleUIResolver(OARepoCommunityReferenceUIResolver):
         return actual_results
 
     def _search_one(self, identity, reference, *args, **kwargs):
-        # todo we aren't using ResolverRegistry.reference_entity bc of permission validation?
         proxy = ResolverRegistry.resolve_entity_proxy(reference)
-        community_reference = proxy.community_reference()
-        community = super()._search_one(identity, community_reference, *args, **kwargs)
-        return {"community": community, "role": proxy._parse_ref_dict_role()}
+        community_id, role = proxy._parse_ref_dict()
+        try:
+            community = current_communities.service.read(identity, community_id).data
+        except PermissionDeniedError:
+            return None
+        return {"community": community, "role": role}
 
     def _resolve(self, record, reference):
         community_record = record["community"]

@@ -65,7 +65,7 @@ class CommunityRecordsResource(RecordResource):
         hits = self.service.search_model(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
-            model_url=resource_requestctx.view_args["model"],
+            model_url_name=resource_requestctx.view_args["model"],
             params=resource_requestctx.args,
             search_preference=search_preference(),
         )
@@ -108,7 +108,7 @@ class CommunityRecordsResource(RecordResource):
         hits = self.service.user_search_model(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
-            model_url=resource_requestctx.view_args["model"],
+            model_url_name=resource_requestctx.view_args["model"],
             params=resource_requestctx.args,
             search_preference=search_preference(),
         )

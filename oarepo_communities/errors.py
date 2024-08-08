@@ -1,3 +1,6 @@
+from marshmallow import ValidationError
+
+
 class CommunityAlreadyIncludedException(Exception):
     """The record is already in the community."""
 
@@ -14,3 +17,10 @@ class PrimaryCommunityException(Exception):
     """The record is already in the community."""
 
     description = "Primary community can't be removed, can only be migrated to another."
+
+
+class MissingDefaultCommunityError(ValidationError):
+    """"""
+
+class MissingCommunitiesError(ValidationError):
+    """"""

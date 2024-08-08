@@ -18,6 +18,9 @@ class CommunityWorkflowCommitOp(Operation):
         try:
             db.session.query(CommunityWorkflowModel).filter(
                 CommunityWorkflowModel.community_id == self._community_id
+            ).one()
+            db.session.query(CommunityWorkflowModel).filter(
+                CommunityWorkflowModel.community_id == self._community_id
             ).update({"workflow": self._workflow})
             db.session.commit()
         except NoResultFound:
