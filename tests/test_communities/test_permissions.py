@@ -9,7 +9,6 @@ from tests.test_communities.utils import (
 
 
 def test_disabled_endpoints(
-    init_cf,
     logged_client,
     community_owner,
     community_with_workflow_factory,
@@ -53,7 +52,6 @@ def requests_service():
 
 
 def test_scenario_change(
-    init_cf,
     logged_client,
     community_owner,
     community_reader,

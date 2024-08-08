@@ -2,12 +2,8 @@ from functools import cached_property
 
 from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
-from .resources.oarepo.config import OARepoCommunityConfig
-from .resources.oarepo.resource import OARepoCommunityResource
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
-from .services.oarepo.config import OARepoCommunityServiceConfig
-from .services.oarepo.service import OARepoCommunityService
 from .services.record_communities.config import CommunityInclusionServiceConfig
 from .services.record_communities.service import CommunityInclusionService
 from .utils import get_urlprefix_service_id_mapping
@@ -69,20 +65,12 @@ class OARepoCommunities(object):
 
         self.community_inclusion_service = CommunityInclusionService(CommunityInclusionServiceConfig())
 
-        self.oarepo_community_service = OARepoCommunityService(
-            OARepoCommunityServiceConfig()
-        )
-
     def init_resources(self, app):
         """Initialize communities resources."""
         # Resources
         self.community_records_resource = CommunityRecordsResource(
             config=CommunityRecordsResourceConfig.build(app),
             service=self.community_records_service,
-        )
-        self.oarepo_community_resource = OARepoCommunityResource(
-            config=OARepoCommunityConfig(),
-            service=self.oarepo_community_service,
         )
 
     def get_default_community_from_record(self, record, **kwargs):

@@ -6,7 +6,6 @@ from tests.test_communities.utils import published_record_in_community
 
 def test_create_record_in_community(
     logged_client,
-    init_cf,
     community_owner,
     community_with_default_workflow,
     search_clear,
@@ -65,7 +64,6 @@ def test_create_record_in_community_without_model_in_url(
 
 
 def test_search(
-    init_cf,
     logged_client,
     community_owner,
     community_reader,
@@ -109,7 +107,6 @@ def test_search(
 
 
 def test_search_model(
-    init_cf,
     logged_client,
     community_owner,
     community_reader,
@@ -143,7 +140,6 @@ def test_search_model(
 
 
 def test_user_search(
-    init_cf,
     logged_client,
     community_owner,
     community_reader,
@@ -182,7 +178,6 @@ def test_user_search(
 
 
 def test_user_search_model(
-    init_cf,
     logged_client,
     community_owner,
     community_reader,
@@ -216,7 +211,6 @@ def test_user_search_model(
 
 
 def test_search_links(
-    init_cf,
     logged_client,
     community_owner,
     community_reader,
@@ -273,7 +267,7 @@ def test_search_links(
 
 
 def test_create_published(
-    init_cf, community_owner, community_with_default_workflow, search_clear
+    community_owner, community_with_default_workflow, search_clear
 ):
     # todo how is workflow used in published service?
     from thesis.proxies import current_published_service

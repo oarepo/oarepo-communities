@@ -324,7 +324,7 @@ def app_config(app_config):
     return app_config
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def init_cf(app, db, cache):
     from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
 
@@ -418,13 +418,13 @@ def community(app, minimal_community, community_owner):
 
 
 @pytest.fixture()
-def community_with_default_workflow(community, init_cf, set_community_workflow):
+def community_with_default_workflow(community, set_community_workflow):
     set_community_workflow(community.id)
     return community
 
 
 @pytest.fixture()
-def community_with_workflow_factory(minimal_community, init_cf, set_community_workflow):
+def community_with_workflow_factory(minimal_community, set_community_workflow):
     def create_community(slug, community_owner, workflow="default"):
         minimal_community_actual = copy.deepcopy(minimal_community)
         minimal_community_actual["slug"] = slug

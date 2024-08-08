@@ -5,7 +5,6 @@ from invenio_communities.communities.records.api import Community
 
 def test_change_workflow(
     logged_client,
-    init_cf,
     community_owner,
     community_with_default_workflow,
     search_clear,

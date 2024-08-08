@@ -17,13 +17,6 @@ def register_community_role_entity_resolver(state):
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())
 
 
-def create_oarepo_community(app):
-    """Create requests blueprint."""
-    ext = app.extensions["oarepo-communities"]
-    blueprint = ext.oarepo_community_resource.as_blueprint()
-    return blueprint
-
-
 def init_addons(state):
     app = state.app
 
