@@ -1,16 +1,17 @@
-from oarepo_communities.resolvers.communities import OARepoCommunityResolver
+from oarepo_communities.resolvers.communities import CommunityRoleResolver
 
 
 def create_oarepo_communities(app):
-    """Create requests blueprint."""
+    # Do we need to add this to service registry?
+    # - use similar pattern like in invenio-requests etc? finalize app and api-finalize-app in entrypoints?
     ext = app.extensions["oarepo-communities"]
     blueprint = ext.community_records_resource.as_blueprint()
-    blueprint.record_once(init_addons_thesis_requests)
+    blueprint.record_once(register_community_role_entity_resolver)
     return blueprint
 
 
-def init_addons_thesis_requests(state):
-    app = state.app
+def register_community_role_entity_resolver(state):
 
-    resolvers = app.extensions["invenio-requests"].entity_resolvers_registry
-    resolvers._registered_types["community"] = OARepoCommunityResolver()
+    app = state.app
+    requests = app.extensions["invenio-requests"]
+    requests.entity_resolvers_registry.register_type(CommunityRoleResolver())

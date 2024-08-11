@@ -1,3 +1,6 @@
+from flask_babelex import lazy_gettext as _
+
+
 class CommunityAlreadyExists(Exception):
     """The record is already in the community."""
 

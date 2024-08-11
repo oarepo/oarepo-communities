@@ -4,14 +4,10 @@ from invenio_communities.records.records.systemfields.communities.context import
 from oarepo_runtime.records.systemfields.mapping import MappingSystemFieldMixin
 
 COMMUNITIES_MAPPING = {
-    "parent": {
+    "communities": {
         "properties": {
-            "communities": {
-                "properties": {
-                    "ids": {"type": "keyword"},
-                    "default": {"type": "keyword"},
-                }
-            }
+            "ids": {"type": "keyword"},
+            "default": {"type": "keyword"},
         }
     }
 }

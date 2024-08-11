@@ -1,11 +1,13 @@
 from functools import cached_property
 
-from .cache import aai_mapping, permissions_cache
 from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
+from .services.community_inclusion.config import CommunityInclusionServiceConfig
+from .services.community_inclusion.service import CommunityInclusionService
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
-from .utils.utils import get_urlprefix_service_id_mapping
+from .utils import get_urlprefix_service_id_mapping
+from .workflow import community_default_workflow
 
 
 class OARepoCommunities(object):
@@ -18,15 +20,26 @@ class OARepoCommunities(object):
 
     def init_app(self, app):
         """Flask application initialization."""
-        self.init_config(app)
+        self.app = app
         self.init_services(app)
         self.init_resources(app)
+        self.init_config(app)
         app.extensions["oarepo-communities"] = self
 
     def init_config(self, app):
         """Initialize configuration."""
-        from . import ext_config
 
+        from . import config, ext_config
+
+        app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(
+            config.REQUESTS_ALLOWED_RECEIVERS
+        )
+        app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS", []).extend(
+            config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS
+        )
+        app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(
+            config.ENTITY_REFERENCE_UI_RESOLVERS
+        )
         if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
             app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
 
@@ -36,18 +49,22 @@ class OARepoCommunities(object):
                     ext_config.OAREPO_PERMISSIONS_PRESETS[k]
                 )
 
-        self.permissions_cache = permissions_cache
-        self.aai_mapping = aai_mapping
-
     @cached_property
     def urlprefix_serviceid_mapping(self):
         return get_urlprefix_service_id_mapping()
+
+    def get_community_default_workflow(self, **kwargs):
+        return community_default_workflow(**kwargs)
 
     def init_services(self, app):
         """Initialize communities service."""
         # Services
         self.community_records_service = CommunityRecordsService(
             config=CommunityRecordsServiceConfig.build(app),
+        )
+
+        self.community_inclusion_service = CommunityInclusionService(
+            CommunityInclusionServiceConfig()
         )
 
     def init_resources(self, app):
@@ -57,3 +74,44 @@ class OARepoCommunities(object):
             config=CommunityRecordsResourceConfig.build(app),
             service=self.community_records_service,
         )
+
+    def get_default_community_from_record(self, record, **kwargs):
+        record = record.parent if hasattr(record, "parent") else record
+        try:
+            return record.communities.default.id
+        except AttributeError:
+            return None
+
+
+def api_finalize_app(app):
+    """Finalize app."""
+    init(app)
+
+
+def finalize_app(app):
+    """Finalize app."""
+    init(app)
+
+
+def init(app):
+    """Init app."""
+    # Register services - cannot be done in extension because
+    # Invenio-Records-Resources might not have been initialized.
+    rr_ext = app.extensions["invenio-records-resources"]
+    # idx_ext = app.extensions["invenio-indexer"]
+    ext = app.extensions["oarepo-communities"]
+
+    # services
+    rr_ext.registry.register(
+        ext.community_records_service,
+        service_id=ext.community_records_service.config.service_id,
+    )
+    # indexers
+    # idx_ext.registry.register(ext.community_records_service.indexer, indexer_id="communities")
+
+    for cf in app.config["DEFAULT_COMMUNITIES_CUSTOM_FIELDS"]:
+        for target_cf in app.config["COMMUNITIES_CUSTOM_FIELDS"]:
+            if cf.name == target_cf.name:
+                break
+        else:
+            app.config["COMMUNITIES_CUSTOM_FIELDS"].append(cf)

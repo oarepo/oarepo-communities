@@ -1,38 +1,66 @@
-from invenio_communities.communities.records.api import Community
-from oarepo import __version__ as oarepo_version
+import dataclasses
 
-if oarepo_version.split(".")[0] == "11":
-    from invenio_communities.communities.resolver import (
-        CommunityPKProxy,
-        CommunityResolver,
-    )
-else:
-    from invenio_communities.communities.entity_resolvers import (
-        CommunityPKProxy,
-        CommunityResolver,
-    )
-
-from invenio_communities.communities.services.config import CommunityServiceConfig
-
-from ..permissions.record import needs_from_community_ids
+from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
 
 
-class OARepoCommunityPKProxy(CommunityPKProxy):
+@dataclasses.dataclass
+class CommunityRoleObj:
+    community_id: str
+    role: str
+
+
+from invenio_records_resources.references.entity_resolvers.base import EntityProxy
+
+
+class CommunityRoleProxy(EntityProxy):
+    def _parse_ref_dict(self):
+        community_id, role = self._parse_ref_dict_id().split(":")
+        return community_id.strip(), role.strip()
+
+    def _resolve(self):
+        """Resolve the Record from the proxy's reference dict."""
+        community_id, role = self._parse_ref_dict()
+
+        return CommunityRoleObj(community_id, role)
+
     def get_needs(self, ctx=None):
         """Return community member need."""
-        comid = str(self._parse_ref_dict_id())
-        needs = needs_from_community_ids({comid}, ctx["community_permission_name"])
-        return needs
+        community_id, role = self._parse_ref_dict()
+        return [CommunityRoleNeed(community_id, role)]
+
+    def pick_resolved_fields(self, identity, resolved_dict):
+        """Select which fields to return when resolving the reference."""
+        return {"community_role": resolved_dict.get("community_role")}
 
 
-class OARepoCommunityResolver(CommunityResolver):
-    type_id = "community"
+from invenio_records_resources.references.entity_resolvers.base import EntityResolver
+
+
+class CommunityRoleResolver(EntityResolver):
+    """Community entity resolver.
+
+    The entity resolver enables Invenio-Requests to understand communities as
+    receiver and topic of a request.
+    """
+
+    type_id = "community_role"
+    """Type identifier for this resolver."""
 
     def __init__(self):
-        """Initialize the default record resolver."""
-        super(CommunityResolver, self).__init__(
-            Community,
-            CommunityServiceConfig.service_id,
-            type_key=self.type_id,
-            proxy_cls=OARepoCommunityPKProxy,
-        )
+        super().__init__(None)
+
+    def _reference_entity(self, entity: CommunityRoleObj):
+        """Create a reference dict for the given record."""
+        return {"community_role": f"{entity.community_id} : {entity.role}"}
+
+    def matches_entity(self, entity):
+        """Check if the entity is a record."""
+        return isinstance(entity, CommunityRoleObj)
+
+    def matches_reference_dict(self, ref_dict):
+        """Check if the reference dict references a request."""
+        return "community_role" in ref_dict
+
+    def _get_entity_proxy(self, ref_dict):
+        """Return a RecordProxy for the given reference dict."""
+        return CommunityRoleProxy(self, ref_dict)

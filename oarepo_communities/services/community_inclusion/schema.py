@@ -7,7 +7,6 @@
 
 """Record communities schema."""
 
-
 from invenio_requests.customizations import CommentEventType
 from marshmallow import Schema, ValidationError, fields, validate, validates
 
@@ -28,15 +27,6 @@ class RecordCommunitiesSchema(Schema):
 
     @validates("communities")
     def validate_communities(self, value):
-        """Validate communities."""
-        max_number = self.context["max_number"]
-        if max_number < len(value):
-            raise ValidationError(
-                "Too many communities passed, {max_number} max allowed.".format(
-                    max_number=max_number
-                )
-            )
-
         # check unique ids
         uniques = set()
         duplicated = set()

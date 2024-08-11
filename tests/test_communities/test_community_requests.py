@@ -1,7 +1,4 @@
 import pytest
-from thesis.resources.record_communities.config import (
-    ThesisRecordCommunitiesResourceConfig,
-)
 
 from oarepo_communities.errors import (
     CommunityAlreadyIncludedException,
@@ -13,10 +10,11 @@ from tests.test_communities.utils import (
     published_record_in_community,
 )
 
-RECORD_COMMUNITIES_BASE_URL = ThesisRecordCommunitiesResourceConfig.url_prefix
 REPO_NAME = "thesis"
 
 
+# todo we should have unified framework for naming kwargs in permissions; it's chaos now
+# ie. we "record", "parent", "community", "community_id" should always represent the same entity, not record=community record etc.
 def link_api2testclient(api_link):
     base_string = "https://127.0.0.1:5000/api/"
     return api_link[len(base_string) - 1 :]
@@ -67,6 +65,10 @@ def _submit_request(
     submit_response = creator_client.post(
         link_api2testclient(create_response.json["links"]["actions"]["submit"])
     )
+    if submit_response.status == 400:
+        creator_client.post(
+            link_api2testclient(create_response.json["links"]["actions"]["submit"])
+        )
     return submit_response
 
 
@@ -79,10 +81,14 @@ def _accept_request(
     **kwargs,
 ):
     if is_draft:
-        record_after_submit = receiver_client.get(f"/thesis/{record_id}/draft")
+        record_after_submit = receiver_client.get(
+            f"/thesis/{record_id}/draft?expand=true"
+        )
     else:
-        record_after_submit = receiver_client.get(f"/thesis/{record_id}")
-    request_dict = find_request_by_type(record_after_submit.json["requests"], type)
+        record_after_submit = receiver_client.get(f"/thesis/{record_id}?expand=true")
+    request_dict = find_request_by_type(
+        record_after_submit.json["expanded"]["requests"], type
+    )
     if no_accept_link:
         assert "accept" not in request_dict["links"]["actions"]
         return None
@@ -109,55 +115,37 @@ def _init_env(
     return reader_client, owner_client, community_1, community_2
 
 
-def test_cf(
-    client,
-    community_owner,
-    community_with_permissions_cf,
-    search_clear,
-):
-    community_owner.login(client)
-    record_resp = _create_record_in_community(client, community_with_permissions_cf.id)
-    assert record_resp.status_code == 201
-    recid = record_resp.json["id"]
-    response = client.get(f"{RECORD_COMMUNITIES_BASE_URL}{recid}/communities")
-    assert (
-        response.json["hits"]["hits"][0]["custom_fields"]
-        == community_with_permissions_cf["custom_fields"]
-    )
-
-
 def test_community_publish(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permissions_cf,
+    community,
     request_data_factory,
     record_service,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record_id = _create_record_in_community(
-        reader_client, community_with_permissions_cf.id
-    ).json["id"]
+    record_id = _create_record_in_community(reader_client, community.id).json["id"]
     submit = _submit_request(
         reader_client,
-        community_with_permissions_cf.id,
+        community.id,
         "thesis_draft",
         record_id,
-        "thesis_publish_draft",
+        "publish_draft",
         request_data_factory,
     )
     _accept_request(
         reader_client,
-        type="thesis_publish_draft",
+        type="publish_draft",
         record_id=record_id,
         is_draft=True,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_publish_draft", record_id=record_id, is_draft=True
+        owner_client, type="publish_draft", record_id=record_id, is_draft=True
     )  # owner can
 
     resp_draft = owner_client.get(f"/thesis/{record_id}/draft")
@@ -172,34 +160,38 @@ def test_community_delete(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permissions_cf,
+    community,
     request_data_factory,
     record_service,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
     record_id = published_record_in_community(
-        owner_client, community_with_permissions_cf.id, record_service, community_owner
+        reader_client,
+        community.id,
+        record_service,
+        community_owner,
     )["id"]
 
     submit = _submit_request(
         reader_client,
-        community_with_permissions_cf.id,
+        community.id,
         "thesis",
         record_id,
-        "thesis_delete_record",
+        "delete_published_record",
         request_data_factory,
     )
     _accept_request(
         reader_client,
-        type="thesis_delete_record",
+        type="delete_published_record",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_delete_record", record_id=record_id
+        owner_client, type="delete_published_record", record_id=record_id
     )  # owner can
 
     resp_record = owner_client.get(f"/thesis/{record_id}")
@@ -214,46 +206,48 @@ def test_community_migration(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     request_data_factory,
     record_service,
     inviter,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
         community_reader,
-        community_with_permission_cf_factory,
+        community_with_workflow_factory,
         inviter,
     )
 
     record_id = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
+        reader_client, community_1.id, record_service, community_owner
     )["id"]
-    record_before = owner_client.get(f"/thesis/{record_id}")
+    record_before = reader_client.get(f"/thesis/{record_id}")
 
     submit = _submit_request(
         reader_client,
         community_2.id,
         "thesis",
         record_id,
-        "thesis_community_migration",
+        "initiate_community_migration",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
-        type="thesis_community_migration",
+        type="initiate_community_migration",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
-    accept_owner = _accept_request(
-        owner_client, type="thesis_community_migration", record_id=record_id
-    )  # owner can
-
-    record_after = owner_client.get(f"/thesis/{record_id}")
-
+    accept_initiate_request_owner = _accept_request(
+        owner_client, type="initiate_community_migration", record_id=record_id
+    )  # confirm should be created and submitted automatically
+    accept_confirm_request_owner = _accept_request(
+        owner_client, type="confirm_community_migration", record_id=record_id
+    )
+    record_after = owner_client.get(f"/thesis/{record_id}?expand=true")
     assert (
         record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
     )
@@ -271,21 +265,22 @@ def test_community_submission_secondary(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     inviter,
     request_data_factory,
     record_service,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
         community_reader,
-        community_with_permission_cf_factory,
+        community_with_workflow_factory,
         inviter,
     )
     record_id = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
+        reader_client, community_1.id, record_service, community_owner
     )["id"]
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -295,7 +290,7 @@ def test_community_submission_secondary(
             community_1.id,
             "thesis",
             record_id,
-            "thesis_secondary_community_submission",
+            "secondary_community_submission",
             request_data_factory,
             payload={"community": str(community_1.id)},
         )
@@ -305,18 +300,18 @@ def test_community_submission_secondary(
         community_2.id,
         "thesis",
         record_id,
-        "thesis_secondary_community_submission",
+        "secondary_community_submission",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
-        type="thesis_secondary_community_submission",
+        type="secondary_community_submission",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_secondary_community_submission", record_id=record_id
+        owner_client, type="secondary_community_submission", record_id=record_id
     )  # owner can
     record_after = owner_client.get(f"/thesis/{record_id}")
 
@@ -333,22 +328,23 @@ def test_remove_secondary(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permission_cf_factory,
+    community_with_workflow_factory,
     inviter,
     request_data_factory,
     record_service,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
         community_reader,
-        community_with_permission_cf_factory,
+        community_with_workflow_factory,
         inviter,
     )
 
     record_id = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
+        reader_client, community_1.id, record_service, community_owner
     )["id"]
 
     submit = _submit_request(
@@ -356,12 +352,13 @@ def test_remove_secondary(
         community_2.id,
         "thesis",
         record_id,
-        "thesis_secondary_community_submission",
+        "secondary_community_submission",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
+
     accept_owner = _accept_request(
-        owner_client, type="thesis_secondary_community_submission", record_id=record_id
+        owner_client, type="secondary_community_submission", record_id=record_id
     )
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -372,7 +369,7 @@ def test_remove_secondary(
             community_1.id,
             "thesis",
             record_id,
-            "thesis_remove_secondary_community",
+            "remove_secondary_community",
             request_data_factory,
             payload={"community": str(community_1.id)},
         )
@@ -382,18 +379,18 @@ def test_remove_secondary(
         community_2.id,
         "thesis",
         record_id,
-        "thesis_remove_secondary_community",
+        "remove_secondary_community",
         request_data_factory,
         payload={"community": str(community_2.id)},
     )
     _accept_request(
         reader_client,
-        type="thesis_remove_secondary_community",
+        type="remove_secondary_community",
         record_id=record_id,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="thesis_remove_secondary_community", record_id=record_id
+        owner_client, type="remove_secondary_community", record_id=record_id
     )  # owner can
 
     record_after = owner_client.get(f"/thesis/{record_id}")
@@ -409,35 +406,34 @@ def test_remove_secondary(
             community_2.id,
             "thesis",
             record_id,
-            "thesis_remove_secondary_community",
+            "remove_secondary_community",
             request_data_factory,
             payload={"community": str(community_2.id)},
         )
 
 
-def test_ui_serialization(
+def test_community_role_ui_serialization(
     logged_client,
     community_owner,
     community_reader,
-    community_with_permissions_cf,
+    community,
     request_data_factory,
     record_service,
-    ui_serialized_community,
+    ui_serialized_community_role,
+    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record_id = _create_record_in_community(
-        reader_client, community_with_permissions_cf.id
-    ).json["id"]
+    record_id = _create_record_in_community(reader_client, community.id).json["id"]
 
     submit = _submit_request(
         reader_client,
-        community_with_permissions_cf.id,
+        community.id,
         "thesis_draft",
         record_id,
-        "thesis_publish_draft",
+        "publish_draft",
         request_data_factory,
     )
 
@@ -445,13 +441,12 @@ def test_ui_serialization(
         f"/requests/extended/{submit.json['id']}",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
-    assert request.json["receiver"] == ui_serialized_community(
-        community_with_permissions_cf.id
-    )
+    assert request.json["receiver"] == ui_serialized_community_role(community.id)
     request_list = owner_client.get(
         "/requests/",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
-    assert request_list.json["hits"]["hits"][0]["receiver"] == ui_serialized_community(
-        community_with_permissions_cf.id
-    )
+    # todo test cache use in search requests with multiple results
+    assert request_list.json["hits"]["hits"][0][
+        "receiver"
+    ] == ui_serialized_community_role(community.id)

@@ -1,18 +1,18 @@
 from flask import Blueprint
 
-from oarepo_communities.resolvers.communities import OARepoCommunityResolver
+from oarepo_communities.resolvers.communities import CommunityRoleResolver
 
 
 def create_app_blueprint(app):
     blueprint = Blueprint(
         "oarepo_communities_app", __name__, url_prefix="/communities/"
     )
-    blueprint.record_once(init_addons_thesis_requests)
+    blueprint.record_once(register_community_role_entity_resolver)
     return blueprint
 
 
-def init_addons_thesis_requests(state):
-    app = state.app
+def register_community_role_entity_resolver(state):
 
-    resolvers = app.extensions["invenio-requests"].entity_resolvers_registry
-    resolvers._registered_types["community"] = OARepoCommunityResolver()
+    app = state.app
+    requests = app.extensions["invenio-requests"]
+    requests.entity_resolvers_registry.register_type(CommunityRoleResolver())

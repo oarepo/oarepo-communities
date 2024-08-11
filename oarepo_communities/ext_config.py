@@ -1,5 +1,7 @@
-from oarepo_communities.permissions.presets import CommunityPermissionPolicy
+from oarepo_communities.services.permissions.policy import (
+    OARepoCommunityWorkflowPermissionPolicy,
+)
 
 OAREPO_PERMISSIONS_PRESETS = {
-    "community": CommunityPermissionPolicy,
+    "workflow-oarepo-community": OARepoCommunityWorkflowPermissionPolicy,
 }

@@ -1,56 +1,54 @@
-from invenio_requests.customizations import actions
+from oarepo_requests.actions.generic import OARepoAcceptAction
+from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType
-from oarepo_requests.utils import get_matching_service_for_record
+from oarepo_runtime.datastreams.utils import get_record_service_for_record
+from oarepo_runtime.i18n import lazy_gettext as _
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
-from ..utils.utils import get_associated_service
+from ..proxies import current_oarepo_communities
 
 
-class AcceptAction(actions.AcceptAction):
+class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
     """Accept action."""
 
-    def execute(self, identity, uow):
-        record = self.request.topic.resolve()
-        community = self.request.receiver.resolve()
-        service = get_matching_service_for_record(record)
-        record_communities_service = get_associated_service(
-            service, "record_communities"
+    def apply(self, identity, request_type, topic, uow, *args, **kwargs):
+        community_id = self.request.receiver.resolve().community_id
+        service = get_record_service_for_record(topic)
+        community_inclusion_service = (
+            current_oarepo_communities.community_inclusion_service
         )
-        record_communities_service.remove(record, str(community.id), uow=uow)
-
-        super().execute(identity, uow)
+        community_inclusion_service.remove(
+            topic, community_id, record_service=service, uow=uow
+        )
 
 
 # Request
 #
-class RemoveSecondaryRequestType(OARepoRequestType):
+class RemoveSecondaryCommunityRequestType(OARepoRequestType):
     """Review request for submitting a record to a community."""
 
     type_id = "remove_secondary_community"
-
-    block_publish = True
-    set_as_default = True
+    name = _("Remove secondary community")
 
     creator_can_be_none = False
     topic_can_be_none = False
-    allowed_creator_ref_types = ["user"]
-    allowed_receiver_ref_types = ["community"]
-    allowed_topic_ref_types = ["record"]
+    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
 
-    needs_context = {"community_permission_name": "can_remove_secondary_community"}
-
-    available_actions = {
-        **OARepoRequestType.available_actions,
-        "accept": AcceptAction,
-    }
+    @classmethod
+    @property
+    def available_actions(cls):
+        return {
+            **super().available_actions,
+            "accept": RemoveSecondaryCommunityAcceptAction,
+        }
 
     def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
-        receiver_community_id = list(receiver.values())[0]
-        not_included = receiver_community_id not in topic.parent.communities
+        target_community_id = data["payload"]["community"]
+        not_included = target_community_id not in topic.parent.communities.ids
         if not_included:
             raise CommunityNotIncludedException
-        if receiver_community_id == str(topic.parent.communities.default.id):
+        if target_community_id == str(topic.parent.communities.default.id):
             raise PrimaryCommunityException
 
     @classmethod
