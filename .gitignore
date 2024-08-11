@@ -92,3 +92,5 @@ dist/
 .vscode
 .venv-builder/
 .venv-tests/
+
+forked_install.sh

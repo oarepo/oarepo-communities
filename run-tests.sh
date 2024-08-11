@@ -9,15 +9,20 @@ BUILDER_VENV=".venv-builder"
 TESTS_VENV=".venv-tests"
 
 OAREPO_VERSION=${OAREPO_VERSION:-12}
+PYTHON=${PYTHON:-python3}
 
 if test -d $BUILDER_VENV ; then
 	rm -rf $BUILDER_VENV
 fi
-python3 -m venv $BUILDER_VENV
+${PYTHON} -m venv $BUILDER_VENV
 . $BUILDER_VENV/bin/activate
 pip install -U setuptools pip wheel
-pip install oarepo-model-builder oarepo-model-builder-requests oarepo-model-builder-drafts oarepo-model-builder-communities oarepo-model-builder-workflows
-editable_install /home/ron/prace/oarepo-model-builder-communities
+pip install oarepo-model-builder oarepo-model-builder-requests \
+            oarepo-model-builder-drafts \
+            oarepo-model-builder-communities \
+            oarepo-model-builder-workflows
+
+
 curl -L -o forked_install.sh https://github.com/oarepo/nrp-devtools/raw/main/tests/forked_install.sh
 if test -d $BUILD_TEST_DIR/$MODEL; then
   rm -rf $BUILD_TEST_DIR/$MODEL
@@ -28,7 +33,7 @@ oarepo-compile-model ./$CODE_TEST_DIR/$MODEL.yaml --output-directory ./$BUILD_TE
 if test -d $TESTS_VENV ; then
 	rm -rf $TESTS_VENV
 fi
-python3 -m venv $TESTS_VENV
+${PYTHON} -m venv $TESTS_VENV
 . $TESTS_VENV/bin/activate
 pip install -U setuptools pip wheel
 pip install "oarepo[tests]==$OAREPO_VERSION.*"
