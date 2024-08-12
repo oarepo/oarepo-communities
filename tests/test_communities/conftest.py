@@ -472,12 +472,12 @@ def request_data_factory():
 def ui_serialized_community_role():
     def _ui_serialized_community(community_id):
         return {
-            "label": "My Community : owner",
+            "label": "Owner of My Community",
             "links": {
                 "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
                 "self_html": "https://127.0.0.1:5000/communities/public",  # todo is this correct?
             },
-            "reference": {"community_role": f"{community_id} : owner"},
+            "reference": {"community_role": f"{community_id}:owner"},
             "type": "community role",
         }
 

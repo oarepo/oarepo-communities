@@ -18,7 +18,7 @@ REQUESTS_REGISTERED_TYPES = [
     SecondaryCommunitySubmissionRequestType(),
 ]
 
-REQUESTS_ALLOWED_RECEIVERS = ["community", "community_role"]
+REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
 
 ENTITY_REFERENCE_UI_RESOLVERS = {
     "community_role": CommunityRoleUIResolver("community_role"),

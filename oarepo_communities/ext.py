@@ -2,7 +2,6 @@ from functools import cached_property
 
 from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
-from .services.community_inclusion.config import CommunityInclusionServiceConfig
 from .services.community_inclusion.service import CommunityInclusionService
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
@@ -29,7 +28,7 @@ class OARepoCommunities(object):
     def init_config(self, app):
         """Initialize configuration."""
 
-        from . import config, ext_config
+        from . import config
 
         app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(
             config.REQUESTS_ALLOWED_RECEIVERS
@@ -40,14 +39,6 @@ class OARepoCommunities(object):
         app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(
             config.ENTITY_REFERENCE_UI_RESOLVERS
         )
-        if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
-            app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
-
-        for k in ext_config.OAREPO_PERMISSIONS_PRESETS:
-            if k not in app.config["OAREPO_PERMISSIONS_PRESETS"]:
-                app.config["OAREPO_PERMISSIONS_PRESETS"][k] = (
-                    ext_config.OAREPO_PERMISSIONS_PRESETS[k]
-                )
 
     @cached_property
     def urlprefix_serviceid_mapping(self):
@@ -63,9 +54,7 @@ class OARepoCommunities(object):
             config=CommunityRecordsServiceConfig.build(app),
         )
 
-        self.community_inclusion_service = CommunityInclusionService(
-            CommunityInclusionServiceConfig()
-        )
+        self.community_inclusion_service = CommunityInclusionService()
 
     def init_resources(self, app):
         """Initialize communities resources."""

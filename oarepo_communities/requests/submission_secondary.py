@@ -43,4 +43,4 @@ class SecondaryCommunitySubmissionRequestType(OARepoRequestType):
 
         already_included = target_community_id in topic.parent.communities.ids
         if already_included:
-            raise CommunityAlreadyIncludedException
+            raise CommunityAlreadyIncludedException("Record is already included in this community.")

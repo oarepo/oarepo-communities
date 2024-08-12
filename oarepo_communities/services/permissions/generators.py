@@ -108,7 +108,7 @@ class DefaultCommunityRole(
 
     def reference_receivers(self, **kwargs):
         community_id = self._get_record_communities(**kwargs)[0]
-        return [{"community_role": f"{community_id} : {self._role}"}]
+        return [{"community_role": f"{community_id}:{self._role}"}]
 
 
 class TargetCommunityRole(DefaultCommunityRole):
@@ -124,7 +124,7 @@ class TargetCommunityRole(DefaultCommunityRole):
 
     def reference_receivers(self, **kwargs):
         community_id = self._get_data_communities(**kwargs)[0]
-        return [{"community_role": f"{community_id} : {self._role}"}]
+        return [{"community_role": f"{community_id}:{self._role}"}]
 
 
 class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):
