@@ -33,6 +33,7 @@ class CommunityRoleProxy(EntityProxy):
         """Select which fields to return when resolving the reference."""
         return {"community_role": resolved_dict.get("community_role")}
 
+
 class CommunityRoleResolver(EntityResolver):
     """Community entity resolver.
 

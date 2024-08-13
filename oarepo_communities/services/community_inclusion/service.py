@@ -10,6 +10,7 @@ class CommunityInclusionService(Service):
 
     The communities service is in charge of managing communities of a given record.
     """
+
     def __init__(self):
         super().__init__(None)
 

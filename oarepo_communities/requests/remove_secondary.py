@@ -47,7 +47,9 @@ class RemoveSecondaryCommunityRequestType(OARepoRequestType):
         target_community_id = data["payload"]["community"]
         not_included = target_community_id not in topic.parent.communities.ids
         if not_included:
-            raise CommunityNotIncludedException("Cannot remove, record is not in this community.")
+            raise CommunityNotIncludedException(
+                "Cannot remove, record is not in this community."
+            )
         if target_community_id == str(topic.parent.communities.default.id):
             raise PrimaryCommunityException("Cannot remove record's primary community.")
 

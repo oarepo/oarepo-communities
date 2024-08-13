@@ -1,10 +1,9 @@
-from invenio_communities.proxies import current_communities
+from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_resources.resources.errors import PermissionDeniedError
 from invenio_requests.resolvers.registry import ResolverRegistry
-from invenio_search.engine import dsl
 from oarepo_requests.resolvers.ui import OARepoUIResolver, fallback_label_result
-from invenio_communities.proxies import current_roles
 from oarepo_runtime.i18n import lazy_gettext as _
+
 
 class CommunityRoleUIResolver(OARepoUIResolver):
     def _get_community_label(self, record, reference):
@@ -21,6 +20,7 @@ class CommunityRoleUIResolver(OARepoUIResolver):
 
     def _get_role_label(self, role):
         return current_roles[role].title
+
     def _get_id(self, result):
         # reuse reference_entity somehow?
         return f"{result['community']['id']}:{result['role']}"
@@ -52,11 +52,12 @@ class CommunityRoleUIResolver(OARepoUIResolver):
         # the 'record' here is dict with community object and role string
         community_record = record["community"]
         community_label = self._get_community_label(community_record, reference)
-        role_label = self._get_role_label(record['role'])
+        role_label = self._get_role_label(record["role"])
         ret = {
             "reference": reference,
             "type": "community role",
-            "label": _("%(role)s of %(community)s") % {"role": role_label, "community": community_label}, #todo
+            "label": _("%(role)s of %(community)s")
+            % {"role": role_label, "community": community_label},  # todo
             "links": self._resolve_links(community_record),
         }
         return ret

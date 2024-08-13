@@ -1,4 +1,3 @@
-
 def test_create_record_in_community_via_parent(
     logged_client,
     community_owner,
@@ -7,13 +6,9 @@ def test_create_record_in_community_via_parent(
 ):
     owner_client = logged_client(community_owner)
 
-    response = owner_client.post(f"/thesis", json={
-        "parent": {
-            "communities": {
-                "default": community.id
-            }
-        }
-    })
+    response = owner_client.post(
+        f"/thesis/", json={"parent": {"communities": {"default": community.id}}}
+    )
     assert response.json["parent"]["communities"]["ids"] == [community.id]
     assert response.json["parent"]["communities"]["default"] == community.id
 

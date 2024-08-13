@@ -1,5 +1,6 @@
 import marshmallow as ma
 from invenio_access.permissions import system_identity
+from invenio_requests.proxies import current_requests_service
 from invenio_requests.resolvers.registry import ResolverRegistry
 from oarepo_requests.actions.generic import OARepoAcceptAction
 from oarepo_requests.proxies import current_oarepo_requests_service
@@ -7,7 +8,7 @@ from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
-from invenio_requests.proxies import current_requests_service
+
 from ..errors import CommunityAlreadyIncludedException
 from ..proxies import current_oarepo_communities
 
@@ -29,8 +30,9 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
             *args,
             **kwargs,
         )
-        current_requests_service.execute_action(system_identity, request_item.id, "submit",
-                                                uow=uow)
+        current_requests_service.execute_action(
+            system_identity, request_item.id, "submit", uow=uow
+        )
 
 
 class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
@@ -86,9 +88,13 @@ class InitiateCommunityMigrationRequestType(OARepoRequestType):
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
         target_community_id = data["payload"]["community"]
 
-        already_included = target_community_id == str(topic.parent.communities.default.id)
+        already_included = target_community_id == str(
+            topic.parent.communities.default.id
+        )
         if already_included:
-            raise CommunityAlreadyIncludedException("Already inside this primary community.")
+            raise CommunityAlreadyIncludedException(
+                "Already inside this primary community."
+            )
 
 
 class ConfirmCommunityMigrationRequestType(OARepoRequestType):
