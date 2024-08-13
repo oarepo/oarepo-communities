@@ -9,6 +9,8 @@ from .services.community_records.service import CommunityRecordsService
 from .utils import get_urlprefix_service_id_mapping
 from .workflow import community_default_workflow
 
+import oarepo_communities.cli   # noqa - imported to register CLI commands
+
 
 class OARepoCommunities(object):
     """OARepo extension of Invenio-Vocabularies."""
