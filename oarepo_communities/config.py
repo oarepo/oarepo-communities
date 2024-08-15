@@ -1,15 +1,13 @@
-from oarepo_communities.requests.migration import (
+from oarepo_runtime.i18n import lazy_gettext as _
+
+from .cf.workflows import WorkflowCF, lazy_workflow_options
+from .requests.migration import (
     ConfirmCommunityMigrationRequestType,
     InitiateCommunityMigrationRequestType,
 )
-from oarepo_communities.requests.remove_secondary import (
-    RemoveSecondaryCommunityRequestType,
-)
-from oarepo_communities.requests.submission_secondary import (
-    SecondaryCommunitySubmissionRequestType,
-)
-from oarepo_communities.resolvers.ui import CommunityRoleUIResolver
-from oarepo_communities.services.custom_fields.workflow import WorkflowCF
+from .requests.remove_secondary import RemoveSecondaryCommunityRequestType
+from .requests.submission_secondary import SecondaryCommunitySubmissionRequestType
+from .resolvers.ui import CommunityRoleUIResolver
 
 REQUESTS_REGISTERED_TYPES = [
     InitiateCommunityMigrationRequestType(),
@@ -26,4 +24,36 @@ ENTITY_REFERENCE_UI_RESOLVERS = {
     "community_role": CommunityRoleUIResolver("community_role"),
 }
 
-DEFAULT_COMMUNITIES_CUSTOM_FIELDS = [WorkflowCF(name="workflow")]
+
+DEFAULT_COMMUNITIES_CUSTOM_FIELDS = [
+    WorkflowCF(name="workflow"),
+    WorkflowCF(name="allowed_workflows", multiple=True),
+]
+
+DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI = [
+    {
+        "section": _("Workflows"),
+        "fields": [
+            dict(
+                field="workflow",
+                ui_widget="Dropdown",
+                props=dict(
+                    label=_("Default workflow"),
+                    description=_("Default workflow for the community if "
+                                  "workflow is not specified when depositing a record."),
+                    options=lazy_workflow_options,
+                ),
+            ),
+            dict(
+                field="allowed_workflows",
+                # todo: need to find a better widget for this
+                ui_widget="MultiInput",
+                props=dict(
+                    label=_("Allowed workflows"),
+                    description=_("Workflows allowed for the community."),
+                    options=lazy_workflow_options,
+                ),
+            ),
+        ],
+    }
+]
