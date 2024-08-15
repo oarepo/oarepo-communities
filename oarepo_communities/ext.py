@@ -28,10 +28,13 @@ class OARepoCommunities(object):
     def init_config(self, app):
         """Initialize configuration."""
 
-        from . import config
+        from . import config, ext_config
 
         app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(
             config.REQUESTS_ALLOWED_RECEIVERS
+        )
+        app.config.setdefault(
+            "OAREPO_REQUESTS_DEFAULT_RECEIVER", config.OAREPO_REQUESTS_DEFAULT_RECEIVER
         )
         app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS", []).extend(
             config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS
@@ -39,6 +42,14 @@ class OARepoCommunities(object):
         app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(
             config.ENTITY_REFERENCE_UI_RESOLVERS
         )
+        if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
+            app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
+
+        for k in ext_config.OAREPO_PERMISSIONS_PRESETS:
+            if k not in app.config["OAREPO_PERMISSIONS_PRESETS"]:
+                app.config["OAREPO_PERMISSIONS_PRESETS"][k] = (
+                    ext_config.OAREPO_PERMISSIONS_PRESETS[k]
+                )
 
     @cached_property
     def urlprefix_serviceid_mapping(self):
