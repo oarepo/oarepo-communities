@@ -1,17 +1,58 @@
 import abc
 
+from invenio_access.permissions import system_identity
 from invenio_communities.generators import (
     CommunityMembers,
     CommunityRoleNeed,
     CommunityRoles,
 )
-from invenio_communities.proxies import current_roles
+from invenio_communities.proxies import current_communities, current_roles
+from invenio_records_permissions.generators import Generator
+from oarepo_workflows.errors import MissingWorkflowError
 from oarepo_workflows.requests.policy import RecipientGeneratorMixin
+from oarepo_workflows.services.permissions.generators import WorkflowPermission
 
 from oarepo_communities.errors import (
     MissingCommunitiesError,
     MissingDefaultCommunityError,
 )
+from oarepo_communities.proxies import current_oarepo_communities
+
+
+class InAnyCommunity(Generator):
+    def __init__(self, permission_generator, **kwargs):
+        self.permission_generator = permission_generator
+        super().__init__(**kwargs)
+
+    def needs(self, **kwargs):
+        communities = current_communities.service.scan(system_identity).hits
+        needs = set()  # to avoid duplicates
+        for community in communities:  # todo optimize
+            needs |= set(
+                self.permission_generator.needs(
+                    data={"parent": {"communities": {"default": community["id"]}}},
+                    **kwargs,
+                )
+            )
+        return list(needs)
+
+
+class CommunityWorkflowPermission(WorkflowPermission):
+
+    def _get_workflow_id(self, record=None, **kwargs):
+        # todo - check the record branch too? idk makes more sense to not use the default community's workflow, there is a deeper problem if there's no workflow on the record
+        try:
+            return super()._get_workflow_id(record=None, **kwargs)
+        except MissingWorkflowError:
+            if not record:
+                workflow_id = current_oarepo_communities.get_community_default_workflow(
+                    data=kwargs["data"]
+                )
+                if not workflow_id:
+                    raise MissingWorkflowError("Workflow not defined in input.")
+                return workflow_id
+            else:
+                raise MissingWorkflowError("Workflow not defined on record.")
 
 
 class CommunityRoleMixin:
@@ -108,7 +149,10 @@ class DefaultCommunityRole(
 
     def reference_receivers(self, **kwargs):
         community_id = self._get_record_communities(**kwargs)[0]
-        return [{"community_role": f"{community_id} : {self._role}"}]
+        return [{"community_role": f"{community_id}:{self._role}"}]
+
+
+PrimaryCommunityRole = DefaultCommunityRole
 
 
 class TargetCommunityRole(DefaultCommunityRole):
@@ -124,7 +168,7 @@ class TargetCommunityRole(DefaultCommunityRole):
 
     def reference_receivers(self, **kwargs):
         community_id = self._get_data_communities(**kwargs)[0]
-        return [{"community_role": f"{community_id} : {self._role}"}]
+        return [{"community_role": f"{community_id}:{self._role}"}]
 
 
 class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):
@@ -139,3 +183,6 @@ class DefaultCommunityMembers(DefaultCommunityRoleMixin, OARepoCommunityRoles):
     def roles(self, **kwargs):
         """Roles."""
         return [r.name for r in current_roles]
+
+
+PrimaryCommunityMembers = DefaultCommunityMembers

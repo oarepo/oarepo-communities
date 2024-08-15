@@ -2,7 +2,6 @@ from functools import cached_property
 
 from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
-from .services.community_inclusion.config import CommunityInclusionServiceConfig
 from .services.community_inclusion.service import CommunityInclusionService
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
@@ -34,6 +33,9 @@ class OARepoCommunities(object):
         app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(
             config.REQUESTS_ALLOWED_RECEIVERS
         )
+        app.config.setdefault(
+            "OAREPO_REQUESTS_DEFAULT_RECEIVER", config.OAREPO_REQUESTS_DEFAULT_RECEIVER
+        )
         app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS", []).extend(
             config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS
         )
@@ -63,9 +65,7 @@ class OARepoCommunities(object):
             config=CommunityRecordsServiceConfig.build(app),
         )
 
-        self.community_inclusion_service = CommunityInclusionService(
-            CommunityInclusionServiceConfig()
-        )
+        self.community_inclusion_service = CommunityInclusionService()
 
     def init_resources(self, app):
         """Initialize communities resources."""

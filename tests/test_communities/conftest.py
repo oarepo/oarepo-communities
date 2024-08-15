@@ -121,12 +121,16 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     can_read = [
         RecordOwners(),
         AuthenticatedUser(),  # need for request receivers - temporary
-        # CommunityRole("owner"),
         CommunityRole("owner"),
         IfInState(
             "published",
             [AnyUser()],
         ),
+    ]
+
+    can_create = [
+        DefaultCommunityRole("owner"),
+        DefaultCommunityRole("reader"),
     ]
 
     can_update = [
@@ -141,7 +145,15 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
         IfInState("deleting", [RequestActive()]),
     ]
 
-    can_set_workflow = [CommunityMembers()]
+
+class TestWithCuratorCommunityWorkflowPermissions(TestCommunityWorkflowPermissions):
+    can_read = TestCommunityWorkflowPermissions.can_read + [
+        DefaultCommunityRole("curator")
+    ]
+
+    can_create = TestCommunityWorkflowPermissions.can_create + [
+        DefaultCommunityRole("curator")
+    ]
 
 
 class DefaultRequests(WorkflowRequestPolicy):
@@ -231,7 +243,7 @@ WORKFLOWS = {
     ),
     "custom": Workflow(
         label=_("For checking if workflow changed."),
-        permission_policy_cls=TestCommunityWorkflowPermissions,
+        permission_policy_cls=TestWithCuratorCommunityWorkflowPermissions,
         request_policy_cls=DefaultRequests,
     ),
     "no": Workflow(
@@ -343,6 +355,27 @@ def community_reader(UserFixture, app, db, community, inviter):
     )
     u.create(app, db)
     inviter(u.id, str(community.id), "reader")
+    return u
+
+
+@pytest.fixture()
+def community_curator(UserFixture, app, db):
+    u = UserFixture(
+        email="community_curator@inveniosoftware.org",
+        password="community_curator",
+    )
+    u.create(app, db)
+    return u
+
+
+@pytest.fixture()
+def rando_user(UserFixture, app, db):
+    # communityless user
+    u = UserFixture(
+        email="just_a_traveller@random.gov",
+        password="not_a_federal_agent",
+    )
+    u.create(app, db)
     return u
 
 
@@ -472,12 +505,12 @@ def request_data_factory():
 def ui_serialized_community_role():
     def _ui_serialized_community(community_id):
         return {
-            "label": "My Community : owner",
+            "label": "Owner of My Community",
             "links": {
                 "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
                 "self_html": "https://127.0.0.1:5000/communities/public",  # todo is this correct?
             },
-            "reference": {"community_role": f"{community_id} : owner"},
+            "reference": {"community_role": f"{community_id}:owner"},
             "type": "community role",
         }
 

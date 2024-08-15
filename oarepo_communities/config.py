@@ -17,8 +17,10 @@ REQUESTS_REGISTERED_TYPES = [
     RemoveSecondaryCommunityRequestType(),
     SecondaryCommunitySubmissionRequestType(),
 ]
-
-REQUESTS_ALLOWED_RECEIVERS = ["community", "community_role"]
+OAREPO_REQUESTS_DEFAULT_RECEIVER = (
+    "oarepo_requests.receiver.default_workflow_receiver_function"
+)
+REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
 
 ENTITY_REFERENCE_UI_RESOLVERS = {
     "community_role": CommunityRoleUIResolver("community_role"),

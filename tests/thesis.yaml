@@ -13,7 +13,7 @@ record:
     - invenio
 
   permissions:
-    presets: [ 'workflow' ]
+    presets: [ 'community-workflow' ]
 
   draft: {}
 

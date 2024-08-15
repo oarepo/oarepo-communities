@@ -1,11 +1,13 @@
-from invenio_records_resources.services.base.config import ConfiguratorMixin
-from invenio_records_resources.services.records.config import RecordServiceConfig
+from invenio_records_resources.services.base.config import (
+    ConfiguratorMixin,
+    ServiceConfig,
+)
 from invenio_records_resources.services.records.links import pagination_links
 from oarepo_runtime.services.config.service import PermissionsPresetsConfigMixin
 
 
 class CommunityRecordsServiceConfig(
-    PermissionsPresetsConfigMixin, RecordServiceConfig, ConfiguratorMixin
+    PermissionsPresetsConfigMixin, ServiceConfig, ConfiguratorMixin
 ):
     """Community records service config."""
 

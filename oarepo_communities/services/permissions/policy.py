@@ -1,10 +1,13 @@
-from invenio_records_permissions import RecordPermissionPolicy
 from oarepo_requests.services.permissions.workflow_policies import (
     DefaultWithRequestsWorkflowPermissionPolicy,
 )
-from oarepo_workflows import WorkflowPermission
+from oarepo_workflows.services.permissions.policy import WorkflowPermissionPolicy
 
-from oarepo_communities.services.permissions.generators import DefaultCommunityMembers
+from oarepo_communities.services.permissions.generators import (
+    CommunityWorkflowPermission,
+    DefaultCommunityMembers,
+    InAnyCommunity,
+)
 
 
 # todo specify
@@ -13,9 +16,7 @@ class CommunityDefaultWorkflowPermissions(DefaultWithRequestsWorkflowPermissionP
         DefaultCommunityMembers(),
     ]
 
-    can_set_workflow = [DefaultCommunityMembers()]
 
-
-class OARepoCommunityWorkflowPermissionPolicy(RecordPermissionPolicy):
-
-    can_set_workflow = [WorkflowPermission("can_set_workflow")]
+class CommunityWorkflowPermissionPolicy(WorkflowPermissionPolicy):
+    can_create = [CommunityWorkflowPermission("create")]
+    can_view_deposit_page = [InAnyCommunity(CommunityWorkflowPermission("create"))]

@@ -8,13 +8,13 @@
 """RDM Community Records Service."""
 import copy
 
-from invenio_drafts_resources.services.records.service import RecordService
+# from invenio_drafts_resources.services.records.service import RecordService
 from invenio_records_resources.services import ServiceSchemaWrapper
 from invenio_records_resources.services.base.links import LinksTemplate
+from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
 
-from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.utils import (
     get_global_search_service,
     get_global_user_search_service,
@@ -25,16 +25,10 @@ from oarepo_communities.utils import (
 # from oarepo_runtime.datastreams.utils import get_service_from_schema_type
 
 
-class CommunityRecordsService(RecordService):
+class CommunityRecordsService(Service):
     """Community records service.
 
     The record communities service is in charge of managing the records of a given community.
-    """
-
-    """
-    def __init__(self, config, record_service=None):
-        super().__init__(config)
-        self.record_service = record_service
     """
 
     @property
@@ -193,14 +187,6 @@ class CommunityRecordsService(RecordService):
         data.setdefault("parent", {}).setdefault("communities", {})[
             "default"
         ] = community_id
-        try:
-            data["parent"]["workflow"]
-        except KeyError:
-            data["parent"]["workflow"] = (
-                current_oarepo_communities.get_community_default_workflow(
-                    community_id=community_id
-                )
-            )
         result_item = record_service.create(
             identity, data, uow=uow, expand=expand, **kwargs
         )

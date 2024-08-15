@@ -1,6 +1,7 @@
 import dataclasses
 
 from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
+from invenio_records_resources.references.entity_resolvers.base import EntityResolver
 
 
 @dataclasses.dataclass
@@ -33,9 +34,6 @@ class CommunityRoleProxy(EntityProxy):
         return {"community_role": resolved_dict.get("community_role")}
 
 
-from invenio_records_resources.references.entity_resolvers.base import EntityResolver
-
-
 class CommunityRoleResolver(EntityResolver):
     """Community entity resolver.
 
@@ -51,7 +49,7 @@ class CommunityRoleResolver(EntityResolver):
 
     def _reference_entity(self, entity: CommunityRoleObj):
         """Create a reference dict for the given record."""
-        return {"community_role": f"{entity.community_id} : {entity.role}"}
+        return {"community_role": f"{entity.community_id}:{entity.role}"}
 
     def matches_entity(self, entity):
         """Check if the entity is a record."""
