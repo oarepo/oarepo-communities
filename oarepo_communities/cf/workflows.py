@@ -5,13 +5,15 @@ from flask import current_app
 from invenio_records_resources.services.custom_fields import KeywordCF
 
 
-class WorkflowSchemaField(ma.fields.Enum):
+def validate_workflow(value):
+    return value in current_app.config["WORKFLOWS"]
+
+
+class WorkflowSchemaField(ma.fields.Str):
     def __init__(self, **kwargs):
-        enum_type = enum.Enum(
-            'WorkflowEnum',
-            {k: w.label for k, w in current_app.config["WORKFLOWS"].items()}
-        )
-        super().__init__(enum_type, **kwargs)
+        super().__init__(validate=[
+            validate_workflow
+        ], **kwargs)
 
 
 class WorkflowCF(KeywordCF):

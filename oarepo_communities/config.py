@@ -47,9 +47,10 @@ DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI = [
             dict(
                 field="allowed_workflows",
                 # todo: need to find a better widget for this
-                ui_widget="MultiInput",
+                ui_widget="Dropdown",
                 props=dict(
                     label=_("Allowed workflows"),
+                    multiple=True,
                     description=_("Workflows allowed for the community."),
                     options=lazy_workflow_options,
                 ),
