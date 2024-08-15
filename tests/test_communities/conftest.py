@@ -121,12 +121,16 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     can_read = [
         RecordOwners(),
         AuthenticatedUser(),  # need for request receivers - temporary
-        # CommunityRole("owner"),
         CommunityRole("owner"),
         IfInState(
             "published",
             [AnyUser()],
         ),
+    ]
+
+    can_create = [
+        DefaultCommunityRole("owner"),
+        DefaultCommunityRole("reader"),
     ]
 
     can_update = [
@@ -141,7 +145,15 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
         IfInState("deleting", [RequestActive()]),
     ]
 
-    can_set_workflow = [CommunityMembers()]
+
+class TestWithCuratorCommunityWorkflowPermissions(TestCommunityWorkflowPermissions):
+    can_read = TestCommunityWorkflowPermissions.can_read + [
+        DefaultCommunityRole("curator")
+    ]
+
+    can_create = TestCommunityWorkflowPermissions.can_create + [
+        DefaultCommunityRole("curator")
+    ]
 
 
 class DefaultRequests(WorkflowRequestPolicy):
@@ -231,7 +243,7 @@ WORKFLOWS = {
     ),
     "custom": Workflow(
         label=_("For checking if workflow changed."),
-        permission_policy_cls=TestCommunityWorkflowPermissions,
+        permission_policy_cls=TestWithCuratorCommunityWorkflowPermissions,
         request_policy_cls=DefaultRequests,
     ),
     "no": Workflow(
@@ -343,6 +355,27 @@ def community_reader(UserFixture, app, db, community, inviter):
     )
     u.create(app, db)
     inviter(u.id, str(community.id), "reader")
+    return u
+
+
+@pytest.fixture()
+def community_curator(UserFixture, app, db):
+    u = UserFixture(
+        email="community_curator@inveniosoftware.org",
+        password="community_curator",
+    )
+    u.create(app, db)
+    return u
+
+
+@pytest.fixture()
+def rando_user(UserFixture, app, db):
+    # communityless user
+    u = UserFixture(
+        email="just_a_traveller@random.gov",
+        password="not_a_federal_agent",
+    )
+    u.create(app, db)
     return u
 
 

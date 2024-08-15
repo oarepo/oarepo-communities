@@ -1,5 +1,6 @@
 import pytest
 from invenio_communities.communities.records.api import Community
+from invenio_communities.proxies import current_communities
 
 from tests.test_communities.utils import (
     _create_record_in_community,
@@ -115,3 +116,58 @@ def test_scenario_change(
     )
     assert request_should_still_work.status_code == 201
     assert request_should_be_forbidden.status_code == 403
+
+
+from invenio_communities.generators import CommunityRoleNeed
+from invenio_records_resources.services.errors import PermissionDeniedError
+
+
+def test_can_possibly_create_in_community(
+    community_owner,
+    community_curator,
+    rando_user,
+    community_with_workflow_factory,
+    inviter,
+    service_config,
+    record_service,
+    search_clear,
+):
+    # tries to .. in with one community with default workflow allowing reader and owner, than adds another community
+    # allowing curator, which should allow curator to deposit too
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    inviter(community_curator.id, community_1.id, "curator")
+    community_curator.identity.provides.add(
+        CommunityRoleNeed(community_1.id, "curator")
+    )
+    record_service.require_permission(community_owner.identity, "view_deposit_page")
+    with pytest.raises(PermissionDeniedError):
+        record_service.require_permission(
+            community_curator.identity, "view_deposit_page"
+        )
+    with pytest.raises(PermissionDeniedError):
+        record_service.require_permission(rando_user.identity, "view_deposit_page")
+
+    community_2 = community_with_workflow_factory(
+        "comm2",
+        community_owner,
+    )
+    current_communities.service.update(
+        community_owner.identity,
+        id_=community_2.id,
+        data=community_2.data | {"custom_fields": {"workflow": "custom"}},
+    )
+    inviter(community_curator.id, community_2.id, "curator")
+    community_curator.identity.provides.add(
+        CommunityRoleNeed(community_2.id, "curator")
+    )
+    community2read = current_communities.service.read(
+        community_curator.identity, community_2.id
+    )
+    assert community2read.data["custom_fields"]["workflow"] == "custom"
+    Community.index.refresh()
+
+    # test goes over all workflows and communities; curator can now create in community 2 that allows create for cura
+    record_service.require_permission(community_owner.identity, "view_deposit_page")
+    record_service.require_permission(community_curator.identity, "view_deposit_page")
+    with pytest.raises(PermissionDeniedError):
+        record_service.require_permission(rando_user.identity, "view_deposit_page")
