@@ -7,8 +7,8 @@ from invenio_communities.generators import (
     CommunityRoles,
 )
 from invenio_communities.proxies import current_communities, current_roles
+from invenio_records_permissions.generators import Generator
 from oarepo_workflows.errors import MissingWorkflowError
-from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests.policy import RecipientGeneratorMixin
 from oarepo_workflows.services.permissions.generators import WorkflowPermission
 
@@ -17,7 +17,7 @@ from oarepo_communities.errors import (
     MissingDefaultCommunityError,
 )
 from oarepo_communities.proxies import current_oarepo_communities
-from invenio_records_permissions.generators import Generator
+
 
 class InAnyCommunity(Generator):
     def __init__(self, permission_generator, **kwargs):

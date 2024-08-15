@@ -5,7 +5,8 @@ from oarepo_workflows.services.permissions.policy import WorkflowPermissionPolic
 
 from oarepo_communities.services.permissions.generators import (
     CommunityWorkflowPermission,
-    DefaultCommunityMembers, InAnyCommunity,
+    DefaultCommunityMembers,
+    InAnyCommunity,
 )
 
 
