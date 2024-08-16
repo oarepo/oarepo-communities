@@ -17,4 +17,4 @@ def community_default_workflow(**kwargs):
             return None
 
     community = Community.get_record(community_id)
-    return community.custom_fields.get("workflow")
+    return community.custom_fields.get("workflow", "default")
