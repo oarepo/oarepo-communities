@@ -1,15 +1,14 @@
 import sys
 
-from oarepo_runtime.cli.base import oarepo
 import click
-from flask.cli import with_appcontext
-
-from invenio_records_resources.proxies import current_service_registry
-from invenio_access.permissions import system_identity
-from invenio_communities.communities.records.api import Community
-from invenio_accounts.models import User
-
 import yaml
+from flask.cli import with_appcontext
+from invenio_access.permissions import system_identity
+from invenio_accounts.models import User
+from invenio_communities.communities.records.api import Community
+from invenio_records_resources.proxies import current_service_registry
+from oarepo_runtime.cli.base import oarepo
+
 
 @oarepo.group()
 def communities():
@@ -26,29 +25,29 @@ def create_community(slug, title, public):
     community_service.create(
         system_identity,
         {
-            'slug': slug,
-            'metadata': {
-                'title': title
-            },
-            'access': {
-                'visibility': 'public' if public else 'restricted'
-            }
-        })
+            "slug": slug,
+            "metadata": {"title": title},
+            "access": {"visibility": "public" if public else "restricted"},
+        },
+    )
 
 
 @communities.command(name="list")
 @with_appcontext
 def list_communities():
     community_service = current_service_registry.get("communities")
-    yaml.dump_all(community_service.read_all(
-            system_identity,
-            fields=["id", "slug", "metadata", "access", "featured"]),
-        sys.stdout)
+    yaml.dump_all(
+        community_service.read_all(
+            system_identity, fields=["id", "slug", "metadata", "access", "featured"]
+        ),
+        sys.stdout,
+    )
 
 
 @communities.group(name="members")
 def community_members():
     """Community members commands."""
+
 
 @community_members.command(name="add")
 @click.argument("community")
@@ -72,9 +71,10 @@ def add_community_member(community, email, role):
                     "id": str(user_id),
                 }
             ],
-            "role": role
-        }
+            "role": role,
+        },
     )
+
 
 @community_members.command(name="remove")
 @click.argument("community")
@@ -97,5 +97,5 @@ def add_community_member(community, email):
                     "id": str(user_id),
                 }
             ]
-        }
+        },
     )

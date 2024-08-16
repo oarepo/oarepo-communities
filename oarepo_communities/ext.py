@@ -1,5 +1,7 @@
 from functools import cached_property
 
+import oarepo_communities.cli  # noqa - imported to register CLI commands
+
 from .resources.community_records.config import CommunityRecordsResourceConfig
 from .resources.community_records.resource import CommunityRecordsResource
 from .services.community_inclusion.service import CommunityInclusionService
@@ -7,8 +9,6 @@ from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
 from .utils import get_urlprefix_service_id_mapping
 from .workflow import community_default_workflow
-
-import oarepo_communities.cli   # noqa - imported to register CLI commands
 
 
 class OARepoCommunities(object):
@@ -40,6 +40,9 @@ class OARepoCommunities(object):
         )
         app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS", []).extend(
             config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS
+        )
+        app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI", []).extend(
+            config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI
         )
         app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(
             config.ENTITY_REFERENCE_UI_RESOLVERS
@@ -117,3 +120,10 @@ def init(app):
                 break
         else:
             app.config["COMMUNITIES_CUSTOM_FIELDS"].append(cf)
+
+    for cf in app.config["DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI"]:
+        for target_cf in app.config["COMMUNITIES_CUSTOM_FIELDS_UI"]:
+            if cf['section'] == target_cf['section']:
+                break
+        else:
+            app.config["COMMUNITIES_CUSTOM_FIELDS_UI"].append(cf)

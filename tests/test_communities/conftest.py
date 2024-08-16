@@ -323,6 +323,7 @@ def app_config(app_config):
     app_config["WORKFLOWS"] = WORKFLOWS
 
     app_config["COMMUNITIES_CUSTOM_FIELDS"] = [WorkflowCF(name="workflow")]
+    app_config["COMMUNITIES_CUSTOM_FIELDS_UI"] = []
 
     return app_config
 
