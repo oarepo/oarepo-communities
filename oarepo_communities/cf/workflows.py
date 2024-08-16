@@ -1,5 +1,3 @@
-import enum
-
 import marshmallow as ma
 from flask import current_app
 from invenio_records_resources.services.custom_fields import KeywordCF
