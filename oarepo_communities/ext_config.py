@@ -10,3 +10,19 @@ OAREPO_PERMISSIONS_PRESETS = {
 COMMUNITY_WORKFLOWS = {
     'default': PermissiveWorkflow(),
 }
+
+DEFAULT_COMMUNITY_ROLES = [
+    dict(
+        name="member",
+        title="Member",
+        description="Community member.",
+    ),
+    dict(
+        name="owner",
+        title="Community owner",
+        description="Can manage community.",
+        is_owner=True,
+        can_manage=True,
+        can_manage_roles=["owner", "member"],
+    )
+]

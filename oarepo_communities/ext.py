@@ -140,3 +140,8 @@ def finalize_app(app):
         # set up default workflows if not set
         from .ext_config import COMMUNITY_WORKFLOWS
         app.config['WORKFLOWS'] = COMMUNITY_WORKFLOWS
+
+    if not app.config.get("COMMUNITIES_ROLES"):
+        # set up default roles if not set up
+        from .ext_config import DEFAULT_COMMUNITY_ROLES
+        app.config["COMMUNITIES_ROLES"] = DEFAULT_COMMUNITY_ROLES
