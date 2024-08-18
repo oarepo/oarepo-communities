@@ -11,7 +11,7 @@ COMMUNITY_WORKFLOWS = {
     'default': PermissiveWorkflow(),
 }
 
-DEFAULT_COMMUNITY_ROLES = [
+DEFAULT_COMMUNITIES_ROLES = [
     dict(
         name="member",
         title="Member",
