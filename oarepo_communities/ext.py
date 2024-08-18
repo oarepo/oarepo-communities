@@ -87,19 +87,13 @@ class OARepoCommunities(object):
         except AttributeError:
             return None
 
-
 def api_finalize_app(app):
     """Finalize app."""
-    init(app)
-
+    finalize_app(app)
 
 def finalize_app(app):
     """Finalize app."""
-    init(app)
 
-
-def init(app):
-    """Init app."""
     # Register services - cannot be done in extension because
     # Invenio-Records-Resources might not have been initialized.
     rr_ext = app.extensions["invenio-records-resources"]
@@ -141,3 +135,8 @@ def init(app):
                 break
         else:
             app.config["COMMUNITIES_CUSTOM_FIELDS_UI"].append(cf)
+
+    if not app.config.get('WORKFLOWS'):
+        # set up default workflows if not set
+        from .ext_config import WORKFLOWS
+        app.config['WORKFLOWS'] = WORKFLOWS
