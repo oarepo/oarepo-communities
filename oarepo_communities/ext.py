@@ -138,5 +138,5 @@ def finalize_app(app):
 
     if not app.config.get('WORKFLOWS'):
         # set up default workflows if not set
-        from .ext_config import WORKFLOWS
-        app.config['WORKFLOWS'] = WORKFLOWS
+        from .ext_config import COMMUNITY_WORKFLOWS
+        app.config['WORKFLOWS'] = COMMUNITY_WORKFLOWS
