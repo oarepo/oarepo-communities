@@ -114,6 +114,14 @@ def init(app):
     # indexers
     # idx_ext.registry.register(ext.community_records_service.indexer, indexer_id="communities")
 
+    if isinstance(app.config["COMMUNITIES_CUSTOM_FIELDS"], dict):
+        assert not app.config["COMMUNITIES_CUSTOM_FIELDS"]
+        app.config["COMMUNITIES_CUSTOM_FIELDS"] = []
+
+    if isinstance(app.config["COMMUNITIES_CUSTOM_FIELDS_UI"], dict):
+        assert not app.config["COMMUNITIES_CUSTOM_FIELDS_UI"]
+        app.config["COMMUNITIES_CUSTOM_FIELDS_UI"] = []
+
     for cf in app.config["DEFAULT_COMMUNITIES_CUSTOM_FIELDS"]:
         for target_cf in app.config["COMMUNITIES_CUSTOM_FIELDS"]:
             if cf.name == target_cf.name:
