@@ -1,11 +1,12 @@
 import abc
+import uuid
 
 from invenio_access.permissions import system_identity
 from invenio_communities.generators import (
-    CommunityMembers,
     CommunityRoleNeed,
     CommunityRoles,
 )
+from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_permissions.generators import Generator
 from oarepo_workflows.errors import MissingWorkflowError
@@ -55,6 +56,17 @@ class CommunityWorkflowPermission(WorkflowPermission):
                 raise MissingWorkflowError("Workflow not defined on record.")
 
 
+
+def convert_community_ids_to_uuid(community_id):
+    # if it already is a string representation of uuid, keep it as it is
+    try:
+        uuid.UUID(community_id, version=4)
+        return community_id
+    except ValueError:
+        community = Community.pid.resolve(community_id)
+        return str(community.id)
+
+
 class CommunityRoleMixin:
     def _get_record_communities(self, record=None, **kwargs):
         try:
@@ -66,7 +78,7 @@ class CommunityRoleMixin:
         community_ids = (data or {}).get("parent", {}).get("communities", {}).get("ids")
         if not community_ids:
             raise MissingCommunitiesError("Communities not defined in input data.")
-        return community_ids
+        return [convert_community_ids_to_uuid(x) for x in community_ids]
 
 
 class DefaultCommunityRoleMixin:
@@ -86,7 +98,7 @@ class DefaultCommunityRoleMixin:
             raise MissingDefaultCommunityError(
                 "Default community not defined in input data."
             )
-        return [community_id]
+        return [convert_community_ids_to_uuid(community_id)]
 
 
 class OARepoCommunityRoles(CommunityRoles):
