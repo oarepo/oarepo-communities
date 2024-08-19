@@ -16,5 +16,6 @@ def community_default_workflow(**kwargs):
         except KeyError:
             return None
 
-    community = Community.get_record(community_id)
+    # use pid resolve so that the community might be both slug or id
+    community = Community.pid.resolve(community_id)
     return community.custom_fields.get("workflow", "default")
