@@ -2,8 +2,6 @@ from flask import current_app
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.proxies import current_service_registry
-from oarepo_global_search.services.records.service import GlobalSearchService
-from oarepo_global_search.services.records.user_service import GlobalUserSearchService
 
 from oarepo_communities.proxies import current_oarepo_communities
 
@@ -17,15 +15,6 @@ def get_associated_service(record_service, service_type):
 
 def slug2id(slug):
     return str(current_communities.service.record_cls.pid.resolve(slug).id)
-
-
-# todo load from proxies
-def get_global_search_service():
-    return GlobalSearchService()
-
-
-def get_global_user_search_service():
-    return GlobalUserSearchService()
 
 
 def get_record_services():
