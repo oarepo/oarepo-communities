@@ -5,6 +5,8 @@ from oarepo_global_search.ui.config import (
 from flask_menu import current_menu
 from flask_login import login_required
 from oarepo_runtime.i18n import lazy_gettext as _
+from flask import redirect, url_for
+from flask_resources import resource_requestctx
 
 from .components import GetCommunityComponent
 
@@ -16,7 +18,7 @@ from invenio_records_resources.resources.records.resource import (
 
 
 class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
-    url_prefix = "/"
+    url_prefix = "/communities"
     blueprint_name = "community_records"
     template_folder = "templates"
     application_id = "community_records"
@@ -26,7 +28,8 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
     }
 
     routes = {
-        "community_records": "/communities/<pid_value>",
+        "community_records": "/<pid_value>/records",
+        "community_home": "/<pid_value>",
     }
     api_service = "records"
 
@@ -39,6 +42,9 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
         return f"/api/communities/{community_id}/records"
 
 
+# TODO: on /communities the communities listed there are linking to communities/slug, and there is actually another handler for "home" that does not seem to even be used currently
+# https://github.com/inveniosoftware/invenio-app-rdm/blob/master/invenio_app_rdm/communities_ui/views/communities.py basically they are always redirecting to /communities/slug/records in its current form
+# though I am not sure what this theme.enabled is supposed to be. Currently there are two handlers because of this.
 class CommunityRecordsUIResource(GlobalSearchUIResource):
     decorators = [
         login_required,
@@ -49,6 +55,16 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
     @request_view_args
     def community_records(self):
         return self.search()
+
+    @request_read_args
+    @request_search_args
+    @request_view_args
+    def community_home(self):
+        url = url_for(
+            "community_records.community_records",
+            pid_value=resource_requestctx.view_args["pid_value"],
+        )
+        return redirect(url)
 
 
 def create_blueprint(app):

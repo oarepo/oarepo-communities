@@ -14,8 +14,6 @@
 {%- block page_body %}
 {{super()}}
 <div class="ui main container">
-{{community.to_dict()}}
-
     <div data-invenio-search-config='{{ search_app_config | tojson }}'></div>
 </div>
 
