@@ -133,3 +133,14 @@ msgstr ""
 #: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_records/__init__.py:58
 msgid "User Dashboard"
 msgstr "Nástěnka"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_landing/templates/CommunityRecordPage.jinja:2
+msgid "Community"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_landing/templates/CommunityRecordPage.jinja:2
+msgid "NR Document repository"
+msgstr ""
+
+msgid "Search inside the community..."
+msgstr ""
