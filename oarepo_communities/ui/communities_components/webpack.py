@@ -9,9 +9,7 @@ theme = WebpackThemeBundle(
             "entry": {
                 "communities_components": "./js/communities_components/custom-components.js"
             },
-            "dependencies": {
-                "react-searchkit": "^2.0.0",
-            },
+            "dependencies": {},
             "devDependencies": {},
             "aliases": {},
         }

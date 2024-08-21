@@ -3,6 +3,7 @@ from invenio_records_resources.proxies import current_service_registry
 from invenio_communities.views.communities import (
     HEADER_PERMISSIONS,
 )
+from flask import request
 
 
 class GetCommunityComponent(UIResourceComponent):
@@ -12,7 +13,7 @@ class GetCommunityComponent(UIResourceComponent):
         community = current_service_registry.get("communities").read(
             identity, view_args["pid_value"]
         )
-        print(community._record, "community_record", flush=True)
+        request.community = community.to_dict()
         permissions = community.has_permissions_to(HEADER_PERMISSIONS)
         extra_context["community"] = community
         extra_context["permissions"] = permissions

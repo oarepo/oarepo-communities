@@ -1,0 +1,43 @@
+.community-frontpage-cards .ui.card {
+  .image {
+    height: @normalDesktopScreenCardHeight;
+    display: flex;
+    background: transparent;
+
+    img {
+      object-fit: contain;
+    }
+
+    &.fallback_image,
+    &.placeholder {
+      img {
+        object-fit: cover;
+      }
+    }
+  }
+
+  .content .header {
+    overflow-wrap: break-word;
+  }
+}
+
+@media only screen and (min-width: @largestSmallMonitor) {
+  .ui.community-frontpage-cards.cards .ui.card {
+    .image {
+      height: @largeDesktopScreenCardHeight;
+    }
+  }
+}
+
+@media only screen and (max-width: @largestMobileScreen) {
+  .ui.community-frontpage-cards.cards .ui.card {
+    margin-top: 2rem;
+    width: 70vw !important;
+    margin-left: auto;
+    margin-right: auto;
+
+    .image {
+      height: 70vw;
+    }
+  }
+}

@@ -1,0 +1,7 @@
+.ui.menu .brand.active.item,
+.ui.brand.menu .active.item {
+  border-color: @primaryColor !important;
+  background-color: @primaryColor;
+  color: @white !important;
+  pointer-events: none;
+}
