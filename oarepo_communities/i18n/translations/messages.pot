@@ -1,0 +1,82 @@
+# Translations template for PROJECT.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-06-01 21:05+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_communities/__init__.py:42
+msgid "Communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_records/__init__.py:49
+msgid "Records"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_records/__init__.py:58
+msgid "User Dashboard"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_requests/__init__.py:47
+msgid "Requests"
+msgstr ""
+
+msgid "profile"
+msgstr ""
+
+msgid "Search in my communities..."
+msgstr ""
+
+msgid "Restricted"
+msgstr ""
+
+msgid "Filter results"
+msgstr ""
+
+msgid "Create new draft"
+msgstr ""
+
+msgid "Search in my uploads..."
+msgstr ""
+
+msgid "No description"
+msgstr ""
+
+msgid "Opened by {{creatorName}} on {{created}}."
+msgstr ""
+
+msgid "Recepient: {{receiver}}."
+msgstr ""
+
+msgid "Expires at: {{- expiringDate}}"
+msgstr ""
+
+msgid "My"
+msgstr ""
+
+msgid "Others"
+msgstr ""
+
+msgid "Search in my requests..."
+msgstr ""
+
+msgid "Edit record"
+msgstr ""
+
+msgid "Delete record"
+msgstr ""
+
+msgid "Publish record"
+msgstr ""
