@@ -76,7 +76,7 @@ class CommunityRecordsService(Service):
             identity,
             community_id,
             search_service=current_global_search_service,
-            search_method="global_search",
+            search_method="search",
             links_template=LinksTemplate(
                 self.config.links_search_community_records,
                 context={"args": params_copy, "id": community_id},
@@ -132,7 +132,7 @@ class CommunityRecordsService(Service):
             identity,
             community_id,
             search_service=current_global_search_service,
-            search_method="global_search_drafts",
+            search_method="search_drafts",
             links_template=LinksTemplate(
                 self.config.links_search_community_user_records,
                 context={"args": params_copy, "id": community_id},
