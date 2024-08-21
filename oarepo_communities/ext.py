@@ -87,9 +87,11 @@ class OARepoCommunities(object):
         except AttributeError:
             return None
 
+
 def api_finalize_app(app):
     """Finalize app."""
     finalize_app(app)
+
 
 def finalize_app(app):
     """Finalize app."""
@@ -131,17 +133,19 @@ def finalize_app(app):
 
     for cf in app.config["DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI"]:
         for target_cf in app.config["COMMUNITIES_CUSTOM_FIELDS_UI"]:
-            if cf['section'] == target_cf['section']:
+            if cf["section"] == target_cf["section"]:
                 break
         else:
             app.config["COMMUNITIES_CUSTOM_FIELDS_UI"].append(cf)
 
-    if not app.config.get('WORKFLOWS'):
+    if not app.config.get("WORKFLOWS"):
         # set up default workflows if not set
         from .ext_config import COMMUNITY_WORKFLOWS
-        app.config['WORKFLOWS'] = COMMUNITY_WORKFLOWS
+
+        app.config["WORKFLOWS"] = COMMUNITY_WORKFLOWS
 
     if not app.config.get("COMMUNITIES_ROLES"):
         # set up default roles if not set up
         from .ext_config import DEFAULT_COMMUNITIES_ROLES
+
         app.config["COMMUNITIES_ROLES"] = DEFAULT_COMMUNITIES_ROLES

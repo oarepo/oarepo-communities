@@ -39,8 +39,10 @@ DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI = [
                 ui_widget="Dropdown",
                 props=dict(
                     label=_("Default workflow"),
-                    description=_("Default workflow for the community if "
-                                  "workflow is not specified when depositing a record."),
+                    description=_(
+                        "Default workflow for the community if "
+                        "workflow is not specified when depositing a record."
+                    ),
                     options=lazy_workflow_options,
                 ),
             ),
