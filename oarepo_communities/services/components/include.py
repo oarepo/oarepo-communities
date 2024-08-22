@@ -2,6 +2,7 @@ from invenio_records_resources.services.records.components.base import ServiceCo
 
 from oarepo_communities.errors import MissingDefaultCommunityError
 from oarepo_communities.proxies import current_oarepo_communities
+from ..permissions.generators import convert_community_ids_to_uuid
 
 
 class CommunityInclusionComponent(ServiceComponent):
@@ -14,12 +15,9 @@ class CommunityInclusionComponent(ServiceComponent):
                 "Default community not defined in input."
             )
 
-        community_inclusion_service = (
-            current_oarepo_communities.community_inclusion_service
-        )
-        community_inclusion_service.include(
+        current_oarepo_communities.community_inclusion_service.include(
             record,
-            community_id,
+            convert_community_ids_to_uuid(community_id),
             record_service=self.service,
             uow=self.uow,
         )
