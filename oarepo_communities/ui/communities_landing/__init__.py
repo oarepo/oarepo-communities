@@ -7,6 +7,7 @@ from flask_login import login_required
 from oarepo_runtime.i18n import lazy_gettext as _
 from flask import redirect, url_for
 from flask_resources import resource_requestctx
+from invenio_communities.views.decorators import pass_community
 
 from .components import GetCommunityComponent
 
@@ -22,7 +23,6 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
     blueprint_name = "community_records"
     template_folder = "templates"
     application_id = "community_records"
-    components = [GetCommunityComponent]
     templates = {
         "search": "CommunityRecordPage",
     }
@@ -33,8 +33,11 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
     }
     api_service = "records"
 
+    components = [GetCommunityComponent]
+
     def search_endpoint_url(self, identity, api_config, overrides={}, **kwargs):
         community_id = kwargs.get("community", {}).get("id")
+        print(kwargs.get("community", {}), "community_id", community_id)
 
         if community_id is None:
             raise RuntimeError("Community ID is missing.")
