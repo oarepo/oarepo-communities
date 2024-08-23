@@ -1,6 +1,7 @@
 import marshmallow as ma
 from invenio_drafts_resources.resources import RecordResourceConfig
 from invenio_records_resources.services.base.config import ConfiguratorMixin
+from oarepo_global_search.proxies import current_global_search
 
 
 class CommunityRecordsResourceConfig(RecordResourceConfig, ConfiguratorMixin):
@@ -18,3 +19,12 @@ class CommunityRecordsResourceConfig(RecordResourceConfig, ConfiguratorMixin):
         **RecordResourceConfig.request_view_args,
         "model": ma.fields.Str(),
     }
+
+    # todo - if service isn't in global search services but needs to be used here - ask whether this can happen
+    # then we would need to look at another configuration
+    @property
+    def response_handlers(self):
+        return {
+            **current_global_search.global_search_resource.config.response_handlers,
+            **super().response_handlers,
+        }

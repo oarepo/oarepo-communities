@@ -4,8 +4,8 @@ import os
 import pytest
 import yaml
 from flask_security import login_user
-from invenio_access.permissions import system_identity
 from invenio_accounts.testutils import login_user_via_session
+from invenio_access.permissions import system_identity
 from invenio_app.factory import create_api
 from invenio_communities.cli import create_communities_custom_field
 from invenio_communities.communities.records.api import Community
@@ -25,13 +25,16 @@ from oarepo_requests.services.permissions.workflow_policies import (
 )
 from oarepo_runtime.services.permissions import RecordOwners
 from oarepo_workflows import (
+    Workflow,
     AutoApprove,
     IfInState,
     WorkflowRequest,
     WorkflowRequestPolicy,
     WorkflowTransitions,
 )
-from oarepo_workflows.base import Workflow
+from oarepo_communities.services.permissions.policy import (
+    CommunityDefaultWorkflowPermissions,
+)
 from thesis.records.api import ThesisDraft
 
 from oarepo_communities.proxies import current_oarepo_communities
@@ -42,9 +45,7 @@ from oarepo_communities.services.permissions.generators import (
     DefaultCommunityRole,
     TargetCommunityRole,
 )
-from oarepo_communities.services.permissions.policy import (
-    CommunityDefaultWorkflowPermissions,
-)
+
 
 
 @pytest.fixture()
@@ -316,6 +317,7 @@ def app_config(app_config):
         {
             "model_service": "thesis.services.records.service.ThesisService",
             "service_config": "thesis.services.records.config.ThesisServiceConfig",
+            "api_resource_config": "thesis.resources.records.config.ThesisResourceConfig",
         }
     ]
 
@@ -327,25 +329,6 @@ def app_config(app_config):
 
     return app_config
 
-
-@pytest.fixture(autouse=True)
-def init_cf(app, db, cache):
-    from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
-
-    prepare_cf_indices()
-    result = app.test_cli_runner().invoke(create_communities_custom_field, [])
-    assert result.exit_code == 0
-    Community.index.refresh()
-
-
-@pytest.fixture()
-def community_owner(UserFixture, app, db):
-    u = UserFixture(
-        email="community_owner@inveniosoftware.org",
-        password="community_owner",
-    )
-    u.create(app, db)
-    return u
 
 
 @pytest.fixture()
@@ -380,6 +363,13 @@ def rando_user(UserFixture, app, db):
     return u
 
 
+
+
+
+@pytest.fixture(scope="module", autouse=True)
+def location(location):
+    return location
+
 @pytest.fixture(scope="module")
 def minimal_community():
     """Minimal community metadata."""
@@ -393,12 +383,6 @@ def minimal_community():
             "title": "My Community",
         },
     }
-
-
-@pytest.fixture(scope="module", autouse=True)
-def location(location):
-    return location
-
 
 def _community_get_or_create(identity, community_dict, workflow=None):
     """Util to get or create community, to avoid duplicate error."""
@@ -420,6 +404,25 @@ def community(app, minimal_community, community_owner):
     return _community_get_or_create(
         community_owner.identity, minimal_community, workflow="default"
     )
+
+@pytest.fixture(autouse=True)
+def init_cf(app, db, cache):
+    from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
+
+    prepare_cf_indices()
+    result = app.test_cli_runner().invoke(create_communities_custom_field, [])
+    assert result.exit_code == 0
+    Community.index.refresh()
+
+
+@pytest.fixture()
+def community_owner(UserFixture, app, db):
+    u = UserFixture(
+        email="community_owner@inveniosoftware.org",
+        password="community_owner",
+    )
+    u.create(app, db)
+    return u
 
 
 @pytest.fixture()

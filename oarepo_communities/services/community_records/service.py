@@ -14,10 +14,9 @@ from invenio_records_resources.services.base.links import LinksTemplate
 from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.uow import unit_of_work
 from invenio_search.engine import dsl
+from oarepo_global_search.proxies import current_global_search_service
 
 from oarepo_communities.utils import (
-    get_global_search_service,
-    get_global_user_search_service,
     get_service_by_urlprefix,
     get_service_from_schema_type,
 )
@@ -76,8 +75,8 @@ class CommunityRecordsService(Service):
         return self._search(
             identity,
             community_id,
-            search_service=get_global_search_service(),
-            search_method="global_search",
+            search_service=current_global_search_service,
+            search_method="search",
             links_template=LinksTemplate(
                 self.config.links_search_community_records,
                 context={"args": params_copy, "id": community_id},
@@ -132,8 +131,8 @@ class CommunityRecordsService(Service):
         return self._search(
             identity,
             community_id,
-            search_service=get_global_user_search_service(),
-            search_method="global_search",
+            search_service=current_global_search_service,
+            search_method="search_drafts",
             links_template=LinksTemplate(
                 self.config.links_search_community_user_records,
                 context={"args": params_copy, "id": community_id},

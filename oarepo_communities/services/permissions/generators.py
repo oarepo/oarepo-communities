@@ -2,11 +2,8 @@ import abc
 import uuid
 
 from invenio_access.permissions import system_identity
-from invenio_communities.generators import (
-    CommunityRoleNeed,
-    CommunityRoles,
-)
 from invenio_communities.communities.records.api import Community
+from invenio_communities.generators import CommunityRoleNeed, CommunityRoles
 from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_permissions.generators import Generator
 from oarepo_workflows.errors import MissingWorkflowError
@@ -54,7 +51,6 @@ class CommunityWorkflowPermission(WorkflowPermission):
                 return workflow_id
             else:
                 raise MissingWorkflowError("Workflow not defined on record.")
-
 
 
 def convert_community_ids_to_uuid(community_id):

@@ -9,9 +9,7 @@ def validate_workflow(value):
 
 class WorkflowSchemaField(ma.fields.Str):
     def __init__(self, **kwargs):
-        super().__init__(validate=[
-            validate_workflow
-        ], **kwargs)
+        super().__init__(validate=[validate_workflow], **kwargs)
 
 
 class WorkflowCF(KeywordCF):
@@ -35,5 +33,8 @@ class LazyChoices(list):
 
 
 lazy_workflow_options = LazyChoices(
-    lambda: [{'id': name, 'title_l10n': w.label} for name, w in current_app.config["WORKFLOWS"].items()]
+    lambda: [
+        {"id": name, "title_l10n": w.label}
+        for name, w in current_app.config["WORKFLOWS"].items()
+    ]
 )

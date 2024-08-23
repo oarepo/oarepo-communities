@@ -246,6 +246,65 @@ def test_search_links(
     )
 
 
+def test_search_ui_serialization(
+    logged_client,
+    community_owner,
+    community_reader,
+    community_with_workflow_factory,
+    record_service,
+    inviter,
+    search_clear,
+):
+    owner_client = logged_client(community_owner)
+    reader_client = logged_client(community_reader)
+
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
+    inviter("2", community_1.id, "reader")
+
+    record1 = published_record_in_community(
+        owner_client, community_1.id, record_service, community_owner
+    )
+    record2 = published_record_in_community(
+        owner_client, community_2.id, record_service, community_owner
+    )
+
+    ThesisRecord.index.refresh()
+    ThesisDraft.index.refresh()
+
+    search_control = owner_client.get(f"/communities/{community_1.id}/records")
+    search_global = owner_client.get(
+        f"/communities/{community_1.id}/records",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+    search_model = owner_client.get(
+        f"/communities/{community_2.id}/thesis",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+
+    search_user_global = owner_client.get(
+        f"/communities/{community_1.id}/user/records",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+    search_user_model = owner_client.get(
+        f"/communities/{community_2.id}/user/thesis",
+        headers={"Accept": "application/vnd.inveniordm.v1+json"},
+    )
+
+    assert search_global.status_code == 200
+    assert search_model.status_code == 200
+    assert search_user_global.status_code == 200
+    assert search_user_model.status_code == 200
+
+    # todo ui serialization is now recognizable through filtering parent - this might not make sense in the future
+    # ie. define something explicit in model json
+    assert "parent" in search_control.json["hits"]["hits"][0]
+    assert "parent" not in search_global.json["hits"]["hits"][0]
+    assert "parent" not in search_model.json["hits"]["hits"][0]
+    assert "parent" not in search_user_global.json["hits"]["hits"][0]
+    assert "parent" not in search_user_model.json["hits"]["hits"][0]
+
+
 """
 # todo published service conceptual rework
 def test_create_published(community_owner, community, search_clear):
