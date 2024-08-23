@@ -8,7 +8,7 @@ OAREPO_PERMISSIONS_PRESETS = {
 }
 
 COMMUNITY_WORKFLOWS = {
-    'default': PermissiveWorkflow(),
+    "default": PermissiveWorkflow(),
 }
 
 DEFAULT_COMMUNITIES_ROLES = [
@@ -24,5 +24,5 @@ DEFAULT_COMMUNITIES_ROLES = [
         is_owner=True,
         can_manage=True,
         can_manage_roles=["owner", "member"],
-    )
+    ),
 ]

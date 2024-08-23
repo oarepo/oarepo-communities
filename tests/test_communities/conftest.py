@@ -317,6 +317,7 @@ def app_config(app_config):
         {
             "model_service": "thesis.services.records.service.ThesisService",
             "service_config": "thesis.services.records.config.ThesisServiceConfig",
+            "api_resource_config": "thesis.resources.records.config.ThesisResourceConfig",
         }
     ]
 

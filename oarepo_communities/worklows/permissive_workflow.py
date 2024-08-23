@@ -1,25 +1,22 @@
 from functools import partial
 
 from invenio_records_permissions.generators import AnyUser
-from oarepo_communities.services.permissions.generators import (
-    PrimaryCommunityMembers,
-)
-from oarepo_runtime.services.permissions.generators import RecordOwners, UserWithRole
+from oarepo_runtime.services.permissions.generators import RecordOwners
 from oarepo_workflows import (
     AutoApprove,
-    IfInState,
     DefaultWorkflowPermissionPolicy,
+    IfInState,
+    Workflow,
     WorkflowRequest,
     WorkflowRequestPolicy,
     WorkflowTransitions,
-    Workflow
 )
+
+from oarepo_communities.services.permissions.generators import PrimaryCommunityMembers
 
 
 class PermissiveWorkflowPermissions(DefaultWorkflowPermissionPolicy):
-    can_create = [
-        PrimaryCommunityMembers()
-    ]
+    can_create = [PrimaryCommunityMembers()]
 
     can_read = [
         RecordOwners(),
@@ -52,9 +49,7 @@ class PermissiveWorkflowPermissions(DefaultWorkflowPermissionPolicy):
 class DefaultWorkflowRequests(WorkflowRequestPolicy):
     publish_draft = WorkflowRequest(
         # if the record is in draft state, the owner or curator can request publishing
-        requesters=[
-            IfInState("draft", then_=[RecordOwners()])
-        ],
+        requesters=[IfInState("draft", then_=[RecordOwners()])],
         recipients=[AutoApprove()],
         transitions=WorkflowTransitions(accepted="published"),
     )
@@ -84,8 +79,10 @@ class DefaultWorkflowRequests(WorkflowRequestPolicy):
         transitions=WorkflowTransitions(accepted="deleted"),
     )
 
-PermissiveWorkflow = partial(Workflow,
-    label = "Permissive workflow",
-    permission_policy_cls = PermissiveWorkflowPermissions,
-    request_policy_cls = DefaultWorkflowRequests
+
+PermissiveWorkflow = partial(
+    Workflow,
+    label="Permissive workflow",
+    permission_policy_cls=PermissiveWorkflowPermissions,
+    request_policy_cls=DefaultWorkflowRequests,
 )
