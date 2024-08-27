@@ -4,7 +4,7 @@ from invenio_records_permissions.generators import AnyUser
 from oarepo_runtime.services.permissions.generators import RecordOwners
 from oarepo_workflows import (
     AutoApprove,
-    DefaultWorkflowPermissionPolicy,
+    DefaultWorkflowPermissions,
     IfInState,
     Workflow,
     WorkflowRequest,
@@ -15,7 +15,7 @@ from oarepo_workflows import (
 from oarepo_communities.services.permissions.generators import PrimaryCommunityMembers
 
 
-class PermissiveWorkflowPermissions(DefaultWorkflowPermissionPolicy):
+class PermissiveWorkflowPermissions(DefaultWorkflowPermissions):
     can_create = [PrimaryCommunityMembers()]
 
     can_read = [
