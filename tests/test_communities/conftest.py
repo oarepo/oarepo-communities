@@ -20,9 +20,7 @@ from invenio_records_permissions.generators import (
 )
 from oarepo_requests.receiver import default_workflow_receiver_function
 from oarepo_requests.services.permissions.generators import RequestActive
-from oarepo_requests.services.permissions.workflow_policies import (
-    CreatorsFromWorkflowPermissionPolicy,
-)
+from oarepo_requests.services.permissions.workflow_policies import CreatorsFromWorkflowRequestsPermissionPolicy
 from oarepo_runtime.services.permissions import RecordOwners
 from oarepo_workflows import (
     Workflow,
@@ -51,7 +49,7 @@ from oarepo_communities.services.permissions.generators import (
 @pytest.fixture()
 def scenario_permissions():
 
-    return CreatorsFromWorkflowPermissionPolicy
+    return CreatorsFromWorkflowRequestsPermissionPolicy
 
 
 @pytest.fixture

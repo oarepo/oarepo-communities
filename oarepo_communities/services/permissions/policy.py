@@ -1,6 +1,4 @@
-from oarepo_requests.services.permissions.workflow_policies import (
-    DefaultWithRequestsWorkflowPermissionPolicy,
-)
+from oarepo_requests.services.permissions.workflow_policies import RequestBasedWorkflowPermissions
 from oarepo_workflows.services.permissions.policy import WorkflowPermissionPolicy
 
 from oarepo_communities.services.permissions.generators import (
@@ -10,8 +8,19 @@ from oarepo_communities.services.permissions.generators import (
 )
 
 
-# todo specify
-class CommunityDefaultWorkflowPermissions(DefaultWithRequestsWorkflowPermissionPolicy):
+class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
+    """
+    Base class for community workflow permissions, subclass from it and put the result to Workflow constructor.
+    Example:
+        class MyWorkflowPermissions(CommunityDefaultWorkflowPermissions):
+            can_read = [AnyUser()]
+    in invenio.cfg
+    WORKFLOWS = {
+        'default': Workflow(
+            permission_policy_cls = MyWorkflowPermissions, ...
+        )
+    }
+    """
     can_create = [
         DefaultCommunityMembers(),
     ]
