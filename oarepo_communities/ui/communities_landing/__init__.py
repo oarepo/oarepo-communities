@@ -16,6 +16,7 @@ from invenio_communities.views.communities import (
     members as invenio_communities_members,
     communities_curation_policy as invenio_communities_curation_policy,
     communities_about as invenio_communities_about,
+    communities_frontpage as invenio_communities_frontpage,
 )
 
 from invenio_communities.views.ui import (
@@ -54,6 +55,7 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
         "communities_curation_policy": "/<pid_value>/curation_policy",
         "communities_about": "/<pid_value>/about",
         "invitations": "/<pid_value>/invitations",
+        "communities_frontpage": "/",
     }
     api_service = "records"
 
@@ -149,6 +151,9 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
             pid_value=resource_requestctx.view_args["pid_value"]
         )
 
+    def communities_frontpage(self):
+        return invenio_communities_frontpage()
+
     def invitations(self):
         return self.members()
 
@@ -162,6 +167,11 @@ def create_blueprint(app):
 
     @app_blueprint.before_app_first_request
     def init_menu():
+        current_menu.submenu("main.communities").register(
+            endpoint="invenio_communities.communities_frontpage",
+            text=_("Communities"),
+            order=1,
+        )
         communities = current_menu.submenu("communities")
         communities.submenu("search").register(
             "invenio_communities.community_records",
