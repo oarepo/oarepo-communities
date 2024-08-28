@@ -17,13 +17,7 @@ class GetCommunityComponent(UIResourceComponent):
         permissions = community.has_permissions_to(HEADER_PERMISSIONS)
         extra_context["community"] = community
         extra_context["permissions"] = permissions
-        search_options["headers"] = {"Accept": "application/json"}
         search_options["community"] = community.to_dict()
         search_options["overrides"]["ui_endpoint"] = (
             f"/communities/{community.id}/records"
         )
-
-
-class DashboardRequestsSearchComponent(UIResourceComponent):
-    def before_ui_search(self, *, search_options, view_args, **kwargs):
-        search_options["initial_filters"] = ["metadata_languages", "cs"]

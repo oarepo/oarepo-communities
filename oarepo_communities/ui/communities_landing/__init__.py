@@ -17,6 +17,7 @@ from invenio_communities.views.communities import (
     communities_curation_policy as invenio_communities_curation_policy,
     communities_about as invenio_communities_about,
     communities_frontpage as invenio_communities_frontpage,
+    communities_search as invenio_communities_search,
 )
 
 from invenio_communities.views.ui import (
@@ -49,13 +50,14 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
         "community_home": "/<pid_value>",
         "communities_settings": "/<pid_value>/settings",
         "communities_settings_privileges": "/<pid_value>/settings/privileges",
-        "communities_settings_curation_policy": "/<pid_value>/settings/curation_policy",
+        "communities_settings_curation_policy": "/<pid_value>/settings/submission-policy",
         "communities_settings_pages": "/<pid_value>/settings/pages",
         "members": "/<pid_value>/members",
         "communities_curation_policy": "/<pid_value>/curation_policy",
         "communities_about": "/<pid_value>/about",
         "invitations": "/<pid_value>/invitations",
         "communities_frontpage": "/",
+        "communities_search": "/search",
     }
     api_service = "records"
 
@@ -90,7 +92,7 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
     @request_view_args
     def community_home(self):
         url = url_for(
-            "community_records.community_records",
+            "invenio_communities.community_records",
             pid_value=resource_requestctx.view_args["pid_value"],
         )
         return redirect(url)
@@ -153,6 +155,9 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
 
     def communities_frontpage(self):
         return invenio_communities_frontpage()
+
+    def communities_search(self):
+        return invenio_communities_search()
 
     def invitations(self):
         return self.members()
