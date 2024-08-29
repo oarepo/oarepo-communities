@@ -20,19 +20,40 @@ from invenio_communities.views.communities import (
     communities_search as invenio_communities_search,
 )
 
+
 from invenio_communities.views.ui import (
     _has_about_page_content,
     _has_curation_policy_page_content,
-    _show_create_community_link,
 )
-from invenio_records_resources.proxies import current_service_registry
+
+from flask_resources import request_parser, from_conf
 
 from .components import GetCommunityComponent
 
 from invenio_records_resources.resources.records.resource import (
-    request_read_args,
-    request_search_args,
     request_view_args,
+)
+from invenio_records_resources.proxies import current_service_registry
+
+
+import marshmallow as ma
+
+
+class CommunitySchema(ma.Schema):
+    pid_value = ma.fields.String()
+
+    def load(self, data, *args, **kwargs):
+        pid_value = data.get("pid_value")
+
+        community = current_service_registry.get("communities").read(
+            g.identity, pid_value
+        )
+
+        return {"community": community}
+
+
+request_community_view_args = request_parser(
+    from_conf("request_community_view_args"), location="view_args"
 )
 
 
@@ -44,6 +65,7 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
     templates = {
         "search": "CommunityRecordPage",
     }
+    request_community_view_args = CommunitySchema
 
     routes = {
         "community_records": "/<pid_value>/records",
@@ -64,12 +86,7 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
     components = [GetCommunityComponent]
 
     def search_endpoint_url(self, identity, api_config, overrides={}, **kwargs):
-        community_id = kwargs.get("community", {}).get("id")
-        print(kwargs.get("community", {}), "community_id", community_id)
-
-        if community_id is None:
-            raise RuntimeError("Community ID is missing.")
-
+        community_id = resource_requestctx.view_args["community"].to_dict()["id"]
         return f"/api/communities/{community_id}/records"
 
 
@@ -81,15 +98,13 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
         login_required,
     ]
 
-    @request_read_args
-    @request_search_args
     @request_view_args
+    @request_community_view_args
     def community_records(self):
         return self.search()
 
-    @request_read_args
-    @request_search_args
     @request_view_args
+    @request_community_view_args
     def community_home(self):
         url = url_for(
             "invenio_communities.community_records",
@@ -133,6 +148,7 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
     def members(
         self,
     ):
+        print(g.identity, "identityflask", flush=True)
         return invenio_communities_members(
             pid_value=resource_requestctx.view_args["pid_value"]
         )
@@ -175,7 +191,7 @@ def create_blueprint(app):
         current_menu.submenu("main.communities").register(
             endpoint="invenio_communities.communities_frontpage",
             text=_("Communities"),
-            order=1,
+            order=0,
         )
         communities = current_menu.submenu("communities")
         communities.submenu("search").register(
