@@ -35,11 +35,13 @@ from invenio_records_resources.resources.records.resource import (
 )
 from invenio_records_resources.proxies import current_service_registry
 
-
+from invenio_communities.communities.resources.serializer import (
+    UICommunityJSONSerializer,
+)
 import marshmallow as ma
 
 
-class CommunitySchema(ma.Schema):
+class CommunityValidationSchema(ma.Schema):
     pid_value = ma.fields.String()
 
     def load(self, data, *args, **kwargs):
@@ -48,7 +50,7 @@ class CommunitySchema(ma.Schema):
         community = current_service_registry.get("communities").read(
             g.identity, pid_value
         )
-
+        UICommunityJSONSerializer().dump_obj(community.to_dict())
         return {"community": community}
 
 
@@ -59,25 +61,22 @@ request_community_view_args = request_parser(
 
 class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
     url_prefix = "/communities"
-    blueprint_name = "invenio_communities"
+    blueprint_name = "oarepo_communities"
     template_folder = "templates"
     application_id = "community_records"
     templates = {
         "search": "CommunityRecordPage",
     }
-    request_community_view_args = CommunitySchema
+    request_community_view_args = CommunityValidationSchema
 
     routes = {
         "community_records": "/<pid_value>/records",
         "community_home": "/<pid_value>",
         "communities_settings": "/<pid_value>/settings",
-        "communities_settings_privileges": "/<pid_value>/settings/privileges",
-        "communities_settings_curation_policy": "/<pid_value>/settings/submission-policy",
         "communities_settings_pages": "/<pid_value>/settings/pages",
         "members": "/<pid_value>/members",
         "communities_curation_policy": "/<pid_value>/curation_policy",
         "communities_about": "/<pid_value>/about",
-        "invitations": "/<pid_value>/invitations",
         "communities_frontpage": "/",
         "communities_search": "/search",
     }
@@ -90,9 +89,6 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
         return f"/api/communities/{community_id}/records"
 
 
-# TODO: on /communities the communities listed there are linking to communities/slug, and there is actually another handler for "home" that does not seem to even be used currently
-# https://github.com/inveniosoftware/invenio-app-rdm/blob/master/invenio_app_rdm/communities_ui/views/communities.py basically they are always redirecting to /communities/slug/records in its current form
-# though I am not sure what this theme.enabled is supposed to be. Currently there are two handlers because of this.
 class CommunityRecordsUIResource(GlobalSearchUIResource):
     decorators = [
         login_required,
@@ -107,7 +103,7 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
     @request_community_view_args
     def community_home(self):
         url = url_for(
-            "invenio_communities.community_records",
+            "oarepo_communities.community_records",
             pid_value=resource_requestctx.view_args["pid_value"],
         )
         return redirect(url)
@@ -117,22 +113,6 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
         self,
     ):
         return invenio_communities_settings(
-            pid_value=resource_requestctx.view_args["pid_value"]
-        )
-
-    @request_view_args
-    def communities_settings_privileges(
-        self,
-    ):
-        return invenio_communities_settings_privileges(
-            pid_value=resource_requestctx.view_args["pid_value"]
-        )
-
-    @request_view_args
-    def communities_settings_curation_policy(
-        self,
-    ):
-        return invenio_communities_settings_curation_policy(
             pid_value=resource_requestctx.view_args["pid_value"]
         )
 
@@ -175,9 +155,6 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
     def communities_search(self):
         return invenio_communities_search()
 
-    def invitations(self):
-        return self.members()
-
 
 def create_blueprint(app):
     """Register blueprint for this resource."""
@@ -189,20 +166,20 @@ def create_blueprint(app):
     @app_blueprint.before_app_first_request
     def init_menu():
         current_menu.submenu("main.communities").register(
-            endpoint="invenio_communities.communities_frontpage",
+            endpoint="oarepo_communities.communities_frontpage",
             text=_("Communities"),
             order=0,
         )
         communities = current_menu.submenu("communities")
         communities.submenu("search").register(
-            "invenio_communities.community_records",
+            "oarepo_communities.community_records",
             text=_("Records"),
             order=10,
             expected_args=["pid_value"],
             **dict(icon="search", permissions=True),
         )
         communities.submenu("members").register(
-            endpoint="invenio_communities.members",
+            endpoint="oarepo_communities.members",
             text=_("Members"),
             order=30,
             expected_args=["pid_value"],
@@ -210,7 +187,7 @@ def create_blueprint(app):
         )
 
         communities.submenu("settings").register(
-            endpoint="invenio_communities.communities_settings",
+            endpoint="oarepo_communities.communities_settings",
             text=_("Settings"),
             order=40,
             expected_args=["pid_value"],
@@ -218,7 +195,7 @@ def create_blueprint(app):
         )
 
         communities.submenu("curation_policy").register(
-            endpoint="invenio_communities.communities_curation_policy",
+            endpoint="oarepo_communities.communities_curation_policy",
             text=_("Curation policy"),
             order=50,
             visible_when=_has_curation_policy_page_content,
@@ -226,7 +203,7 @@ def create_blueprint(app):
             **{"icon": "balance scale", "permissions": "can_read"},
         )
         communities.submenu("about").register(
-            endpoint="invenio_communities.communities_about",
+            endpoint="oarepo_communities.communities_about",
             text=_("About"),
             order=60,
             visible_when=_has_about_page_content,

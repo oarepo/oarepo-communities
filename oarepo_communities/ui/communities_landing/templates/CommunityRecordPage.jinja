@@ -5,7 +5,6 @@
 {% set community = extra_context["community"] %}
 {% set active_community_header_menu_item = 'search' %}
 
-
 {%- block javascript %}
     {{ super() }}
     {{ webpack['communities_landing.js'] }}
@@ -15,7 +14,6 @@
 
 {%- block page_body %}
 {{super()}}
-
 <div class="ui main container">
     <div data-invenio-search-config='{{ search_app_config | tojson }}'></div>
 </div>

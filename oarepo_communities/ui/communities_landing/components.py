@@ -12,6 +12,8 @@ class GetCommunityComponent(UIResourceComponent):
     ):
         community = view_args.get("community")
         # for consistency with invenio-communities routes
+        # needed to check if there is something in the curation policy and
+        # about page, so that those tabs would render in the menu
         request.community = community.to_dict()
         permissions = community.has_permissions_to(HEADER_PERMISSIONS)
         extra_context["community"] = community
