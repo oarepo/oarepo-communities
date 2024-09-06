@@ -6,7 +6,7 @@ theme = WebpackThemeBundle(
     default="semantic-ui",
     themes={
         "semantic-ui": dict(
-            entry={"communities_landing": "./js/communities_landing/search"},
+            entry={"communities_landing": "./js/oarepo_communities/search"},
             dependencies={},
             devDependencies={},
             aliases={},

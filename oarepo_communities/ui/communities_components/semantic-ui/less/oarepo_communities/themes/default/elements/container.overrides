@@ -1,0 +1,8 @@
+.ui.container.community-search.page-subheader {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+#communities-search {
+  margin-bottom: 2rem;
+}

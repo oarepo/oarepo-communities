@@ -5,3 +5,7 @@
   color: @white !important;
   pointer-events: none;
 }
+
+.ui.menu.theme-primary-menu {
+  width: auto !important;
+}
