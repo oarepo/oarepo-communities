@@ -94,3 +94,6 @@ dist/
 .venv-tests/
 
 forked_install.sh
+# node modules
+**/*/node_modules
+node_modules
