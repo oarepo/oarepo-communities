@@ -2,7 +2,7 @@
 
 
 {% block searchbar %}
-    <div class="stackable row">
+    <div class="two column stackable row">
       <div class="eight wide tablet five wide computer column mt-auto mb-auto">
         <form action="{{ url_for('oarepo_communities.communities_search') }}" class="ui form">
           <div class="ui fluid action input">
@@ -23,6 +23,14 @@
           </div>
         </form>
       </div>
+      {% if permissions.can_create %}
+        <div class="three wide mobile five wide tablet three wide computer stretched column">
+          <a href="{{ config.COMMUNITIES_ROUTES['new'] }}" class="ui icon left labeled positive button" role="button">
+            <i class="icon plus"></i>
+            {{_('New community')}}
+          </a>
+        </div>
+      {% endif %}
     </div>
 {% endblock searchbar %}
 
