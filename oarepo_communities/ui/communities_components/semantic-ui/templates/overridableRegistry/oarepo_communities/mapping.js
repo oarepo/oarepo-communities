@@ -1,5 +1,4 @@
-import React from "react";
-import { CommunityInvitationModal } from "@js/oarepo_communities/search/CommunityInvitationModal";
+import { CommunityInvitationModal } from "@js/oarepo_communities/search/CommunityInvitation";
 
 const mapping = {
   "InvenioCommunities.CommunityProfileForm.GridRow.DangerZone": () => null,
