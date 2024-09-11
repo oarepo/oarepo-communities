@@ -1,16 +1,8 @@
 import React, { useCallback } from "react";
 import { Modal, Button, Form, Icon, List, Label } from "semantic-ui-react";
 import { i18next } from "@translations/oarepo_communities";
+import { useConfirmationModal, OARepoDepositSerializer } from "@js/oarepo_ui";
 import {
-  useConfirmationModal,
-  ArrayFieldItem,
-  OARepoDepositSerializer,
-  requiredMessage,
-  returnGroupError,
-  unique,
-} from "@js/oarepo_ui";
-import {
-  ArrayField,
   TextAreaField,
   RichInputField,
   http,
@@ -19,81 +11,24 @@ import {
 } from "react-invenio-forms";
 import { Formik, getIn } from "formik";
 import PropTypes from "prop-types";
-import * as Yup from "yup";
 import _debounce from "lodash/debounce";
+import { serializeMembers, findAndValidateEmails } from "./util";
 
 const FormikStateLogger = ({ values }) => (
   <pre>{JSON.stringify(values, null, 2)}</pre>
 );
 
-const memberInvitationsSchema = Yup.object().shape({
-  members: Yup.array()
-    .of(
-      Yup.object().shape({
-        email: Yup.string()
-          .email("Invalid email format")
-          .required(requiredMessage)
-          .label(i18next.t("Email")),
-        firstName: Yup.string().label(i18next.t("First name")),
-        lastName: Yup.string().label(i18next.t("Last name")),
-      })
-    )
-    .required(requiredMessage)
-    .label(i18next.t("Members"))
-    .test("unique-emails", returnGroupError, (value, context) =>
-      unique(value, context, "email", i18next.t("Emails must be unique"))
-    ),
-  message: Yup.string().label(i18next.t("Message")),
-  membersEmails: Yup.string()
-    .required(requiredMessage)
-    .label(i18next.t("Members")),
-
-  // role: Yup.string().required(requiredMessage).label(i18next.t("Role")),
-});
-const re = new RegExp(/[\n,]/, "g");
-
-export const findAndValidateEmails = (value) => {
-  const validEmails = [];
-  const invalidEmails = [];
-  const emailSchema = Yup.string().email();
-  if (!value) {
-    return { validEmails, invalidEmails };
-  }
-
-  const emailsArray = value.split(re).map((e) => e.trim());
-  for (const email of emailsArray) {
-    if (!email) {
-      continue;
-    }
-    let processedEmail = email;
-
-    if (email.includes("<") && email.includes(">")) {
-      processedEmail = email
-        .substring(email.indexOf("<") + 1, email.indexOf(">"))
-        .trim();
-    }
-    if (emailSchema.isValidSync(processedEmail)) {
-      validEmails.push(processedEmail);
-    } else {
-      invalidEmails.push(email);
-    }
-  }
-
-  return { validEmails, invalidEmails };
-};
-
 export const CommunityInvitation = ({ rolesCanInvite, community }) => {
   const { isOpen, close, open } = useConfirmationModal();
 
   const onSubmit = async (values, formikBag) => {
-    const serializer = new OARepoDepositSerializer(["membersEmail"], []);
-    console.log(values);
-    const serializedValues = serializer.serialize(values);
-    serializedValues.members = serializedValues.members.map((m) => ({
-      type: "email",
-      id: m.email,
-    }));
-    console.log(serializedValues);
+    const serializer = new OARepoDepositSerializer(
+      ["membersEmails", "emails"],
+      []
+    );
+    const valuesCopy = { ...values };
+    valuesCopy.members = serializeMembers(valuesCopy.emails.validEmails);
+    const serializedValues = serializer.serialize(valuesCopy);
 
     await http.post(community.links.invitations, serializedValues);
   };
@@ -124,15 +59,8 @@ export const CommunityInvitation = ({ rolesCanInvite, community }) => {
       validateOnChange={false}
       validateOnBlur={true}
       enableReinitialize={true}
-      validationSchema={memberInvitationsSchema}
     >
-      {({
-        values,
-        setFieldValue,
-        setFieldTouched,
-        handleSubmit,
-        resetForm,
-      }) => (
+      {({ values, setFieldValue, handleSubmit, resetForm }) => (
         <Modal
           className="form-modal"
           closeIcon
@@ -162,7 +90,6 @@ export const CommunityInvitation = ({ rolesCanInvite, community }) => {
             <Form>
               <Form.Field>
                 <TextAreaField
-                  className="mb-0"
                   fieldPath="membersEmails"
                   optimized
                   required
@@ -173,20 +100,20 @@ export const CommunityInvitation = ({ rolesCanInvite, community }) => {
                 />
                 {values.emails.invalidEmails.length > 0 && (
                   <Label
+                    className="mt-0"
                     pointing
                     prompt
                     content={`${i18next.t(
                       "Invalid emails"
-                    )}: ${values.emails.invalidEmails.join(",")}`}
+                    )}: ${values.emails.invalidEmails.join(", ")}`}
                   />
                 )}
+                <label className="helptext">
+                  {i18next.t(
+                    "Emails shall be provided on separate lines. Acceptable formats are johndoe@user.com or Doe John <johndoe@user.com>."
+                  )}
+                </label>
               </Form.Field>
-
-              <label className="helptext">
-                {i18next.t(
-                  "Emails shall be provided on separate lines. Acceptable formats are johndoe@user.com or John Doe <johndoe@user.com>."
-                )}
-              </label>
               <Form.Field required className="rel-mt-1">
                 <FieldLabel label={i18next.t("Role")} />
                 <List selection>
@@ -216,7 +143,7 @@ export const CommunityInvitation = ({ rolesCanInvite, community }) => {
                 inputValue={() => getIn(values, "message", "")}
                 initialValue=""
               />
-              {/* <FormikStateLogger values={values} /> */}
+              <FormikStateLogger values={values} />
             </Form>
           </Modal.Content>
           <Modal.Actions>
@@ -232,7 +159,7 @@ export const CommunityInvitation = ({ rolesCanInvite, community }) => {
             <Button
               primary
               onClick={handleSubmit}
-              disabled={values.members.length === 0}
+              disabled={values.emails.validEmails === 0}
             >
               <Icon name="checkmark" /> {i18next.t("Invite")}
             </Button>
