@@ -8,7 +8,13 @@ def published_record_in_community(client, community_id, record_service, user):
     return record_item._obj
 
 
-def _create_record_in_community(client, comm_id):
+def _create_record_in_community(client, comm_id, custom_workflow=None):
+    if custom_workflow:
+        return client.post(
+            f"/communities/{comm_id}/thesis",
+            json={"parent": {"workflow": custom_workflow}},
+        )
+
     return client.post(f"/communities/{comm_id}/thesis", json={})
 
 
