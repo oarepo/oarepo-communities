@@ -1,5 +1,5 @@
-import React from "react";
-import { Modal, Button, Form, Icon, List } from "semantic-ui-react";
+import React, { useCallback } from "react";
+import { Modal, Button, Form, Icon, List, Label } from "semantic-ui-react";
 import { i18next } from "@translations/oarepo_communities";
 import {
   useConfirmationModal,
@@ -11,7 +11,7 @@ import {
 } from "@js/oarepo_ui";
 import {
   ArrayField,
-  TextField,
+  TextAreaField,
   RichInputField,
   http,
   ErrorLabel,
@@ -20,6 +20,11 @@ import {
 import { Formik, getIn } from "formik";
 import PropTypes from "prop-types";
 import * as Yup from "yup";
+import _debounce from "lodash/debounce";
+
+const FormikStateLogger = ({ values }) => (
+  <pre>{JSON.stringify(values, null, 2)}</pre>
+);
 
 const memberInvitationsSchema = Yup.object().shape({
   members: Yup.array()
@@ -39,16 +44,50 @@ const memberInvitationsSchema = Yup.object().shape({
       unique(value, context, "email", i18next.t("Emails must be unique"))
     ),
   message: Yup.string().label(i18next.t("Message")),
+  membersEmails: Yup.string()
+    .required(requiredMessage)
+    .label(i18next.t("Members")),
+
   // role: Yup.string().required(requiredMessage).label(i18next.t("Role")),
 });
+const re = new RegExp(/[\n,]/, "g");
+
+export const findAndValidateEmails = (value) => {
+  const validEmails = [];
+  const invalidEmails = [];
+  const emailSchema = Yup.string().email();
+  if (!value) {
+    return { validEmails, invalidEmails };
+  }
+
+  const emailsArray = value.split(re).map((e) => e.trim());
+  for (const email of emailsArray) {
+    if (!email) {
+      continue;
+    }
+    let processedEmail = email;
+
+    if (email.includes("<") && email.includes(">")) {
+      processedEmail = email
+        .substring(email.indexOf("<") + 1, email.indexOf(">"))
+        .trim();
+    }
+    if (emailSchema.isValidSync(processedEmail)) {
+      validEmails.push(processedEmail);
+    } else {
+      invalidEmails.push(email);
+    }
+  }
+
+  return { validEmails, invalidEmails };
+};
 
 export const CommunityInvitation = ({ rolesCanInvite, community }) => {
   const { isOpen, close, open } = useConfirmationModal();
 
   const onSubmit = async (values, formikBag) => {
-    const serializer = new OARepoDepositSerializer([], ["__key"]);
+    const serializer = new OARepoDepositSerializer(["membersEmail"], []);
     console.log(values);
-    // Remove empty values and internal dependencies such as __key from array fields
     const serializedValues = serializer.serialize(values);
     serializedValues.members = serializedValues.members.map((m) => ({
       type: "email",
@@ -58,14 +97,29 @@ export const CommunityInvitation = ({ rolesCanInvite, community }) => {
 
     await http.post(community.links.invitations, serializedValues);
   };
+
+  const debouncedValidateEmails = useCallback(
+    _debounce((value, setFieldValue) => {
+      const emails = findAndValidateEmails(value);
+      setFieldValue("emails", emails);
+    }, 1000),
+    []
+  );
+
+  const handleChange = (value, setFieldValue) => {
+    setFieldValue("membersEmails", value);
+    debouncedValidateEmails(value, setFieldValue);
+  };
   const usersCanInvite = rolesCanInvite.user;
   return (
     <Formik
       onSubmit={onSubmit}
       initialValues={{
-        members: [{ email: "", firstName: "", lastName: "" }],
+        membersEmails: "",
+        members: [],
         message: "",
         role: "member",
+        emails: { validEmails: [], invalidEmails: [] },
       }}
       validateOnChange={false}
       validateOnBlur={true}
@@ -106,41 +160,33 @@ export const CommunityInvitation = ({ rolesCanInvite, community }) => {
           </Modal.Header>
           <Modal.Content>
             <Form>
-              <ArrayField
-                addButtonLabel={i18next.t("Add member")}
-                fieldPath={"members"}
-                addButtonClassName="array-field-add-button"
-                defaultNewValue={{ email: "", firstName: "", lastName: "" }}
-                label={<FieldLabel label={i18next.t("Members")} />}
-              >
-                {({ arrayHelpers, indexPath }) => {
-                  const fieldPathPrefix = `members.${indexPath}`;
-                  return (
-                    <ArrayFieldItem
-                      indexPath={indexPath}
-                      arrayHelpers={arrayHelpers}
-                      fieldPathPrefix={fieldPathPrefix}
-                    >
-                      <TextField
-                        width={7}
-                        fieldPath={`${fieldPathPrefix}.email`}
-                        label={i18next.t("Email")}
-                        required
-                      />
-                      <TextField
-                        width={4}
-                        fieldPath={`${fieldPathPrefix}.firstName`}
-                        label={i18next.t("First name")}
-                      />
-                      <TextField
-                        width={4}
-                        fieldPath={`${fieldPathPrefix}.lastName`}
-                        label={i18next.t("Last name")}
-                      />
-                    </ArrayFieldItem>
-                  );
-                }}
-              </ArrayField>
+              <Form.Field>
+                <TextAreaField
+                  className="mb-0"
+                  fieldPath="membersEmails"
+                  optimized
+                  required
+                  label={<FieldLabel label={i18next.t("Members")} />}
+                  onChange={(e, { value }) =>
+                    handleChange(value, setFieldValue)
+                  }
+                />
+                {values.emails.invalidEmails.length > 0 && (
+                  <Label
+                    pointing
+                    prompt
+                    content={`${i18next.t(
+                      "Invalid emails"
+                    )}: ${values.emails.invalidEmails.join(",")}`}
+                  />
+                )}
+              </Form.Field>
+
+              <label className="helptext">
+                {i18next.t(
+                  "Emails shall be provided on separate lines. Acceptable formats are johndoe@user.com or John Doe <johndoe@user.com>."
+                )}
+              </label>
               <Form.Field required className="rel-mt-1">
                 <FieldLabel label={i18next.t("Role")} />
                 <List selection>
@@ -170,6 +216,7 @@ export const CommunityInvitation = ({ rolesCanInvite, community }) => {
                 inputValue={() => getIn(values, "message", "")}
                 initialValue=""
               />
+              {/* <FormikStateLogger values={values} /> */}
             </Form>
           </Modal.Content>
           <Modal.Actions>
