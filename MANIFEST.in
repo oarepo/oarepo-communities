@@ -1,0 +1,34 @@
+include *.rst
+include *.md
+include *.sh
+include *.txt
+include *.lock
+include .dockerignore
+include .editorconfig
+include .tx/config
+include LICENSE
+include babel.ini
+include pytest.ini
+exclude tests
+recursive-exclude .github/workflows *.yml
+recursive-exclude docs *
+recursive-exclude playground *
+recursive-include examples *
+recursive-include oarepo_communities *.html
+recursive-include oarepo_communities *.jinja
+recursive-include oarepo_communities *.js
+recursive-include oarepo_communities *.mo
+recursive-include oarepo_communities *.po
+recursive-include oarepo_communities *.pot
+recursive-include oarepo_communities *.scss
+recursive-exclude tests *
+recursive-include oarepo_communities *.gitkeep
+recursive-include oarepo_communities *.jsx *.less *.json
+recursive-include oarepo_communities *.overrides
+recursive-include oarepo_communities *.variables
+recursive-include oarepo_communities *.png *.svg
+recursive-include oarepo_communities *.css
+recursive-include oarepo_communities *.jinja2
+recursive-include oarepo_communities *.lock
+recursive-exclude oarepo_communities *.DS_Store
+recursive-exclude tests *
