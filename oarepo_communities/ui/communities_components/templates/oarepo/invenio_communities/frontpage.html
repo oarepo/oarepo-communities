@@ -1,0 +1,60 @@
+{% extends "semantic-ui/invenio_communities/frontpage.html" %}
+
+
+{% block searchbar %}
+    <div class="two column stackable row">
+      <div class="eight wide tablet five wide computer column mt-auto mb-auto">
+        <form action="{{ url_for('oarepo_communities.communities_search') }}" class="ui form">
+          <div class="ui fluid action input">
+            <input
+              type="text"
+              name="q"
+              class="form-control"
+              placeholder="{{ _('Search communities') }}"
+              aria-label="{{ _('Search communities') }}"
+            >
+            <button
+              type="submit"
+              class="ui icon search button"
+              aria-label="{{ _('Search') }}"
+            >
+              <i class="search icon" aria-hidden="true"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+      {% if permissions.can_create %}
+        <div class="three wide mobile five wide tablet three wide computer stretched column">
+          <a href="{{ config.COMMUNITIES_ROUTES['new'] }}" class="ui icon left labeled positive button">
+            <i class="icon plus"></i>
+            {{_('New community')}}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+{% endblock searchbar %}
+
+{%- block user_communities %}
+{% if current_user.is_authenticated %}
+    <div class="flex">
+      <h2 class="ui header mb-0 align-self-center">{{_('My communities')}}</h2>
+      <a class="align-self-center rel-ml-1 " href="{{url_for('communities_dashboard.search')}}">
+        {{ _('See all')}}
+      </a>
+    </div>
+    <div class="ui divider hidden"></div>
+    <div id="user-communities" class="rel-mb-2"></div>
+{% endif %}
+{%- endblock user_communities %}
+
+{%- block new_communities %}
+  <div class="ui divider"></div>
+  <div class="flex">
+    <h2 class="ui header mb-0 align-self-center">{{ _('New communities') }}</h2>
+    <a class="align-self-center rel-ml-1" href="{{url_for('oarepo_communities.communities_search')}}">
+        {{ _('See all')}}
+      </a>
+  </div>
+  <div class="ui divider hidden"></div>
+  <div id="new-communities"></div>
+{%- endblock new_communities %}

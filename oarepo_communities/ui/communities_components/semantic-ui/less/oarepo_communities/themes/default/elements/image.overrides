@@ -1,0 +1,31 @@
+.ui.image.community-logo {
+  img {
+    height: @communityItemLogoWidth !important; // needs to override height set for images in items by SUI
+    object-fit: contain;
+  }
+
+  &.settings {
+    img {
+      height: @mediumWidth !important;
+    }
+  }
+}
+
+.ui.image.community-image {
+  &.mini {
+    width: 45px;
+    min-width: 45px;
+
+    img {
+      max-height: 45px;
+      min-width: 45px;
+      object-fit: contain;
+    }
+  }
+
+  img {
+    max-height: @tinyWidth;
+    min-width: @tinyWidth;
+    object-fit: contain;
+  }
+}

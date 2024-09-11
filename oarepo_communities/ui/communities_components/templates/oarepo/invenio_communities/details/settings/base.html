@@ -1,0 +1,24 @@
+{% extends "semantic-ui/invenio_communities/details/settings/base.html" %}
+ 
+{%- block settings_menu %}
+    {%- set menu_items = {
+    'profile': (_('Profile'), url_for('oarepo_communities.communities_settings', pid_value=community.slug)),
+    'pages': (_('Pages'), url_for('oarepo_communities.communities_settings_pages', pid_value=community.slug)),
+    } %}
+    <div class="sixteen wide mobile sixteen wide tablet three wide computer column">
+    <div role="tablist" class="ui vertical horizontal mobile tablet menu theme-primary-menu">
+        {% for menu_key, (menu_item, menu_link) in menu_items.items() %}
+        {% if not (menu_key == 'privileges' and not permissions.can_manage_access) %}
+            <a
+            role="tab"
+            id="{{ menu_key }}"
+            aria-selected="{{ active_settings_menu_item and menu_key == active_settings_menu_item }}"
+            href="{{ menu_link }}"
+            class="{{ 'brand item active' if active_settings_menu_item and menu_key == active_settings_menu_item }} {{ 'disabled' if not menu_link }} item"
+            >{{ menu_item }}</a
+            >
+        {% endif %}
+        {% endfor %}
+    </div>
+    </div>
+{%- endblock settings_menu %}

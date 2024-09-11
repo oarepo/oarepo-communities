@@ -1,0 +1,200 @@
+#
+msgid ""
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:30
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:50
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:90
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:110
+msgid "By Title"
+msgstr "Podle názvu"
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:36
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:56
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:96
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:116
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:161
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:175
+msgid "Best match"
+msgstr "Nejlepší shoda"
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:40
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:60
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:100
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:120
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:165
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:179
+msgid "Newest"
+msgstr "Nejnovější"
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:44
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:64
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:104
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:124
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:169
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:183
+msgid "Oldest"
+msgstr "Nejstarší"
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:231
+msgid "Records"
+msgstr "Nahráno"
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:237
+msgid "Communities"
+msgstr "Komunity"
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:243
+msgid "Requests"
+msgstr "Žádosti"
+
+msgid "profile"
+msgstr "profil"
+
+msgid "Search in my communities..."
+msgstr "Hledat v mých komunitách..."
+
+msgid "Restricted"
+msgstr "Omezený"
+
+msgid "Filter results"
+msgstr "Filtrovat výsledky"
+
+msgid "Edit"
+msgstr "Upravit"
+
+msgid "Uploaded on {{uploadDate}}"
+msgstr "Nahráno dne {{uploadDate}}"
+
+msgid "No creation date found."
+msgstr "Nebylo nalezeno žádné datum vytvoření"
+
+msgid "No description"
+msgstr "Bez popisu"
+
+msgid "No title"
+msgstr "Bez názvu"
+
+msgid "Create new..."
+msgstr "Vytvořit nový..."
+
+msgid "Search in my uploads..."
+msgstr "Hledat v mých záznamech..."
+
+msgid "Expires at: {{- expiringDate}}"
+msgstr "Vyprší v: {{- expiringDate}}"
+
+msgid "Opened {{relativeTime}} by"
+msgstr "Otevřeno {{relativeTime}} uživatelem"
+
+msgid "Open"
+msgstr "Otevřeno"
+
+msgid "Closed"
+msgstr "Zavřeno"
+
+msgid "New request"
+msgstr "Nová žádost"
+
+msgid "My"
+msgstr "Moje"
+
+msgid "Others"
+msgstr "Ostatní"
+
+msgid "Search in my requests..."
+msgstr "Hledat v mých žádostech..."
+
+msgid "Opened by"
+msgstr "Otevřeno {{relativeTime}} uživatelem"
+
+msgid "Create new draft"
+msgstr "Vytvořit nový koncept"
+
+msgid "Edit record"
+msgstr "Úprava záznamu"
+
+msgid "Delete record"
+msgstr "Smazání záznamu"
+
+msgid "Publish record"
+msgstr "Vypublikování záznamů"
+
+msgid "Opened by {{creatorName}} on {{created}}."
+msgstr "Otevřeno uživatelem {{creatorName}} na {{created}}."
+
+msgid "Recepient: {{receiver}}."
+msgstr "Příjemce: {{receiver}}"
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_records/__init__.py:58
+msgid "Dashboard"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_records/__init__.py:58
+msgid "User Dashboard"
+msgstr "Nástěnka"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_landing/templates/CommunityRecordPage.jinja:2
+msgid "Community"
+msgstr ""
+
+msgid "Search inside the community..."
+msgstr "Hledat v komunitě..."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:14
+msgid "Search communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:19
+msgid "Search"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:30
+msgid "New community"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:40
+msgid "My communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:42
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:55
+msgid "See all"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:53
+msgid "New communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/header.html:10
+msgid "New upload"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:5
+msgid "Profile"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:6
+msgid "Pages"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:185
+msgid "Members"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:193
+msgid "Settings"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:201
+msgid "Curation policy"
+msgstr "Kurátorství"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:209
+msgid "About"
+msgstr "O komunitě"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/CommunityRecordsPage.jinja:7
+msgid "Community records"
+msgstr "Záznamy komunity"

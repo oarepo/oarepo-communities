@@ -1,0 +1,23 @@
+{#def  extra_context, search_app_config #}
+{% extends "invenio_communities/details/base.html" %}
+{% set permissions = extra_context["permissions"] %}
+{% set community = extra_context["community"] %}
+{% set active_community_header_menu_item = 'search' %}
+
+{%- set title = _("Community records") ~ ": " ~ community.metadata.title %}
+
+
+{%- block javascript %}
+    {{ super() }}
+    {{ webpack['communities_landing.js'] }}
+    {{ webpack['communities_components.js'] }}
+{%- endblock javascript %}
+
+
+{%- block page_body %}
+{{super()}}
+<div class="ui main container">
+    <div data-invenio-search-config='{{ search_app_config | tojson }}'></div>
+</div>
+
+{%- endblock page_body %}

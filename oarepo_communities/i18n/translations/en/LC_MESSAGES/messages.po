@@ -1,0 +1,209 @@
+#
+msgid ""
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:30
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:50
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:90
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:110
+msgid "By Title"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:36
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:56
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:96
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:116
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:161
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:175
+msgid "Best match"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:40
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:60
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:100
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:120
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:165
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:179
+msgid "Newest"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:44
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:64
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:104
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:124
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:169
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:183
+msgid "Oldest"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:231
+msgid "Records"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:237
+msgid "Communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:243
+msgid "Requests"
+msgstr ""
+
+msgid "profile"
+msgstr ""
+
+msgid "Search in my communities..."
+msgstr ""
+
+msgid "Restricted"
+msgstr ""
+
+msgid "Filter results"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Uploaded on {{uploadDate}}"
+msgstr ""
+
+msgid "No creation date found."
+msgstr ""
+
+msgid "No description"
+msgstr ""
+
+msgid "No title"
+msgstr ""
+
+msgid "Create new..."
+msgstr ""
+
+msgid "Search in my uploads..."
+msgstr ""
+
+msgid "Expires at: {{- expiringDate}}"
+msgstr ""
+
+msgid "Opened {{relativeTime}} by"
+msgstr ""
+
+msgid "Open"
+msgstr ""
+
+msgid "Closed"
+msgstr ""
+
+msgid "New request"
+msgstr ""
+
+msgid "My"
+msgstr ""
+
+msgid "Others"
+msgstr ""
+
+msgid "Search in my requests..."
+msgstr ""
+
+msgid "Opened by"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:185
+msgid "Dashboard"
+msgstr ""
+
+msgid "Create new draft"
+msgstr ""
+
+msgid "Edit record"
+msgstr ""
+
+msgid "Delete record"
+msgstr ""
+
+msgid "Publish record"
+msgstr ""
+
+msgid "Recepient: "
+msgstr ""
+
+msgid "Opened by {{creatorName}} on {{created}}"
+msgstr ""
+
+msgid "Recepient: {{reciever}}"
+msgstr ""
+
+msgid "Opened by {{creatorName}} on {{created}}."
+msgstr ""
+
+msgid "Recepient: {{receiver}}."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_records/__init__.py:58
+msgid "User Dashboard"
+msgstr "Dashboard"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_landing/templates/CommunityRecordPage.jinja:2
+msgid "Community"
+msgstr ""
+
+msgid "Search inside the community..."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:14
+msgid "Search communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:19
+msgid "Search"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:30
+msgid "New community"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:40
+msgid "My communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:42
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:55
+msgid "See all"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:53
+msgid "New communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/header.html:10
+msgid "New upload"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:5
+msgid "Profile"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:6
+msgid "Pages"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:185
+msgid "Members"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:193
+msgid "Settings"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:201
+msgid "Curation policy"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:209
+msgid "About"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/CommunityRecordsPage.jinja:7
+msgid "Community records"
+msgstr ""
