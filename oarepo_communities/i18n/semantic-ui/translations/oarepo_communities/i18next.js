@@ -4,7 +4,7 @@
 // Invenio-app-rdm is free software; you can redistribute it and/or modify it
 // under the terms of the MIT License; see LICENSE file for more details.
 
-import i18n from "i18next";
+import i18n from "oarepo_communities/i18n/semantic-ui/translations/oarepo_communities/i18next";
 
 import LanguageDetector from "i18next-browser-languagedetector";
 import { translations } from "./messages";
