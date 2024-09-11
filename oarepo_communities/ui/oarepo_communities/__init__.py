@@ -10,14 +10,13 @@ from flask import redirect, url_for
 from flask_resources import resource_requestctx
 from invenio_communities.views.communities import (
     communities_settings as invenio_communities_settings,
-    communities_settings_curation_policy as invenio_communities_settings_curation_policy,
-    communities_settings_privileges as invenio_communities_settings_privileges,
     communities_settings_pages as invenio_communities_settings_pages,
     members as invenio_communities_members,
     communities_curation_policy as invenio_communities_curation_policy,
     communities_about as invenio_communities_about,
     communities_frontpage as invenio_communities_frontpage,
     communities_search as invenio_communities_search,
+    communities_new as invenio_communities_new,
 )
 
 
@@ -65,7 +64,7 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
     template_folder = "templates"
     application_id = "community_records"
     templates = {
-        "search": "CommunityRecordPage",
+        "search": "CommunityRecordsPage",
     }
     request_community_view_args = CommunityValidationSchema
 
@@ -79,6 +78,7 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
         "communities_about": "/<pid_value>/about",
         "communities_frontpage": "/",
         "communities_search": "/search",
+        "communities_new": "/new",
     }
     api_service = "records"
 
@@ -128,7 +128,6 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
     def members(
         self,
     ):
-        print(g.identity, "identityflask", flush=True)
         return invenio_communities_members(
             pid_value=resource_requestctx.view_args["pid_value"]
         )
@@ -154,6 +153,9 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
 
     def communities_search(self):
         return invenio_communities_search()
+
+    def communities_new(self):
+        return invenio_communities_new()
 
 
 def create_blueprint(app):
