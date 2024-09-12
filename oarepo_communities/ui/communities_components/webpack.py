@@ -11,7 +11,9 @@ theme = WebpackThemeBundle(
             },
             "dependencies": {},
             "devDependencies": {},
-            "aliases": {},
+            "aliases": {
+                "@js/oarepo_communities/components": "./js/communities_components/components"
+            },
         }
     },
 )

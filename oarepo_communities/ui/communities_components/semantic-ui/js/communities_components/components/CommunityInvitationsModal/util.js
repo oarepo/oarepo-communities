@@ -20,7 +20,6 @@ export const findAndValidateEmails = (value) => {
   if (!value) {
     return { validEmails, invalidEmails };
   }
-
   const emailsArray = value.split(re).map((e) => e.trim());
   for (const email of emailsArray) {
     if (!email) {
@@ -29,12 +28,16 @@ export const findAndValidateEmails = (value) => {
     let processedEmail = email;
 
     if (emailHasDisplayName(email)) {
-      processedEmail = email
-        .substring(email.indexOf("<") + 1, email.indexOf(">"))
-        .trim();
+      processedEmail = processedEmail.match(/(?<=<)(.*?)(?=>)/)[0].trim();
     }
     if (emailSchema.isValidSync(processedEmail)) {
-      validEmails.push(email);
+      const emailExists = validEmails.some((mail) =>
+        mail.includes(processedEmail)
+      );
+
+      if (!emailExists) {
+        validEmails.push(email);
+      }
     } else {
       invalidEmails.push(email);
     }

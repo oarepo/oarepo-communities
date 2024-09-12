@@ -1,8 +1,9 @@
-import { CommunityInvitation } from "@js/oarepo_communities/search/CommunityInvitation";
+// import { CommunityInvitationsModal } from "@js/oarepo_communities/componentsss/components/CommunityInvitationsModal/CommunityInvitationsModal";
 
 const mapping = {
   "InvenioCommunities.CommunityProfileForm.GridRow.DangerZone": () => null,
-  "InvenioCommunities.CommunityMembers.InvitationsModal": CommunityInvitation,
+  // "InvenioCommunities.CommunityMembers.InvitationsModal":
+  //   CommunityInvitationsModal,
 };
 
 export default mapping;
