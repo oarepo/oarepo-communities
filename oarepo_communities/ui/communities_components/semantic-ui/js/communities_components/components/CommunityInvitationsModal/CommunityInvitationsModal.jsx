@@ -120,6 +120,7 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
                   <TextAreaField
                     fieldPath="membersEmails"
                     required
+                    autoFocus
                     label={
                       <FieldLabel
                         label={i18next.t("Members")}
