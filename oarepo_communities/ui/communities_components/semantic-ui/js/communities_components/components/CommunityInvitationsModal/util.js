@@ -28,7 +28,7 @@ export const findAndValidateEmails = (value) => {
     let processedEmail = email;
 
     if (emailHasDisplayName(email)) {
-      processedEmail = processedEmail.match(/(?<=<)(.*?)(?=>)/)[0].trim();
+      processedEmail = processedEmail.match(/<([^<>]+)>/)[1].trim();
     }
     if (emailSchema.isValidSync(processedEmail)) {
       const emailExists = validEmails.some((mail) =>
