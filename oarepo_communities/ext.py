@@ -1,5 +1,7 @@
 from functools import cached_property
 
+from flask_principal import identity_loaded
+
 import oarepo_communities.cli  # noqa - imported to register CLI commands
 
 from .resources.community_records.config import CommunityRecordsResourceConfig
@@ -7,7 +9,7 @@ from .resources.community_records.resource import CommunityRecordsResource
 from .services.community_inclusion.service import CommunityInclusionService
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
-from .utils import get_urlprefix_service_id_mapping
+from .utils import get_urlprefix_service_id_mapping, load_community_user_needs
 from .workflow import community_default_workflow
 
 
@@ -24,6 +26,7 @@ class OARepoCommunities(object):
         self.app = app
         self.init_services(app)
         self.init_resources(app)
+        self.init_hooks(app)
         self.init_config(app)
         app.extensions["oarepo-communities"] = self
 
@@ -79,6 +82,13 @@ class OARepoCommunities(object):
             config=CommunityRecordsResourceConfig.build(app),
             service=self.community_records_service,
         )
+
+    def init_hooks(self, app):
+        """Initialize hooks."""
+
+        @identity_loaded.connect_via(app)
+        def on_identity_loaded(_, identity):
+            load_community_user_needs(identity)
 
     def get_default_community_from_record(self, record, **kwargs):
         record = record.parent if hasattr(record, "parent") else record

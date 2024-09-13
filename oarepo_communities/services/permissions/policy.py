@@ -1,4 +1,6 @@
-from oarepo_requests.services.permissions.workflow_policies import RequestBasedWorkflowPermissions
+from oarepo_requests.services.permissions.workflow_policies import (
+    RequestBasedWorkflowPermissions,
+)
 from oarepo_workflows.services.permissions.policy import WorkflowPermissionPolicy
 
 from oarepo_communities.services.permissions.generators import (
@@ -21,6 +23,7 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
         )
     }
     """
+
     can_create = [
         DefaultCommunityMembers(),
     ]

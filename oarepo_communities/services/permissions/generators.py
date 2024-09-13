@@ -1,11 +1,14 @@
 import abc
 import uuid
+from collections import namedtuple
+from functools import partial, reduce
 
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.generators import CommunityRoleNeed, CommunityRoles
 from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_permissions.generators import Generator
+from invenio_search.engine import dsl
 from oarepo_workflows.errors import MissingWorkflowError
 from oarepo_workflows.requests.policy import RecipientGeneratorMixin
 from oarepo_workflows.services.permissions.generators import WorkflowPermission
@@ -15,6 +18,9 @@ from oarepo_communities.errors import (
     MissingDefaultCommunityError,
 )
 from oarepo_communities.proxies import current_oarepo_communities
+
+_Need = namedtuple("Need", ["method", "user", "community"])
+UserInCommunityNeed = partial(_Need, "user_in_community")
 
 
 class InAnyCommunity(Generator):
@@ -194,3 +200,61 @@ class DefaultCommunityMembers(DefaultCommunityRoleMixin, OARepoCommunityRoles):
 
 
 PrimaryCommunityMembers = DefaultCommunityMembers
+
+
+class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, Generator):
+    default_or_ids = "default"
+
+    def _record_communities(self, record, **kwargs):
+        return set(self._get_record_communities(record, **kwargs))
+
+    def needs(self, record=None, **kwargs):
+        record_communities = set(self._get_record_communities(record, **kwargs))
+        return self._needs(record_communities, record=record)
+
+    def _needs(self, record_communities, record=None):
+        owners = getattr(record.parent, "owners", None)
+        ret = []
+        for owner in owners:
+            ret += [
+                UserInCommunityNeed(owner.id, community)
+                for community in record_communities
+            ]
+        return ret
+
+    def query_filter(self, identity=None, **kwargs):
+        """Filters for current identity as owner."""
+        user_in_communities = {
+            (n.user, n.community)
+            for n in identity.provides
+            if n.method == "user_in_community"
+        }
+        terms = []
+        for element in user_in_communities:
+            terms.append(
+                dsl.Q("term", **{"parent.owners.user": element[0]})
+                & dsl.Q(
+                    "term", **{f"parent.communities.{self.default_or_ids}": element[1]}
+                )
+            )
+        if not terms:
+            return []
+        query = reduce(lambda f1, f2: f1 | f2, terms)
+        return query
+
+
+RecordOwnerInPrimaryRecordCommunity = RecordOwnerInDefaultRecordCommunity
+
+
+class RecordOwnerInRecordCommunity(
+    CommunityRoleMixin, RecordOwnerInDefaultRecordCommunity
+):
+    default_or_ids = "ids"
+
+    # trick to use CommunityRoleMixin instead of DefaultCommunityRoleMixin
+    def _record_communities(self, record, **kwargs):
+        return set(self._get_record_communities(record, **kwargs))
+
+    def needs(self, record=None, **kwargs):
+        record_communities = set(self._get_record_communities(record, **kwargs))
+        return self._needs(record_communities, record=record)

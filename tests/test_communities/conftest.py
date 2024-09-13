@@ -4,8 +4,8 @@ import os
 import pytest
 import yaml
 from flask_security import login_user
-from invenio_accounts.testutils import login_user_via_session
 from invenio_access.permissions import system_identity
+from invenio_accounts.testutils import login_user_via_session
 from invenio_app.factory import create_api
 from invenio_communities.cli import create_communities_custom_field
 from invenio_communities.communities.records.api import Community
@@ -20,18 +20,17 @@ from invenio_records_permissions.generators import (
 )
 from oarepo_requests.receiver import default_workflow_receiver_function
 from oarepo_requests.services.permissions.generators import RequestActive
-from oarepo_requests.services.permissions.workflow_policies import CreatorsFromWorkflowRequestsPermissionPolicy
+from oarepo_requests.services.permissions.workflow_policies import (
+    CreatorsFromWorkflowRequestsPermissionPolicy,
+)
 from oarepo_runtime.services.permissions import RecordOwners
 from oarepo_workflows import (
-    Workflow,
     AutoApprove,
     IfInState,
+    Workflow,
     WorkflowRequest,
     WorkflowRequestPolicy,
     WorkflowTransitions,
-)
-from oarepo_communities.services.permissions.policy import (
-    CommunityDefaultWorkflowPermissions,
 )
 from thesis.records.api import ThesisDraft
 
@@ -41,9 +40,13 @@ from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
     CommunityRole,
     DefaultCommunityRole,
+    RecordOwnerInDefaultRecordCommunity,
+    RecordOwnerInRecordCommunity,
     TargetCommunityRole,
 )
-
+from oarepo_communities.services.permissions.policy import (
+    CommunityDefaultWorkflowPermissions,
+)
 
 
 @pytest.fixture()
@@ -155,9 +158,37 @@ class TestWithCuratorCommunityWorkflowPermissions(TestCommunityWorkflowPermissio
     ]
 
 
+class TestWithRecordOwnerInRecordCommunityWorkflowPermissions(
+    TestWithCuratorCommunityWorkflowPermissions
+):
+    can_read = [
+        RecordOwnerInRecordCommunity(),
+        CommunityRole("owner"),
+        IfInState(
+            "published",
+            [AnyUser()],
+        ),
+    ]
+
+    can_create = TestCommunityWorkflowPermissions.can_create + [AuthenticatedUser()]
+
+
+class TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions(
+    TestWithCuratorCommunityWorkflowPermissions
+):
+    can_read = [
+        RecordOwnerInDefaultRecordCommunity(),
+        CommunityRole("owner"),
+        IfInState(
+            "published",
+            [AnyUser()],
+        ),
+    ]
+
+
 class DefaultRequests(WorkflowRequestPolicy):
     publish_draft = WorkflowRequest(
-        requesters=[IfInState("draft", [RecordOwners()])],
+        requesters=[IfInState("draft", [RecordOwnerInDefaultRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
             submitted="publishing", accepted="published", declined="draft"
@@ -194,6 +225,26 @@ class DefaultRequests(WorkflowRequestPolicy):
         requesters=[SystemProcess()],
         recipients=[TargetCommunityRole("owner")],
         transitions=WorkflowTransitions(),
+    )
+
+
+class PublishRequestsRecordOwnerInRecordCommunity(DefaultRequests):
+    publish_draft = WorkflowRequest(
+        requesters=[IfInState("draft", [RecordOwnerInRecordCommunity()])],
+        recipients=[DefaultCommunityRole("owner")],
+        transitions=WorkflowTransitions(
+            submitted="publishing", accepted="published", declined="draft"
+        ),
+    )
+
+
+class PublishRequestsRecordOwnerInDefaultRecordCommunity(DefaultRequests):
+    publish_draft = WorkflowRequest(
+        requesters=[IfInState("draft", [RecordOwnerInDefaultRecordCommunity()])],
+        recipients=[DefaultCommunityRole("owner")],
+        transitions=WorkflowTransitions(
+            submitted="publishing", accepted="published", declined="draft"
+        ),
     )
 
 
@@ -245,6 +296,16 @@ WORKFLOWS = {
         permission_policy_cls=TestWithCuratorCommunityWorkflowPermissions,
         request_policy_cls=DefaultRequests,
     ),
+    "record_owner_in_record_community": Workflow(
+        label=_("For testing RecordOwnerInRecordCommunity generator."),
+        permission_policy_cls=TestWithRecordOwnerInRecordCommunityWorkflowPermissions,
+        request_policy_cls=PublishRequestsRecordOwnerInRecordCommunity,
+    ),
+    "record_owner_in_default_record_community": Workflow(
+        label=_("For testing RecordOwnerInDefaultRecordCommunity generator."),
+        permission_policy_cls=TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions,
+        request_policy_cls=PublishRequestsRecordOwnerInDefaultRecordCommunity,
+    ),
     "no": Workflow(
         label=_("Can't do any requests."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
@@ -274,6 +335,22 @@ def inviter():
         )
 
     return invite
+
+
+@pytest.fixture()
+def remover():
+    """Add/invite a user to a community with a specific role."""
+
+    def remove(user_id, community_id):
+        """Add/invite a user to a community with a specific role."""
+        delete_data = {
+            "members": [{"type": "user", "id": user_id}],
+        }
+        member_delete = current_communities.service.members.delete(
+            system_identity, community_id, delete_data
+        )
+
+    return remove
 
 
 @pytest.fixture(scope="module")
@@ -328,7 +405,6 @@ def app_config(app_config):
     return app_config
 
 
-
 @pytest.fixture()
 def community_reader(UserFixture, app, db, community, inviter):
     u = UserFixture(
@@ -361,12 +437,10 @@ def rando_user(UserFixture, app, db):
     return u
 
 
-
-
-
 @pytest.fixture(scope="module", autouse=True)
 def location(location):
     return location
+
 
 @pytest.fixture(scope="module")
 def minimal_community():
@@ -381,6 +455,7 @@ def minimal_community():
             "title": "My Community",
         },
     }
+
 
 def _community_get_or_create(identity, community_dict, workflow=None):
     """Util to get or create community, to avoid duplicate error."""
@@ -402,6 +477,7 @@ def community(app, minimal_community, community_owner):
     return _community_get_or_create(
         community_owner.identity, minimal_community, workflow="default"
     )
+
 
 @pytest.fixture(autouse=True)
 def init_cf(app, db, cache):
