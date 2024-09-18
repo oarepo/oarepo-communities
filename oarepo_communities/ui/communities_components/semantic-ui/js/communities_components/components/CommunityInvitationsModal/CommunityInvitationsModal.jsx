@@ -132,9 +132,7 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
                       <FieldLabel
                         label={i18next.t("Members")}
                         icon={
-                          validEmailsCount + invalidEmailsCount > 0 &&
-                          validEmailsCount ===
-                            validEmailsCount + invalidEmailsCount
+                          validEmailsCount > 0 && invalidEmailsCount === 0
                             ? "check circle green"
                             : ""
                         }
