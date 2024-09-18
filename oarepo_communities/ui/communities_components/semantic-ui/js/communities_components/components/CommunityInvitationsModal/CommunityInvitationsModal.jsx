@@ -25,7 +25,7 @@ import { serializeMembers, findAndValidateEmails } from "./util";
 export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
   const { isOpen, close, open } = useConfirmationModal();
   const [successMessage, setSuccessMessage] = useState("");
-  const [httpError, setHttpError] = useState(null);
+  const [httpError, setHttpError] = useState("");
 
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
     const serializer = new OARepoDepositSerializer(
@@ -38,7 +38,7 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
     setSubmitting(true);
     try {
       const response = await http.post(
-        community.links.invitations,
+        community.links.invitations + "dada",
         serializedValues
       );
       if (response.status === 204) {
@@ -55,6 +55,13 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
       }
     } finally {
       setSubmitting(false);
+      setTimeout(() => {
+        if (isOpen) {
+          close();
+          setSuccessMessage("");
+          setHttpError("");
+        }
+      }, 3000);
     }
   };
 
