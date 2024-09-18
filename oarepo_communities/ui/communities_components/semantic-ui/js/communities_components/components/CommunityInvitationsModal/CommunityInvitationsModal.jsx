@@ -38,7 +38,7 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
     setSubmitting(true);
     try {
       const response = await http.post(
-        community.links.invitations + "dada",
+        community.links.invitations,
         serializedValues
       );
       if (response.status === 204) {
@@ -61,7 +61,7 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
           setSuccessMessage("");
           setHttpError("");
         }
-      }, 3000);
+      }, 2500);
     }
   };
 
