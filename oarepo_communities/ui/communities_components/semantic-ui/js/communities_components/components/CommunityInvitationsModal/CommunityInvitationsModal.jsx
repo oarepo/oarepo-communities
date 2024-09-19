@@ -12,12 +12,11 @@ import { i18next } from "@translations/oarepo_communities";
 import { useConfirmationModal, OARepoDepositSerializer } from "@js/oarepo_ui";
 import {
   TextAreaField,
-  RichInputField,
   http,
   ErrorLabel,
   FieldLabel,
 } from "react-invenio-forms";
-import { Formik, getIn } from "formik";
+import { Formik } from "formik";
 import PropTypes from "prop-types";
 import _debounce from "lodash/debounce";
 import { serializeMembers, findAndValidateEmails } from "./util";
@@ -84,7 +83,6 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
       initialValues={{
         membersEmails: "",
         members: [],
-        message: "",
         role: "member",
         emails: { validEmails: [], invalidEmails: [] },
       }}
@@ -181,14 +179,6 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
                   </List>
                   <ErrorLabel fieldPath="role" />
                 </Form.Field>
-                <RichInputField
-                  className="rel-mt-1"
-                  label={<FieldLabel label={i18next.t("Message")} />}
-                  fieldPath="message"
-                  optimized
-                  inputValue={() => getIn(values, "message", "")}
-                  initialValue=""
-                />
               </Form>
               {successMessage && <Message positive>{successMessage}</Message>}
               {httpError && <Message negative>{httpError}</Message>}
