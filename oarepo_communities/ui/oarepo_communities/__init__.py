@@ -1,43 +1,46 @@
-from oarepo_global_search.ui.config import (
-    GlobalSearchUIResourceConfig,
-    GlobalSearchUIResource,
-)
-from flask import g
-from flask_menu import current_menu
+import marshmallow as ma
+from flask import g, redirect, url_for
 from flask_login import login_required
-from oarepo_runtime.i18n import lazy_gettext as _
-from flask import redirect, url_for
-from flask_resources import resource_requestctx
+from flask_menu import current_menu
+from flask_resources import from_conf, request_parser, resource_requestctx
+from invenio_communities.communities.resources.serializer import (
+    UICommunityJSONSerializer,
+)
 from invenio_communities.views.communities import (
-    communities_settings as invenio_communities_settings,
-    communities_settings_pages as invenio_communities_settings_pages,
-    members as invenio_communities_members,
-    communities_curation_policy as invenio_communities_curation_policy,
     communities_about as invenio_communities_about,
+)
+from invenio_communities.views.communities import (
+    communities_curation_policy as invenio_communities_curation_policy,
+)
+from invenio_communities.views.communities import (
     communities_frontpage as invenio_communities_frontpage,
-    communities_search as invenio_communities_search,
+)
+from invenio_communities.views.communities import (
     communities_new as invenio_communities_new,
 )
-
-
+from invenio_communities.views.communities import (
+    communities_search as invenio_communities_search,
+)
+from invenio_communities.views.communities import (
+    communities_settings as invenio_communities_settings,
+)
+from invenio_communities.views.communities import (
+    communities_settings_pages as invenio_communities_settings_pages,
+)
+from invenio_communities.views.communities import members as invenio_communities_members
 from invenio_communities.views.ui import (
     _has_about_page_content,
     _has_curation_policy_page_content,
 )
-
-from flask_resources import request_parser, from_conf
+from invenio_records_resources.proxies import current_service_registry
+from invenio_records_resources.resources.records.resource import request_view_args
+from oarepo_global_search.ui.config import (
+    GlobalSearchUIResource,
+    GlobalSearchUIResourceConfig,
+)
+from oarepo_runtime.i18n import lazy_gettext as _
 
 from .components import GetCommunityComponent
-
-from invenio_records_resources.resources.records.resource import (
-    request_view_args,
-)
-from invenio_records_resources.proxies import current_service_registry
-
-from invenio_communities.communities.resources.serializer import (
-    UICommunityJSONSerializer,
-)
-import marshmallow as ma
 
 
 class CommunityValidationSchema(ma.Schema):

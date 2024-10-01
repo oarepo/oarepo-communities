@@ -1,4 +1,5 @@
 import pytest
+from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 
@@ -171,3 +172,121 @@ def test_can_possibly_create_in_community(
     record_service.require_permission(community_curator.identity, "view_deposit_page")
     with pytest.raises(PermissionDeniedError):
         record_service.require_permission(rando_user.identity, "view_deposit_page")
+
+
+def test_record_owners_in_default_record_community_needs(
+    community_owner,
+    community_curator,
+    logged_client,
+    community_with_workflow_factory,
+    inviter,
+    remover,
+    service_config,
+    record_service,
+    search_clear,
+):
+    # tries to .. in with one community with default workflow allowing reader and owner, than adds another community
+    # allowing curator, which should allow curator to deposit too
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
+    inviter(community_curator.id, community_1.id, "curator")
+    inviter(community_curator.id, community_2.id, "curator")
+    community_curator.identity.provides.add(
+        CommunityRoleNeed(community_1.id, "curator")
+    )
+
+    curator_client = logged_client(community_curator)
+
+    record1 = _create_record_in_community(
+        curator_client,
+        community_1.id,
+        custom_workflow="record_owner_in_default_record_community",
+    )
+    record2 = _create_record_in_community(
+        curator_client,
+        community_2.id,
+        custom_workflow="record_owner_in_default_record_community",
+    )
+
+    read_before = curator_client.get(f"/thesis/{record1.json['id']}/draft?expand=true")
+    search_before = curator_client.get(f"/user/thesis/")
+    type_ids = {
+        request_type["type_id"]
+        for request_type in read_before.json["expanded"]["request_types"]
+    }
+    assert "publish_draft" in type_ids
+    assert len(search_before.json["hits"]["hits"]) == 2
+
+    remover(
+        community_curator.id, community_1.id
+    )  # the curator now isn't in community and should not be able to create
+    # publish request on the record nor search it
+
+    read_after = curator_client.get(f"/thesis/{record1.json['id']}/draft?expand=true")
+    assert read_after.status_code == 403
+    search_after = curator_client.get(f"/user/thesis/")
+    assert len(search_after.json["hits"]["hits"]) == 1
+
+
+def test_record_owners_in_record_community_needs(
+    community_owner,
+    community_curator,
+    logged_client,
+    community_with_workflow_factory,
+    community_inclusion_service,
+    inviter,
+    remover,
+    service_config,
+    record_service,
+    search_clear,
+):
+
+    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_2 = community_with_workflow_factory("comm2", community_owner)
+    community_3 = community_with_workflow_factory("comm3", community_owner)
+    inviter(community_curator.id, community_1.id, "curator")
+    inviter(community_curator.id, community_2.id, "curator")
+    community_curator.identity.provides.add(
+        CommunityRoleNeed(community_1.id, "curator")
+    )
+
+    curator_client = logged_client(community_curator)
+
+    record1 = _create_record_in_community(
+        curator_client,
+        community_1.id,
+        custom_workflow="record_owner_in_record_community",
+    )
+    record2 = _create_record_in_community(
+        curator_client,
+        community_3.id,
+        custom_workflow="record_owner_in_record_community",
+    )
+
+    read_before1 = curator_client.get(f"/thesis/{record1.json['id']}/draft?expand=true")
+    read_before2 = curator_client.get(f"/thesis/{record2.json['id']}/draft?expand=true")
+    search_before = curator_client.get(f"/user/thesis/")
+    type_ids1 = {
+        request_type["type_id"]
+        for request_type in read_before1.json["expanded"]["request_types"]
+    }
+    assert read_before2.status_code == 403
+    assert len(search_before.json["hits"]["hits"]) == 1
+    assert "publish_draft" in type_ids1
+
+    community_inclusion_service.include(
+        record_service.read_draft(system_identity, record2.json["id"])._record,
+        community_2.id,
+        record_service=record_service,
+        default=False,
+    )
+
+    read_after = curator_client.get(f"/thesis/{record2.json['id']}/draft?expand=true")
+    search_after = curator_client.get(f"/user/thesis/")
+
+    type_ids2 = {
+        request_type["type_id"]
+        for request_type in read_after.json["expanded"]["request_types"]
+    }
+    assert "publish_draft" in type_ids2
+    assert len(search_after.json["hits"]["hits"]) == 2

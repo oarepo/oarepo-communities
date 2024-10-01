@@ -1,16 +1,17 @@
 from copy import deepcopy
 from typing import Dict
 
-from uritemplate import URITemplate
-from invenio_records_resources.services.base.links import preprocess_vars, Link
 from invenio_communities.communities.records.api import Community
+from invenio_records_resources.services.base.links import Link, preprocess_vars
+from uritemplate import URITemplate
+
 
 class CommunitiesLinks(Link):
     """Utility class for keeping track of and resolve links."""
 
     def __init__(self, uritemplate_strs: Dict, when=None, vars=None):
         """Constructor."""
-        self._uritemplates = {k: URITemplate(v) for k,v in uritemplate_strs.items()}
+        self._uritemplates = {k: URITemplate(v) for k, v in uritemplate_strs.items()}
         self._when_func = when
         self._vars_func = vars
 
