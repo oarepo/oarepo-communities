@@ -198,3 +198,42 @@ msgstr "O komunitě"
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/CommunityRecordsPage.jinja:7
 msgid "Community records"
 msgstr "Záznamy komunity"
+
+msgid "Invitations sent successfully."
+msgstr "Pozvánky byly úspěšně odeslány."
+
+msgid "The invitations could not be sent. Please try again later."
+msgstr "Pozvánky se nepodařilo odeslat. Zkuste to znovu později."
+
+msgid "Invite..."
+msgstr "Pozvat..."
+
+msgid "Invite users to the {{communityTitle}} community"
+msgstr "Pozvěte uživatele do komunity {{communityTitle}}"
+
+msgid "Invalid emails"
+msgstr "Neplatné e-maily"
+
+msgid ""
+"Emails shall be provided on separate lines. \n"
+"                    Acceptable formats are johndoe@user.com or Doe John <johndoe@user.com>. \n"
+"                    Note that invitations shall be sent only to the valid email addresses."
+msgstr ""
+"E-maily musí být uvedeny na samostatných řádcích. \n"
+"                    Přijatelné formáty jsou johndoe@user.com nebo Doe John <johndoe@user.com>. \n"
+"                    Vezměte na vědomí, že pozvánky budou odeslány pouze na platné e-mailové adresy."
+
+msgid "Role"
+msgstr "Role"
+
+msgid "Message"
+msgstr "Zpráva"
+
+msgid "Cancel"
+msgstr "Zrušit"
+
+msgid "Invite"
+msgstr "Pozvat"
+
+msgid "Members"
+msgstr "Členové"
