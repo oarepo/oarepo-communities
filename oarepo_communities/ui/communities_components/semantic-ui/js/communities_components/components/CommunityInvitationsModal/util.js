@@ -144,8 +144,8 @@ const isEmail = (str, options) => {
     ? emailUserUtf8Part
     : emailUserPart;
   const userParts = user.split(".");
-  for (let i = 0; i < userParts.length; i++) {
-    if (!pattern.test(userParts[i])) {
+  for (const userPart of userParts) {
+    if (!pattern.test(userPart)) {
       return false;
     }
   }

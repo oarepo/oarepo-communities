@@ -128,11 +128,14 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
                     autoFocus
                     label={
                       <FieldLabel
-                        label={i18next.t("Members")}
-                        icon={
-                          validEmailsCount > 0 && invalidEmailsCount === 0
-                            ? "check circle green"
-                            : ""
+                        label={
+                          <label htmlFor="membersEmails">
+                            {validEmailsCount > 0 &&
+                            invalidEmailsCount === 0 ? (
+                              <Icon name="check circle" color="green" />
+                            ) : null}
+                            {i18next.t("Members")}
+                          </label>
                         }
                       />
                     }
