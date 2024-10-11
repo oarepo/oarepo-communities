@@ -1,5 +1,3 @@
-
-
 def test_community_role_param_interpreter(
     logged_client,
     community_owner,
@@ -23,16 +21,15 @@ def test_community_role_param_interpreter(
     inviter("2", community_2.id, "reader")
     inviter("2", community_3.id, "reader")
 
-
     record1 = create_draft_via_resource(owner_client, community=community_1)
     record2 = create_draft_via_resource(owner_client, community=community_2)
-    record3 = create_draft_via_resource(curator_client, community=community_3, custom_workflow="curator_publish")
-
+    record3 = create_draft_via_resource(
+        curator_client, community=community_3, custom_workflow="curator_publish"
+    )
 
     response_1 = submit_request(reader_client, record1, "publish_draft")
     response_2 = submit_request(reader_client, record2, "publish_draft")
     response_3 = submit_request(owner_client, record3, "publish_draft")
-
 
     search_unfiltered = owner_client.get("/requests/")
     assert len(search_unfiltered.json["hits"]["hits"]) == 3
