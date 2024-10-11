@@ -32,6 +32,8 @@ from oarepo_workflows import (
     WorkflowRequestPolicy,
     WorkflowTransitions,
 )
+
+from tests.test_communities.utils import link_api2testclient
 from thesis.records.api import ThesisDraft
 
 from oarepo_communities.proxies import current_oarepo_communities
@@ -228,6 +230,8 @@ class DefaultRequests(WorkflowRequestPolicy):
     )
 
 
+
+
 class PublishRequestsRecordOwnerInRecordCommunity(DefaultRequests):
     publish_draft = WorkflowRequest(
         requesters=[IfInState("draft", [RecordOwnerInRecordCommunity()])],
@@ -284,6 +288,15 @@ class NoRequests(WorkflowRequestPolicy):
         transitions=WorkflowTransitions(),
     )
 
+class CuratorPublishRequests(DefaultRequests):
+    publish_draft = WorkflowRequest(
+        requesters=[IfInState("draft", [CommunityRole("owner")])],
+        recipients=[DefaultCommunityRole("curator")],
+        transitions=WorkflowTransitions(
+            submitted="publishing", accepted="published", declined="draft"
+        ),
+    )
+
 
 WORKFLOWS = {
     "default": Workflow(
@@ -311,6 +324,11 @@ WORKFLOWS = {
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=NoRequests,
     ),
+    "curator_publish": Workflow(
+        label=_("For testing assigned param filter."),
+        permission_policy_cls=TestCommunityWorkflowPermissions,
+        request_policy_cls=CuratorPublishRequests,
+    )
 }
 
 
@@ -637,16 +655,55 @@ def default_workflow_json():
 
 
 @pytest.fixture()
-def create_draft_via_resource(default_workflow_json, urls):
+def create_draft_via_resource(default_workflow_json):
     def _create_draft(
-        client, expand=True, custom_workflow=None, additional_data=None, **kwargs
+        client, community, expand=True, custom_workflow=None, additional_data=None, **kwargs
     ):
         json = copy.deepcopy(default_workflow_json)
         if custom_workflow:
             json["parent"]["workflow"] = custom_workflow
         if additional_data:
             json |= additional_data
-        url = urls["BASE_URL"] + "?expand=true" if expand else urls["BASE_URL"]
+        #url = "/thesis/" + "?expand=true" if expand else "/thesis/"
+        url=f"/communities/{community.id}/thesis"
         return client.post(url, json=json, **kwargs)
 
     return _create_draft
+
+@pytest.fixture()
+def get_request_type():
+    """
+    gets request create link from serialized request types
+    """
+
+    def _get_request_type(request_types_json, request_type):
+        selected_entry = [
+            entry for entry in request_types_json if entry["type_id"] == request_type
+        ][0]
+        return selected_entry
+
+    return _get_request_type
+
+
+@pytest.fixture()
+def get_request_link(get_request_type):
+    """
+    gets request create link from serialized request types
+    """
+
+    def _create_request_from_link(request_types_json, request_type):
+        selected_entry = get_request_type(request_types_json, request_type)
+        return selected_entry["links"]["actions"]["create"]
+
+    return _create_request_from_link
+
+@pytest.fixture
+def submit_request(get_request_link):
+    def _submit_request(client, record, request_type):
+        applicable_requests = client.get(link_api2testclient(record.json["links"]["applicable-requests"])).json["hits"]["hits"]
+        approve_link = link_api2testclient(get_request_link(applicable_requests, request_type))
+        create_approve_response = client.post(approve_link)
+        submit_approve_response = client.post(
+            link_api2testclient(create_approve_response.json["links"]["actions"]["submit"]))
+        return submit_approve_response
+    return _submit_request
