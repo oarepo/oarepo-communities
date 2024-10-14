@@ -52,12 +52,21 @@ class OARepoCommunities(object):
         )
         if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
             app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
+        app.config.setdefault(
+            "DISPLAY_USER_COMMUNITIES", config.DISPLAY_USER_COMMUNITIES
+        )
+        app.config.setdefault("DISPLAY_NEW_COMMUNITIES", config.DISPLAY_NEW_COMMUNITIES)
 
         for k in ext_config.OAREPO_PERMISSIONS_PRESETS:
             if k not in app.config["OAREPO_PERMISSIONS_PRESETS"]:
                 app.config["OAREPO_PERMISSIONS_PRESETS"][k] = (
                     ext_config.OAREPO_PERMISSIONS_PRESETS[k]
                 )
+
+        app.config["COMMUNITIES_ROUTES"] = {
+            **config.COMMUNITIES_ROUTES,
+            **app.config.get("COMMUNITIES_ROUTES", {}),
+        }
 
     @cached_property
     def urlprefix_serviceid_mapping(self):

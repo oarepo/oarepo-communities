@@ -35,19 +35,23 @@
 {% endblock searchbar %}
 
 {%- block user_communities %}
-{% if current_user.is_authenticated %}
-    <div class="flex">
-      <h2 class="ui header mb-0 align-self-center">{{_('My communities')}}</h2>
-      <a class="align-self-center rel-ml-1 " href="{{url_for('communities_dashboard.search')}}">
-        {{ _('See all')}}
-      </a>
-    </div>
-    <div class="ui divider hidden"></div>
-    <div id="user-communities" class="rel-mb-2"></div>
+{% if config.DISPLAY_USER_COMMUNITIES %}
+  {% if current_user.is_authenticated %}
+      <div class="flex">
+        <h2 class="ui header mb-0 align-self-center">{{_('My communities')}}</h2>
+        <a class="align-self-center rel-ml-1 " href="{{config.COMMUNITIES_ROUTES['my_communities'] }}">
+          {{ _('See all')}}
+        </a>
+      </div>
+      <div class="ui divider hidden"></div>
+      <div id="user-communities" class="rel-mb-2"></div>
+  {% endif %}
 {% endif %}
 {%- endblock user_communities %}
 
+
 {%- block new_communities %}
+{% if config.DISPLAY_NEW_COMMUNITIES %}
   <div class="ui divider"></div>
   <div class="flex">
     <h2 class="ui header mb-0 align-self-center">{{ _('New communities') }}</h2>
@@ -57,4 +61,5 @@
   </div>
   <div class="ui divider hidden"></div>
   <div id="new-communities"></div>
+{% endif %}
 {%- endblock new_communities %}
