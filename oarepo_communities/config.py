@@ -8,6 +8,7 @@ from .requests.migration import (
 from .requests.remove_secondary import RemoveSecondaryCommunityRequestType
 from .requests.submission_secondary import SecondaryCommunitySubmissionRequestType
 from .resolvers.ui import CommunityRoleUIResolver
+from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 
 REQUESTS_REGISTERED_TYPES = [
     InitiateCommunityMigrationRequestType(),
@@ -60,3 +61,9 @@ DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI = [
         ],
     }
 ]
+
+COMMUNITIES_ROUTES = {**INVENIO_COMMUNITIES_ROUTES, "my_communities": "/me/communities"}
+
+DISPLAY_USER_COMMUNITIES = True
+
+DISPLAY_NEW_COMMUNITIES = True
