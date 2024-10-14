@@ -1,6 +1,6 @@
 import React from "react";
 import { parametrize } from "react-overridable";
-import { i18next } from "@translations/oarepo_dashboard";
+import { i18next } from "@translations/oarepo_communities";
 import {
   UserDashboardSearchAppLayoutHOC,
   UserDashboardSearchAppResultView,
