@@ -61,7 +61,6 @@ def test_scenario_change(
     inviter,
     set_community_workflow,
     service_config,
-    patch_requests_permissions,
     search_clear,
 ):
     owner_client = logged_client(community_owner)

@@ -122,7 +122,6 @@ def test_community_publish(
     community,
     request_data_factory,
     record_service,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
@@ -163,7 +162,6 @@ def test_community_delete(
     community,
     request_data_factory,
     record_service,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
@@ -210,7 +208,6 @@ def test_community_migration(
     request_data_factory,
     record_service,
     inviter,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -269,7 +266,6 @@ def test_community_submission_secondary(
     inviter,
     request_data_factory,
     record_service,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -332,7 +328,6 @@ def test_remove_secondary(
     inviter,
     request_data_factory,
     record_service,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -420,7 +415,6 @@ def test_community_role_ui_serialization(
     request_data_factory,
     record_service,
     ui_serialized_community_role,
-    patch_requests_permissions,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
