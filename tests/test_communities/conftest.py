@@ -47,20 +47,8 @@ from oarepo_communities.services.permissions.generators import (
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
-
-
-@pytest.fixture()
-def scenario_permissions():
-
-    return CreatorsFromWorkflowRequestsPermissionPolicy
-
-
-@pytest.fixture
-def patch_requests_permissions(
-    requests_service_config,
-    scenario_permissions,
-):
-    setattr(requests_service_config, "permission_policy_cls", scenario_permissions)
+from tests.test_communities.utils import link_api2testclient
+from oarepo_requests.services.permissions.workflow_policies import CreatorsFromWorkflowRequestsPermissionPolicy
 
 
 @pytest.fixture(scope="function")
@@ -285,6 +273,16 @@ class NoRequests(WorkflowRequestPolicy):
     )
 
 
+class CuratorPublishRequests(DefaultRequests):
+    publish_draft = WorkflowRequest(
+        requesters=[IfInState("draft", [CommunityRole("owner")])],
+        recipients=[DefaultCommunityRole("curator")],
+        transitions=WorkflowTransitions(
+            submitted="publishing", accepted="published", declined="draft"
+        ),
+    )
+
+
 WORKFLOWS = {
     "default": Workflow(
         label=_("Default workflow"),
@@ -310,6 +308,11 @@ WORKFLOWS = {
         label=_("Can't do any requests."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=NoRequests,
+    ),
+    "curator_publish": Workflow(
+        label=_("For testing assigned param filter."),
+        permission_policy_cls=TestCommunityWorkflowPermissions,
+        request_policy_cls=CuratorPublishRequests,
     ),
 }
 
@@ -402,6 +405,7 @@ def app_config(app_config):
     app_config["COMMUNITIES_CUSTOM_FIELDS"] = [WorkflowCF(name="workflow")]
     app_config["COMMUNITIES_CUSTOM_FIELDS_UI"] = []
 
+    app_config["REQUESTS_PERMISSION_POLICY"] = CreatorsFromWorkflowRequestsPermissionPolicy
     return app_config
 
 
@@ -637,16 +641,77 @@ def default_workflow_json():
 
 
 @pytest.fixture()
-def create_draft_via_resource(default_workflow_json, urls):
+def create_draft_via_resource(default_workflow_json):
     def _create_draft(
-        client, expand=True, custom_workflow=None, additional_data=None, **kwargs
+        client,
+        community,
+        expand=True,
+        custom_workflow=None,
+        additional_data=None,
+        **kwargs,
     ):
         json = copy.deepcopy(default_workflow_json)
         if custom_workflow:
             json["parent"]["workflow"] = custom_workflow
         if additional_data:
             json |= additional_data
-        url = urls["BASE_URL"] + "?expand=true" if expand else urls["BASE_URL"]
+        # url = "/thesis/" + "?expand=true" if expand else "/thesis/"
+        url = f"/communities/{community.id}/thesis"
         return client.post(url, json=json, **kwargs)
 
     return _create_draft
+
+
+@pytest.fixture()
+def get_request_type():
+    """
+    gets request create link from serialized request types
+    """
+
+    def _get_request_type(request_types_json, request_type):
+        selected_entry = [
+            entry for entry in request_types_json if entry["type_id"] == request_type
+        ][0]
+        return selected_entry
+
+    return _get_request_type
+
+
+@pytest.fixture()
+def get_request_link(get_request_type):
+    """
+    gets request create link from serialized request types
+    """
+
+    def _create_request_from_link(request_types_json, request_type):
+        selected_entry = get_request_type(request_types_json, request_type)
+        return selected_entry["links"]["actions"]["create"]
+
+    return _create_request_from_link
+
+
+@pytest.fixture
+def create_request_by_link(get_request_link):
+    def _create_request(client, record, request_type):
+        applicable_requests = client.get(
+            link_api2testclient(record.json["links"]["applicable-requests"])
+        ).json["hits"]["hits"]
+        create_link = link_api2testclient(
+            get_request_link(applicable_requests, request_type)
+        )
+        create_response = client.post(create_link)
+        return create_response
+
+    return _create_request
+
+
+@pytest.fixture
+def submit_request_by_link(create_request_by_link):
+    def _submit_request(client, record, request_type):
+        create_response = create_request_by_link(client, record, request_type)
+        submit_response = client.post(
+            link_api2testclient(create_response.json["links"]["actions"]["submit"])
+        )
+        return submit_response
+
+    return _submit_request
