@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-09-11 09:01+0200\n"
+"POT-Creation-Date: 2024-09-12 13:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,6 +81,39 @@ msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/CommunityRecordsPage.jinja:7
 msgid "Community records"
+msgstr ""
+
+msgid "Invitations sent successfully."
+msgstr ""
+
+msgid "The invitations could not be sent. Please try again later."
+msgstr ""
+
+msgid "Invite..."
+msgstr ""
+
+msgid "Invite users to the {{communityTitle}} community"
+msgstr ""
+
+msgid "Invalid emails"
+msgstr ""
+
+msgid ""
+"Emails shall be provided on separate lines. \n"
+"                    Acceptable formats are johndoe@user.com or Doe John <johndoe@user.com>. \n"
+"                    Note that invitations shall be sent only to the valid email addresses."
+msgstr ""
+
+msgid "Role"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Invite"
 msgstr ""
 
 msgid "Search inside the community..."

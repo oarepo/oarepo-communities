@@ -11,7 +11,9 @@ theme = WebpackThemeBundle(
             },
             "dependencies": {},
             "devDependencies": {},
-            "aliases": {},
+            "aliases": {
+                "@js/communities_components": "./js/communities_components/components"
+            },
         }
     },
 )

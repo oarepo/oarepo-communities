@@ -24,8 +24,8 @@
   }
 
   img {
-    max-height: @tinyWidth;
-    min-width: @tinyWidth;
+    max-height: 120px;
+    min-width: 120px;
     object-fit: contain;
   }
 }

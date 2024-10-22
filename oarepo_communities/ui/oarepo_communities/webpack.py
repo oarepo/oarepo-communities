@@ -9,7 +9,7 @@ theme = WebpackThemeBundle(
             entry={"communities_landing": "./js/oarepo_communities/search"},
             dependencies={},
             devDependencies={},
-            aliases={},
+            aliases={"@js/oarepo_communities": "./js/oarepo_communities"},
         )
     },
 )
