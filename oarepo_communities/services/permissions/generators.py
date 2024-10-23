@@ -1,7 +1,7 @@
 import abc
 import uuid
 from collections import namedtuple
-from functools import partial, reduce
+from functools import reduce
 
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
@@ -19,8 +19,13 @@ from oarepo_communities.errors import (
 )
 from oarepo_communities.proxies import current_oarepo_communities
 
-_Need = namedtuple("Need", ["method", "user", "community"])
-UserInCommunityNeed = partial(_Need, "user_in_community")
+
+def _UserInCommunityNeed(user, community):
+    _Need = namedtuple("Need", ["method", "value", "user", "community"])
+    return _Need("user_in_community", f"{user}:{community}", user, community)
+
+
+UserInCommunityNeed = _UserInCommunityNeed
 
 
 class InAnyCommunity(Generator):
