@@ -20,12 +20,12 @@ from oarepo_communities.errors import (
 from oarepo_communities.proxies import current_oarepo_communities
 
 
-def _UserInCommunityNeed(user, community):
+def _user_in_community_need(user, community):
     _Need = namedtuple("Need", ["method", "value", "user", "community"])
     return _Need("user_in_community", f"{user}:{community}", user, community)
 
 
-UserInCommunityNeed = _UserInCommunityNeed
+UserInCommunityNeed = _user_in_community_need
 
 
 class InAnyCommunity(Generator):
