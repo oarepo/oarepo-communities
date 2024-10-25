@@ -3,8 +3,8 @@ import uuid
 from collections import namedtuple
 from functools import reduce
 
-from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
+from invenio_communities.communities.records.models import CommunityMetadata
 from invenio_communities.generators import CommunityRoleNeed, CommunityRoles
 from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_permissions.generators import Generator
@@ -34,12 +34,19 @@ class InAnyCommunity(Generator):
         super().__init__(**kwargs)
 
     def needs(self, **kwargs):
-        communities = current_communities.service.scan(system_identity).hits
+        communities = CommunityMetadata.query.all()
         needs = set()  # to avoid duplicates
-        for community in communities:  # todo optimize
+        # TODO: this is linear with number of communities, optimize
+        # won't be easy to do as we go from community -> workflow id -> can_create/deposit
+        # permission which might need a community id and currently can not process bulk
+        # ids. Then we'd need a fallback to iteration if bulk fails.
+        for community in communities:
+            if community.slug is None:
+                continue
             needs |= set(
                 self.permission_generator.needs(
-                    data={"parent": {"communities": {"default": community["id"]}}},
+                    data={"parent": {"communities": {"default": str(community.id)}}},
+                    community_metadata=community,   # optimization
                     **kwargs,
                 )
             )
@@ -55,7 +62,7 @@ class CommunityWorkflowPermission(WorkflowPermission):
         except MissingWorkflowError:
             if not record:
                 workflow_id = current_oarepo_communities.get_community_default_workflow(
-                    data=kwargs["data"]
+                    **kwargs
                 )
                 if not workflow_id:
                     raise MissingWorkflowError("Workflow not defined in input.")
