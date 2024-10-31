@@ -25,13 +25,6 @@
 
   img {
     max-height: 120px;
-    min-width: 120px;
     object-fit: contain;
   }
-}
-
-.ui.image.community-selector-image img {
-  max-height: 80px;
-  min-width: 80px;
-  object-fit: contain;
 }
