@@ -1,7 +1,7 @@
 i18n:
   babel_output_translations: oarepo_communities/i18n/translations
   babel_source_paths:
-    - oarepo_communities/ui
+    - oarepo_communities
   i18next_output_translations: oarepo_communities/i18n/semantic-ui/translations/oarepo_communities
   i18next_source_paths:
     - oarepo_communities/ui

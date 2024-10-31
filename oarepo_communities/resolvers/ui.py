@@ -2,7 +2,7 @@ from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_resources.resources.errors import PermissionDeniedError
 from invenio_requests.resolvers.registry import ResolverRegistry
 from oarepo_requests.resolvers.ui import OARepoUIResolver, fallback_label_result
-from oarepo_runtime.i18n import lazy_gettext as _
+from oarepo_runtime.i18n import gettext as _
 
 
 class CommunityRoleUIResolver(OARepoUIResolver):
@@ -56,8 +56,9 @@ class CommunityRoleUIResolver(OARepoUIResolver):
         ret = {
             "reference": reference,
             "type": "community role",
-            "label": _("%(role)s of %(community)s")
-            % {"role": role_label, "community": community_label},  # todo
+            "label": _(
+                "%(role)s of %(community)s", role=role_label, community=community_label
+            ),
             "links": self._resolve_links(community_record),
         }
         return ret

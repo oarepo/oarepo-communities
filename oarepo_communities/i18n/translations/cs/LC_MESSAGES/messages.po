@@ -128,7 +128,7 @@ msgstr "Příjemce: {{receiver}}"
 
 #: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_records/__init__.py:58
 msgid "Dashboard"
-msgstr ""
+msgstr "Nástěnka"
 
 #: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/dashboard_records/__init__.py:58
 msgid "User Dashboard"
@@ -136,7 +136,7 @@ msgstr "Nástěnka"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_landing/templates/CommunityRecordPage.jinja:2
 msgid "Community"
-msgstr ""
+msgstr "Komunita"
 
 msgid "Search inside the community..."
 msgstr "Hledat v komunitě..."
@@ -144,48 +144,48 @@ msgstr "Hledat v komunitě..."
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:14
 msgid "Search communities"
-msgstr ""
+msgstr "Hledat komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:19
 msgid "Search"
-msgstr ""
+msgstr "Hledat"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:30
 msgid "New community"
-msgstr ""
+msgstr "Nová komunita"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:40
 msgid "My communities"
-msgstr ""
+msgstr "Moje komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:42
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:55
 msgid "See all"
-msgstr ""
+msgstr "Zobrazit vše"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:53
 msgid "New communities"
-msgstr ""
+msgstr "Nové komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/header.html:10
 msgid "New upload"
-msgstr ""
+msgstr "Nová nahrání"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:5
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:6
 msgid "Pages"
-msgstr ""
+msgstr "Stránky"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:185
 msgid "Members"
-msgstr ""
+msgstr "Členové"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:193
 msgid "Settings"
-msgstr ""
+msgstr "Nastavení"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:201
 msgid "Curation policy"
@@ -242,38 +242,79 @@ msgid "Community selection"
 msgstr "Výběr komunity"
 
 msgid "Please select community in which your work will be published:"
-msgstr "Vyberte prosím komunitu, ve které bude vaše práce publikována:"
+msgstr "Vyberte prosím komunitu pro publikování vaší práce"
 
 msgid ""
 "If you are certain that you wish to proceed with the generic community, "
 "please click on it below."
 msgstr ""
-"Pokud jste si jisti, že chcete pokračovat s generickou komunitou, klikněte "
-"na něj níže."
+"Pokud jste si jistí že váš záznam patří do obecné komunity,prosím klikněte "
+"níže"
 
 msgid "All records must belong to a community."
-msgstr "Všechny záznamy musí patřit komunitě."
+msgstr "Každý záznam musí patřit do komunity"
 
 msgid "Go back"
-msgstr "Zpátky"
+msgstr "Jít zpět"
 
 msgid "genericCommunityMessage"
-msgstr ""
-"Nejste členem žádné komunity. Pokud se rozhodnete pokračovat, vaše práce "
-"bude publikována v \"generické\" komunitě. Důrazně doporučujeme, abyste se "
-"připojili k nějaké komunitě, abyste zvýšili viditelnost své práce a mohli "
-"snadněji spolupracovat s ostatními. Na dostupné komunity se můžete podívat "
-"<2>na naší stránce komunit.</2> Pro více podrobností o tom, jak se připojit "
-"k nějaké komunitě, se prosím podívejte na instrukce <6>jak se připojit ke "
-"komunitě.</6>"
+msgstr "zprávaObecnéKomunity"
 
 msgid "Your record will be published in the following community:"
-msgstr "Váš záznam bude zveřejněn v následující komunitě:"
+msgstr "Váš záznam bude zveřejněn v následující komunitě"
 
 msgid ""
 "Your work will be saved in the following community. Please note that after "
 "saving it will not be possible to transfer it to another community. "
 "Click<1>here</1>to change the selection."
 msgstr ""
-"Vaše práce bude uložena v následující komunitě. Vezměte prosím na vědomí, že"
-" po uložení nebude možné převést ji do jiné komunity."
+"Vaše práce bude uložena v následující komunitě. Prosím vemte na vědomí že po"
+" uložení už nebude možné komunitu změnit. Klikni<1>zde</1>pro změnu výběru."
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:36
+msgid "Workflows"
+msgstr "Workflows"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:42
+msgid "Default workflow"
+msgstr "Výchozí workflow"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:43
+msgid ""
+"Default workflow for the community if workflow is not specified when "
+"depositing a record."
+msgstr ""
+"Výchozí workflow komunity pokud workflow není specifikován během nahrání "
+"záznamu."
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:55
+msgid "Allowed workflows"
+msgstr "Povolené workflows"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:57
+msgid "Workflows allowed for the community."
+msgstr "Povolené workflows komunity"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:63
+msgid "There is already an open inclusion request for this community."
+msgstr "Otevřená žádost pro přidání do komunity už existuje"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/resolvers/ui.py:59
+msgid "%(role)s of %(community)s"
+msgstr "Role \"%(role)s\" komunity \"%(community)s\""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/migration.py:71
+msgid "Inititiate Community migration"
+msgstr "Zahájit migraci mezi komunitami"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/migration.py:107
+msgid "confirm Community migration"
+msgstr "Potvrdit migraci mezi komunitami"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/remove_secondary.py:31
+msgid "Remove secondary community"
+msgstr "Odebrat sekundární komunitu"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/submission_secondary.py:29
+msgid "Secondary community submission"
+msgstr "Přijmout do sekundární komunity"
