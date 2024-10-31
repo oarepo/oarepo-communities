@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-09-12 13:09+0200\n"
+"POT-Creation-Date: 2024-10-31 12:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,16 +30,16 @@ msgstr ""
 msgid "New community"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:40
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:41
 msgid "My communities"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:42
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:55
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:43
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:59
 msgid "See all"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:53
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:57
 msgid "New communities"
 msgstr ""
 
@@ -55,27 +55,27 @@ msgstr ""
 msgid "Pages"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:172
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:175
 msgid "Communities"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:178
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:181
 msgid "Records"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:185
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:188
 msgid "Members"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:193
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:196
 msgid "Settings"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:201
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:204
 msgid "Curation policy"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:209
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:212
 msgid "About"
 msgstr ""
 
@@ -107,13 +107,39 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
-msgid "Message"
-msgstr ""
-
 msgid "Cancel"
 msgstr ""
 
 msgid "Invite"
+msgstr ""
+
+msgid "Community selection"
+msgstr ""
+
+msgid "Please select community in which your work will be published:"
+msgstr ""
+
+msgid ""
+"If you are certain that you wish to proceed with the generic community, "
+"please click on it below."
+msgstr ""
+
+msgid "All records must belong to a community."
+msgstr ""
+
+msgid "Go back"
+msgstr ""
+
+msgid "genericCommunityMessage"
+msgstr ""
+
+msgid "Your record will be published in the following community:"
+msgstr ""
+
+msgid ""
+"Your work will be saved in the following community. Please note that after "
+"saving it will not be possible to transfer it to another community. "
+"Click<1>here</1>to change the selection."
 msgstr ""
 
 msgid "Search inside the community..."

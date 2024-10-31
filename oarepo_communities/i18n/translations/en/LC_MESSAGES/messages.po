@@ -240,3 +240,32 @@ msgstr ""
 
 msgid "Invite"
 msgstr ""
+
+msgid "Community selection"
+msgstr ""
+
+msgid "Please select community in which your work will be published:"
+msgstr ""
+
+msgid ""
+"If you are certain that you wish to proceed with the generic community, "
+"please click on it below."
+msgstr ""
+
+msgid "All records must belong to a community."
+msgstr ""
+
+msgid "Go back"
+msgstr ""
+
+msgid "genericCommunityMessage"
+msgstr ""
+
+msgid "Your record will be published in the following community:"
+msgstr ""
+
+msgid ""
+"Your work will be saved in the following community. Please note that after "
+"saving it will not be possible to transfer it to another community. "
+"Click<1>here</1>to change the selection."
+msgstr ""
