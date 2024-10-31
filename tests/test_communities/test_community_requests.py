@@ -445,7 +445,7 @@ def test_community_role_ui_serialization(
         "receiver"
     ] == ui_serialized_community_role(community.id)
 
-"""
+
 def test_community_role_ui_serialization_cs(
     logged_client,
     community_owner,
@@ -482,4 +482,3 @@ def test_community_role_ui_serialization_cs(
         request.json["receiver"]["label"] == 'Role "Vlastník" komunity "My Community"'
     )
     clear_babel_context()
-"""
