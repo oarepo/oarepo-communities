@@ -444,3 +444,41 @@ def test_community_role_ui_serialization(
     assert request_list.json["hits"]["hits"][0][
         "receiver"
     ] == ui_serialized_community_role(community.id)
+
+
+def test_community_role_ui_serialization_cs(
+    logged_client,
+    community_owner,
+    community_reader,
+    community,
+    request_data_factory,
+    record_service,
+    ui_serialized_community_role,
+    clear_babel_context,
+    search_clear,
+):
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
+
+    record_id = _create_record_in_community(reader_client, community.id).json["id"]
+
+    submit = _submit_request(
+        reader_client,
+        community.id,
+        "thesis_draft",
+        record_id,
+        "publish_draft",
+        request_data_factory,
+    )
+    clear_babel_context()
+    request = owner_client.get(
+        f"/requests/extended/{submit.json['id']}",
+        headers={
+            "Accept": "application/vnd.inveniordm.v1+json",
+            "Accept-Language": "cs",
+        },
+    )
+    assert (
+        request.json["receiver"]["label"] == 'Role "Vlastník" komunity "My Community"'
+    )
+    clear_babel_context()

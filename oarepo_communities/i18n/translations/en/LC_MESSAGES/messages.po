@@ -240,3 +240,80 @@ msgstr ""
 
 msgid "Invite"
 msgstr ""
+
+msgid "Community selection"
+msgstr ""
+
+msgid "Please select community in which your work will be published:"
+msgstr ""
+
+msgid ""
+"If you are certain that you wish to proceed with the generic community, "
+"please click on it below."
+msgstr ""
+
+msgid "All records must belong to a community."
+msgstr ""
+
+msgid "Go back"
+msgstr ""
+
+msgid "genericCommunityMessage"
+msgstr ""
+
+msgid "Your record will be published in the following community:"
+msgstr ""
+
+msgid ""
+"Your work will be saved in the following community. Please note that after "
+"saving it will not be possible to transfer it to another community. "
+"Click<1>here</1>to change the selection."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:36
+msgid "Workflows"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:42
+msgid "Default workflow"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:43
+msgid ""
+"Default workflow for the community if workflow is not specified when "
+"depositing a record."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:55
+msgid "Allowed workflows"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:57
+msgid "Workflows allowed for the community."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:63
+msgid "There is already an open inclusion request for this community."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/i18n/translations/_just_for_translations.py:4
+#: /home/ron/prace/oarepo-communities/oarepo_communities/resolvers/ui.py:59
+#, python-format
+msgid "%(role)s of %(community)s"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/migration.py:71
+msgid "Inititiate Community migration"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/migration.py:107
+msgid "confirm Community migration"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/remove_secondary.py:31
+msgid "Remove secondary community"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/submission_secondary.py:29
+msgid "Secondary community submission"
+msgstr ""

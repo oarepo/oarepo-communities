@@ -48,7 +48,6 @@ from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
 from tests.test_communities.utils import link_api2testclient
-from oarepo_requests.services.permissions.workflow_policies import CreatorsFromWorkflowRequestsPermissionPolicy
 
 
 @pytest.fixture(scope="function")
@@ -404,8 +403,13 @@ def app_config(app_config):
 
     app_config["COMMUNITIES_CUSTOM_FIELDS"] = [WorkflowCF(name="workflow")]
     app_config["COMMUNITIES_CUSTOM_FIELDS_UI"] = []
+    app_config["I18N_LANGUAGES"] = [
+        ("cs", _("Czech")),
+    ]
 
-    app_config["REQUESTS_PERMISSION_POLICY"] = CreatorsFromWorkflowRequestsPermissionPolicy
+    app_config["REQUESTS_PERMISSION_POLICY"] = (
+        CreatorsFromWorkflowRequestsPermissionPolicy
+    )
     return app_config
 
 
@@ -715,3 +719,19 @@ def submit_request_by_link(create_request_by_link):
         return submit_response
 
     return _submit_request
+
+
+@pytest.fixture()
+def clear_babel_context():
+
+    # force babel reinitialization when language is switched
+    def _clear_babel_context():
+        try:
+            from flask import g
+            from flask_babel import SimpleNamespace
+
+            g._flask_babel = SimpleNamespace()
+        except ImportError:
+            return
+
+    return _clear_babel_context
