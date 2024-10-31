@@ -40,6 +40,28 @@ def test_create_record_in_community_without_model_in_url(
     assert response_record.json["parent"]["communities"]["default"] == community.id
 
 
+def test_create_record_directly(
+    logged_client,
+    community_owner,
+    community,
+    search_clear,
+):
+    owner_client = logged_client(community_owner)
+
+    response = owner_client.post(
+        f"/thesis/",
+        json={},
+    )
+    """
+    assert response.json["parent"]["communities"]["ids"] == [community.id]
+    assert response.json["parent"]["communities"]["default"] == community.id
+
+    response_record = owner_client.get(f"/thesis/{response.json['id']}/draft")
+    assert response_record.json["parent"]["communities"]["ids"] == [community.id]
+    assert response_record.json["parent"]["communities"]["default"] == community.id
+    """
+
+
 def test_search(
     logged_client,
     community_owner,

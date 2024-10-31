@@ -6,7 +6,7 @@ from functools import reduce
 from invenio_communities.communities.records.api import Community
 from invenio_communities.communities.records.models import CommunityMetadata
 from invenio_communities.generators import CommunityRoleNeed, CommunityRoles
-from invenio_communities.proxies import current_communities, current_roles
+from invenio_communities.proxies import current_roles
 from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
 from oarepo_workflows.errors import MissingWorkflowError
@@ -46,7 +46,7 @@ class InAnyCommunity(Generator):
             needs |= set(
                 self.permission_generator.needs(
                     data={"parent": {"communities": {"default": str(community.id)}}},
-                    community_metadata=community,   # optimization
+                    community_metadata=community,  # optimization
                     **kwargs,
                 )
             )

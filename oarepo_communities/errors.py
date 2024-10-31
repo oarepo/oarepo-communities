@@ -2,6 +2,10 @@ from flask_babelex import lazy_gettext as _
 from marshmallow import ValidationError
 
 
+class MissingCommunityError(ValidationError):
+    """"""
+
+
 class CommunityAlreadyIncludedException(Exception):
     """The record is already in the community."""
 
