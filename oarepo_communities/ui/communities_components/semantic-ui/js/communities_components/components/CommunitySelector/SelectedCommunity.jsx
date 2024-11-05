@@ -10,11 +10,7 @@ import { Trans } from "react-i18next";
 
 export const SelectedCommunity = ({ fieldPath }) => {
   const {
-    formConfig: {
-      allowed_communities,
-      generic_community,
-      preselected_community,
-    },
+    formConfig: { allowed_communities, generic_community },
   } = useFormConfig();
   const { values, setFieldValue } = useFormikContext();
   const selectedCommunityId = getIn(values, fieldPath, "");
