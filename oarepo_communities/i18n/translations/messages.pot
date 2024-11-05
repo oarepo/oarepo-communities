@@ -8,125 +8,125 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-31 15:23+0100\n"
+"POT-Creation-Date: 2024-11-05 13:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.15.0\n"
+"Generated-By: Babel 2.16.0\n"
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:36
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:36
 msgid "Workflows"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:42
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:42
 msgid "Default workflow"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:43
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:43
 msgid ""
 "Default workflow for the community if workflow is not specified when "
 "depositing a record."
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:55
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:55
 msgid "Allowed workflows"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:57
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:57
 msgid "Workflows allowed for the community."
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:63
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:63
 msgid "There is already an open inclusion request for this community."
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/migration.py:71
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:71
 msgid "Inititiate Community migration"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/migration.py:107
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:107
 msgid "confirm Community migration"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/remove_secondary.py:31
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/remove_secondary.py:31
 msgid "Remove secondary community"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/requests/submission_secondary.py:29
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:29
 msgid "Secondary community submission"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/resolvers/ui.py:59
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resolvers/ui.py:59
 #, python-format
 msgid "%(role)s of %(community)s"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:14
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:14
 msgid "Search communities"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:19
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:19
 msgid "Search"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:30
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:30
 msgid "New community"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:41
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:41
 msgid "My communities"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:43
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:59
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:43
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:59
 msgid "See all"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:57
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:57
 msgid "New communities"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/header.html:10
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/header.html:10
 msgid "New upload"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:5
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:5
 msgid "Profile"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:6
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:6
 msgid "Pages"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:175
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:175
 msgid "Communities"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:181
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:181
 msgid "Records"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:188
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:188
 msgid "Members"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:196
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:196
 msgid "Settings"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:204
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:204
 msgid "Curation policy"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:212
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:212
 msgid "About"
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/CommunityRecordsPage.jinja:7
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/CommunityRecordsPage.jinja:7
 msgid "Community records"
 msgstr ""
 

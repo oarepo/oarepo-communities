@@ -276,7 +276,8 @@ msgid ""
 "Click<1>here</1>to change the selection."
 msgstr ""
 "Vaše práce bude uložena v následující komunitě. Vezměte prosím na vědomí, že"
-" po uložení nebude možné převést ji do jiné komunity."
+" po uložení nebude možné převést ji do jiné komunity. Klikněte<1>zde</1>pro "
+"změnu výběru."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:36
 msgid "Workflows"
