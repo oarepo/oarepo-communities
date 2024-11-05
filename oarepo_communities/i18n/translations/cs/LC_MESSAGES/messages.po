@@ -276,6 +276,7 @@ msgid ""
 "Click<1>here</1>to change the selection."
 msgstr ""
 "Vaše práce bude uložena v následující komunitě. Vezměte prosím na vědomí, že"
+<<<<<<< Updated upstream
 " po uložení nebude možné převést ji do jiné komunity."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:36
@@ -325,3 +326,7 @@ msgstr "Odebrat sekundární komunitu"
 #: /home/ron/prace/oarepo-communities/oarepo_communities/requests/submission_secondary.py:29
 msgid "Secondary community submission"
 msgstr "Přijmout do sekundární komunity"
+=======
+" po uložení nebude možné převést ji do jiné komunity. Klikněte<1>zde</1>pro "
+"změnu výběru."
+>>>>>>> Stashed changes
