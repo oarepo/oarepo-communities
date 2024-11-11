@@ -17,7 +17,7 @@ def _serialized_community_role(id_):
                 "visibility": "public",
             },
             "children": {"allow": False},
-            #"created": "2024-10-31T10:44:13.951403+00:00",
+            # "created": "2024-10-31T10:44:13.951403+00:00",
             "custom_fields": {"workflow": "default"},
             "deletion_status": {"is_deleted": False, "status": "P"},
             "id": id_,
@@ -25,12 +25,13 @@ def _serialized_community_role(id_):
             "metadata": {"title": "My Community"},
             "revision_id": 2,
             "slug": "public",
-            #"updated": "2024-10-31T10:44:14.012001+00:00",
+            # "updated": "2024-10-31T10:44:14.012001+00:00",
         },
         "id": f"{id_}:owner",
         "role": "owner",
-        "links": {}
+        "links": {},
     }
+
 
 def _check_result(response_community_role, id_):
     response_community_role["community"].pop("created")

@@ -1,9 +1,6 @@
 from invenio_communities.communities.records.api import Community
 from invenio_records_resources.services.records.results import RecordItem, RecordList
 
-from oarepo_communities.records.api import CommunityRoleAggregate
-
-
 class CommunityRoleRecordItem(RecordItem):
     """Single record result."""
 
@@ -20,7 +17,11 @@ class CommunityRoleRecordItem(RecordItem):
         expand=False,
         nested_links_item=None,
     ):
-        record = CommunityRoleAggregate(community._record, role)
+        record = {
+            "community": community._record,
+            "role": role,
+            "id": f"{community._record.id}:{role}",
+        }
         super().__init__(
             service,
             identity,
@@ -80,10 +81,10 @@ class CommunityRoleRecordList(RecordList):
         """Iterator over the hits."""
         for community_id, community_role in self._inputs:
             # Load dump
-            # record = self._service.record_cls.loads({**hit.to_dict(), "role": self._community_to_role[id_]})
-            record = CommunityRoleAggregate(
-                self._id_to_record[community_id], community_role
-            )
+            # record = CommunityRoleAggregate(
+            #    self._id_to_record[community_id], community_role
+            # )
+
             record = {
                 "community": self._id_to_record[community_id],
                 "role": community_role,
