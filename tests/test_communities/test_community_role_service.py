@@ -38,6 +38,12 @@ def _check_result(response_community_role, id_):
     response_community_role["community"].pop("updated")
     assert response_community_role == _serialized_community_role(id_)
 
+def _check_result_pick_resolved_field(response_community_role, id_):
+    # this comes from the result of pick_resolver_fields of the CommunityRoleProxy method;
+    # the read method of the service uses the ResultItem serialization; result might be different
+    response_community_role["links"] = {}
+    _check_result(response_community_role, id_)
+
 
 def test_read(app, community):
     service = current_service_registry.get("community-role")
@@ -74,9 +80,11 @@ def test_expand_community_role(
     read = owner_client.get(link_api2testclient(submit.json["links"]["self"]))
     read_expanded = owner_client.get(
         f"{link_api2testclient(submit.json['links']['self'])}?expand=true"
-    ).json
+    )
+    assert read_expanded.status_code == 200
     read_expanded_ui_serialization = owner_client.get(
         f"{link_api2testclient(submit.json['links']['self'])}?expand=true",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
-    ).json
-    print()
+    ).json # expanded isn't here bc it isn't in the ui serialization schema
+    receiver = read_expanded.json["expanded"]["receiver"]
+    _check_result_pick_resolved_field(receiver, str(community.id))
