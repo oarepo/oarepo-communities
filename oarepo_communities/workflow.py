@@ -24,7 +24,9 @@ def community_default_workflow(**kwargs):
         try:
             community_id = kwargs["data"]["parent"]["communities"]["default"]
         except KeyError:
-            raise MissingDefaultCommunityError("Failed to get community from input data.")
+            raise MissingDefaultCommunityError(
+                "Failed to get community from input data."
+            )
 
     # use pid resolve so that the community might be both slug or id
     community = Community.pid.resolve(community_id)

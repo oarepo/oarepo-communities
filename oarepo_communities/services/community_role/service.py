@@ -1,12 +1,13 @@
 from functools import cached_property
 from typing import Iterable
 
+from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.base.links import LinksTemplate
 from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.records.schema import ServiceSchemaWrapper
 from invenio_search.engine import dsl
-from invenio_communities.communities.records.api import Community
+
 
 class CommunityRoleService(Service):
     @cached_property
@@ -75,7 +76,6 @@ class CommunityRoleService(Service):
                 "id": f"{community_id}:{community_role}",
             }
             results.append(record)
-
 
         return self.result_list(
             self,

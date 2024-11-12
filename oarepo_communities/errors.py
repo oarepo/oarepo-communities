@@ -1,6 +1,7 @@
 from flask_babelex import lazy_gettext as _
 from marshmallow import ValidationError
 
+
 class CommunityAlreadyIncludedException(Exception):
     """The record is already in the community."""
 
@@ -16,17 +17,22 @@ class CommunityNotIncludedException(Exception):
 class PrimaryCommunityException(Exception):
     """The record is already in the community."""
 
-    description = _("Primary community can't be removed, can only be migrated to another.")
+    description = _(
+        "Primary community can't be removed, can only be migrated to another."
+    )
 
 
 class MissingDefaultCommunityError(ValidationError):
     """"""
+
     description = _("Default community is not present in the input.")
 
 
 class MissingCommunitiesError(ValidationError):
     """"""
+
     description = _("Communities are not present in the input.")
+
 
 class CommunityAlreadyExists(Exception):
     """The record is already in the community."""
