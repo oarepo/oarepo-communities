@@ -1,6 +1,6 @@
 from invenio_communities.communities.records.api import Community
 
-from oarepo_communities.errors import MissingCommunityError
+from oarepo_communities.errors import MissingDefaultCommunityError
 from oarepo_communities.utils import community_id_from_record
 
 
@@ -12,19 +12,19 @@ def community_default_workflow(**kwargs):
         return custom_fields.get("workflow", "default")
 
     if "record" not in kwargs and "data" not in kwargs:  # nothing to get community from
-        raise MissingCommunityError(
+        raise MissingDefaultCommunityError(
             "Can't get community when neither record nor input data are present."
         )
 
     if "record" in kwargs:
         community_id = community_id_from_record(kwargs["record"])
         if not community_id:
-            raise MissingCommunityError("Failed to get community from record.")
+            raise MissingDefaultCommunityError("Failed to get community from record.")
     else:
         try:
             community_id = kwargs["data"]["parent"]["communities"]["default"]
         except KeyError:
-            raise MissingCommunityError("Failed to get community from input data.")
+            raise MissingDefaultCommunityError("Failed to get community from input data.")
 
     # use pid resolve so that the community might be both slug or id
     community = Community.pid.resolve(community_id)

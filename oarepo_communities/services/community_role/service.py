@@ -6,7 +6,7 @@ from invenio_records_resources.services.base.links import LinksTemplate
 from invenio_records_resources.services.base.service import Service
 from invenio_records_resources.services.records.schema import ServiceSchemaWrapper
 from invenio_search.engine import dsl
-
+from invenio_communities.communities.records.api import Community
 
 class CommunityRoleService(Service):
     @cached_property
@@ -31,10 +31,15 @@ class CommunityRoleService(Service):
 
     def read(self, identity, id_: str, **kwargs):
         community_id = id_.split(":")[0].strip()
-        role_id = id_.split(":")[1].strip()
+        role = id_.split(":")[1].strip()
         community = self.community_service.read(identity, community_id, **kwargs)
+        result = {
+            "community": community._record,
+            "role": role,
+            "id": f"{community_id}:{role}",
+        }
         return self.result_item(
-            self, identity, community, role_id, links_tpl=self.links_item_tpl
+            self, identity, record=result, links_tpl=self.links_item_tpl
         )
 
     def read_many(self, identity, ids: Iterable[str], fields=None, **kwargs):
@@ -54,10 +59,27 @@ class CommunityRoleService(Service):
             identity, query, fields, len(community_ids), **kwargs
         )
 
+        results = []
+
+        id_to_record = {}
+        for hit in communities_search_results:
+            id_ = hit["id"]
+            if id_ not in id_to_record:
+                community_record = Community.loads(hit.to_dict())
+                id_to_record[id_] = community_record
+
+        for community_id, community_role in community_and_role_split_inputs:
+            record = {
+                "community": id_to_record[community_id],
+                "role": community_role,
+                "id": f"{community_id}:{community_role}",
+            }
+            results.append(record)
+
+
         return self.result_list(
             self,
             identity,
-            results=communities_search_results,
-            inputs=community_and_role_split_inputs,
+            results=results,
             links_item_tpl=self.links_item_tpl,
         )
