@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-31 15:23+0100\n"
+"POT-Creation-Date: 2024-11-13 13:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,7 +39,28 @@ msgstr ""
 msgid "Workflows allowed for the community."
 msgstr ""
 
-#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:8
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:40
+msgid "The record is already included in this community."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:14
+msgid "The record is not included in this community."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:20
+msgid "Primary community can't be removed, can only be migrated to another."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:28
+msgid "Default community is not present in the input."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:34
+msgid "Communities are not present in the input."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:69
 msgid "There is already an open inclusion request for this community."
 msgstr ""
 
