@@ -31,7 +31,11 @@ class CommunityRoleProxy(EntityProxy):
 
     def pick_resolved_fields(self, identity, resolved_dict):
         """Select which fields to return when resolving the reference."""
-        return {"community_role": resolved_dict.get("community_role")}
+        return {
+            "community": resolved_dict.get("community"),
+            "role": resolved_dict.get("role"),
+            "id": resolved_dict.get("id"),
+        }
 
 
 class CommunityRoleResolver(EntityResolver):
@@ -45,7 +49,7 @@ class CommunityRoleResolver(EntityResolver):
     """Type identifier for this resolver."""
 
     def __init__(self):
-        super().__init__(None)
+        super().__init__("community-role")
 
     def _reference_entity(self, entity: CommunityRoleObj):
         """Create a reference dict for the given record."""

@@ -445,6 +445,7 @@ def test_community_role_ui_serialization(
         "receiver"
     ] == ui_serialized_community_role(community.id)
 
+
 """
 def test_community_role_ui_serialization_cs(
     logged_client,

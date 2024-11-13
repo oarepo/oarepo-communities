@@ -2,6 +2,7 @@ from invenio_records_resources.services.records.components.base import ServiceCo
 
 from oarepo_communities.errors import MissingDefaultCommunityError
 from oarepo_communities.proxies import current_oarepo_communities
+
 from ..permissions.generators import convert_community_ids_to_uuid
 
 

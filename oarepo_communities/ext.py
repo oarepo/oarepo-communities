@@ -9,6 +9,8 @@ from .resources.community_records.resource import CommunityRecordsResource
 from .services.community_inclusion.service import CommunityInclusionService
 from .services.community_records.config import CommunityRecordsServiceConfig
 from .services.community_records.service import CommunityRecordsService
+from .services.community_role.config import CommunityRoleServiceConfig
+from .services.community_role.service import CommunityRoleService
 from .utils import get_urlprefix_service_id_mapping, load_community_user_needs
 from .workflow import community_default_workflow
 
@@ -83,6 +85,9 @@ class OARepoCommunities(object):
         )
 
         self.community_inclusion_service = CommunityInclusionService()
+        self.community_role_service = CommunityRoleService(
+            config=CommunityRoleServiceConfig()
+        )
 
     def init_resources(self, app):
         """Initialize communities resources."""
@@ -125,6 +130,10 @@ def finalize_app(app):
     rr_ext.registry.register(
         ext.community_records_service,
         service_id=ext.community_records_service.config.service_id,
+    )
+    rr_ext.registry.register(
+        ext.community_role_service,
+        service_id=ext.community_role_service.config.service_id,
     )
     # indexers
     # idx_ext.registry.register(ext.community_records_service.indexer, indexer_id="communities")

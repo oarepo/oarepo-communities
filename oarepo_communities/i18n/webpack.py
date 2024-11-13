@@ -9,7 +9,9 @@ theme = WebpackThemeBundle(
             "entry": {},
             "dependencies": {},
             "devDependencies": {},
-            "aliases": {"@translations/oarepo_communities": "translations/oarepo_communities/i18next.js"},
+            "aliases": {
+                "@translations/oarepo_communities": "translations/oarepo_communities/i18next.js"
+            },
         }
     },
 )
