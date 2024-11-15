@@ -242,7 +242,7 @@ msgid "Community selection"
 msgstr "Výběr komunity"
 
 msgid "Please select community in which your work will be published:"
-msgstr "Vyberte prosím komunitu pro publikování vaší práce"
+msgstr "Vyberte prosím komunitu pro publikování vaší práce:"
 
 msgid ""
 "If you are certain that you wish to proceed with the generic community, "
@@ -276,7 +276,8 @@ msgid ""
 "Click<1>here</1>to change the selection."
 msgstr ""
 "Vaše práce bude uložena v následující komunitě. Vezměte prosím na vědomí, že"
-" po uložení nebude možné převést ji do jiné komunity."
+" po uložení nebude možné převést ji do jiné komunity. Klikněte<1>zde</1>pro "
+"změnu výběru."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/config.py:36
 msgid "Workflows"

@@ -10,11 +10,7 @@ import { Trans } from "react-i18next";
 
 export const SelectedCommunity = ({ fieldPath }) => {
   const {
-    formConfig: {
-      allowed_communities,
-      generic_community,
-      preselected_community,
-    },
+    formConfig: { allowed_communities, generic_community },
   } = useFormConfig();
   const { values, setFieldValue } = useFormikContext();
   const selectedCommunityId = getIn(values, fieldPath, "");
@@ -37,23 +33,21 @@ export const SelectedCommunity = ({ fieldPath }) => {
           )}
         </p>
       )}
-      {!values?.id &&
-        allowed_communities.length > 1 &&
-        !preselected_community && (
-          <Trans i18n={i18next}>
-            Your work will be saved in the following community. Please note that
-            after saving it will not be possible to transfer it to another
-            community. Click
-            <Button
-              className="ml-5 mr-5"
-              onClick={handleCommunityRemoval}
-              size="mini"
-            >
-              here
-            </Button>
-            to change the selection.
-          </Trans>
-        )}
+      {!values?.id && allowed_communities.length > 1 && (
+        <Trans i18n={i18next}>
+          Your work will be saved in the following community. Please note that
+          after saving it will not be possible to transfer it to another
+          community. Click
+          <Button
+            className="ml-5 mr-5"
+            onClick={handleCommunityRemoval}
+            size="mini"
+          >
+            here
+          </Button>
+          to change the selection.
+        </Trans>
+      )}
       {selectedCommunity && (
         <List>
           <CommunityItem community={selectedCommunity} />
