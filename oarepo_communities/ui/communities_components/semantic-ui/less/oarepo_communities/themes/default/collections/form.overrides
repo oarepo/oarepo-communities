@@ -1,0 +1,11 @@
+.ui.form {
+  &.communities-creation {
+    label.helptext {
+      display: block;
+      font-weight: normal;
+      font-size: 0.9em;
+      margin-top: -0.8em;
+      margin-bottom: @defaultMargin;
+    }
+  }
+}

@@ -242,7 +242,7 @@ msgid "Community selection"
 msgstr "Výběr komunity"
 
 msgid "Please select community in which your work will be published:"
-msgstr "Vyberte prosím komunitu pro publikování vaší práce"
+msgstr "Vyberte prosím komunitu pro publikování vaší práce:"
 
 msgid ""
 "If you are certain that you wish to proceed with the generic community, "
