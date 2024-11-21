@@ -99,10 +99,13 @@ class DefaultCommunityRoleMixin:
     def _get_record_communities(self, record=None, **kwargs):
         try:
             return [str(record.parent.communities.default.id)]
-        except AttributeError:
-            raise MissingDefaultCommunityError(
-                f"Default community missing on record {record}."
-            )
+        except (AttributeError, TypeError) as e:
+            try:
+                return [str(record['parent']['communities']['default'])]
+            except KeyError:
+                raise MissingDefaultCommunityError(
+                    f"Default community missing on record {record}."
+                )
 
     def _get_data_communities(self, data=None, **kwargs):
         community_id = (
