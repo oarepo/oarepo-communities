@@ -10,7 +10,7 @@ from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
 from oarepo_workflows.errors import MissingWorkflowError
-from oarepo_workflows.requests.policy import RecipientGeneratorMixin
+from oarepo_workflows.requests import RecipientGeneratorMixin
 from oarepo_workflows.services.permissions.generators import WorkflowPermission
 
 from oarepo_communities.errors import (

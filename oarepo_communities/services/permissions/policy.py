@@ -1,7 +1,7 @@
 from oarepo_requests.services.permissions.workflow_policies import (
     RequestBasedWorkflowPermissions,
 )
-from oarepo_workflows.services.permissions.policy import WorkflowPermissionPolicy
+from oarepo_workflows import WorkflowRecordPermissionPolicy
 
 from oarepo_communities.services.permissions.generators import (
     CommunityWorkflowPermission,
@@ -29,6 +29,6 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
     ]
 
 
-class CommunityWorkflowPermissionPolicy(WorkflowPermissionPolicy):
+class CommunityWorkflowPermissionPolicy(WorkflowRecordPermissionPolicy):
     can_create = [CommunityWorkflowPermission("create")]
     can_view_deposit_page = [InAnyCommunity(CommunityWorkflowPermission("create"))]
