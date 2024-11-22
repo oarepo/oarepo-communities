@@ -10,7 +10,7 @@ from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
 from oarepo_workflows.errors import MissingWorkflowError
-from oarepo_workflows.requests.policy import RecipientGeneratorMixin
+from oarepo_workflows.requests import RecipientGeneratorMixin
 from oarepo_workflows.services.permissions.generators import WorkflowPermission
 
 from oarepo_communities.errors import (
@@ -99,10 +99,13 @@ class DefaultCommunityRoleMixin:
     def _get_record_communities(self, record=None, **kwargs):
         try:
             return [str(record.parent.communities.default.id)]
-        except AttributeError:
-            raise MissingDefaultCommunityError(
-                f"Default community missing on record {record}."
-            )
+        except (AttributeError, TypeError) as e:
+            try:
+                return [str(record['parent']['communities']['default'])]
+            except KeyError:
+                raise MissingDefaultCommunityError(
+                    f"Default community missing on record {record}."
+                )
 
     def _get_data_communities(self, data=None, **kwargs):
         community_id = (

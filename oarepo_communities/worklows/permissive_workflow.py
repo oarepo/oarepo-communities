@@ -4,13 +4,13 @@ from invenio_records_permissions.generators import AnyUser
 from oarepo_runtime.services.permissions.generators import RecordOwners
 from oarepo_workflows import (
     AutoApprove,
-    DefaultWorkflowPermissions,
     IfInState,
     Workflow,
     WorkflowRequest,
     WorkflowRequestPolicy,
     WorkflowTransitions,
 )
+from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
 
 from oarepo_communities.services.permissions.generators import PrimaryCommunityMembers
 
