@@ -131,15 +131,15 @@ class OARepoCommunityRoles(CommunityRoles):
 
     @abc.abstractmethod
     def _get_record_communities(self, record=None, **kwargs):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def _get_data_communities(self, data=None, **kwargs):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def roles(self, **kwargs):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def needs(self, record=None, data=None, **kwargs):
         """Set of Needs granting permission."""
@@ -160,7 +160,7 @@ class OARepoCommunityRoles(CommunityRoles):
 
         returns parent.communities.ids or parent.communities.default
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def query_filter(self, identity=None, **kwargs):
         """Filter for current identity."""
