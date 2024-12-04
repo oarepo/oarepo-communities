@@ -131,15 +131,15 @@ class OARepoCommunityRoles(CommunityRoles):
 
     @abc.abstractmethod
     def _get_record_communities(self, record=None, **kwargs):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def _get_data_communities(self, data=None, **kwargs):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def roles(self, **kwargs):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def needs(self, record=None, data=None, **kwargs):
         """Set of Needs granting permission."""
@@ -154,6 +154,21 @@ class OARepoCommunityRoles(CommunityRoles):
                 _needs.add(CommunityRoleNeed(c, role))
         return _needs
 
+    @abc.abstractmethod
+    def query_filter_field(self):
+        """Field for query filter.
+
+        returns parent.communities.ids or parent.communities.default
+        """
+        raise NotImplementedError()
+
+    def query_filter(self, identity=None, **kwargs):
+        """Filter for current identity."""
+        community_ids = self.communities(identity)
+        if not community_ids:
+            return dsl.Q("match_none")
+        return dsl.Q("terms", **{self.query_filter_field(): community_ids})
+
 
 class CommunityRole(CommunityRoleMixin, OARepoCommunityRoles):
 
@@ -163,6 +178,9 @@ class CommunityRole(CommunityRoleMixin, OARepoCommunityRoles):
 
     def roles(self, **kwargs):
         return [self._role]
+
+    def query_filter_field(self):
+        return "parent.communities.ids"
 
 
 class DefaultCommunityRole(
@@ -179,6 +197,9 @@ class DefaultCommunityRole(
     def reference_receivers(self, **kwargs):
         community_id = self._get_record_communities(**kwargs)[0]
         return [{"community_role": f"{community_id}:{self._role}"}]
+
+    def query_filter_field(self):
+        return "parent.communities.default"
 
 
 PrimaryCommunityRole = DefaultCommunityRole
@@ -206,12 +227,17 @@ class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):
         """Roles."""
         return [r.name for r in current_roles]
 
+    def query_filter_field(self):
+        return "parent.communities.ids"
 
 class DefaultCommunityMembers(DefaultCommunityRoleMixin, OARepoCommunityRoles):
 
     def roles(self, **kwargs):
         """Roles."""
         return [r.name for r in current_roles]
+
+    def query_filter_field(self):
+        return "parent.communities.default"
 
 
 PrimaryCommunityMembers = DefaultCommunityMembers

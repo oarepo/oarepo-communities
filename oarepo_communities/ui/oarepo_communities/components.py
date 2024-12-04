@@ -10,17 +10,17 @@ class GetCommunityComponent(UIResourceComponent):
         community = view_args.get("community")
         community_id = str(community.id)
 
-        workflow = community["custom_fields"].get("workflow", "default")
+        workflow_name = community["custom_fields"].get("workflow", "default")
         from oarepo_workflows.errors import InvalidWorkflowError
         from oarepo_workflows.proxies import current_oarepo_workflows
 
-        if workflow not in current_oarepo_workflows.record_workflows:
+        if workflow_name not in current_oarepo_workflows.record_workflows:
             raise InvalidWorkflowError(
-                f"Workflow {workflow} does not exist in the configuration."
+                f"Workflow {workflow_name} does not exist in the configuration."
             )
 
-        wf = current_oarepo_workflows.record_workflows[workflow]
-        permissions = wf.permissions(
+        workflow = current_oarepo_workflows.record_workflows[workflow_name]
+        permissions = workflow.permissions(
             "create", data={"parent": {"communities": {"default": community_id}}}
         )
         can_create_record = permissions.allows(identity)
