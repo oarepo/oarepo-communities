@@ -24,9 +24,9 @@
             {% if funding.award %}
               <dd class="header">
                 {{ funding.award.title_l10n }}
-                <label class="ui basic small label">
+                <span class="ui basic small label">
                   {{funding.award.number}}
-                </label>
+                </span>
 
                 {% if funding.award.identifiers|length and funding.award.identifiers[0].scheme == "url" %}
                   <a
