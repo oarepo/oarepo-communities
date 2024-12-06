@@ -1,3 +1,4 @@
+from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 from oarepo_runtime.i18n import lazy_gettext as _
 
 from .cf.workflows import WorkflowCF, lazy_workflow_options
@@ -8,7 +9,7 @@ from .requests.migration import (
 from .requests.remove_secondary import RemoveSecondaryCommunityRequestType
 from .requests.submission_secondary import SecondaryCommunitySubmissionRequestType
 from .resolvers.ui import CommunityRoleUIResolver
-from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
+from .services.permissions.policy import CommunityRequestsWorkflowPermissionPolicy
 
 REQUESTS_REGISTERED_TYPES = [
     InitiateCommunityMigrationRequestType(),
@@ -20,6 +21,7 @@ OAREPO_REQUESTS_DEFAULT_RECEIVER = (
     "oarepo_requests.receiver.default_workflow_receiver_function"
 )
 REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
+REQUESTS_PERMISSION_POLICY = CommunityRequestsWorkflowPermissionPolicy
 
 ENTITY_REFERENCE_UI_RESOLVERS = {
     "community_role": CommunityRoleUIResolver("community_role"),

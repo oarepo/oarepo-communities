@@ -68,6 +68,17 @@ class OARepoCommunities(object):
             **app.config.get("COMMUNITIES_ROUTES", {}),
         }
 
+        from invenio_requests.services.permissions import (
+            PermissionPolicy as OriginalPermissionPolicy,
+        )
+
+        current_permission_policy = app.config.get("REQUESTS_PERMISSION_POLICY", None)
+        if (
+            not current_permission_policy
+            or current_permission_policy is OriginalPermissionPolicy
+        ):  # should not pass if user defined is used
+            app.config["REQUESTS_PERMISSION_POLICY"] = config.REQUESTS_PERMISSION_POLICY
+
     @cached_property
     def urlprefix_serviceid_mapping(self):
         return get_urlprefix_service_id_mapping()
