@@ -1,5 +1,3 @@
-
-
 def test_community_role_param_interpreter(
     logged_client,
     community_owner,
@@ -25,7 +23,9 @@ def test_community_role_param_interpreter(
     record1 = create_draft_via_resource(owner_client, community=community_1)
     record2 = create_draft_via_resource(owner_client, community=community_2)
     record3 = create_draft_via_resource(
-        owner_client, community=community_2, custom_workflow="curator_publish" # owner is creator but not receiver of the third request
+        owner_client,
+        community=community_2,
+        custom_workflow="curator_publish",  # owner is creator but not receiver of the third request
     )
 
     response_1 = submit_request_by_link(owner_client, record1, "publish_draft")
@@ -36,6 +36,5 @@ def test_community_role_param_interpreter(
     assert len(search_unfiltered.json["hits"]["hits"]) == 3
 
     search_filtered = owner_client.get("/requests/?assigned=true")
-
 
     assert len(search_filtered.json["hits"]["hits"]) == 2
