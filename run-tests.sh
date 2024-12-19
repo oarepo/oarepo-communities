@@ -42,9 +42,8 @@ pip install .
 pip install oarepo-workflows
 pip install oarepo-global-search
 sh forked_install.sh invenio-records-resources
-#sh forked_install.sh invenio-requests
-#sh forked_install.sh invenio-drafts-resources
-pip install -U --force-reinstall --no-deps https://github.com/oarepo/invenio-requests/archive/oarepo-4.1.0.zip
-pip install -U --force-reinstall --no-deps https://github.com/oarepo/invenio-drafts-resources/archive/oarepo-3.1.1.zip
-pip install -U --force-reinstall --no-deps https://github.com/oarepo/invenio-rdm-records/archive/oarepo-10.8.0.zip
+sh forked_install.sh invenio-requests
+sh forked_install.sh invenio-drafts-resources
+sh forked_install.sh invenio-rdm-records
+
 pytest ./$CODE_TEST_DIR/test_communities

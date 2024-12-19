@@ -28,6 +28,8 @@ from invenio_communities.views.communities import (
     communities_settings_pages as invenio_communities_settings_pages,
 )
 from invenio_communities.views.communities import members as invenio_communities_members
+from invenio_communities.views.communities import invitations as invenio_communities_invitations
+
 from invenio_communities.views.ui import (
     _has_about_page_content,
     _has_curation_policy_page_content,
@@ -77,6 +79,7 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
         "communities_settings": "/<pid_value>/settings",
         "communities_settings_pages": "/<pid_value>/settings/pages",
         "members": "/<pid_value>/members",
+        "invitations": "/<pid_value>/invitations",
         "communities_curation_policy": "/<pid_value>/curation_policy",
         "communities_about": "/<pid_value>/about",
         "communities_frontpage": "/",
@@ -136,6 +139,12 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
         )
 
     @request_view_args
+    def invitations(self,):
+        return invenio_communities_invitations(
+            pid_value=resource_requestctx.view_args["pid_value"]
+        )
+
+    @request_view_args
     def communities_curation_policy(
         self,
     ):
@@ -190,11 +199,17 @@ def create_blueprint(app):
             expected_args=["pid_value"],
             **{"icon": "users", "permissions": "can_members_search_public"},
         )
-
+        communities.submenu("invitations").register(
+            endpoint="oarepo_communities.invitations",
+            text=_("Invitations"),
+            order=40,
+            expected_args=["pid_value"],
+            **{"icon": "mail", "permissions": "can_search_invites"},
+        )
         communities.submenu("settings").register(
             endpoint="oarepo_communities.communities_settings",
             text=_("Settings"),
-            order=40,
+            order=50,
             expected_args=["pid_value"],
             **{"icon": "settings", "permissions": "can_update"},
         )
@@ -202,7 +217,7 @@ def create_blueprint(app):
         communities.submenu("curation_policy").register(
             endpoint="oarepo_communities.communities_curation_policy",
             text=_("Curation policy"),
-            order=50,
+            order=60,
             visible_when=_has_curation_policy_page_content,
             expected_args=["pid_value"],
             **{"icon": "balance scale", "permissions": "can_read"},
@@ -210,7 +225,7 @@ def create_blueprint(app):
         communities.submenu("about").register(
             endpoint="oarepo_communities.communities_about",
             text=_("About"),
-            order=60,
+            order=70,
             visible_when=_has_about_page_content,
             expected_args=["pid_value"],
             **{"icon": "info", "permissions": "can_read"},
