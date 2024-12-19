@@ -26,6 +26,12 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [httpError, setHttpError] = useState("");
 
+  const handleClose = () => {
+    setSuccessMessage("");
+    setHttpError("");
+    close();
+  }
+
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
     const serializer = new OARepoDepositSerializer(
       ["membersEmails", "emails"],
@@ -43,24 +49,28 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
       if (response.status === 204) {
         resetForm();
         setSuccessMessage(i18next.t("Invitations sent successfully."));
+        setTimeout(() => {
+          if (isOpen) {
+            handleClose()
+          }
+        }, 2500);
       }
     } catch (error) {
       if (error.response.status >= 400) {
-        setHttpError(
-          i18next.t(
+        console.error(error.response)
+        setHttpError(`
+          ${i18next.t(
             "The invitations could not be sent. Please try again later."
-          )
+          )}
+          ${error.response.data.message}` // TODO: These needs to get translated in invenio_communities.members.config
+
         );
+        setTimeout(() => {
+          setHttpError("")
+        }, 5000);
       }
     } finally {
       setSubmitting(false);
-      setTimeout(() => {
-        if (isOpen) {
-          close();
-          setSuccessMessage("");
-          setHttpError("");
-        }
-      }, 2500);
     }
   };
 

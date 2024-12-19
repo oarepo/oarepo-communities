@@ -3,7 +3,7 @@
 {%- block subheader_buttons %}
     <div
     class="sixteen wide mobile sixteen wide tablet three wide computer right aligned middle aligned column">
-    {%- if not community_use_jinja_header %}
+    {%- if not community_use_jinja_header and can_view_deposit_page %}
         <a href="{{ config.RECORD_ROUTES['new'].format(community_slug=community.slug) }}"
             class="ui positive button labeled icon rel-mt-1 theme-secondary">
         <i class="upload icon" aria-hidden="true"></i>
