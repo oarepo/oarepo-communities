@@ -108,7 +108,7 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
             className="form-modal community-invitations"
             closeIcon
             open={isOpen}
-            onClose={close}
+            onClose={handleClose}
             onOpen={open}
             trigger={
               <Button
