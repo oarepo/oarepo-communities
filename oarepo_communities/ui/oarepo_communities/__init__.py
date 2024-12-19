@@ -200,7 +200,7 @@ def create_blueprint(app):
             **{"icon": "users", "permissions": "can_members_search_public"},
         )
         communities.submenu("invitations").register(
-            endpoint="oarepo_communities.invitations",
+            "oarepo_communities.invitations",
             text=_("Invitations"),
             order=40,
             expected_args=["pid_value"],
