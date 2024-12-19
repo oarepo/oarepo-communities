@@ -63,7 +63,6 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
             "The invitations could not be sent. Please try again later."
           )}
           ${error.response.data.message}` // TODO: These needs to get translated in invenio_communities.members.config
-
         );
         setTimeout(() => {
           setHttpError("")
