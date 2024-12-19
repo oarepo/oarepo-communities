@@ -2,6 +2,15 @@ import dataclasses
 
 from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
 from invenio_records_resources.references.entity_resolvers.base import EntityResolver
+from invenio_access.permissions import system_identity
+from invenio_notifications.models import Recipient
+from invenio_notifications.services.generators import RecipientGenerator
+from invenio_records.dictutils import dict_lookup
+from invenio_search.engine import dsl
+from invenio_users_resources.proxies import current_users_service
+
+from invenio_communities.proxies import current_communities
+from oarepo_requests.proxies import current_oarepo_requests
 
 
 @dataclasses.dataclass
@@ -28,6 +37,42 @@ class CommunityRoleProxy(EntityProxy):
         """Return community member need."""
         community_id, role = self._parse_ref_dict()
         return [CommunityRoleNeed(community_id, role)]
+
+    def get_recipients(self, ctx:dict =None, resolved_entity:str = None, **kwargs):
+        """Return community member need."""
+        """
+        def get_recipients(self, ctx: dict, resolved_entity: dict, **kwargs):
+        return [resolved_entity['email']]
+        
+        """
+
+        recipients = [] # spoof
+        community_id, role = self._parse_ref_dict()
+
+        filter_ = dsl.Q("term", **{"role": role})
+
+        members = current_communities.service.members.scan(
+            system_identity,
+            community_id,
+            extra_filter=filter_,
+        )
+
+        user_ids = []
+        for m in members:
+            # TODO: add support for groups
+            if m["member"]["type"] != "user":
+                continue
+            user_ids.append(m["member"]["id"])
+
+        if not user_ids:
+            return recipients
+
+        # todo - use link get_many in 'ui resolvers'
+        entity_resolvers = current_oarepo_requests.entity_reference_ui_resolvers
+        resolver = entity_resolvers["user"]
+        users = resolver._search_many(system_identity, user_ids)
+        mails = [u["email"] for u in users]
+        return mails
 
     def pick_resolved_fields(self, identity, resolved_dict):
         """Select which fields to return when resolving the reference."""

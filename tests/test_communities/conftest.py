@@ -48,7 +48,10 @@ from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
 from tests.test_communities.utils import link_api2testclient
-
+from invenio_notifications.backends import EmailNotificationBackend
+from oarepo_requests.notifications.builders.publish import PublishDraftRequestAcceptNotificationBuilder, \
+    PublishDraftRequestSubmitNotificationBuilder
+from invenio_records_resources.references.entity_resolvers import ServiceResultResolver
 
 @pytest.fixture(scope="function")
 def sample_metadata_list():
@@ -178,14 +181,14 @@ class DefaultRequests(WorkflowRequestPolicy):
         requesters=[IfInState("draft", [RecordOwnerInDefaultRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft"
+            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
         ),
     )
     delete_published_record = WorkflowRequest(
         requesters=[IfInState("published", [RecordOwners()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="deleting", accepted="deleted", declined="published"
+            submitted="deleting", accepted="deleted", declined="published", cancelled="published"
         ),
     )
     edit_published_record = WorkflowRequest(
@@ -220,7 +223,7 @@ class PublishRequestsRecordOwnerInRecordCommunity(DefaultRequests):
         requesters=[IfInState("draft", [RecordOwnerInRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft"
+            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
         ),
     )
 
@@ -230,7 +233,7 @@ class PublishRequestsRecordOwnerInDefaultRecordCommunity(DefaultRequests):
         requesters=[IfInState("draft", [RecordOwnerInDefaultRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft"
+            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
         ),
     )
 
@@ -240,14 +243,14 @@ class NoRequests(WorkflowRequestPolicy):
         requesters=[],
         recipients=[CommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft"
+            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
         ),
     )
     delete_published_record = WorkflowRequest(
         requesters=[],
         recipients=[CommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="deleting", accepted="deleted", declined="published"
+            submitted="deleting", accepted="deleted", declined="published", cancelled="published"
         ),
     )
     edit_published_record = WorkflowRequest(
@@ -274,10 +277,10 @@ class NoRequests(WorkflowRequestPolicy):
 
 class CuratorPublishRequests(DefaultRequests):
     publish_draft = WorkflowRequest(
-        requesters=[IfInState("draft", [CommunityRole("owner")])],
+        requesters=[IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])],
         recipients=[DefaultCommunityRole("curator")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft"
+            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
         ),
     )
 
@@ -410,6 +413,21 @@ def app_config(app_config):
     app_config["REQUESTS_PERMISSION_POLICY"] = (
         CreatorsFromWorkflowRequestsPermissionPolicy
     )
+
+    app_config["NOTIFICATIONS_BACKENDS"] = {
+        EmailNotificationBackend.id: EmailNotificationBackend(),
+    }
+    app_config["NOTIFICATIONS_BUILDERS"] = {
+        PublishDraftRequestAcceptNotificationBuilder.type: PublishDraftRequestAcceptNotificationBuilder,
+        PublishDraftRequestSubmitNotificationBuilder.type: PublishDraftRequestSubmitNotificationBuilder,
+    }
+    app_config["NOTIFICATIONS_ENTITY_RESOLVERS"] = [
+        ServiceResultResolver(service_id="users", type_key="user"),
+        ServiceResultResolver(service_id="community-role", type_key="community_role"),
+        ServiceResultResolver(service_id="requests", type_key="request"),
+        ServiceResultResolver(service_id="request_events", type_key="request_event"),
+    ]
+    app_config["MAIL_DEFAULT_SENDER"] = "test@invenio-rdm-records.org"
     return app_config
 
 
@@ -433,6 +451,18 @@ def community_curator(UserFixture, app, db):
     u.create(app, db)
     return u
 
+@pytest.fixture()
+def user_factory(UserFixture, app, db, inviter):
+    def _user(name, *community_invites: tuple[str, str]):
+        u = UserFixture(
+            email=f"{name}@inveniosoftware.org",
+            password="community_curator",
+        )
+        u.create(app, db)
+        for community_id, role in community_invites:
+            inviter(u.id, community_id, role)
+        return u
+    return _user
 
 @pytest.fixture()
 def rando_user(UserFixture, app, db):
@@ -680,6 +710,8 @@ def create_draft_via_resource(default_workflow_json):
             json |= additional_data
         # url = "/thesis/" + "?expand=true" if expand else "/thesis/"
         url = f"/communities/{community.id}/thesis"
+        if expand:
+            url += "?expand=true"
         return client.post(url, json=json, **kwargs)
 
     return _create_draft
