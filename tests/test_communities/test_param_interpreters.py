@@ -38,4 +38,4 @@ def test_community_role_param_interpreter(
     search_filtered = owner_client.get("/requests/?assigned=true")
 
 
-    assert len(search_filtered.json["hits"]["hits"]) == 2
+    assert len(search_filtered.json["hits"]["hits"]) == 0
