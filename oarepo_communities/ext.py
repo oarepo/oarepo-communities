@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import TYPE_CHECKING
 
 from flask_principal import identity_loaded
 
@@ -12,16 +13,22 @@ from .services.community_records.service import CommunityRecordsService
 from .utils import get_urlprefix_service_id_mapping, load_community_user_needs
 from .workflow import community_default_workflow
 
+#---
+from flask import Flask
+from typing import Any
+from invenio_records_resources.records import Record
+
+
 
 class OARepoCommunities(object):
     """OARepo extension of Invenio-Vocabularies."""
 
-    def __init__(self, app=None):
+    def __init__(self, app: Flask = None) -> None:
         """Extension initialization."""
         if app:
             self.init_app(app)
 
-    def init_app(self, app):
+    def init_app(self, app: Flask) -> None:
         """Flask application initialization."""
         self.app = app
         self.init_services(app)
@@ -30,7 +37,7 @@ class OARepoCommunities(object):
         self.init_config(app)
         app.extensions["oarepo-communities"] = self
 
-    def init_config(self, app):
+    def init_config(self, app: Flask) -> None:
         """Initialize configuration."""
 
         from . import config, ext_config
@@ -69,13 +76,13 @@ class OARepoCommunities(object):
         }
 
     @cached_property
-    def urlprefix_serviceid_mapping(self):
+    def urlprefix_serviceid_mapping(self) -> str:
         return get_urlprefix_service_id_mapping()
 
-    def get_community_default_workflow(self, **kwargs):
+    def get_community_default_workflow(self, **kwargs)->str | None:
         return community_default_workflow(**kwargs)
 
-    def init_services(self, app):
+    def init_services(self, app: Flask) -> None:
         """Initialize communities service."""
         # Services
         self.community_records_service = CommunityRecordsService(
@@ -84,7 +91,7 @@ class OARepoCommunities(object):
 
         self.community_inclusion_service = CommunityInclusionService()
 
-    def init_resources(self, app):
+    def init_resources(self, app: Flask) -> None:
         """Initialize communities resources."""
         # Resources
         self.community_records_resource = CommunityRecordsResource(
@@ -92,27 +99,28 @@ class OARepoCommunities(object):
             service=self.community_records_service,
         )
 
-    def init_hooks(self, app):
+    def init_hooks(self, app: Flask) -> None:
         """Initialize hooks."""
 
         @identity_loaded.connect_via(app)
         def on_identity_loaded(_, identity):
             load_community_user_needs(identity)
 
-    def get_default_community_from_record(self, record, **kwargs):
+    """
+    def get_default_community_from_record(self, record: Record, **kwargs: Any):
         record = record.parent if hasattr(record, "parent") else record
         try:
             return record.communities.default.id
         except AttributeError:
             return None
+    """
 
-
-def api_finalize_app(app):
+def api_finalize_app(app: Flask)->None:
     """Finalize app."""
     finalize_app(app)
 
 
-def finalize_app(app):
+def finalize_app(app: Flask)->None:
     """Finalize app."""
 
     # Register services - cannot be done in extension because

@@ -12,10 +12,10 @@ from invenio_records_resources.resources.records.utils import search_preference
 class CommunityRecordsResource(RecordResource):
     """RDM community's records resource."""
 
-    def create_url_rules(self):
+    def create_url_rules(self) -> list[dict]:
         """Create the URL rules for the record resource."""
 
-        def p(route):
+        def p(route) -> str:
             """Prefix a route with the URL prefix."""
             return f"{self.config.url_prefix}{route}"
 
@@ -47,7 +47,7 @@ class CommunityRecordsResource(RecordResource):
     @request_search_args
     @request_view_args
     @response_handler(many=True)
-    def search(self):
+    def search(self) -> tuple[dict, int]:
         """Perform a search over the community's records."""
         hits = self.service.search(
             identity=g.identity,
@@ -60,7 +60,7 @@ class CommunityRecordsResource(RecordResource):
     @request_search_args
     @request_view_args
     @response_handler(many=True)
-    def search_model(self):
+    def search_model(self) -> tuple[dict, int]:
         """Perform a search over the community's records."""
         hits = self.service.search_model(
             identity=g.identity,
@@ -74,7 +74,7 @@ class CommunityRecordsResource(RecordResource):
     @request_view_args
     @response_handler()
     @request_data
-    def create_in_community(self):
+    def create_in_community(self) -> tuple[dict, int]:
         model = (
             resource_requestctx.view_args["model"]
             if "model" in resource_requestctx.view_args
@@ -92,7 +92,7 @@ class CommunityRecordsResource(RecordResource):
     @request_search_args
     @request_view_args
     @response_handler(many=True)
-    def search_user(self):
+    def search_user(self) -> tuple[dict, int]:
         hits = self.service.user_search(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
@@ -104,7 +104,7 @@ class CommunityRecordsResource(RecordResource):
     @request_search_args
     @request_view_args
     @response_handler(many=True)
-    def search_user_model(self):
+    def search_user_model(self) -> tuple[dict, int]:
         hits = self.service.user_search_model(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],

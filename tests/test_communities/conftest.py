@@ -487,21 +487,24 @@ def community(app, minimal_community, community_owner):
     )
 
 
-
 @pytest.fixture()
 def communities(app, minimal_community, community_owner):
     return {
         "aaa": _community_get_or_create(
-            community_owner.identity, {
+            community_owner.identity,
+            {
                 **minimal_community,
-                'slug': "aaa",
-            }, workflow="default"
+                "slug": "aaa",
+            },
+            workflow="default",
         ),
         "bbb": _community_get_or_create(
-            community_owner.identity, {
+            community_owner.identity,
+            {
                 **minimal_community,
-                'slug': "bbb",
-            }, workflow="default"
+                "slug": "bbb",
+            },
+            workflow="default",
         ),
     }
 

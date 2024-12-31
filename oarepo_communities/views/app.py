@@ -1,9 +1,19 @@
+from typing import TYPE_CHECKING
+
 from flask import Blueprint
 
 from oarepo_communities.resolvers.communities import CommunityRoleResolver
 
+#---
+from flask import Blueprint, Flask
+from flask.blueprints import BlueprintSetupState
 
-def create_app_blueprint(app):
+def create_app_blueprint(app: Flask) -> Blueprint:
+    """Create a blueprint for the communities endpoint.
+
+    :param app: Flask application
+    """
+
     blueprint = Blueprint(
         "oarepo_communities_app", __name__, url_prefix="/communities/"
     )
@@ -11,7 +21,7 @@ def create_app_blueprint(app):
     return blueprint
 
 
-def register_community_role_entity_resolver(state):
+def register_community_role_entity_resolver(state: BlueprintSetupState)->None:
 
     app = state.app
     requests = app.extensions["invenio-requests"]

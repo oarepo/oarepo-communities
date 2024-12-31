@@ -433,9 +433,13 @@ def test_community_role_ui_serialization(
 
     def compare_result(result):
         assert result.items() >= ui_serialized_community_role(community.id).items()
-        assert result["links"].items() >=   {"self": f"https://127.0.0.1:5000/api/communities/{community.id}",
-            "self_html": "https://127.0.0.1:5000/communities/public",
-        }.items()
+        assert (
+            result["links"].items()
+            >= {
+                "self": f"https://127.0.0.1:5000/api/communities/{community.id}",
+                "self_html": "https://127.0.0.1:5000/communities/public",
+            }.items()
+        )
 
     request = owner_client.get(
         f"/requests/extended/{submit.json['id']}",
@@ -450,6 +454,7 @@ def test_community_role_ui_serialization(
     )
 
     compare_result(request_list.json["hits"]["hits"][0]["receiver"])
+
 
 """
 def test_community_role_ui_serialization_cs(

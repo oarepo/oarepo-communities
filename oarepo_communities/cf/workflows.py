@@ -8,12 +8,12 @@ def validate_workflow(value):
 
 
 class WorkflowSchemaField(ma.fields.Str):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(validate=[validate_workflow], **kwargs)
 
 
 class WorkflowCF(KeywordCF):
-    def __init__(self, name, **kwargs):
+    def __init__(self, name: str, **kwargs) -> None:
         super().__init__(name, field_cls=WorkflowSchemaField, **kwargs)
 
 

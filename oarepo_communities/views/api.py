@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 from oarepo_communities.resolvers.communities import CommunityRoleResolver
 
+#---
+from flask import Blueprint, Flask
+from flask.blueprints import BlueprintSetupState
 
-def create_oarepo_communities(app):
+def create_oarepo_communities(app: Flask) -> Blueprint:
     # Do we need to add this to service registry?
     # - use similar pattern like in invenio-requests etc? finalize app and api-finalize-app in entrypoints?
     ext = app.extensions["oarepo-communities"]
@@ -11,8 +16,8 @@ def create_oarepo_communities(app):
 
 
 def register_community_role_entity_resolver(
-    state,
-):  # todo consider using different method for registering the resolver
+    state: BlueprintSetupState,
+)->None:  # todo consider using different method for registering the resolver
 
     app = state.app
     requests = app.extensions["invenio-requests"]

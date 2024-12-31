@@ -37,13 +37,13 @@ class CommunityAlreadyExists(Exception):
 class RecordCommunityMissing(Exception):
     """Record does not belong to the community."""
 
-    def __init__(self, record_id, community_id):
+    def __init__(self, record_id: str, community_id: str):
         """Initialise error."""
         self.record_id = record_id
         self.community_id = community_id
 
     @property
-    def description(self):
+    def description(self) -> str:
         """Exception description."""
         return "The record {record_id} in not included in the community {community_id}.".format(
             record_id=self.record_id, community_id=self.community_id
@@ -53,11 +53,11 @@ class RecordCommunityMissing(Exception):
 class OpenRequestAlreadyExists(Exception):
     """An open request already exists."""
 
-    def __init__(self, request_id):
+    def __init__(self, request_id: str):
         """Initialize exception."""
         self.request_id = request_id
 
     @property
-    def description(self):
+    def description(self) -> str:
         """Exception's description."""
         return _("There is already an open inclusion request for this community.")

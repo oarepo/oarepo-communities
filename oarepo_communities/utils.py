@@ -6,9 +6,13 @@ from invenio_records_resources.proxies import current_service_registry
 
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.services.permissions.generators import UserInCommunityNeed
+#---
+from flask_principal import Identity
+from invenio_records_resources.services.records.service import RecordService
+from invenio_records_resources.records import Record
 
 
-def get_community_needs_for_identity(identity):
+def get_community_needs_for_identity(identity: Identity)->list[tuple[str, str]]:
     # see invenio_communities.utils.load_community_needs
     if identity.id is None:
         # no user is logged in
@@ -34,7 +38,7 @@ def get_community_needs_for_identity(identity):
     return community_roles
 
 
-def load_community_user_needs(identity):
+def load_community_user_needs(identity: Identity)->None:
     # todo assuming there's one user and identity_id = user_id
     community_roles = get_community_needs_for_identity(identity)
     if not community_roles:
@@ -44,31 +48,31 @@ def load_community_user_needs(identity):
     identity.provides |= needs
 
 
-def get_associated_service(record_service, service_type):
+def get_associated_service(record_service:RecordService, service_type: str)->RecordService:
     # return getattr(record_service.config, service_type, None)
     return current_service_registry.get(
         f"{record_service.config.service_id}_{service_type}"
     )
 
 
-def slug2id(slug):
+def slug2id(slug: str)->str:
     return str(current_communities.service.record_cls.pid.resolve(slug).id)
 
 
-def get_record_services():
+def get_record_services()->list[RecordService]:
     services = []
     for service_id in set(current_app.config["OAREPO_PRIMARY_RECORD_SERVICE"].values()):
         services.append(current_service_registry.get(service_id))
     return services
 
 
-def get_service_by_urlprefix(url_prefix):
+def get_service_by_urlprefix(url_prefix: str)->RecordService:
     return current_service_registry.get(
         current_oarepo_communities.urlprefix_serviceid_mapping[url_prefix]
     )
 
 
-def get_service_from_schema_type(schema_type):
+def get_service_from_schema_type(schema_type: str)->RecordService:
     for service in get_record_services():
         if (
             hasattr(service, "record_cls")
@@ -76,10 +80,10 @@ def get_service_from_schema_type(schema_type):
             and service.record_cls.schema.value == schema_type
         ):
             return service
-    return None
 
 
-def get_urlprefix_service_id_mapping():
+
+def get_urlprefix_service_id_mapping()->dict[str, str]:
     ret = {}
     services = get_record_services()
     for service in services:
@@ -91,7 +95,7 @@ def get_urlprefix_service_id_mapping():
     return ret
 
 
-def community_id_from_record(record):
+def community_id_from_record(record: Record)->str:
 
     if isinstance(record, Community):
         community_id = record.id
