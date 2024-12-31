@@ -4,9 +4,7 @@ from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 
 from tests.test_communities.utils import (
-    _create_record_in_community,
-    link_api2testclient,
-    published_record_in_community,
+    link2testclient,
 )
 
 
@@ -14,6 +12,7 @@ def test_disabled_endpoints(
     logged_client,
     community_owner,
     community_with_workflow_factory,
+    published_record_in_community,
     record_service,
     default_workflow_json,
     search_clear,
@@ -28,12 +27,10 @@ def test_disabled_endpoints(
     draft = owner_client.post(
         f"/communities/{community_1.id}/thesis", json=default_workflow_json
     ).json
-    published_record = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
-    )
+    published_record = published_record_in_community(owner_client, community_1.id)
 
     publish = owner_client.post(f"/thesis/{draft['id']}/draft/actions/publish")
-    delete = owner_client.delete(f"/thesis/{published_record['id']}")
+    delete = owner_client.delete(f"/thesis/{published_record.json['id']}")
     assert publish.status_code == 403
     assert delete.status_code == 403
 
@@ -61,6 +58,7 @@ def test_scenario_change(
     inviter,
     set_community_workflow,
     service_config,
+    draft_in_community,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
@@ -74,23 +72,23 @@ def test_scenario_change(
     inviter("2", community_1.id, "reader")
     inviter("2", community_2.id, "reader")
 
-    record1 = _create_record_in_community(owner_client, community_1.id)
-    record2 = _create_record_in_community(owner_client, community_2.id)
-    record4 = _create_record_in_community(reader_client, community_1.id)
+    record1 = draft_in_community(owner_client, community_1.id)
+    record2 = draft_in_community(owner_client, community_2.id)
+    record4 = draft_in_community(reader_client, community_1.id)
 
     request_should_be_allowed = owner_client.post(
         f"/thesis/{record1.json['id']}/draft/requests/publish_draft"
     )
     submit = owner_client.post(
-        link_api2testclient(
+        link2testclient(
             request_should_be_allowed.json["links"]["actions"]["submit"]
         )
     )
     accept_should_be_denied = reader_client.post(
-        link_api2testclient(submit.json["links"]["actions"]["accept"])
+        link2testclient(submit.json["links"]["actions"]["accept"])
     )
     accept = owner_client.post(
-        link_api2testclient(submit.json["links"]["actions"]["accept"])
+        link2testclient(submit.json["links"]["actions"]["accept"])
     )
     assert accept_should_be_denied.status_code == 403
     assert request_should_be_allowed.status_code == 201
@@ -109,8 +107,7 @@ def test_scenario_change(
     request_should_still_work = owner_client.post(
         f"/thesis/{record2.json['id']}/draft/requests/publish_draft"
     )
-    # todo add workflow to marshmallow
-    record5 = _create_record_in_community(owner_client, community_1.id)
+    record5 = draft_in_community(owner_client, community_1.id)
     request_should_be_forbidden = owner_client.post(
         f"/thesis/{record5.json['id']}/draft/requests/publish_draft"
     )
@@ -180,6 +177,7 @@ def test_record_owners_in_default_record_community_needs(
     community_with_workflow_factory,
     inviter,
     remover,
+    draft_in_community,
     service_config,
     record_service,
     search_clear,
@@ -196,12 +194,12 @@ def test_record_owners_in_default_record_community_needs(
 
     curator_client = logged_client(community_curator)
 
-    record1 = _create_record_in_community(
+    record1 = draft_in_community(
         curator_client,
         community_1.id,
         custom_workflow="record_owner_in_default_record_community",
     )
-    record2 = _create_record_in_community(
+    record2 = draft_in_community(
         curator_client,
         community_2.id,
         custom_workflow="record_owner_in_default_record_community",
@@ -233,6 +231,7 @@ def test_record_owners_in_record_community_needs(
     logged_client,
     community_with_workflow_factory,
     community_inclusion_service,
+    draft_in_community,
     inviter,
     remover,
     service_config,
@@ -251,12 +250,12 @@ def test_record_owners_in_record_community_needs(
 
     curator_client = logged_client(community_curator)
 
-    record1 = _create_record_in_community(
+    record1 = draft_in_community(
         curator_client,
         community_1.id,
         custom_workflow="record_owner_in_record_community",
     )
-    record2 = _create_record_in_community(
+    record2 = draft_in_community(
         curator_client,
         community_3.id,
         custom_workflow="record_owner_in_record_community",

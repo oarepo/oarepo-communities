@@ -1,6 +1,6 @@
 import copy
 import os
-
+from thesis.proxies import current_service
 import pytest
 import yaml
 from flask_security import login_user
@@ -47,8 +47,8 @@ from oarepo_communities.services.permissions.generators import (
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
-from tests.test_communities.utils import link_api2testclient
-
+from tests.test_communities.utils import link2testclient
+from deepmerge import always_merger
 
 @pytest.fixture(scope="function")
 def sample_metadata_list():
@@ -545,8 +545,6 @@ def community_with_workflow_factory(minimal_community, set_community_workflow):
 
     return create_community
 
-
-# -----
 from invenio_requests.customizations import RequestType
 from invenio_requests.proxies import current_requests
 
@@ -556,58 +554,6 @@ def requests_service(app):
     """Request Factory fixture."""
 
     return current_requests.requests_service
-
-
-@pytest.fixture()
-def create_publish_request(requests_service):
-    """Request Factory fixture."""
-
-    def _create_request(identity, receiver, **kwargs):
-        """Create a request."""
-        RequestType.allowed_receiver_ref_types = ["community"]
-        RequestType.needs_context = {
-            "community_permission_name": "can_publish",
-        }
-        # Need to use the service to get the id
-        item = requests_service.create(
-            identity=identity,
-            data={},
-            request_type=RequestType,
-            receiver=receiver,
-            **kwargs,
-        )
-        return item._request
-
-    return _create_request
-
-
-# -----
-from thesis.proxies import current_service
-
-
-@pytest.fixture(scope="function")
-def sample_draft(app, db, input_data, community):
-    input_data["community_id"] = community.id
-    draft_item = current_service.create(system_identity, input_data)
-    ThesisDraft.index.refresh()
-    return ThesisDraft.pid.resolve(draft_item.id, registered_only=False)
-
-
-@pytest.fixture
-def request_data_factory():
-    def _request_data(
-        community_id, topic_type, topic_id, request_type, creator=None, payload=None
-    ):
-        input_data = {
-            "request_type": request_type,
-            "topic": {topic_type: topic_id},
-        }
-        if payload:
-            input_data["payload"] = payload
-        return input_data
-
-    return _request_data
-
 
 @pytest.fixture
 def ui_serialized_community_role():
@@ -693,8 +639,8 @@ def get_request_type():
     def _get_request_type(request_types_json, request_type):
         selected_entry = [
             entry for entry in request_types_json if entry["type_id"] == request_type
-        ][0]
-        return selected_entry
+        ]
+        return selected_entry[0] if selected_entry else None
 
     return _get_request_type
 
@@ -707,36 +653,9 @@ def get_request_link(get_request_type):
 
     def _create_request_from_link(request_types_json, request_type):
         selected_entry = get_request_type(request_types_json, request_type)
-        return selected_entry["links"]["actions"]["create"]
+        return selected_entry["links"]["actions"]["create"] if selected_entry else None
 
     return _create_request_from_link
-
-
-@pytest.fixture
-def create_request_by_link(get_request_link):
-    def _create_request(client, record, request_type):
-        applicable_requests = client.get(
-            link_api2testclient(record.json["links"]["applicable-requests"])
-        ).json["hits"]["hits"]
-        create_link = link_api2testclient(
-            get_request_link(applicable_requests, request_type)
-        )
-        create_response = client.post(create_link)
-        return create_response
-
-    return _create_request
-
-
-@pytest.fixture
-def submit_request_by_link(create_request_by_link):
-    def _submit_request(client, record, request_type):
-        create_response = create_request_by_link(client, record, request_type)
-        submit_response = client.post(
-            link_api2testclient(create_response.json["links"]["actions"]["submit"])
-        )
-        return submit_response
-
-    return _submit_request
 
 
 @pytest.fixture()
@@ -753,3 +672,83 @@ def clear_babel_context():
             return
 
     return _clear_babel_context
+
+
+@pytest.fixture()
+def request_type_additional_data():
+    return {"publish_draft": {"payload": {"version": "1.0"}}}
+
+
+@pytest.fixture
+def create_request_by_link(get_request_link, request_type_additional_data):
+    def _create_request(
+        client, record, request_type, additional_data=None, **request_kwargs
+    ):
+        if additional_data is None:
+            additional_data = {}
+        applicable_requests = client.get(
+            link2testclient(record.json["links"]["applicable-requests"])
+        ).json["hits"]["hits"]
+        create_link = link2testclient(
+            get_request_link(applicable_requests, request_type)
+        )
+        if request_type in request_type_additional_data:
+            additional_data = always_merger.merge(
+                additional_data, request_type_additional_data[request_type]
+            )
+        if not additional_data:
+            create_response = client.post(create_link, **request_kwargs)
+        else:
+            create_response = client.post(
+                create_link, json=additional_data, **request_kwargs
+            )
+        return create_response
+
+    return _create_request
+
+
+
+@pytest.fixture
+def submit_request_by_link(create_request_by_link):
+    def _submit_request(
+        client,
+        record,
+        request_type,
+        create_additional_data=None,
+        submit_additional_data=None,
+    ):
+        create_response = create_request_by_link(
+            client, record, request_type, additional_data=create_additional_data
+        )
+        submit_response = client.post(
+            link2testclient(create_response.json["links"]["actions"]["submit"]),
+            json=submit_additional_data,
+        )
+        return submit_response
+
+    return _submit_request
+
+@pytest.fixture
+def draft_in_community():
+    def _draft_in_community(client, comm_id, custom_workflow=None):
+        if custom_workflow:
+            return client.post(
+                f"/communities/{comm_id}/thesis",
+                json={"parent": {"workflow": custom_workflow}},
+            )
+
+        return client.post(f"/communities/{comm_id}/thesis", json={})
+    return _draft_in_community
+
+@pytest.fixture
+def published_record_in_community(record_service, draft_in_community):
+    # skip the request approval
+    def _published_record_in_community(client, community_id, custom_workflow=None):
+        response = draft_in_community(client, community_id, custom_workflow)
+        record_item = record_service.publish(system_identity, response.json["id"])
+        ret = client.get(f"/thesis/{record_item['id']}")
+        return ret
+    return _published_record_in_community
+
+
+# todo - idea - oarepo-pytest library or something for these fixtures so we don't have to redefine them each time?

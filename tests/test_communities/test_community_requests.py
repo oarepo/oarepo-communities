@@ -1,23 +1,13 @@
 import pytest
+from .utils import link2testclient
 
 from oarepo_communities.errors import (
     CommunityAlreadyIncludedException,
     CommunityNotIncludedException,
     PrimaryCommunityException,
 )
-from tests.test_communities.utils import (
-    _create_record_in_community,
-    published_record_in_community,
-)
 
 REPO_NAME = "thesis"
-
-
-# todo we should have unified framework for naming kwargs in permissions; it's chaos now
-# ie. we "record", "parent", "community", "community_id" should always represent the same entity, not record=community record etc.
-def link_api2testclient(api_link):
-    base_string = "https://127.0.0.1:5000/api/"
-    return api_link[len(base_string) - 1 :]
 
 
 def find_request_by_type(requests, type):
@@ -25,52 +15,6 @@ def find_request_by_type(requests, type):
         if request["type"] == type:
             return request
     return None
-
-
-def _create_request(
-    creator_client,
-    community_id,
-    record_type,
-    record_id,
-    request_type,
-    request_data_func,
-    **kwargs,
-):
-    request_data = request_data_func(
-        community_id, record_type, record_id, request_type, **kwargs
-    )
-    create_response = creator_client.post("/requests/", json=request_data)
-    return create_response
-
-
-def _submit_request(
-    creator_client,
-    community_id,
-    record_type,
-    record_id,
-    request_type,
-    request_data_func,
-    **kwargs,
-):
-    create_response = _create_request(
-        creator_client,
-        community_id,
-        record_type,
-        record_id,
-        request_type,
-        request_data_func,
-        **kwargs,
-    )
-
-    submit_response = creator_client.post(
-        link_api2testclient(create_response.json["links"]["actions"]["submit"])
-    )
-    if submit_response.status == 400:
-        creator_client.post(
-            link_api2testclient(create_response.json["links"]["actions"]["submit"])
-        )
-    return submit_response
-
 
 def _accept_request(
     receiver_client,
@@ -92,7 +36,7 @@ def _accept_request(
     if no_accept_link:
         assert "accept" not in request_dict["links"]["actions"]
         return None
-    accept_link = link_api2testclient(request_dict["links"]["actions"]["accept"])
+    accept_link = link2testclient(request_dict["links"]["actions"]["accept"])
     receiver_response = receiver_client.post(accept_link)
     return receiver_response
 
@@ -120,21 +64,17 @@ def test_community_publish(
     community_owner,
     community_reader,
     community,
-    request_data_factory,
-    record_service,
+    draft_in_community,
+    submit_request_by_link,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record_id = _create_record_in_community(reader_client, community.id).json["id"]
-    submit = _submit_request(
-        reader_client,
-        community.id,
-        "thesis_draft",
-        record_id,
-        "publish_draft",
-        request_data_factory,
+    record = draft_in_community(reader_client, community.id)
+    record_id = record.json["id"]
+    submit = submit_request_by_link(
+        reader_client, record, "publish_draft"
     )
     _accept_request(
         reader_client,
@@ -155,39 +95,34 @@ def test_community_publish(
     assert resp_record.status_code == 200
 
 
+
 def test_community_delete(
     logged_client,
     community_owner,
     community_reader,
     community,
-    request_data_factory,
-    record_service,
+    published_record_in_community,
+    submit_request_by_link,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record_id = published_record_in_community(
+    record = published_record_in_community(
         reader_client,
-        community.id,
-        record_service,
-        community_owner,
-    )["id"]
+        community.id
+    )
+    record_id = record.json["id"]
 
-    submit = _submit_request(
-        reader_client,
-        community.id,
-        "thesis",
-        record_id,
-        "delete_published_record",
-        request_data_factory,
+    submit = submit_request_by_link(
+        reader_client, record, "delete_published_record"
     )
     _accept_request(
         reader_client,
         type="delete_published_record",
         record_id=record_id,
         no_accept_link=True,
-    )  # reader can accept the request
+    )  # reader can't accept the request
     accept_owner = _accept_request(
         owner_client, type="delete_published_record", record_id=record_id
     )  # owner can
@@ -205,8 +140,8 @@ def test_community_migration(
     community_owner,
     community_reader,
     community_with_workflow_factory,
-    request_data_factory,
-    record_service,
+    published_record_in_community,
+    submit_request_by_link,
     inviter,
     search_clear,
 ):
@@ -218,20 +153,13 @@ def test_community_migration(
         inviter,
     )
 
-    record_id = published_record_in_community(
-        reader_client, community_1.id, record_service, community_owner
-    )["id"]
-    record_before = reader_client.get(f"/thesis/{record_id}")
-
-    submit = _submit_request(
-        reader_client,
-        community_2.id,
-        "thesis",
-        record_id,
-        "initiate_community_migration",
-        request_data_factory,
-        payload={"community": str(community_2.id)},
+    record = published_record_in_community(
+        reader_client, community_1.id
     )
+    record_id = record.json["id"]
+    record_before = reader_client.get(f"/thesis/{record_id}")
+    submit = submit_request_by_link(reader_client, record, "initiate_community_migration",
+                                    create_additional_data={"payload":{"community": str(community_2.id)}})
     _accept_request(
         reader_client,
         type="initiate_community_migration",
@@ -264,8 +192,9 @@ def test_community_submission_secondary(
     community_reader,
     community_with_workflow_factory,
     inviter,
-    request_data_factory,
-    record_service,
+    published_record_in_community,
+    create_request_by_link,
+    submit_request_by_link,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -275,31 +204,17 @@ def test_community_submission_secondary(
         community_with_workflow_factory,
         inviter,
     )
-    record_id = published_record_in_community(
-        reader_client, community_1.id, record_service, community_owner
-    )["id"]
+    record = published_record_in_community(
+        reader_client, community_1.id
+    )
+    record_id = record.json["id"]
 
     record_before = owner_client.get(f"/thesis/{record_id}")
     with pytest.raises(CommunityAlreadyIncludedException):
-        _create_request(
-            reader_client,
-            community_1.id,
-            "thesis",
-            record_id,
-            "secondary_community_submission",
-            request_data_factory,
-            payload={"community": str(community_1.id)},
-        )
-
-    submit = _submit_request(
-        reader_client,
-        community_2.id,
-        "thesis",
-        record_id,
-        "secondary_community_submission",
-        request_data_factory,
-        payload={"community": str(community_2.id)},
-    )
+        create_request_by_link(reader_client, record, "secondary_community_submission",
+                               additional_data={"payload": {"community": str(community_1.id)}})
+    submit = submit_request_by_link(reader_client, record, "secondary_community_submission",
+                               create_additional_data={"payload": {"community": str(community_2.id)}})
     _accept_request(
         reader_client,
         type="secondary_community_submission",
@@ -326,8 +241,10 @@ def test_remove_secondary(
     community_reader,
     community_with_workflow_factory,
     inviter,
-    request_data_factory,
-    record_service,
+    published_record_in_community,
+    create_request_by_link,
+    submit_request_by_link,
+    get_request_type,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = _init_env(
@@ -338,52 +255,33 @@ def test_remove_secondary(
         inviter,
     )
 
-    record_id = published_record_in_community(
-        reader_client, community_1.id, record_service, community_owner
-    )["id"]
-
-    submit = _submit_request(
-        reader_client,
-        community_2.id,
-        "thesis",
-        record_id,
-        "secondary_community_submission",
-        request_data_factory,
-        payload={"community": str(community_2.id)},
+    record = published_record_in_community(
+        reader_client, community_1.id
     )
+    record_id = record.json["id"]
 
+    submit_request_by_link(reader_client, record, "secondary_community_submission",
+                           create_additional_data={"payload": {"community": str(community_2.id)}})
     accept_owner = _accept_request(
         owner_client, type="secondary_community_submission", record_id=record_id
     )
 
     record_before = owner_client.get(f"/thesis/{record_id}")
 
+    # todo this should not work - it should not produce a link
     with pytest.raises(PrimaryCommunityException):
-        _create_request(
-            reader_client,
-            community_1.id,
-            "thesis",
-            record_id,
-            "remove_secondary_community",
-            request_data_factory,
-            payload={"community": str(community_1.id)},
-        )
+        create_request_by_link(reader_client, record, "remove_secondary_community",
+                               additional_data={"payload": {"community": str(community_1.id)}})
 
-    submit = _submit_request(
-        reader_client,
-        community_2.id,
-        "thesis",
-        record_id,
-        "remove_secondary_community",
-        request_data_factory,
-        payload={"community": str(community_2.id)},
-    )
+
+    submit_request_by_link(reader_client, record, "remove_secondary_community",
+                           create_additional_data={"payload": {"community": str(community_2.id)}})
     _accept_request(
         reader_client,
         type="remove_secondary_community",
         record_id=record_id,
         no_accept_link=True,
-    )  # reader can accept the request
+    )  # reader can't accept the request
     accept_owner = _accept_request(
         owner_client, type="remove_secondary_community", record_id=record_id
     )  # owner can
@@ -395,16 +293,14 @@ def test_remove_secondary(
     }
     assert set(record_after.json["parent"]["communities"]["ids"]) == {community_1.id}
 
+    # assert link is not present
+    applicable_requests = reader_client.get(
+        link2testclient(record.json["links"]["applicable-requests"])
+    ).json["hits"]["hits"]
+    assert get_request_type(applicable_requests, "remove_secondary_community") is None
     with pytest.raises(CommunityNotIncludedException):
-        _create_request(
-            reader_client,
-            community_2.id,
-            "thesis",
-            record_id,
-            "remove_secondary_community",
-            request_data_factory,
-            payload={"community": str(community_2.id)},
-        )
+        reader_client.post(f"/thesis/{record_id}/requests/remove_secondary_community",
+                           json={"payload": {"community": str(community_2.id)}})
 
 
 def test_community_role_ui_serialization(
@@ -412,24 +308,19 @@ def test_community_role_ui_serialization(
     community_owner,
     community_reader,
     community,
-    request_data_factory,
-    record_service,
+    draft_in_community,
+    submit_request_by_link,
     ui_serialized_community_role,
     search_clear,
 ):
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record_id = _create_record_in_community(reader_client, community.id).json["id"]
-
-    submit = _submit_request(
-        reader_client,
-        community.id,
-        "thesis_draft",
-        record_id,
-        "publish_draft",
-        request_data_factory,
+    record = draft_in_community(
+        reader_client, community.id
     )
+
+    submit = submit_request_by_link(reader_client, record, "publish_draft")
 
     def compare_result(result):
         assert result.items() >= ui_serialized_community_role(community.id).items()

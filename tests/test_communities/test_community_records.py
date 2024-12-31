@@ -1,8 +1,5 @@
 from thesis.records.api import ThesisDraft, ThesisRecord
 
-from tests.test_communities.utils import published_record_in_community
-
-
 def test_create_record_in_community(
     logged_client,
     community_owner,
@@ -45,6 +42,7 @@ def test_search(
     community_owner,
     community_reader,
     community_with_workflow_factory,
+    published_record_in_community,
     record_service,
     search_clear,
 ):
@@ -53,12 +51,8 @@ def test_search(
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
 
-    record1 = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
-    )
-    record2 = published_record_in_community(
-        owner_client, community_2.id, record_service, community_owner
-    )
+    record1 = published_record_in_community(owner_client, community_1.id)
+    record2 = published_record_in_community(owner_client, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -76,8 +70,8 @@ def test_search(
     assert len(response_draft1.json["hits"]["hits"]) == 1
     assert len(response_draft2.json["hits"]["hits"]) == 1
 
-    assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
-    assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+    assert response_record1.json["hits"]["hits"][0]["id"] == record1.json["id"]
+    assert response_record2.json["hits"]["hits"][0]["id"] == record2.json["id"]
 
 
 # todo tests for search links
@@ -88,6 +82,7 @@ def test_search_model(
     community_owner,
     community_reader,
     community_with_workflow_factory,
+    published_record_in_community,
     record_service,
     search_clear,
 ):
@@ -96,12 +91,8 @@ def test_search_model(
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
 
-    record1 = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
-    )
-    record2 = published_record_in_community(
-        owner_client, community_2.id, record_service, community_owner
-    )
+    record1 = published_record_in_community(owner_client, community_1.id)
+    record2 = published_record_in_community(owner_client, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -112,8 +103,8 @@ def test_search_model(
     assert len(response_record1.json["hits"]["hits"]) == 1
     assert len(response_record2.json["hits"]["hits"]) == 1
 
-    assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
-    assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+    assert response_record1.json["hits"]["hits"][0]["id"] == record1.json["id"]
+    assert response_record2.json["hits"]["hits"][0]["id"] == record2.json["id"]
 
 
 def test_user_search(
@@ -192,6 +183,7 @@ def test_search_links(
     community_owner,
     community_reader,
     community_with_workflow_factory,
+    published_record_in_community,
     record_service,
     search_clear,
     site_hostname="127.0.0.1:5000",
@@ -201,9 +193,7 @@ def test_search_links(
     community_1 = community_with_workflow_factory("comm1", community_owner)
 
     for _ in range(30):
-        published_record_in_community(
-            owner_client, community_1.id, record_service, community_owner
-        )
+        published_record_in_community(owner_client, community_1.id)
     ThesisRecord.index.refresh()
 
     def check_links(model_suffix):
@@ -251,6 +241,7 @@ def test_search_ui_serialization(
     community_owner,
     community_reader,
     community_with_workflow_factory,
+    published_record_in_community,
     record_service,
     inviter,
     search_clear,
@@ -262,12 +253,8 @@ def test_search_ui_serialization(
     community_2 = community_with_workflow_factory("comm2", community_owner)
     inviter("2", community_1.id, "reader")
 
-    record1 = published_record_in_community(
-        owner_client, community_1.id, record_service, community_owner
-    )
-    record2 = published_record_in_community(
-        owner_client, community_2.id, record_service, community_owner
-    )
+    record1 = published_record_in_community(owner_client, community_1.id)
+    record2 = published_record_in_community(owner_client, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
