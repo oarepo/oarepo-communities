@@ -46,7 +46,7 @@ class CommunityRoleProxy(EntityProxy):
         
         """
 
-        recipients = [] # spoof
+        recipients = []
         community_id, role = self._parse_ref_dict()
 
         filter_ = dsl.Q("term", **{"role": role})
@@ -59,7 +59,6 @@ class CommunityRoleProxy(EntityProxy):
 
         user_ids = []
         for m in members:
-            # TODO: add support for groups
             if m["member"]["type"] != "user":
                 continue
             user_ids.append(m["member"]["id"])
