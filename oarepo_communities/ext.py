@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from flask_principal import identity_loaded
 
@@ -76,7 +76,7 @@ class OARepoCommunities(object):
         }
 
     @cached_property
-    def urlprefix_serviceid_mapping(self) -> str:
+    def urlprefix_serviceid_mapping(self) -> dict[str, str]:
         return get_urlprefix_service_id_mapping()
 
     def get_community_default_workflow(self, **kwargs)->str | None:

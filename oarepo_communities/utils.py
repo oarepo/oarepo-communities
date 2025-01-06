@@ -12,7 +12,7 @@ from invenio_records_resources.services.records.service import RecordService
 from invenio_records_resources.records import Record
 
 
-def get_community_needs_for_identity(identity: Identity)->list[tuple[str, str]]:
+def get_community_needs_for_identity(identity: Identity)->list[tuple[str, str]] | None:
     # see invenio_communities.utils.load_community_needs
     if identity.id is None:
         # no user is logged in
@@ -95,7 +95,7 @@ def get_urlprefix_service_id_mapping()->dict[str, str]:
     return ret
 
 
-def community_id_from_record(record: Record)->str:
+def community_id_from_record(record: Record)->str | None:
 
     if isinstance(record, Community):
         community_id = record.id
