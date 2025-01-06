@@ -1,4 +1,3 @@
-from invenio_access.permissions import system_identity
 
 
 def link2testclient(link, ui=False):

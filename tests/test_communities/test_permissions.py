@@ -3,9 +3,7 @@ from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 
-from tests.test_communities.utils import (
-    link2testclient,
-)
+from tests.test_communities.utils import link2testclient
 
 
 def test_disabled_endpoints(
@@ -80,9 +78,7 @@ def test_scenario_change(
         f"/thesis/{record1.json['id']}/draft/requests/publish_draft"
     )
     submit = owner_client.post(
-        link2testclient(
-            request_should_be_allowed.json["links"]["actions"]["submit"]
-        )
+        link2testclient(request_should_be_allowed.json["links"]["actions"]["submit"])
     )
     accept_should_be_denied = reader_client.post(
         link2testclient(submit.json["links"]["actions"]["accept"])

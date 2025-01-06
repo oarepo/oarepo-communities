@@ -1,5 +1,6 @@
 from thesis.records.api import ThesisDraft, ThesisRecord
 
+
 def test_create_record_in_community(
     logged_client,
     community_owner,
