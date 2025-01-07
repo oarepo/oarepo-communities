@@ -1,6 +1,5 @@
 import marshmallow as ma
 from flask import g, redirect, url_for
-from flask_login import login_required
 from flask_menu import current_menu
 from flask_resources import from_conf, request_parser, resource_requestctx
 from invenio_communities.communities.resources.serializer import (
@@ -93,10 +92,6 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
 
 
 class CommunityRecordsUIResource(GlobalSearchUIResource):
-    decorators = [
-        login_required,
-    ]
-
     @request_view_args
     @request_community_view_args
     def community_records(self):
