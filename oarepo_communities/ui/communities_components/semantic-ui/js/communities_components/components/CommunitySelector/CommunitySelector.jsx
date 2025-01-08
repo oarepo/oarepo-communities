@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { useFormConfig, goBack } from "@js/oarepo_ui";
 import { useFormikContext, getIn } from "formik";
@@ -38,6 +38,7 @@ export const GenericCommunityMessage = () => (
 
 export const CommunitySelector = ({ fieldPath }) => {
   const { values, setFieldValue } = useFormikContext();
+  const lastSelectedCommunity = useRef(null);
   const {
     formConfig: {
       allowed_communities,
@@ -50,75 +51,94 @@ export const CommunitySelector = ({ fieldPath }) => {
     if (!values.id) {
       if (preselected_community) {
         setFieldValue(fieldPath, preselected_community.id);
+        lastSelectedCommunity.current = preselected_community.id;
       } else if (allowed_communities.length === 1) {
         setFieldValue(fieldPath, allowed_communities[0].id);
+        lastSelectedCommunity.current = allowed_communities[0].id;
       }
     }
   }, []);
+
   const handleClick = (id) => {
     setFieldValue(fieldPath, id);
+    lastSelectedCommunity.current = id;
   };
+  console.log(lastSelectedCommunity.current);
   return (
     !values.id && (
-      <Modal open={!selectedCommunity}>
+      <Modal
+        open={!selectedCommunity}
+        className="communities community-selection-modal"
+      >
         <Modal.Header>{i18next.t("Community selection")}</Modal.Header>
         <Modal.Content>
-          <React.Fragment>
-            {allowed_communities.length > 1 && (
-              <React.Fragment>
-                <p>
-                  {i18next.t(
-                    "Please select community in which your work will be published:"
-                  )}
-                </p>
-                <List selection>
-                  {allowed_communities.map((c) => (
-                    <CommunityItem
-                      key={c.id}
-                      community={c}
-                      handleClick={handleClick}
-                      renderLinks={false}
-                    />
-                  ))}
-                </List>
-              </React.Fragment>
-            )}
-            {allowed_communities.length === 0 && (
-              <React.Fragment>
-                <GenericCommunityMessage />{" "}
-                <span>
-                  {i18next.t(
-                    "If you are certain that you wish to proceed with the generic community, please click on it below."
-                  )}
-                </span>
-                <List selection>
+          {allowed_communities.length > 1 && (
+            <div className="communities communities-list-scroll-container">
+              <p>
+                {i18next.t(
+                  "Please select community in which your work will be published:"
+                )}
+              </p>
+              <List selection>
+                {allowed_communities.map((c) => (
                   <CommunityItem
-                    community={generic_community}
+                    key={c.id}
+                    community={c}
                     handleClick={handleClick}
                     renderLinks={false}
                   />
-                </List>
-              </React.Fragment>
-            )}
-            <Message>
-              <Icon name="info circle" className="text size large" />
+                ))}
+              </List>
+            </div>
+          )}
+          {allowed_communities.length === 0 && (
+            <React.Fragment>
+              <GenericCommunityMessage />{" "}
               <span>
-                {i18next.t("All records must belong to a community.")}
+                {i18next.t(
+                  "If you are certain that you wish to proceed with the generic community, please click on it below."
+                )}
               </span>
-            </Message>
-          </React.Fragment>
+              <List selection>
+                <CommunityItem
+                  community={generic_community}
+                  handleClick={handleClick}
+                  renderLinks={false}
+                />
+              </List>
+            </React.Fragment>
+          )}
+          <Message>
+            <Icon name="info circle" className="text size large" />
+            <span>{i18next.t("All records must belong to a community.")}</span>
+          </Message>
         </Modal.Content>
         <Modal.Actions className="flex">
-          <Button
-            type="button"
-            className="ml-0"
-            icon
-            labelPosition="left"
-            onClick={() => goBack()}
-          >
-            <Icon name="arrow alternate circle left outline" />
-            {i18next.t("Go back")}
-          </Button>
+          {lastSelectedCommunity.current ? (
+            <Button
+              type="button"
+              className="ml-0"
+              icon
+              labelPosition="left"
+              onClick={() =>
+                setFieldValue(fieldPath, lastSelectedCommunity.current)
+              }
+            >
+              <Icon name="arrow alternate circle left outline" />
+              {i18next.t("Go back")}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              className="ml-0"
+              icon
+              labelPosition="left"
+              onClick={() => goBack()}
+            >
+              <Icon name="arrow alternate circle left outline" />
+              {i18next.t("Go back")}
+            </Button>
+          )}
         </Modal.Actions>
       </Modal>
     )
