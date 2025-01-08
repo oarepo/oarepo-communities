@@ -63,7 +63,6 @@ export const CommunitySelector = ({ fieldPath }) => {
     setFieldValue(fieldPath, id);
     lastSelectedCommunity.current = id;
   };
-  console.log(lastSelectedCommunity.current);
   return (
     !values.id && (
       <Modal
