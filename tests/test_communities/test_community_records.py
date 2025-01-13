@@ -41,9 +41,8 @@ def test_create_record_in_community_without_model_in_url(
 def test_search(
     logged_client,
     community_owner,
-    community_reader,
     community_with_workflow_factory,
-    published_record_in_community,
+    published_record_with_community_factory,
     record_service,
     search_clear,
 ):
@@ -52,8 +51,8 @@ def test_search(
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
 
-    record1 = published_record_in_community(owner_client, community_1.id)
-    record2 = published_record_in_community(owner_client, community_2.id)
+    record1 = published_record_with_community_factory(owner_client, community_1.id)
+    record2 = published_record_with_community_factory(owner_client, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -81,9 +80,8 @@ def test_search(
 def test_search_model(
     logged_client,
     community_owner,
-    community_reader,
     community_with_workflow_factory,
-    published_record_in_community,
+    published_record_with_community_factory,
     record_service,
     search_clear,
 ):
@@ -92,8 +90,8 @@ def test_search_model(
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
 
-    record1 = published_record_in_community(owner_client, community_1.id)
-    record2 = published_record_in_community(owner_client, community_2.id)
+    record1 = published_record_with_community_factory(owner_client, community_1.id)
+    record2 = published_record_with_community_factory(owner_client, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -111,17 +109,18 @@ def test_search_model(
 def test_user_search(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community_with_workflow_factory,
     inviter,
     search_clear,
 ):
+    community_reader = users[0]
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
-    inviter("2", community_1.id, "reader")
+    inviter(community_reader, community_1.id, "reader")
 
     record1 = owner_client.post(f"/communities/{community_1.id}/thesis", json={}).json
     record2 = owner_client.post(f"/communities/{community_2.id}/thesis", json={}).json
@@ -149,18 +148,19 @@ def test_user_search(
 def test_user_search_model(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community_with_workflow_factory,
     record_service,
     inviter,
     search_clear,
 ):
+    community_reader = users[0]
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
-    inviter("2", community_1.id, "reader")
+    inviter(community_reader, community_1.id, "reader")
 
     record1 = owner_client.post(f"/communities/{community_1.id}/thesis", json={}).json
     record2 = owner_client.post(f"/communities/{community_2.id}/thesis", json={}).json
@@ -182,19 +182,19 @@ def test_user_search_model(
 def test_search_links(
     logged_client,
     community_owner,
-    community_reader,
     community_with_workflow_factory,
-    published_record_in_community,
+    published_record_with_community_factory,
     record_service,
     search_clear,
     site_hostname="127.0.0.1:5000",
 ):
+
     owner_client = logged_client(community_owner)
 
     community_1 = community_with_workflow_factory("comm1", community_owner)
 
     for _ in range(30):
-        published_record_in_community(owner_client, community_1.id)
+        published_record_with_community_factory(owner_client, community_1.id)
     ThesisRecord.index.refresh()
 
     def check_links(model_suffix):
@@ -240,22 +240,19 @@ def test_search_links(
 def test_search_ui_serialization(
     logged_client,
     community_owner,
-    community_reader,
     community_with_workflow_factory,
-    published_record_in_community,
+    published_record_with_community_factory,
     record_service,
     inviter,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
-    reader_client = logged_client(community_reader)
 
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
-    inviter("2", community_1.id, "reader")
 
-    record1 = published_record_in_community(owner_client, community_1.id)
-    record2 = published_record_in_community(owner_client, community_2.id)
+    record1 = published_record_with_community_factory(owner_client, community_1.id)
+    record2 = published_record_with_community_factory(owner_client, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()

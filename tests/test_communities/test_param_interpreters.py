@@ -1,30 +1,31 @@
 def test_community_role_param_interpreter(
     logged_client,
     community_owner,
-    community_reader,
-    community_curator,
+    users,
     community_with_workflow_factory,
     record_service,
-    create_draft_via_resource,
+    draft_with_community_factory,
     create_request_by_link,
     submit_request_by_link,
     inviter,
     search_clear,
 ):
+    community_reader = users[0]
+    community_curator = users[1]
     owner_client = logged_client(community_owner)
 
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
     community_3 = community_with_workflow_factory("comm3", community_curator)
-    inviter("2", community_1.id, "reader")
-    inviter("2", community_2.id, "reader")
-    inviter("2", community_3.id, "reader")
+    inviter(community_reader, community_1.id, "reader")
+    inviter(community_reader, community_2.id, "reader")
+    inviter(community_reader, community_3.id, "reader")
 
-    record1 = create_draft_via_resource(owner_client, community=community_1)
-    record2 = create_draft_via_resource(owner_client, community=community_2)
-    record3 = create_draft_via_resource(
+    record1 = draft_with_community_factory(owner_client, str(community_1.id))
+    record2 = draft_with_community_factory(owner_client, str(community_2.id))
+    record3 = draft_with_community_factory(
         owner_client,
-        community=community_2,
+        str(community_2.id),
         custom_workflow="curator_publish",  # owner is creator but not receiver of the third request
     )
 

@@ -55,8 +55,8 @@ def _init_env(
 
     community_1 = community_with_permission_cf_factory("comm1", community_owner)
     community_2 = community_with_permission_cf_factory("comm2", community_owner)
-    inviter(community_reader.id, community_1.data["id"], "reader")
-    inviter(community_reader.id, community_2.data["id"], "reader")
+    inviter(community_reader, community_1.data["id"], "reader")
+    inviter(community_reader, community_2.data["id"], "reader")
 
     return reader_client, owner_client, community_1, community_2
 
@@ -64,16 +64,19 @@ def _init_env(
 def test_community_publish(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community,
-    draft_in_community,
+    inviter,
+    draft_with_community_factory,
     submit_request_by_link,
     search_clear,
 ):
+    community_reader = users[0]
+    inviter(community_reader, community.id, "reader")
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record = draft_in_community(reader_client, community.id)
+    record = draft_with_community_factory(reader_client, community.id)
     record_id = record.json["id"]
     submit = submit_request_by_link(reader_client, record, "publish_draft")
     _accept_request(
@@ -98,16 +101,18 @@ def test_community_publish(
 def test_community_delete(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community,
-    published_record_in_community,
+    inviter,
+    published_record_with_community_factory,
     submit_request_by_link,
     search_clear,
 ):
+    community_reader = users[0]
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
-
-    record = published_record_in_community(reader_client, community.id)
+    inviter(community_reader, community.id, "reader")
+    record = published_record_with_community_factory(reader_client, community.id)
     record_id = record.json["id"]
 
     submit = submit_request_by_link(reader_client, record, "delete_published_record")
@@ -132,13 +137,14 @@ def test_community_delete(
 def test_community_migration(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community_with_workflow_factory,
-    published_record_in_community,
+    published_record_with_community_factory,
     submit_request_by_link,
     inviter,
     search_clear,
 ):
+    community_reader = users[0]
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
@@ -147,7 +153,7 @@ def test_community_migration(
         inviter,
     )
 
-    record = published_record_in_community(reader_client, community_1.id)
+    record = published_record_with_community_factory(reader_client, community_1.id)
     record_id = record.json["id"]
     record_before = reader_client.get(f"/thesis/{record_id}")
     submit = submit_request_by_link(
@@ -185,14 +191,15 @@ def test_community_migration(
 def test_community_submission_secondary(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community_with_workflow_factory,
     inviter,
-    published_record_in_community,
+    published_record_with_community_factory,
     create_request_by_link,
     submit_request_by_link,
     search_clear,
 ):
+    community_reader = users[0]
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
@@ -200,7 +207,7 @@ def test_community_submission_secondary(
         community_with_workflow_factory,
         inviter,
     )
-    record = published_record_in_community(reader_client, community_1.id)
+    record = published_record_with_community_factory(reader_client, community_1.id)
     record_id = record.json["id"]
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -240,15 +247,16 @@ def test_community_submission_secondary(
 def test_remove_secondary(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community_with_workflow_factory,
     inviter,
-    published_record_in_community,
+    published_record_with_community_factory,
     create_request_by_link,
     submit_request_by_link,
     get_request_type,
     search_clear,
 ):
+    community_reader = users[0]
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
         community_owner,
@@ -257,7 +265,7 @@ def test_remove_secondary(
         inviter,
     )
 
-    record = published_record_in_community(reader_client, community_1.id)
+    record = published_record_with_community_factory(reader_client, community_1.id)
     record_id = record.json["id"]
 
     submit_request_by_link(
@@ -319,17 +327,19 @@ def test_remove_secondary(
 def test_community_role_ui_serialization(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community,
-    draft_in_community,
+    inviter,
+    draft_with_community_factory,
     submit_request_by_link,
     ui_serialized_community_role,
     search_clear,
 ):
+    community_reader = users[0]
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
-
-    record = draft_in_community(reader_client, community.id)
+    inviter(community_reader, community.id, "reader")
+    record = draft_with_community_factory(reader_client, community.id)
 
     submit = submit_request_by_link(reader_client, record, "publish_draft")
 

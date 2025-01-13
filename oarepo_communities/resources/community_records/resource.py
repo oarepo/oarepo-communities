@@ -80,7 +80,7 @@ class CommunityRecordsResource(RecordResource):
             if "model" in resource_requestctx.view_args
             else None
         )
-        item = self.service.create_in_community(
+        item = self.service.create(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
             data=resource_requestctx.data,

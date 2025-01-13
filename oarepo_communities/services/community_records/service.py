@@ -197,11 +197,11 @@ class CommunityRecordsService(Service):
         )
 
     @unit_of_work()
-    def create_in_community(
+    def create(
         self,
         identity: Identity,
-        community_id: str,
         data: dict[str, Any],
+        community_id: str,
         model: str = None,
         uow: UnitOfWork | None = None,
         expand: bool = False,

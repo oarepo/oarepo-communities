@@ -50,61 +50,26 @@ from oarepo_communities.services.permissions.policy import (
 from tests.test_communities.utils import link2testclient
 from deepmerge import always_merger
 
-@pytest.fixture(scope="function")
-def sample_metadata_list():
-    data_path = f"tests/thesis/data/sample_data.yaml"
-    docs = list(yaml.load_all(open(data_path), Loader=yaml.SafeLoader))
-    return docs
+pytest_plugins = [
+   "pytest_oarepo.communities.fixtures",
+   "pytest_oarepo.communities.records",
+   "pytest_oarepo.requests.fixtures",
+   "pytest_oarepo.records",
+   "pytest_oarepo.fixtures",
+   "pytest_oarepo.users",
+]
 
+@pytest.fixture()
+def urls():
+    return {"BASE_URL": "/thesis/", "BASE_URL_REQUESTS": "/requests/"}
 
 @pytest.fixture()
 def record_service():
     return current_service
 
-
 @pytest.fixture()
-def community_inclusion_service():
-    return current_oarepo_communities.community_inclusion_service
-
-
-@pytest.fixture()
-def input_data(sample_metadata_list):
-    return sample_metadata_list[0]
-
-
-class LoggedClient:
-    def __init__(self, client, user_fixture):
-        self.client = client
-        self.user_fixture = user_fixture
-
-    def _login(self):
-        login_user(self.user_fixture.user, remember=True)
-        login_user_via_session(self.client, email=self.user_fixture.email)
-
-    def post(self, *args, **kwargs):
-        self._login()
-        return self.client.post(*args, **kwargs)
-
-    def get(self, *args, **kwargs):
-        self._login()
-        return self.client.get(*args, **kwargs)
-
-    def put(self, *args, **kwargs):
-        self._login()
-        return self.client.put(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        self._login()
-        return self.client.delete(*args, **kwargs)
-
-
-@pytest.fixture()
-def logged_client(client):
-    def _logged_client(user):
-        return LoggedClient(client, user)
-
-    return _logged_client
-
+def base_model_schema():
+    return "local://thesis-1.0.0.json"
 
 class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     can_read = [
@@ -156,8 +121,6 @@ class TestWithRecordOwnerInRecordCommunityWorkflowPermissions(
             [AnyUser()],
         ),
     ]
-
-    can_create = TestCommunityWorkflowPermissions.can_create + [AuthenticatedUser()]
 
 
 class TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions(
@@ -315,46 +278,6 @@ WORKFLOWS = {
     ),
 }
 
-
-@pytest.fixture()
-def inviter():
-    """Add/invite a user to a community with a specific role."""
-
-    def invite(user_id, community_id, role):
-        """Add/invite a user to a community with a specific role."""
-        invitation_data = {
-            "members": [
-                {
-                    "type": "user",
-                    "id": user_id,
-                }
-            ],
-            "role": role,
-            "visible": True,
-        }
-        current_communities.service.members.add(
-            system_identity, community_id, invitation_data
-        )
-
-    return invite
-
-
-@pytest.fixture()
-def remover():
-    """Add/invite a user to a community with a specific role."""
-
-    def remove(user_id, community_id):
-        """Add/invite a user to a community with a specific role."""
-        delete_data = {
-            "members": [{"type": "user", "id": user_id}],
-        }
-        member_delete = current_communities.service.members.delete(
-            system_identity, community_id, delete_data
-        )
-
-    return remove
-
-
 @pytest.fixture(scope="module")
 def create_app(instance_path, entry_points):
     """Application factory fixture."""
@@ -412,148 +335,8 @@ def app_config(app_config):
     )
     return app_config
 
-
-@pytest.fixture()
-def community_reader(UserFixture, app, db, community, inviter):
-    u = UserFixture(
-        email="community_reader@inveniosoftware.org",
-        password="community_reader",
-    )
-    u.create(app, db)
-    inviter(u.id, str(community.id), "reader")
-    return u
-
-
-@pytest.fixture()
-def community_curator(UserFixture, app, db):
-    u = UserFixture(
-        email="community_curator@inveniosoftware.org",
-        password="community_curator",
-    )
-    u.create(app, db)
-    return u
-
-
-@pytest.fixture()
-def rando_user(UserFixture, app, db):
-    # communityless user
-    u = UserFixture(
-        email="just_a_traveller@random.gov",
-        password="not_a_federal_agent",
-    )
-    u.create(app, db)
-    return u
-
-
-@pytest.fixture(scope="module", autouse=True)
-def location(location):
-    return location
-
-
-@pytest.fixture(scope="module")
-def minimal_community():
-    """Minimal community metadata."""
-    return {
-        "access": {
-            "visibility": "public",
-            "record_policy": "open",
-        },
-        "slug": "public",
-        "metadata": {
-            "title": "My Community",
-        },
-    }
-
-
-def _community_get_or_create(identity, community_dict, workflow=None):
-    """Util to get or create community, to avoid duplicate error."""
-    slug = community_dict["slug"]
-    try:
-        c = current_communities.service.record_cls.pid.resolve(slug)
-    except PIDDoesNotExistError:
-        c = current_communities.service.create(
-            identity,
-            {**community_dict, "custom_fields": {"workflow": workflow or "default"}},
-        )
-        Community.index.refresh()
-        identity.provides.add(CommunityRoleNeed(str(c.id), "owner"))
-    return c
-
-
-@pytest.fixture()
-def community(app, minimal_community, community_owner):
-    return _community_get_or_create(
-        community_owner.identity, minimal_community, workflow="default"
-    )
-
-
-@pytest.fixture()
-def communities(app, minimal_community, community_owner):
-    return {
-        "aaa": _community_get_or_create(
-            community_owner.identity,
-            {
-                **minimal_community,
-                "slug": "aaa",
-            },
-            workflow="default",
-        ),
-        "bbb": _community_get_or_create(
-            community_owner.identity,
-            {
-                **minimal_community,
-                "slug": "bbb",
-            },
-            workflow="default",
-        ),
-    }
-
-
-@pytest.fixture(autouse=True)
-def init_cf(app, db, cache):
-    from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
-
-    prepare_cf_indices()
-    result = app.test_cli_runner().invoke(create_communities_custom_field, [])
-    assert result.exit_code == 0
-    Community.index.refresh()
-
-
-@pytest.fixture()
-def community_owner(UserFixture, app, db):
-    u = UserFixture(
-        email="community_owner@inveniosoftware.org",
-        password="community_owner",
-    )
-    u.create(app, db)
-    return u
-
-
-@pytest.fixture()
-def community_with_workflow_factory(minimal_community, set_community_workflow):
-    def create_community(slug, community_owner, workflow="default"):
-        minimal_community_actual = copy.deepcopy(minimal_community)
-        minimal_community_actual["slug"] = slug
-        community = _community_get_or_create(
-            community_owner.identity, minimal_community_actual
-        )
-        community_owner.identity.provides.add(
-            CommunityRoleNeed(community.data["id"], "owner")
-        )
-        set_community_workflow(community.id, workflow=workflow)
-        return community
-
-    return create_community
-
 from invenio_requests.customizations import RequestType
-from invenio_requests.proxies import current_requests
 
-
-@pytest.fixture(scope="module")
-def requests_service(app):
-    """Request Factory fixture."""
-
-    return current_requests.requests_service
 
 @pytest.fixture
 def ui_serialized_community_role():
@@ -582,82 +365,6 @@ def ui_serialized_community():
 
     return _ui_serialized_community
 
-
-@pytest.fixture
-def set_community_workflow():
-    def _set_community_workflow(community_id, workflow="default"):
-        community_item = current_communities.service.read(system_identity, community_id)
-        current_communities.service.update(
-            system_identity,
-            community_id,
-            data={**community_item.data, "custom_fields": {"workflow": workflow}},
-        )
-
-    return _set_community_workflow
-
-
-@pytest.fixture()
-def requests_service_config():
-    from invenio_requests.services.requests.config import RequestsServiceConfig
-
-    return RequestsServiceConfig
-
-
-@pytest.fixture()
-def default_workflow_json():
-    return {"parent": {"workflow": "default"}}
-
-
-@pytest.fixture()
-def create_draft_via_resource(default_workflow_json):
-    def _create_draft(
-        client,
-        community,
-        expand=True,
-        custom_workflow=None,
-        additional_data=None,
-        **kwargs,
-    ):
-        json = copy.deepcopy(default_workflow_json)
-        if custom_workflow:
-            json["parent"]["workflow"] = custom_workflow
-        if additional_data:
-            json |= additional_data
-        # url = "/thesis/" + "?expand=true" if expand else "/thesis/"
-        url = f"/communities/{community.id}/thesis"
-        return client.post(url, json=json, **kwargs)
-
-    return _create_draft
-
-
-@pytest.fixture()
-def get_request_type():
-    """
-    gets request create link from serialized request types
-    """
-
-    def _get_request_type(request_types_json, request_type):
-        selected_entry = [
-            entry for entry in request_types_json if entry["type_id"] == request_type
-        ]
-        return selected_entry[0] if selected_entry else None
-
-    return _get_request_type
-
-
-@pytest.fixture()
-def get_request_link(get_request_type):
-    """
-    gets request create link from serialized request types
-    """
-
-    def _create_request_from_link(request_types_json, request_type):
-        selected_entry = get_request_type(request_types_json, request_type)
-        return selected_entry["links"]["actions"]["create"] if selected_entry else None
-
-    return _create_request_from_link
-
-
 @pytest.fixture()
 def clear_babel_context():
 
@@ -672,83 +379,3 @@ def clear_babel_context():
             return
 
     return _clear_babel_context
-
-
-@pytest.fixture()
-def request_type_additional_data():
-    return {"publish_draft": {"payload": {"version": "1.0"}}}
-
-
-@pytest.fixture
-def create_request_by_link(get_request_link, request_type_additional_data):
-    def _create_request(
-        client, record, request_type, additional_data=None, **request_kwargs
-    ):
-        if additional_data is None:
-            additional_data = {}
-        applicable_requests = client.get(
-            link2testclient(record.json["links"]["applicable-requests"])
-        ).json["hits"]["hits"]
-        create_link = link2testclient(
-            get_request_link(applicable_requests, request_type)
-        )
-        if request_type in request_type_additional_data:
-            additional_data = always_merger.merge(
-                additional_data, request_type_additional_data[request_type]
-            )
-        if not additional_data:
-            create_response = client.post(create_link, **request_kwargs)
-        else:
-            create_response = client.post(
-                create_link, json=additional_data, **request_kwargs
-            )
-        return create_response
-
-    return _create_request
-
-
-
-@pytest.fixture
-def submit_request_by_link(create_request_by_link):
-    def _submit_request(
-        client,
-        record,
-        request_type,
-        create_additional_data=None,
-        submit_additional_data=None,
-    ):
-        create_response = create_request_by_link(
-            client, record, request_type, additional_data=create_additional_data
-        )
-        submit_response = client.post(
-            link2testclient(create_response.json["links"]["actions"]["submit"]),
-            json=submit_additional_data,
-        )
-        return submit_response
-
-    return _submit_request
-
-@pytest.fixture
-def draft_in_community():
-    def _draft_in_community(client, comm_id, custom_workflow=None):
-        if custom_workflow:
-            return client.post(
-                f"/communities/{comm_id}/thesis",
-                json={"parent": {"workflow": custom_workflow}},
-            )
-
-        return client.post(f"/communities/{comm_id}/thesis", json={})
-    return _draft_in_community
-
-@pytest.fixture
-def published_record_in_community(record_service, draft_in_community):
-    # skip the request approval
-    def _published_record_in_community(client, community_id, custom_workflow=None):
-        response = draft_in_community(client, community_id, custom_workflow)
-        record_item = record_service.publish(system_identity, response.json["id"])
-        ret = client.get(f"/thesis/{record_item['id']}")
-        return ret
-    return _published_record_in_community
-
-
-# todo - idea - oarepo-pytest library or something for these fixtures so we don't have to redefine them each time?

@@ -1,14 +1,15 @@
 import marshmallow as ma
 from flask import current_app
 from invenio_records_resources.services.custom_fields import KeywordCF
+#---
+from typing import Any
 
-
-def validate_workflow(value):
+def validate_workflow(value: str)->bool:
     return value in current_app.config["WORKFLOWS"]
 
 
 class WorkflowSchemaField(ma.fields.Str):
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(validate=[validate_workflow], **kwargs)
 
 
