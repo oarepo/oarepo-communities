@@ -147,12 +147,18 @@ class OARepoCommunityRoles(CommunityRoles):
 
     def needs(self, record: Record=None, data:dict=None, **kwargs:Any) -> list[Need]:
         """Set of Needs granting permission."""
+        _needs = set()
+
+        if record and isinstance(record, Community):
+            for role in self.roles(**kwargs):
+                _needs.add(CommunityRoleNeed(str(record.id), role))
+            return _needs
+
         if record:
             community_ids = self._get_record_communities(record)
         else:
             community_ids = self._get_data_communities(data)
 
-        _needs = set()
         for c in community_ids:
             for role in self.roles(**kwargs):
                 _needs.add(CommunityRoleNeed(c, role))
