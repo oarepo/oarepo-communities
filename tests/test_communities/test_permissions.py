@@ -7,6 +7,8 @@ from invenio_communities.proxies import current_communities
 from invenio_users_resources.proxies import current_users_service
 from pytest_oarepo.functions import link2testclient
 
+from tests.test_communities.test_community_requests import _accept_request
+
 
 def test_disabled_endpoints(
     logged_client,
@@ -163,57 +165,71 @@ def test_can_possibly_create_in_community(
     with pytest.raises(PermissionDeniedError):
         record_service.require_permission(rando_user.identity, "view_deposit_page")
 
-
-def test_record_owners_in_default_record_community_needs(
+def _record_owners_in_record_community_test(
     community_owner,
     users,
     logged_client,
     community_with_workflow_factory,
-    inviter,
-    remover,
+    community_inclusion_service,
     draft_with_community_factory,
-    service_config,
     record_service,
-    search_clear,
-):
-    # tries to .. in with one community with default workflow allowing reader and owner, than adds another community
-    # allowing curator, which should allow curator to deposit too
+    workflow,
+    results
+    ):
+    # user's record should not be available after getting kicked out of the community of the record
     community_curator = users[0]
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
-    inviter(community_curator, community_1.id, "curator")
-    inviter(community_curator, community_2.id, "curator")
+    community_3 = community_with_workflow_factory("comm3", community_curator)
 
-    curator_client = logged_client(community_curator)
-    record1 = draft_with_community_factory(
-        curator_client,
+    # inviter(community_curator, community_2.id, "curator")
+
+    # curator_client = logged_client(community_curator)
+    owner_client = logged_client(community_owner)
+
+    record = draft_with_community_factory(
+        owner_client,
         community_1.id,
-        custom_workflow="record_owner_in_default_record_community",
+        custom_workflow=workflow,
     )
-    record2 = draft_with_community_factory(
-        curator_client,
+
+    read_com1 = owner_client.get(f"/thesis/{record.json['id']}/draft?expand=true")
+
+    community_inclusion_service.include(
+        record_service.read_draft(system_identity, record.json["id"])._record,
         community_2.id,
-        custom_workflow="record_owner_in_default_record_community",
+        record_service=record_service,
+        default=False,
     )
 
-    read_before = curator_client.get(f"/thesis/{record1.json['id']}/draft?expand=true")
-    search_before = curator_client.get(f"/user/thesis/")
-    type_ids = {
-        request_type["type_id"]
-        for request_type in read_before.json["expanded"]["request_types"]
-    }
-    assert "publish_draft" in type_ids
-    assert len(search_before.json["hits"]["hits"]) == 2
+    read_com2 = owner_client.get(f"/thesis/{record.json['id']}/draft?expand=true")
 
-    remover(
-        community_curator.id, community_1.id
-    )  # the curator now isn't in community and should not be able to create
-    # publish request on the record nor search it
+    community_inclusion_service.include(
+        record_service.read_draft(system_identity, record.json["id"])._record,
+        community_3.id,
+        record_service=record_service,
+        default=True,
+    )
+    community_inclusion_service.remove(
+        record_service.read_draft(system_identity, record.json["id"])._record,
+        community_1.id,
+        record_service=record_service
+    )
 
-    read_after = curator_client.get(f"/thesis/{record1.json['id']}/draft?expand=true")
-    assert read_after.status_code == 403
-    search_after = curator_client.get(f"/user/thesis/")
-    assert len(search_after.json["hits"]["hits"]) == 1
+    read_com3 = owner_client.get(f"/thesis/{record.json['id']}/draft?expand=true")
+
+    community_inclusion_service.remove(
+        record_service.read_draft(system_identity, record.json["id"])._record,
+        community_2.id,
+        record_service=record_service
+    )
+
+    read_com4 = owner_client.get(f"/thesis/{record.json['id']}/draft?expand=true")
+
+    assert read_com1.status_code == results[0]
+    assert read_com2.status_code == results[1]
+    assert read_com3.status_code == results[2]
+    assert read_com4.status_code == results[3]
 
 
 def test_record_owners_in_record_community_needs(
@@ -223,47 +239,40 @@ def test_record_owners_in_record_community_needs(
     community_with_workflow_factory,
     community_inclusion_service,
     draft_with_community_factory,
-    inviter,
-    remover,
-    service_config,
     record_service,
     search_clear,
 ):
-    # user's record should not be available after getting kicked out of the community of the record
-    community_curator = users[0]
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
-    inviter(community_curator, community_1.id, "curator")
-    inviter(community_curator, community_2.id, "curator")
-    community_curator.identity.provides.add(
-        CommunityRoleNeed(community_1.id, "curator")
+    _record_owners_in_record_community_test(
+        community_owner,
+        users,
+        logged_client,
+        community_with_workflow_factory,
+        community_inclusion_service,
+        draft_with_community_factory,
+        record_service,
+        "record_owner_in_record_community",
+        (200, 200, 200, 403)
     )
 
-    curator_client = logged_client(community_curator)
-
-    record1 = draft_with_community_factory(
-        curator_client,
-        community_1.id,
-        custom_workflow="record_owner_in_record_community",
+def test_record_owners_in_default_record_community_needs(
+    community_owner,
+    users,
+    logged_client,
+    community_with_workflow_factory,
+    community_inclusion_service,
+    draft_with_community_factory,
+    record_service,
+    search_clear,
+):
+    _record_owners_in_record_community_test(
+        community_owner,
+        users,
+        logged_client,
+        community_with_workflow_factory,
+        community_inclusion_service,
+        draft_with_community_factory,
+        record_service,
+        "record_owner_in_default_record_community",
+        (200, 200, 403, 403)
     )
-    record2 = draft_with_community_factory(
-        curator_client,
-        community_2.id,
-        custom_workflow="record_owner_in_record_community",
-    )
 
-    read_before1 = curator_client.get(f"/thesis/{record1.json['id']}/draft?expand=true")
-    read_before2 = curator_client.get(f"/thesis/{record2.json['id']}/draft?expand=true")
-    search_before = curator_client.get(f"/user/thesis/")
-
-    remover(community_curator.id, community_2.id)
-    read_after1 = curator_client.get(f"/thesis/{record1.json['id']}/draft?expand=true")
-    read_after2 = curator_client.get(f"/thesis/{record2.json['id']}/draft?expand=true")
-    search_after = curator_client.get(f"/user/thesis/")
-
-    assert read_before1.status_code == 200
-    assert read_before2.status_code == 200
-    assert read_after1.status_code == 200
-    assert read_after2.status_code == 403
-    assert len(search_before.json["hits"]["hits"]) == 2
-    assert len(search_after.json["hits"]["hits"]) == 1

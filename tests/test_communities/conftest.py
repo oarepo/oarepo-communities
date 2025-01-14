@@ -122,7 +122,6 @@ class TestWithRecordOwnerInRecordCommunityWorkflowPermissions(
 ):
     can_read = [
         RecordOwnerInRecordCommunity(),
-        CommunityRole("owner"),
         IfInState(
             "published",
             [AnyUser()],
@@ -135,7 +134,6 @@ class TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions(
 ):
     can_read = [
         RecordOwnerInDefaultRecordCommunity(),
-        CommunityRole("owner"),
         IfInState(
             "published",
             [AnyUser()],
