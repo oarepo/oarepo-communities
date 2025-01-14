@@ -176,15 +176,13 @@ def _record_owners_in_record_community_test(
     workflow,
     results
     ):
-    # user's record should not be available after getting kicked out of the community of the record
+    # tries to read record when user in record's primary community, in noth primary and secondary, in secondary and
+    # in none
     community_curator = users[0]
     community_1 = community_with_workflow_factory("comm1", community_owner)
     community_2 = community_with_workflow_factory("comm2", community_owner)
     community_3 = community_with_workflow_factory("comm3", community_curator)
 
-    # inviter(community_curator, community_2.id, "curator")
-
-    # curator_client = logged_client(community_curator)
     owner_client = logged_client(community_owner)
 
     record = draft_with_community_factory(
@@ -250,8 +248,8 @@ def test_record_owners_in_record_community_needs(
         community_inclusion_service,
         draft_with_community_factory,
         record_service,
-        "record_owner_in_record_community",
-        (200, 200, 200, 403)
+        workflow="record_owner_in_record_community",
+        results=(200, 200, 200, 403)
     )
 
 def test_record_owners_in_default_record_community_needs(
@@ -272,7 +270,7 @@ def test_record_owners_in_default_record_community_needs(
         community_inclusion_service,
         draft_with_community_factory,
         record_service,
-        "record_owner_in_default_record_community",
-        (200, 200, 403, 403)
+        workflow="record_owner_in_default_record_community",
+        results=(200, 200, 403, 403)
     )
 
