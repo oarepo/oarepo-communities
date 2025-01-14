@@ -14,13 +14,13 @@ class WorkflowSchemaField(ma.fields.Str):
 
 
 class WorkflowCF(KeywordCF):
-    def __init__(self, name: str, **kwargs) -> None:
+    def __init__(self, name: str, **kwargs: Any) -> None:
         super().__init__(name, field_cls=WorkflowSchemaField, **kwargs)
 
 
 # hack to get lazy choices serialized to JSON
 class LazyChoices(list):
-    def __init__(self, func):
+    def __init__(self, func: callable):
         self._func = func
 
     def __iter__(self):

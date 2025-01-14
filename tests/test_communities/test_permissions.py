@@ -5,7 +5,7 @@ from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_users_resources.proxies import current_users_service
-from tests.test_communities.utils import link2testclient
+from pytest_oarepo.functions import link2testclient
 
 
 def test_disabled_endpoints(

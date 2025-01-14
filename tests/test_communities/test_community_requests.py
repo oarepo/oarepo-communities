@@ -1,12 +1,11 @@
 import pytest
+from pytest_oarepo.functions import link2testclient
 
 from oarepo_communities.errors import (
     CommunityAlreadyIncludedException,
     CommunityNotIncludedException,
     PrimaryCommunityException,
 )
-
-from .utils import link2testclient
 
 REPO_NAME = "thesis"
 

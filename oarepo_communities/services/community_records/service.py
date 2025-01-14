@@ -26,7 +26,6 @@ from oarepo_communities.utils import (
 
 #---
 from typing import Any
-
 from flask_principal import Identity
 from invenio_records_resources.services.base.links import LinksTemplate
 from invenio_records_resources.services.records.results import (
@@ -48,14 +47,6 @@ class CommunityRecordsService(Service):
     def community_record_schema(self) -> ServiceSchemaWrapper:
         """Returns the community schema instance."""
         return ServiceSchemaWrapper(self, schema=self.config.community_record_schema)
-
-    """
-            params: dict[str, Any] | None = None,
-        search_preference: Any | None = None,
-        expand: bool = False,
-        extra_filter: Query | None = None,
-        **kwargs: Any,
-    """
 
     def _search(
         self,

@@ -21,7 +21,7 @@ from oarepo_communities.proxies import current_oarepo_communities
 #---
 from typing import Any
 from flask_principal import Need
-from invenio_drafts_resources.records import Record as RecordWithDraft #should probably replace with drafts record where parent is expected
+from invenio_drafts_resources.records import Record
 from flask_principal import Identity
 
 def _user_in_community_need(user, community):
@@ -59,7 +59,7 @@ class InAnyCommunity(Generator):
 
 class CommunityWorkflowPermission(WorkflowPermission):
 
-    def _get_workflow_id(self, record: RecordWithDraft = None, **kwargs: Any) -> str:
+    def _get_workflow_id(self, record: Record = None, **kwargs: Any) -> str:
         # todo - check the record branch too? idk makes more sense to not use the default community's workflow, there is a deeper problem if there's no workflow on the record
         try:
             return super()._get_workflow_id(record=None, **kwargs)
@@ -75,7 +75,7 @@ class CommunityWorkflowPermission(WorkflowPermission):
                 raise MissingWorkflowError("Workflow not defined on record.")
 
 
-def convert_community_ids_to_uuid(community_id: str) -> str:
+def convert_community_ids_to_uuid(community_id: str) -> str | uuid.UUID:
     # if it already is a string representation of uuid, keep it as it is
     try:
         uuid.UUID(community_id, version=4) #?
@@ -86,7 +86,7 @@ def convert_community_ids_to_uuid(community_id: str) -> str:
 
 
 class CommunityRoleMixin:
-    def _get_record_communities(self, record: RecordWithDraft = None, **kwargs: Any)->list[str]:
+    def _get_record_communities(self, record: Record = None, **kwargs: Any)->list[str]:
         try:
             return record.parent.communities.ids
         except AttributeError:
@@ -100,7 +100,7 @@ class CommunityRoleMixin:
 
 
 class DefaultCommunityRoleMixin:
-    def _get_record_communities(self, record: RecordWithDraft = None, **kwargs: Any)->list[str]:
+    def _get_record_communities(self, record: Record = None, **kwargs: Any)->list[str]:
         try:
             return [str(record.parent.communities.default.id)]
         except (AttributeError, TypeError) as e:
@@ -134,7 +134,7 @@ class OARepoCommunityRoles(CommunityRoles):
         return list(community_ids)
 
     @abc.abstractmethod
-    def _get_record_communities(self, record: RecordWithDraft=None, **kwargs: Any) -> list[str]:
+    def _get_record_communities(self, record: Record=None, **kwargs: Any) -> list[str]:
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -145,7 +145,7 @@ class OARepoCommunityRoles(CommunityRoles):
     def roles(self, **kwargs: Any)->list[str]:
         raise NotImplementedError()
 
-    def needs(self, record: RecordWithDraft=None, data:dict=None, **kwargs:Any) -> list[Need]:
+    def needs(self, record: Record=None, data:dict=None, **kwargs:Any) -> list[Need]:
         """Set of Needs granting permission."""
         if record:
             community_ids = self._get_record_communities(record)
@@ -251,14 +251,14 @@ PrimaryCommunityMembers = DefaultCommunityMembers
 class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, Generator):
     default_or_ids = "default"
 
-    def _record_communities(self, record: RecordWithDraft=None, **kwargs: Any) -> set[str]:
+    def _record_communities(self, record: Record=None, **kwargs: Any) -> set[str]:
         return set(self._get_record_communities(record, **kwargs))
 
-    def needs(self, record: RecordWithDraft=None, data:dict=None, **kwargs:Any) -> list[Need]:
+    def needs(self, record: Record=None, data:dict=None, **kwargs:Any) -> list[Need]:
         record_communities = set(self._get_record_communities(record, **kwargs))
         return self._needs(record_communities, record=record)
 
-    def _needs(self, record_communities: set[str], record: RecordWithDraft = None) -> list[Need]:
+    def _needs(self, record_communities: set[str], record: Record = None) -> list[Need]:
         owners = getattr(record.parent, "owners", None)
         ret = []
         for owner in owners:
@@ -298,9 +298,9 @@ class RecordOwnerInRecordCommunity(
     default_or_ids = "ids"
 
     # trick to use CommunityRoleMixin instead of DefaultCommunityRoleMixin
-    def _record_communities(self, record: RecordWithDraft=None, **kwargs: Any) -> set[str]:
+    def _record_communities(self, record: Record=None, **kwargs: Any) -> set[str]:
         return set(self._get_record_communities(record, **kwargs))
 
-    def needs(self, record: RecordWithDraft=None, data:dict=None, **kwargs:Any) -> list[Need]:
+    def needs(self, record: Record=None, data:dict=None, **kwargs:Any) -> list[Need]:
         record_communities = set(self._get_record_communities(record, **kwargs))
         return self._needs(record_communities, record=record)

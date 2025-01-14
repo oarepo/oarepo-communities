@@ -47,7 +47,6 @@ from oarepo_communities.services.permissions.generators import (
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
-from tests.test_communities.utils import link2testclient
 from deepmerge import always_merger
 
 pytest_plugins = [
@@ -58,6 +57,14 @@ pytest_plugins = [
    "pytest_oarepo.fixtures",
    "pytest_oarepo.users",
 ]
+
+@pytest.fixture(autouse=True)
+def init_cf(init_cf):
+    return init_cf
+
+@pytest.fixture(scope="module", autouse=True)
+def location(location):
+    return location
 
 @pytest.fixture()
 def urls():

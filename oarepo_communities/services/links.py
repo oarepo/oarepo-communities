@@ -6,7 +6,7 @@ from invenio_records_resources.services.base.links import Link, preprocess_vars
 from uritemplate import URITemplate
 
 #---
-from invenio_records_resources.records import Record
+from invenio_drafts_resources.records import Record
 
 
 class CommunitiesLinks(Link):
@@ -20,7 +20,7 @@ class CommunitiesLinks(Link):
         self._when_func = when
         self._vars_func = vars
 
-    def expand(self, obj: Record, context) -> dict:
+    def expand(self, obj: Record, context: dict) -> dict:
         """Expand the URI Template."""
         ids = obj.parent.communities.ids
         links = {}

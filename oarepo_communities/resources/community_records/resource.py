@@ -10,7 +10,7 @@ from invenio_records_resources.resources.records.utils import search_preference
 
 
 class CommunityRecordsResource(RecordResource):
-    """RDM community's records resource."""
+    """Communities-specific records resource."""
 
     def create_url_rules(self) -> list[dict]:
         """Create the URL rules for the record resource."""

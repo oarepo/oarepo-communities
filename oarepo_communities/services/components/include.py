@@ -10,7 +10,7 @@ from ..permissions.generators import convert_community_ids_to_uuid
 #---
 from typing import Any
 from flask_principal import Identity
-from invenio_records_resources.records import Record
+from invenio_drafts_resources.records import Record
 
 
 class CommunityInclusionComponent(ServiceComponent):

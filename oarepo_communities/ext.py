@@ -16,7 +16,6 @@ from .workflow import community_default_workflow
 #---
 from flask import Flask
 from typing import Any
-from invenio_records_resources.records import Record
 
 
 

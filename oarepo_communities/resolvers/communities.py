@@ -40,11 +40,7 @@ class CommunityRoleProxy(EntityProxy):
 
 
 class CommunityRoleResolver(EntityResolver):
-    """Community entity resolver.
-
-    The entity resolver enables Invenio-Requests to understand communities as
-    receiver and topic of a request.
-    """
+    """Community role entity resolver."""
 
     type_id = "community_role"
     """Type identifier for this resolver."""
