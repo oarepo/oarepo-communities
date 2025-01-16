@@ -8,6 +8,12 @@ class CommunityAlreadyIncludedException(Exception):
     description = "The record is already included in this community."
 
 
+class TargetCommunityNotProvidedException(Exception):
+    """Target community not provided in the migration request"""
+
+    description = "Target community not provided in the migration request."
+
+
 class CommunityNotIncludedException(Exception):
     """The record is already in the community."""
 

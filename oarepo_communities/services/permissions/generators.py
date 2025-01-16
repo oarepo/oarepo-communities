@@ -16,6 +16,7 @@ from oarepo_workflows.services.permissions.generators import WorkflowPermission
 from oarepo_communities.errors import (
     MissingCommunitiesError,
     MissingDefaultCommunityError,
+    TargetCommunityNotProvidedException,
 )
 from oarepo_communities.proxies import current_oarepo_communities
 
@@ -213,7 +214,7 @@ class TargetCommunityRole(DefaultCommunityRole):
         try:
             community_id = data["payload"]["community"]
         except KeyError:
-            raise MissingDefaultCommunityError(
+            raise TargetCommunityNotProvidedException(
                 "Community not defined in request payload."
             )
         return [community_id]
