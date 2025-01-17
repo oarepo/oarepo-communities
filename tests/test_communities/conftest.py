@@ -59,8 +59,8 @@ pytest_plugins = [
 ]
 
 @pytest.fixture(autouse=True)
-def init_cf(init_cf):
-    return init_cf
+def init_communities_cf(init_communities_cf):
+    return init_communities_cf
 
 @pytest.fixture(scope="module", autouse=True)
 def location(location):

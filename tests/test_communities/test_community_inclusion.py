@@ -1,5 +1,6 @@
 import pytest
 from invenio_access.permissions import system_identity
+from pytest_oarepo.communities.functions import community_get_or_create
 
 from oarepo_communities.errors import CommunityNotIncludedException
 
@@ -7,16 +8,15 @@ from oarepo_communities.errors import CommunityNotIncludedException
 def test_include(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
     community_inclusion_service,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
-    community_3 = community_with_workflow_factory("comm3", community_owner)
+    community_1 = community_get_or_create(community_owner, slug="comm1")
+    community_2 = community_get_or_create(community_owner, slug="comm2")
+    community_3 = community_get_or_create(community_owner, slug="comm3")
 
     response = owner_client.post(f"/communities/{community_1.id}/thesis", json={})
 
@@ -51,15 +51,14 @@ def test_include(
 def test_remove(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
     community_inclusion_service,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
 
     response = owner_client.post(f"/communities/{community_1.id}/thesis", json={})
     record_id = response.json["id"]

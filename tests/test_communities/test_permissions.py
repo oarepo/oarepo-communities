@@ -5,6 +5,8 @@ from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_users_resources.proxies import current_users_service
+from pytest_oarepo.communities.functions import community_get_or_create, invite, set_community_workflow
+from pytest_oarepo.constants import DEFAULT_RECORD_WITH_WORKFLOW_JSON
 from pytest_oarepo.functions import link2testclient
 
 from tests.test_communities.test_community_requests import _accept_request
@@ -13,26 +15,21 @@ from tests.test_communities.test_community_requests import _accept_request
 def test_disabled_endpoints(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
+    draft_with_community_factory,
     published_record_with_community_factory,
     record_service,
-    default_record_with_workflow_json,
     search_clear,
 ):
 
     owner_client = logged_client(community_owner)
     # create should work only through community
-    create = owner_client.post("/thesis/", json=default_record_with_workflow_json)
+    create = owner_client.post("/thesis/", json=DEFAULT_RECORD_WITH_WORKFLOW_JSON)
     assert create.status_code == 400
-
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    draft = owner_client.post(
-        f"/communities/{community_1.id}/thesis", json=default_record_with_workflow_json
-    ).json
+    community_1 = community_get_or_create(community_owner, "comm1")
+    draft = draft_with_community_factory(owner_client, community_1.id)
     published_record = published_record_with_community_factory(owner_client, community_1.id)
-
     publish = owner_client.post(f"/thesis/{draft['id']}/draft/actions/publish")
-    delete = owner_client.delete(f"/thesis/{published_record.json['id']}")
+    delete = owner_client.delete(f"/thesis/{published_record['id']}")
     assert publish.status_code == 403
     assert delete.status_code == 403
 
@@ -44,21 +41,10 @@ def service_config():
     return ThesisServiceConfig
 
 
-@pytest.fixture()
-def requests_service():
-    # from invenio_requests.services.requests.service import RequestsService
-    from invenio_requests.proxies import current_requests_service
-
-    return current_requests_service
-
-
 def test_default_community_workflow_changed(
     logged_client,
     community_owner,
     users,
-    community_with_workflow_factory,
-    inviter,
-    set_community_workflow,
     service_config,
     draft_with_community_factory,
     search_clear,
@@ -67,20 +53,17 @@ def test_default_community_workflow_changed(
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory(
-        "comm2",
-        community_owner,
-    )
-    inviter(community_reader, community_1.id, "reader")
-    inviter(community_reader, community_2.id, "reader")
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
+    invite(community_reader, community_1.id, "reader")
+    invite(community_reader, community_2.id, "reader")
 
     record1 = draft_with_community_factory(owner_client, community_1.id)
     record2 = draft_with_community_factory(owner_client, community_2.id)
     record4 = draft_with_community_factory(reader_client, community_1.id)
 
     request_should_be_allowed = owner_client.post(
-        f"/thesis/{record1.json['id']}/draft/requests/publish_draft"
+        f"/thesis/{record1['id']}/draft/requests/publish_draft"
     )
     submit = owner_client.post(
         link2testclient(request_should_be_allowed.json["links"]["actions"]["submit"])
@@ -96,8 +79,8 @@ def test_default_community_workflow_changed(
 
     # old permissions should not allow this for reader, but reader is in editors so it should be fine with new ones
     update_draft = reader_client.put(
-        f"/thesis/{record4.json['id']}/draft",
-        json=record4.json | {"metadata": {"title": "should do"}},
+        f"/thesis/{record4['id']}/draft",
+        json=record4 | {"metadata": {"title": "should do"}},
     )
     assert update_draft.status_code == 200
     assert update_draft.json["metadata"]["title"] == "should do"
@@ -106,11 +89,11 @@ def test_default_community_workflow_changed(
     record = Community.get_record(str(community_1.id))
     assert record.custom_fields["workflow"] == "no"
     request_should_still_work = owner_client.post(
-        f"/thesis/{record2.json['id']}/draft/requests/publish_draft"
+        f"/thesis/{record2['id']}/draft/requests/publish_draft"
     )
     record5 = draft_with_community_factory(owner_client, community_1.id)
     request_should_be_forbidden = owner_client.post(
-        f"/thesis/{record5.json['id']}/draft/requests/publish_draft"
+        f"/thesis/{record5['id']}/draft/requests/publish_draft"
     )
     assert request_should_still_work.status_code == 201
     assert request_should_be_forbidden.status_code == 403
@@ -123,8 +106,6 @@ from invenio_records_resources.services.errors import PermissionDeniedError
 def test_can_possibly_create_in_community(
     community_owner,
     users,
-    community_with_workflow_factory,
-    inviter,
     service_config,
     record_service,
     search_clear,
@@ -133,8 +114,8 @@ def test_can_possibly_create_in_community(
     # allowing curator, which should allow curator to deposit too
     community_curator = users[0]
     rando_user = users[1]
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    inviter(community_curator, community_1.id, "curator")
+    community_1 = community_get_or_create(community_owner, "comm1")
+    invite(community_curator, community_1.id, "curator")
     record_service.require_permission(community_owner.identity, "view_deposit_page")
     with pytest.raises(PermissionDeniedError):
         record_service.require_permission(
@@ -143,16 +124,13 @@ def test_can_possibly_create_in_community(
     with pytest.raises(PermissionDeniedError):
         record_service.require_permission(rando_user.identity, "view_deposit_page")
 
-    community_2 = community_with_workflow_factory(
-        "comm2",
-        community_owner,
-    )
+    community_2 = community_get_or_create(community_owner, "comm2")
     current_communities.service.update(
         community_owner.identity,
         id_=community_2.id,
         data=community_2.data | {"custom_fields": {"workflow": "custom"}},
     )
-    inviter(community_curator, community_2.id, "curator")
+    invite(community_curator, community_2.id, "curator")
     community2read = current_communities.service.read(
         community_curator.identity, community_2.id
     )
@@ -169,7 +147,6 @@ def _record_owners_in_record_community_test(
     community_owner,
     users,
     logged_client,
-    community_with_workflow_factory,
     community_inclusion_service,
     draft_with_community_factory,
     record_service,
@@ -179,9 +156,9 @@ def _record_owners_in_record_community_test(
     # tries to read record when user in record's primary community, in noth primary and secondary, in secondary and
     # in none
     community_curator = users[0]
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
-    community_3 = community_with_workflow_factory("comm3", community_curator)
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
+    community_3 = community_get_or_create(community_curator, "comm3")
 
     owner_client = logged_client(community_owner)
 
@@ -190,39 +167,40 @@ def _record_owners_in_record_community_test(
         community_1.id,
         custom_workflow=workflow,
     )
+    record_id = record["id"]
 
-    read_com1 = owner_client.get(f"/thesis/{record.json['id']}/draft?expand=true")
+    read_com1 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
 
     community_inclusion_service.include(
-        record_service.read_draft(system_identity, record.json["id"])._record,
+        record_service.read_draft(system_identity, record_id)._record,
         community_2.id,
         record_service=record_service,
         default=False,
     )
 
-    read_com2 = owner_client.get(f"/thesis/{record.json['id']}/draft?expand=true")
+    read_com2 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
 
     community_inclusion_service.include(
-        record_service.read_draft(system_identity, record.json["id"])._record,
+        record_service.read_draft(system_identity, record_id)._record,
         community_3.id,
         record_service=record_service,
         default=True,
     )
     community_inclusion_service.remove(
-        record_service.read_draft(system_identity, record.json["id"])._record,
+        record_service.read_draft(system_identity, record_id)._record,
         community_1.id,
         record_service=record_service
     )
 
-    read_com3 = owner_client.get(f"/thesis/{record.json['id']}/draft?expand=true")
+    read_com3 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
 
     community_inclusion_service.remove(
-        record_service.read_draft(system_identity, record.json["id"])._record,
+        record_service.read_draft(system_identity, record_id)._record,
         community_2.id,
         record_service=record_service
     )
 
-    read_com4 = owner_client.get(f"/thesis/{record.json['id']}/draft?expand=true")
+    read_com4 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
 
     assert read_com1.status_code == results[0]
     assert read_com2.status_code == results[1]
@@ -234,7 +212,6 @@ def test_record_owners_in_record_community_needs(
     community_owner,
     users,
     logged_client,
-    community_with_workflow_factory,
     community_inclusion_service,
     draft_with_community_factory,
     record_service,
@@ -244,7 +221,6 @@ def test_record_owners_in_record_community_needs(
         community_owner,
         users,
         logged_client,
-        community_with_workflow_factory,
         community_inclusion_service,
         draft_with_community_factory,
         record_service,
@@ -256,7 +232,6 @@ def test_record_owners_in_default_record_community_needs(
     community_owner,
     users,
     logged_client,
-    community_with_workflow_factory,
     community_inclusion_service,
     draft_with_community_factory,
     record_service,
@@ -266,7 +241,6 @@ def test_record_owners_in_default_record_community_needs(
         community_owner,
         users,
         logged_client,
-        community_with_workflow_factory,
         community_inclusion_service,
         draft_with_community_factory,
         record_service,

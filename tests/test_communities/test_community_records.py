@@ -1,3 +1,5 @@
+from pytest_oarepo.communities.functions import community_get_or_create, invite
+
 from thesis.records.api import ThesisDraft, ThesisRecord
 
 
@@ -41,15 +43,14 @@ def test_create_record_in_community_without_model_in_url(
 def test_search(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
     published_record_with_community_factory,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
 
     record1 = published_record_with_community_factory(owner_client, community_1.id)
     record2 = published_record_with_community_factory(owner_client, community_2.id)
@@ -70,8 +71,8 @@ def test_search(
     assert len(response_draft1.json["hits"]["hits"]) == 1
     assert len(response_draft2.json["hits"]["hits"]) == 1
 
-    assert response_record1.json["hits"]["hits"][0]["id"] == record1.json["id"]
-    assert response_record2.json["hits"]["hits"][0]["id"] == record2.json["id"]
+    assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
+    assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
 # todo tests for search links
@@ -80,15 +81,14 @@ def test_search(
 def test_search_model(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
     published_record_with_community_factory,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
 
     record1 = published_record_with_community_factory(owner_client, community_1.id)
     record2 = published_record_with_community_factory(owner_client, community_2.id)
@@ -102,29 +102,28 @@ def test_search_model(
     assert len(response_record1.json["hits"]["hits"]) == 1
     assert len(response_record2.json["hits"]["hits"]) == 1
 
-    assert response_record1.json["hits"]["hits"][0]["id"] == record1.json["id"]
-    assert response_record2.json["hits"]["hits"][0]["id"] == record2.json["id"]
+    assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
+    assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
 def test_user_search(
     logged_client,
     community_owner,
     users,
-    community_with_workflow_factory,
-    inviter,
+    draft_with_community_factory,
     search_clear,
 ):
     community_reader = users[0]
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
-    inviter(community_reader, community_1.id, "reader")
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
+    invite(community_reader, community_1.id, "reader")
 
-    record1 = owner_client.post(f"/communities/{community_1.id}/thesis", json={}).json
-    record2 = owner_client.post(f"/communities/{community_2.id}/thesis", json={}).json
-    record3 = reader_client.post(f"/communities/{community_1.id}/thesis", json={}).json
+    record1 = draft_with_community_factory(owner_client, str(community_1.id))
+    record2 = draft_with_community_factory(owner_client, str(community_2.id))
+    record3 = draft_with_community_factory(reader_client, str(community_1.id))
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -149,22 +148,21 @@ def test_user_search_model(
     logged_client,
     community_owner,
     users,
-    community_with_workflow_factory,
+    draft_with_community_factory,
     record_service,
-    inviter,
     search_clear,
 ):
     community_reader = users[0]
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
-    inviter(community_reader, community_1.id, "reader")
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
+    invite(community_reader, community_1.id, "reader")
 
-    record1 = owner_client.post(f"/communities/{community_1.id}/thesis", json={}).json
-    record2 = owner_client.post(f"/communities/{community_2.id}/thesis", json={}).json
-    record3 = reader_client.post(f"/communities/{community_1.id}/thesis", json={}).json
+    record1 = draft_with_community_factory(owner_client, str(community_1.id))
+    record2 = draft_with_community_factory(owner_client, str(community_2.id))
+    record3 = draft_with_community_factory(reader_client, str(community_1.id))
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -182,7 +180,6 @@ def test_user_search_model(
 def test_search_links(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
     published_record_with_community_factory,
     record_service,
     search_clear,
@@ -191,7 +188,7 @@ def test_search_links(
 
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
+    community_1 = community_get_or_create(community_owner, "comm1")
 
     for _ in range(30):
         published_record_with_community_factory(owner_client, community_1.id)
@@ -240,16 +237,14 @@ def test_search_links(
 def test_search_ui_serialization(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
     published_record_with_community_factory,
     record_service,
-    inviter,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
 
     record1 = published_record_with_community_factory(owner_client, community_1.id)
     record2 = published_record_with_community_factory(owner_client, community_2.id)
