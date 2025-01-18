@@ -1,8 +1,8 @@
 from __future__ import annotations
+from flask import g
 import marshmallow as ma
 from invenio_access.permissions import system_identity
 from invenio_requests.proxies import current_requests_service
-from invenio_requests.resolvers.registry import ResolverRegistry
 from oarepo_requests.actions.generic import OARepoAcceptAction
 from oarepo_requests.proxies import current_oarepo_requests_service
 from oarepo_requests.types import ModelRefTypes
@@ -10,7 +10,6 @@ from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
 from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
 from oarepo_requests.utils import (
-    classproperty,
     is_auto_approved,
     request_identity_matches,
     open_request_exists,
@@ -31,10 +30,7 @@ if TYPE_CHECKING:
     from flask_babel.speaklater import LazyString
     from flask_principal import Identity
     from invenio_drafts_resources.records import Record
-    from invenio_requests.customizations.actions import RequestAction
     from invenio_requests.records.api import Request
-
-    from oarepo_requests.typing import EntityReference
 
 
 class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
@@ -43,13 +39,12 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
     """
 
     def apply(self, identity, request_type, topic, uow, *args, **kwargs):
-        creator_ref = ResolverRegistry.reference_identity(identity)
         request_item = current_oarepo_requests_service.create(
             system_identity,
             data={"payload": self.request.get("payload", {})},
             request_type=ConfirmCommunityMigrationRequestType.type_id,
             topic=topic,
-            creator=creator_ref,
+            creator={"user": str(self.request.created_by._resolve().id)},
             uow=uow,
             *args,
             **kwargs,
@@ -99,10 +94,11 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
     description = _("Request initiation of Community migration.")
 
     topic_can_be_none = False
-    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
+    allowed_topic_ref_types = ModelRefTypes(published=True, draft=False)
     payload_schema = {
-        "community": ma.fields.String(required=True),
+        "community": ma.fields.String(),
     }
+    receiver_can_be_none = True
 
     @override
     def stateful_name(
@@ -137,7 +133,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         if is_auto_approved(self, identity=identity, topic=topic):
             return _(
                 "Click to immediately start migration. "
-                "After submitting the request will immediatelly be forwarded to responsible person(s) in the target community."
+                "After submitting the request will immediatelly be forwarded to responsible person(s) in the target community. "
             )
 
         if not request:
@@ -165,14 +161,24 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
 
                 return _("Request not yet submitted.")
 
-    form = {
-        "field": "community",
-        "ui_widget": "TargetCommunitySelector",
-        "read_only_ui_widget": "SelectedTargetCommunity",
-        "props": {
-            "requestType": "initiate_community_migration",
-        },
-    }
+    @property
+    def form(self):
+        allowed_communities = AllowedCommunitiesComponent.get_allowed_communities(
+            g.identity, "create"
+        )
+        allowed_communities = [
+            AllowedCommunitiesComponent.community_to_dict(community)
+            for community in allowed_communities
+        ]
+        return {
+            "field": "community",
+            "ui_widget": "TargetCommunitySelector",
+            "read_only_ui_widget": "SelectedTargetCommunity",
+            "props": {
+                "readOnlyLabel": _("Target community:"),
+                "allowedCommunities": allowed_communities,
+            },
+        }
 
     editable = False
 
@@ -191,7 +197,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         """Check if the request type is applicable to the topic."""
 
         if open_request_exists(topic, cls.type_id) or open_request_exists(
-            topic, "confirm_community_migration"
+            topic, ConfirmCommunityMigrationRequestType.type_id
         ):
             return False
         # check if the user has more than one community to which they can migrate
@@ -231,17 +237,22 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
     type_id = "confirm_community_migration"
     name = _("confirm Community migration")
 
-    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
+    allowed_topic_ref_types = ModelRefTypes(published=True, draft=False)
 
-    form = {
-        "field": "community",
-        "read_only_ui_widget": "SelectedTargetCommunity",
-        "props": {
-            "requestType": "initiate_community_migration",
-            "placeholder": _("Yes or no"),
-            "community": {"id": "community", "label": _("Community")},
-        },
+    payload_schema = {
+        "community": ma.fields.String(),
     }
+
+    @property
+    def form(self):
+        return {
+            "field": "community",
+            "ui_widget": "TargetCommunitySelector",
+            "read_only_ui_widget": "SelectedTargetCommunity",
+            "props": {
+                "readOnlyLabel": _("Target community:"),
+            },
+        }
 
     @override
     def stateful_name(

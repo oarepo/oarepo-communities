@@ -3,7 +3,7 @@ import { i18next } from "@translations/oarepo_communities";
 import { CommunityItem } from "@js/communities_components/CommunitySelector/CommunityItem";
 import { List } from "semantic-ui-react";
 import { useFormikContext, getIn } from "formik";
-import React, { useState } from "react";
+import React from "react";
 import { OverridableContext } from "react-overridable";
 import {
   EmptyResults,
@@ -15,7 +15,7 @@ import {
   Pagination,
   withState,
 } from "react-searchkit";
-import { Grid, Menu, Message, Icon } from "semantic-ui-react";
+import { Grid, Message } from "semantic-ui-react";
 import { EmptyResultsElement } from "@js/oarepo_ui";
 const overriddenComponents = {
   "EmptyResults.element": EmptyResultsElement,
@@ -27,7 +27,7 @@ const searchConfig = {
       headers: {
         Accept: "application/vnd.inveniordm.v1+json",
       },
-      url: "/api/communities",
+      url: "/api/user/communities",
     },
   },
   initialQueryState: {
@@ -37,22 +37,11 @@ const searchConfig = {
   },
 };
 
-const SecondaryCommunitySelector = ({ requestType, fieldPath }) => {
+const SecondaryCommunitySelector = ({ fieldPath }) => {
   const { values, errors, setFieldValue, setFieldError } = useFormikContext();
-  console.log(errors);
   const selectedCommunityId = getIn(values, fieldPath, "");
-  const [communityEndpoint, setCommunityEndpoint] = useState("all");
-  const searchApiWithUrl = {
-    ...searchConfig.searchApi,
-    axios: {
-      ...searchConfig.searchApi.axios,
-      url:
-        communityEndpoint === "all"
-          ? "/api/communities"
-          : "/api/user/communities",
-    },
-  };
-  const searchApi = new InvenioSearchApi(searchApiWithUrl);
+
+  const searchApi = new InvenioSearchApi(searchConfig.searchApi);
 
   const handleClick = (communityId) => {
     if (selectedCommunityId === communityId) return;
@@ -64,8 +53,6 @@ const SecondaryCommunitySelector = ({ requestType, fieldPath }) => {
     <React.Fragment>
       <OverridableContext.Provider value={overriddenComponents}>
         <ReactSearchKit
-          // necessary, because otherwise, when you switch tabs, it won't refetch
-          key={communityEndpoint}
           searchApi={searchApi}
           urlHandlerApi={{ enabled: false }}
           initialQueryState={searchConfig.initialQueryState}
@@ -74,7 +61,7 @@ const SecondaryCommunitySelector = ({ requestType, fieldPath }) => {
             <Grid.Row>
               <Grid.Column width={8} floated="left" verticalAlign="middle">
                 <SearchBar
-                  placeholder={i18next.t("Search")}
+                  placeholder={i18next.t("Search in my communities...")}
                   autofocus
                   actionProps={{
                     icon: "search",
@@ -82,26 +69,6 @@ const SecondaryCommunitySelector = ({ requestType, fieldPath }) => {
                     className: "search",
                   }}
                 />
-              </Grid.Column>
-              <Grid.Column width={8} textAlign="right" floated="right">
-                <Menu
-                  compact
-                  size="tiny"
-                  className="license-toggler shadowless"
-                >
-                  <Menu.Item
-                    content={i18next.t("All")}
-                    name="all"
-                    active={communityEndpoint === "all"}
-                    onClick={() => setCommunityEndpoint("all")}
-                  />
-                  <Menu.Item
-                    content={i18next.t("Mine")}
-                    name="mine"
-                    active={communityEndpoint === "mine"}
-                    onClick={() => setCommunityEndpoint("mine")}
-                  />
-                </Menu>
               </Grid.Column>
             </Grid.Row>
             {getIn(errors, fieldPath, null) && (
@@ -146,6 +113,10 @@ const SecondaryCommunitySelector = ({ requestType, fieldPath }) => {
 
 export default SecondaryCommunitySelector;
 
+SecondaryCommunitySelector.propTypes = {
+  fieldPath: PropTypes.string.isRequired,
+};
+
 export const CommunityResults = withState(
   ({ currentResultsState: results, handleClick, selectedCommunityId }) => {
     return (
@@ -173,3 +144,9 @@ export const CommunityResults = withState(
     );
   }
 );
+
+CommunityResults.propTypes = {
+  currentResultsState: PropTypes.object,
+  handleClick: PropTypes.func.isRequired,
+  selectedCommunityId: PropTypes.string.isRequired,
+};

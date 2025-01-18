@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import { httpApplicationJson } from "@js/oarepo_ui";
 import { SelectField } from "react-invenio-forms";
 import { i18next } from "@translations/oarepo_communities";
 import { CommunityItem } from "@js/communities_components/CommunitySelector/CommunityItem";
@@ -17,25 +15,11 @@ const serializeOptions = (options) =>
     name: option.title,
   }));
 
-const TargetCommunitySelector = ({ requestType, fieldPath }) => {
-  const { data, isLoading } = useQuery(
-    ["formConfig", requestType],
-    () => httpApplicationJson.get(`/requests/configs/${requestType}`),
-    {
-      enabled: !!requestType,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-    }
-  );
-  const allowedCommunities = data?.data?.allowed_communities;
+const TargetCommunitySelector = ({ fieldPath, allowedCommunities }) => {
   const { values } = useFormikContext();
   const selectedCommunityId = getIn(values, fieldPath, "");
 
-  return isLoading ? (
-    <Dimmer active={isLoading} inverted>
-      <Loader inverted active={isLoading} />
-    </Dimmer>
-  ) : (
+  return (
     <React.Fragment>
       <SelectField
         fieldPath={fieldPath}
@@ -60,6 +44,11 @@ const TargetCommunitySelector = ({ requestType, fieldPath }) => {
       )}
     </React.Fragment>
   );
+};
+
+TargetCommunitySelector.propTypes = {
+  fieldPath: PropTypes.string.isRequired,
+  allowedCommunities: PropTypes.array.isRequired,
 };
 
 export default TargetCommunitySelector;

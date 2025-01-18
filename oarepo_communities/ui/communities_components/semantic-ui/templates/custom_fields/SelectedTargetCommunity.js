@@ -1,21 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { httpApplicationJson } from "@js/oarepo_ui";
-import { SelectField } from "react-invenio-forms";
-import { i18next } from "@translations/oarepo_communities";
 import { CommunityItem } from "@js/communities_components/CommunitySelector/CommunityItem";
 import { List } from "semantic-ui-react";
 import { useFormikContext, getIn } from "formik";
 
-const serializeOptions = (options) =>
-  options?.map((option) => ({
-    text: option.title,
-    value: option.id,
-    key: option.id,
-  }));
-
-const SelectedTargetCommunity = ({ requestType, fieldPath }) => {
+const SelectedTargetCommunity = ({ fieldPath, readOnlyLabel }) => {
   const { values } = useFormikContext();
   const selectedCommunityId = getIn(values, fieldPath, "");
 
@@ -29,11 +20,10 @@ const SelectedTargetCommunity = ({ requestType, fieldPath }) => {
     }
   );
   const targetCommunity = data?.data;
-  console.log(targetCommunity);
 
   return (
-    <div>
-      <div>Target community:</div>
+    <React.Fragment>
+      <strong>{readOnlyLabel}</strong>
       {!isLoading && (
         <List>
           <CommunityItem
@@ -48,8 +38,13 @@ const SelectedTargetCommunity = ({ requestType, fieldPath }) => {
           />
         </List>
       )}
-    </div>
+    </React.Fragment>
   );
+};
+
+SelectedTargetCommunity.propTypes = {
+  fieldPath: PropTypes.string.isRequired,
+  readOnlyLabel: PropTypes.string.isRequired,
 };
 
 export default SelectedTargetCommunity;
