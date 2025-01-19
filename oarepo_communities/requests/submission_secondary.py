@@ -30,7 +30,13 @@ if TYPE_CHECKING:
 
 class CommunitySubmissionAcceptAction(OARepoAcceptAction):
     def apply(self, identity, request_type, topic, uow, *args, **kwargs):
-        community_id, _ = self.request.receiver.resolve().entities[0]._parse_ref_dict()
+        # community_id, _ = self.request.receiver.resolve().entities[0]._parse_ref_dict()
+        # community_id = self.request.receiver.resolve().community_id
+        # as you don't know if receiver is AutoApprove, one entity or multiple entities,
+        # it seems that the safest way is to just get the community id from the request payload?
+        community_id = self.request.get("payload", {}).get("community", None)
+        if not community_id:
+            raise TargetCommunityNotProvidedException("Target community not provided.")
         service = get_record_service_for_record(topic)
         community_inclusion_service = (
             current_oarepo_communities.community_inclusion_service
@@ -85,12 +91,12 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
         # if is_auto_approved(self, identity=identity, topic=topic):
         #     return _("Add secondary community")
         if not request:
-            return _("Initiate secondary community submission")
+            return _("Initiate record secondary community submission")
         match request.status:
             case "submitted":
-                return _("Confirm secondary community submission")
+                return _("Confirm record secondary community submission")
             case _:
-                return _("Request secondary community submission")
+                return _("Request record secondary community submission")
 
     @override
     def stateful_description(
@@ -102,20 +108,16 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
         **kwargs: Any,
     ) -> str | LazyString:
         """Return the stateful description of the request."""
-        # This check fails when target community is involved, as it simply does not know the target community at this point
-        # if is_auto_approved(self, identity=identity, topic=topic):
-        #     return _("Click to immediately tie the record to another community.")
-
         if not request:
             return _(
-                "After you submit secondary community submission request, it will first have to be approved by curators/owners of the target community. "
+                "After submitting record secondary community submission request, it will first have to be approved by responsible person(s) of the target community. "
                 "You will be notified about the decision by email."
             )
         match request.status:
             case "submitted":
                 if request_identity_matches(request.created_by, identity):
                     return _(
-                        "The secondary community submission request has been submitted. "
+                        "Record secondary community submission request has been submitted. "
                         "You will be notified about the decision by email."
                     )
                 if request_identity_matches(request.receiver, identity):
@@ -123,10 +125,14 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
                         "User has requested to add secondary community to a record. "
                         "You can now accept or decline the request."
                     )
-                return _("Secondary community submission request has been submitted.")
+                return _(
+                    "Record secondary community submission request has been submitted."
+                )
             case _:
                 if request_identity_matches(request.created_by, identity):
-                    return _("Submit to initiate secondary community submission.")
+                    return _(
+                        "Submit to initiate record secondary community submission."
+                    )
 
                 return _("Request not yet submitted.")
 

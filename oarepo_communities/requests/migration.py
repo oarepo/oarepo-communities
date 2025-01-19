@@ -61,7 +61,8 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
         # coordination along multiple submission like requests? can only one be available at time?
         # ie.
         # and what if the community is deleted before the request is processed?
-        community_id, _ = self.request.receiver.resolve().entities[0]._parse_ref_dict()
+        # community_id, _ = self.request.receiver.resolve().entities[0]._parse_ref_dict()
+        community_id = self.request.get("payload", {}).get("community", None)
 
         service = get_record_service_for_record(topic)
         community_inclusion_service = (
@@ -109,14 +110,14 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
     ) -> str | LazyString:
         """Return the stateful name of the request."""
         if is_auto_approved(self, identity=identity, topic=topic):
-            return _("Inititiate Community migration")
+            return _("Inititiate record community migration")
         if not request:
             return _("Request community migration")
         match request.status:
             case "submitted":
-                return _("Community migration initiated")
+                return _("Record community migration initiated")
             case _:
-                return _("Request community migration")
+                return _("Request record community migration")
 
     @override
     def stateful_description(
@@ -130,32 +131,32 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         """Return the stateful description of the request."""
         if is_auto_approved(self, identity=identity, topic=topic):
             return _(
-                "Click to immediately start migration. "
+                "Click to immediately start record migration. "
                 "After submitting the request will immediatelly be forwarded to responsible person(s) in the target community. "
             )
 
         if not request:
             return _(
-                "After you submit community migration request, it will first have to be approved by curators/owners of the current community. "
-                "Then it will have to be accepted by curators/owners of the target community. "
+                "After you submit record community migration request, it will first have to be approved by responsible person(s) of the current community. "
+                "Then it will have to be accepted by responsible persons(s) of the target community. "
                 "You will be notified about the decision by email."
             )
         match request.status:
             case "submitted":
                 if request_identity_matches(request.created_by, identity):
                     return _(
-                        "The community migration request has been submitted. "
+                        "Record community migration request has been submitted. "
                         "You will be notified about the decision by email."
                     )
                 if request_identity_matches(request.receiver, identity):
                     return _(
-                        "User has requested community migration. "
+                        "User has requested record community migration. "
                         "You can now accept or decline the request."
                     )
-                return _("Community migration request has been submitted.")
+                return _("Record community migration request has been submitted.")
             case _:
                 if request_identity_matches(request.created_by, identity):
-                    return _("Submit to initiate community migration. ")
+                    return _("Submit to initiate record community migration. ")
 
                 return _("Request not yet submitted.")
 
@@ -263,12 +264,12 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
     ) -> str | LazyString:
         """Return the stateful name of the request."""
         if not request:
-            return _("Confirm community migration")
+            return _("Confirm record community migration")
         match request.status:
             case "submitted":
-                return _("Community migration confirmation pending")
+                return _("Record community migration confirmation pending")
             case _:
-                return _("Confirm community migration")
+                return _("Confirm record community migration")
 
     @override
     def stateful_description(
@@ -283,7 +284,7 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         if not request:
             return _(
                 "Confirm the migration of the record to the new primary community. "
-                "This request must be accepted by the curators/owners of the new community."
+                "This request must be accepted by responsible person(s) of the new community."
             )
 
         match request.status:
@@ -295,13 +296,13 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
                     )
                 if request_identity_matches(request.receiver, identity):
                     return _(
-                        "A request to confirm the community migration has been received. "
+                        "A request to confirm record community migration has been received. "
                         "You can now accept or decline the request."
                     )
-                return _("The community migration confirmation request is pending.")
+                return _("Record community migration confirmation request is pending.")
             case _:
                 if request_identity_matches(request.created_by, identity):
-                    return _("Submit to confirm the community migration.")
+                    return _("Submit to confirm record community migration.")
                 return _("Request not yet submitted.")
 
     @classmethod
