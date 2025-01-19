@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import { i18next } from "@translations/oarepo_communities";
 import { CommunityItem } from "@js/communities_components/CommunitySelector/CommunityItem";
-import { List } from "semantic-ui-react";
 import { useFormikContext, getIn } from "formik";
 import React from "react";
 import { OverridableContext } from "react-overridable";
@@ -15,7 +14,7 @@ import {
   Pagination,
   withState,
 } from "react-searchkit";
-import { Grid, Message } from "semantic-ui-react";
+import { Grid, Message, List } from "semantic-ui-react";
 import { EmptyResultsElement } from "@js/oarepo_ui";
 const overriddenComponents = {
   "EmptyResults.element": EmptyResultsElement,
@@ -50,64 +49,60 @@ const SecondaryCommunitySelector = ({ fieldPath }) => {
   };
 
   return (
-    <React.Fragment>
-      <OverridableContext.Provider value={overriddenComponents}>
-        <ReactSearchKit
-          searchApi={searchApi}
-          urlHandlerApi={{ enabled: false }}
-          initialQueryState={searchConfig.initialQueryState}
-        >
-          <Grid>
+    <OverridableContext.Provider value={overriddenComponents}>
+      <ReactSearchKit
+        searchApi={searchApi}
+        urlHandlerApi={{ enabled: false }}
+        initialQueryState={searchConfig.initialQueryState}
+      >
+        <Grid>
+          <Grid.Row>
+            <Grid.Column width={8} floated="left" verticalAlign="middle">
+              <SearchBar
+                placeholder={i18next.t("Search in my communities...")}
+                autofocus
+                actionProps={{
+                  icon: "search",
+                  content: null,
+                  className: "search",
+                }}
+              />
+            </Grid.Column>
+          </Grid.Row>
+          {getIn(errors, fieldPath, null) && (
             <Grid.Row>
-              <Grid.Column width={8} floated="left" verticalAlign="middle">
-                <SearchBar
-                  placeholder={i18next.t("Search in my communities...")}
-                  autofocus
-                  actionProps={{
-                    icon: "search",
-                    content: null,
-                    className: "search",
-                  }}
+              <Grid.Column width={16}>
+                <Message negative>
+                  <Message.Content>{getIn(errors, fieldPath)}</Message.Content>
+                </Message>
+              </Grid.Column>
+            </Grid.Row>
+          )}
+          <Grid.Row verticalAlign="middle">
+            <Grid.Column>
+              <ResultsLoader>
+                <EmptyResults />
+                <Error />
+                <CommunityResults
+                  handleClick={handleClick}
+                  selectedCommunityId={selectedCommunityId}
                 />
-              </Grid.Column>
-            </Grid.Row>
-            {getIn(errors, fieldPath, null) && (
-              <Grid.Row>
-                <Grid.Column width={16}>
-                  <Message negative>
-                    <Message.Content>
-                      {getIn(errors, fieldPath)}
-                    </Message.Content>
-                  </Message>
-                </Grid.Column>
-              </Grid.Row>
-            )}
-            <Grid.Row verticalAlign="middle">
-              <Grid.Column>
-                <ResultsLoader>
-                  <EmptyResults />
-                  <Error />
-                  <CommunityResults
-                    handleClick={handleClick}
-                    selectedCommunityId={selectedCommunityId}
+                <div className="centered">
+                  <Pagination
+                    options={{
+                      size: "mini",
+                      showFirst: false,
+                      showLast: false,
+                    }}
+                    showWhenOnlyOnePage={false}
                   />
-                  <div className="centered">
-                    <Pagination
-                      options={{
-                        size: "mini",
-                        showFirst: false,
-                        showLast: false,
-                      }}
-                      showWhenOnlyOnePage={false}
-                    />
-                  </div>
-                </ResultsLoader>
-              </Grid.Column>
-            </Grid.Row>
-          </Grid>
-        </ReactSearchKit>
-      </OverridableContext.Provider>
-    </React.Fragment>
+                </div>
+              </ResultsLoader>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      </ReactSearchKit>
+    </OverridableContext.Provider>
   );
 };
 

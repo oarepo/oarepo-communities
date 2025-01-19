@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { SelectField } from "react-invenio-forms";
 import { i18next } from "@translations/oarepo_communities";
 import { CommunityItem } from "@js/communities_components/CommunitySelector/CommunityItem";
-import { List, Dimmer, Loader } from "semantic-ui-react";
+import { List } from "semantic-ui-react";
 import { useFormikContext, getIn } from "formik";
 import { search } from "@js/oarepo_vocabularies";
 

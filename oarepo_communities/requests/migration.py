@@ -61,9 +61,7 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
         # coordination along multiple submission like requests? can only one be available at time?
         # ie.
         # and what if the community is deleted before the request is processed?
-        community_id, role = (
-            self.request.receiver.resolve().entities[0]._parse_ref_dict()
-        )
+        community_id, _ = self.request.receiver.resolve().entities[0]._parse_ref_dict()
 
         service = get_record_service_for_record(topic)
         community_inclusion_service = (
@@ -264,9 +262,6 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         **kwargs: Any,
     ) -> str | LazyString:
         """Return the stateful name of the request."""
-        # if is_auto_approved(self, identity=identity, topic=topic):
-        #     return _("Migrate record")
-
         if not request:
             return _("Confirm community migration")
         match request.status:
@@ -285,12 +280,6 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         **kwargs: Any,
     ) -> str | LazyString:
         """Return the stateful description of the request."""
-        # if is_auto_approved(self, identity=identity, topic=topic):
-        #     return _(
-        #         "Click to immediately migrate record to a different community. "
-        #         "After submitting the record will immediatelly be migrated to another community."
-        #     )
-
         if not request:
             return _(
                 "Confirm the migration of the record to the new primary community. "
