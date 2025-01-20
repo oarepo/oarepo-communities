@@ -333,19 +333,19 @@ msgstr "Požádejte o zahájení migrace komunity."
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:113
 msgid "Inititiate record community migration"
-msgstr "Zahajte migraci záznamu do komunity."
+msgstr "Zahajte migraci záznamu do komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:115
 msgid "Request community migration"
-msgstr "Požádejte o migraci komunity."
+msgstr "Požádejte o migraci komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:118
 msgid "Record community migration initiated"
-msgstr "Migrace záznamu do komunity byla zahájena."
+msgstr "Migrace záznamu do komunity byla zahájena"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:120
 msgid "Request record community migration"
-msgstr "Požádejte o migraci záznamu do komunity."
+msgstr "Požádejte o migraci záznamu do komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:133
 msgid ""
@@ -405,11 +405,11 @@ msgstr "Cílová komunita:"
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:267
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:272
 msgid "Confirm record community migration"
-msgstr "Potvrďte migraci záznamu do komunity."
+msgstr "Potvrďte migraci záznamu do komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:270
 msgid "Record community migration confirmation pending"
-msgstr "Čeká se na potvrzení migrace záznamu do komunity."
+msgstr "Čeká se na potvrzení migrace záznamu do komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:285
 msgid ""
@@ -449,15 +449,15 @@ msgstr "Sekundární komunita:"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:94
 msgid "Initiate record secondary community submission"
-msgstr "Zahajte přidání záznamu do sekundární komunity."
+msgstr "Zahajte přidání záznamu do sekundární komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:97
 msgid "Confirm record secondary community submission"
-msgstr "Potvrďte přidání záznamu do sekundární komunity."
+msgstr "Potvrďte přidání záznamu do sekundární komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:99
 msgid "Request record secondary community submission"
-msgstr "Požádejte o přidání záznamu do sekundární komunity."
+msgstr "Požádejte o přidání záznamu do sekundární komunity"
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
 msgid ""
