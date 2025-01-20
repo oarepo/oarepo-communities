@@ -54,10 +54,11 @@ class RemoveSecondaryCommunityRequestType(OARepoRequestType):
             raise PrimaryCommunityException("Cannot remove record's primary community.")
 
     @classmethod
-    def can_possibly_create(self, identity, topic, *args, **kwargs):
-        super().can_possibly_create(identity, topic, *args, **kwargs)
+    def is_applicable_to(cls, identity, topic, *args, **kwargs):
         try:
             communities = topic.parent.communities.ids
         except AttributeError:
             return False
-        return len(communities) > 1
+        if len(communities) < 2:
+            return False
+        return super().is_applicable_to(identity, topic, *args, **kwargs)

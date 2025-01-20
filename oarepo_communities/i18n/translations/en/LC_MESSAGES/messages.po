@@ -317,3 +317,162 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/requests/submission_secondary.py:29
 msgid "Secondary community submission"
 msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:93
+msgid "Request initiation of Community migration."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:113
+msgid "Inititiate record community migration"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:115
+msgid "Request community migration"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:118
+msgid "Record community migration initiated"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:120
+msgid "Request record community migration"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:133
+msgid ""
+"Click to immediately start record migration. After submitting the request "
+"will immediatelly be forwarded to responsible person(s) in the target "
+"community. "
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:139
+msgid ""
+"After you submit record community migration request, it will first have to "
+"be approved by responsible person(s) of the current community. Then it will "
+"have to be accepted by responsible persons(s) of the target community. You "
+"will be notified about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:147
+msgid ""
+"Record community migration request has been submitted. You will be notified "
+"about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:152
+msgid ""
+"User has requested record community migration. You can now accept or decline"
+" the request."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:156
+msgid "Record community migration request has been submitted."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:159
+msgid "Submit to initiate record community migration. "
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:161
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:306
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:137
+msgid "Request not yet submitted."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:177
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:252
+msgid "Target community:"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:267
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:272
+msgid "Confirm record community migration"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:270
+msgid "Record community migration confirmation pending"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:285
+msgid ""
+"Confirm the migration of the record to the new primary community. This "
+"request must be accepted by responsible person(s) of the new community."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:293
+msgid ""
+"The confirmation request has been submitted to the target community. You "
+"will be notified about their decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:298
+msgid ""
+"A request to confirm record community migration has been received. You can "
+"now accept or decline the request."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:302
+msgid "Record community migration confirmation request is pending."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:305
+msgid "Submit to confirm record community migration."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:76
+msgid "Secondary community:"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:94
+msgid "Initiate record secondary community submission"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:97
+msgid "Confirm record secondary community submission"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:99
+msgid "Request record secondary community submission"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
+msgid ""
+"After submitting record secondary community submission request, it will "
+"first have to be approved by responsible person(s) of the target community. "
+"You will be notified about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:119
+msgid ""
+"Record secondary community submission request has been submitted. You will "
+"be notified about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:124
+msgid ""
+"User has requested to add secondary community to a record. You can now "
+"accept or decline the request."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:128
+msgid "Record secondary community submission request has been submitted."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:133
+msgid "Submit to initiate record secondary community submission."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:19
+msgid "Awards"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:35
+msgid "Visit external website"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:36
+msgid "Opens in new tab"
+msgstr ""
+
+msgid "Target community"
+msgstr ""

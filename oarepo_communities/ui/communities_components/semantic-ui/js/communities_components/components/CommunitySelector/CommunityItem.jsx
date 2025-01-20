@@ -4,7 +4,12 @@ import Overridable from "react-overridable";
 import PropTypes from "prop-types";
 import { Image } from "react-invenio-forms";
 
-export const CommunityItem = ({ community, handleClick, renderLinks }) => {
+export const CommunityItem = ({
+  community,
+  handleClick,
+  renderLinks,
+  active,
+}) => {
   const { id, title, website, logo, organizations } = community;
   return (
     <Overridable
@@ -12,10 +17,12 @@ export const CommunityItem = ({ community, handleClick, renderLinks }) => {
       community={community}
       handleClick={handleClick}
       renderLinks={renderLinks}
+      key={id}
     >
       <List.Item
         onClick={() => handleClick(id)}
         className="flex align-items-center"
+        active={active}
       >
         <div className="ui image community-selector-image">
           <Image src={logo} size="tiny" rounded verticalAlign="top" />
@@ -66,8 +73,10 @@ CommunityItem.propTypes = {
   community: PropTypes.object.isRequired,
   handleClick: PropTypes.func,
   renderLinks: PropTypes.bool,
+  active: PropTypes.bool,
 };
 
 CommunityItem.defaultProps = {
   renderLinks: true,
+  active: false,
 };
