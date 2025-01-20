@@ -61,8 +61,10 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
         # coordination along multiple submission like requests? can only one be available at time?
         # ie.
         # and what if the community is deleted before the request is processed?
-        # community_id, _ = self.request.receiver.resolve().entities[0]._parse_ref_dict()
+
         community_id = self.request.get("payload", {}).get("community", None)
+        if not community_id:
+            raise TargetCommunityNotProvidedException("Target community not provided.")
 
         service = get_record_service_for_record(topic)
         community_inclusion_service = (
