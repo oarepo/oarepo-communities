@@ -6,7 +6,6 @@ from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_users_resources.proxies import current_users_service
 from pytest_oarepo.communities.functions import invite, set_community_workflow
-from pytest_oarepo.functions import link2testclient
 
 from tests.test_communities.test_community_requests import _accept_request
 
@@ -49,6 +48,7 @@ def test_default_community_workflow_changed(
     service_config,
     community_get_or_create,
     draft_with_community_factory,
+    link2testclient,
     search_clear,
 ):
     community_reader = users[0]

@@ -1,6 +1,5 @@
 import pytest
 from pytest_oarepo.communities.functions import invite
-from pytest_oarepo.functions import link2testclient
 from pytest_oarepo.requests.functions import get_request_type
 
 from oarepo_communities.errors import (
@@ -13,6 +12,7 @@ def _accept_request(
     receiver_client,
     type,
     record_id,
+    link2testclient,
     is_draft=False,
     no_accept_link=False,
     **kwargs,
@@ -62,6 +62,7 @@ def test_community_publish(
     community,
     draft_with_community_factory,
     submit_request_on_draft,
+    link2testclient,
     search_clear,
 ):
     community_reader = users[0]
@@ -76,11 +77,12 @@ def test_community_publish(
         reader_client,
         type="publish_draft",
         record_id=record_id,
+        link2testclient=link2testclient,
         is_draft=True,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="publish_draft", record_id=record_id, is_draft=True
+        owner_client, type="publish_draft", record_id=record_id, link2testclient=link2testclient, is_draft=True
     )  # owner can
 
     resp_draft = owner_client.get(f"/thesis/{record_id}/draft")
@@ -98,6 +100,7 @@ def test_community_delete(
     community,
     published_record_with_community_factory,
     submit_request_on_record,
+    link2testclient,
     search_clear,
 ):
     community_reader = users[0]
@@ -112,10 +115,11 @@ def test_community_delete(
         reader_client,
         type="delete_published_record",
         record_id=record_id,
+        link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can't accept the request
     accept_owner = _accept_request(
-        owner_client, type="delete_published_record", record_id=record_id
+        owner_client, type="delete_published_record", record_id=record_id,  link2testclient=link2testclient
     )  # owner can
 
     resp_record = owner_client.get(f"/thesis/{record_id}")
@@ -133,6 +137,7 @@ def test_community_migration(
     community_get_or_create,
     published_record_with_community_factory,
     submit_request_on_record,
+    link2testclient,
     search_clear,
 ):
     community_reader = users[0]
@@ -156,13 +161,14 @@ def test_community_migration(
         reader_client,
         type="initiate_community_migration",
         record_id=record_id,
+        link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can accept the request
     accept_initiate_request_owner = _accept_request(
-        owner_client, type="initiate_community_migration", record_id=record_id
+        owner_client, type="initiate_community_migration", record_id=record_id,  link2testclient=link2testclient
     )  # confirm should be created and submitted automatically
     accept_confirm_request_owner = _accept_request(
-        owner_client, type="confirm_community_migration", record_id=record_id
+        owner_client, type="confirm_community_migration", record_id=record_id,  link2testclient=link2testclient
     )
     record_after = owner_client.get(f"/thesis/{record_id}?expand=true")
     assert (
@@ -186,6 +192,7 @@ def test_community_submission_secondary(
     published_record_with_community_factory,
     create_request_on_record,
     submit_request_on_record,
+    link2testclient,
     search_clear,
 ):
     community_reader = users[0]
@@ -216,10 +223,11 @@ def test_community_submission_secondary(
         reader_client,
         type="secondary_community_submission",
         record_id=record_id,
+        link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="secondary_community_submission", record_id=record_id
+        owner_client, type="secondary_community_submission", record_id=record_id,  link2testclient=link2testclient
     )  # owner can
     record_after = owner_client.get(f"/thesis/{record_id}")
 
@@ -240,6 +248,7 @@ def test_remove_secondary(
     published_record_with_community_factory,
     create_request_on_record,
     submit_request_on_record,
+    link2testclient,
     search_clear,
 ):
     community_reader = users[0]
@@ -260,7 +269,7 @@ def test_remove_secondary(
         create_additional_data={"payload": {"community": str(community_2.id)}},
     )
     accept_owner = _accept_request(
-        owner_client, type="secondary_community_submission", record_id=record_id
+        owner_client, type="secondary_community_submission", record_id=record_id,  link2testclient=link2testclient
     )
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -284,10 +293,11 @@ def test_remove_secondary(
         reader_client,
         type="remove_secondary_community",
         record_id=record_id,
+        link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can't accept the request
     accept_owner = _accept_request(
-        owner_client, type="remove_secondary_community", record_id=record_id
+        owner_client, type="remove_secondary_community", record_id=record_id,  link2testclient=link2testclient
     )  # owner can
 
     record_after = owner_client.get(f"/thesis/{record_id}")
