@@ -5,8 +5,7 @@ from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_users_resources.proxies import current_users_service
-from pytest_oarepo.communities.functions import community_get_or_create, invite, set_community_workflow
-from pytest_oarepo.constants import DEFAULT_RECORD_WITH_WORKFLOW_JSON
+from pytest_oarepo.communities.functions import invite, set_community_workflow
 from pytest_oarepo.functions import link2testclient
 
 from tests.test_communities.test_community_requests import _accept_request
@@ -17,17 +16,19 @@ def test_disabled_endpoints(
     community_owner,
     draft_with_community_factory,
     published_record_with_community_factory,
+    default_record_with_workflow_json,
+    community_get_or_create,
     record_service,
     search_clear,
 ):
 
     owner_client = logged_client(community_owner)
     # create should work only through community
-    create = owner_client.post("/thesis/", json=DEFAULT_RECORD_WITH_WORKFLOW_JSON)
+    create = owner_client.post("/thesis/", json=default_record_with_workflow_json)
     assert create.status_code == 400
     community_1 = community_get_or_create(community_owner, "comm1")
-    draft = draft_with_community_factory(owner_client, community_1.id)
-    published_record = published_record_with_community_factory(owner_client, community_1.id)
+    draft = draft_with_community_factory(community_owner.identity, community_1.id)
+    published_record = published_record_with_community_factory(community_owner.identity, community_1.id)
     publish = owner_client.post(f"/thesis/{draft['id']}/draft/actions/publish")
     delete = owner_client.delete(f"/thesis/{published_record['id']}")
     assert publish.status_code == 403
@@ -46,6 +47,7 @@ def test_default_community_workflow_changed(
     community_owner,
     users,
     service_config,
+    community_get_or_create,
     draft_with_community_factory,
     search_clear,
 ):
@@ -58,9 +60,9 @@ def test_default_community_workflow_changed(
     invite(community_reader, community_1.id, "reader")
     invite(community_reader, community_2.id, "reader")
 
-    record1 = draft_with_community_factory(owner_client, community_1.id)
-    record2 = draft_with_community_factory(owner_client, community_2.id)
-    record4 = draft_with_community_factory(reader_client, community_1.id)
+    record1 = draft_with_community_factory(community_owner.identity, community_1.id)
+    record2 = draft_with_community_factory(community_owner.identity, community_2.id)
+    record4 = draft_with_community_factory(community_reader.identity, community_1.id)
 
     request_should_be_allowed = owner_client.post(
         f"/thesis/{record1['id']}/draft/requests/publish_draft"
@@ -91,7 +93,7 @@ def test_default_community_workflow_changed(
     request_should_still_work = owner_client.post(
         f"/thesis/{record2['id']}/draft/requests/publish_draft"
     )
-    record5 = draft_with_community_factory(owner_client, community_1.id)
+    record5 = draft_with_community_factory(community_owner.identity, community_1.id)
     request_should_be_forbidden = owner_client.post(
         f"/thesis/{record5['id']}/draft/requests/publish_draft"
     )
@@ -106,6 +108,7 @@ from invenio_records_resources.services.errors import PermissionDeniedError
 def test_can_possibly_create_in_community(
     community_owner,
     users,
+    community_get_or_create,
     service_config,
     record_service,
     search_clear,
@@ -150,6 +153,7 @@ def _record_owners_in_record_community_test(
     community_inclusion_service,
     draft_with_community_factory,
     record_service,
+    community_get_or_create,
     workflow,
     results
     ):
@@ -163,7 +167,7 @@ def _record_owners_in_record_community_test(
     owner_client = logged_client(community_owner)
 
     record = draft_with_community_factory(
-        owner_client,
+        community_owner.identity,
         community_1.id,
         custom_workflow=workflow,
     )
@@ -213,6 +217,7 @@ def test_record_owners_in_record_community_needs(
     users,
     logged_client,
     community_inclusion_service,
+    community_get_or_create,
     draft_with_community_factory,
     record_service,
     search_clear,
@@ -224,6 +229,7 @@ def test_record_owners_in_record_community_needs(
         community_inclusion_service,
         draft_with_community_factory,
         record_service,
+        community_get_or_create,
         workflow="record_owner_in_record_community",
         results=(200, 200, 200, 403)
     )
@@ -233,6 +239,7 @@ def test_record_owners_in_default_record_community_needs(
     users,
     logged_client,
     community_inclusion_service,
+    community_get_or_create,
     draft_with_community_factory,
     record_service,
     search_clear,
@@ -244,6 +251,7 @@ def test_record_owners_in_default_record_community_needs(
         community_inclusion_service,
         draft_with_community_factory,
         record_service,
+        community_get_or_create,
         workflow="record_owner_in_default_record_community",
         results=(200, 200, 403, 403)
     )

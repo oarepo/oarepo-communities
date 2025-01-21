@@ -1,22 +1,13 @@
 import pytest
-from pytest_oarepo.communities.functions import invite, community_get_or_create
+from pytest_oarepo.communities.functions import invite
 from pytest_oarepo.functions import link2testclient
+from pytest_oarepo.requests.functions import get_request_type
 
 from oarepo_communities.errors import (
     CommunityAlreadyIncludedException,
     CommunityNotIncludedException,
     PrimaryCommunityException,
 )
-
-REPO_NAME = "thesis"
-
-
-def find_request_by_type(requests, type):
-    for request in requests:
-        if request["type"] == type:
-            return request
-    return None
-
 
 def _accept_request(
     receiver_client,
@@ -32,9 +23,13 @@ def _accept_request(
         )
     else:
         record_after_submit = receiver_client.get(f"/thesis/{record_id}?expand=true")
-    request_dict = find_request_by_type(
-        record_after_submit.json["expanded"]["requests"], type
-    )
+
+    request_dict = {}
+    for request in record_after_submit.json["expanded"]["requests"]:
+        if request["type"] == type:
+            request_dict = request
+    assert request_dict
+
     if no_accept_link:
         assert "accept" not in request_dict["links"]["actions"]
         return None
@@ -45,6 +40,7 @@ def _accept_request(
 
 def _init_env(
     logged_client,
+    community_get_or_create,
     community_owner,
     community_reader,
 ):
@@ -65,7 +61,7 @@ def test_community_publish(
     users,
     community,
     draft_with_community_factory,
-    submit_request,
+    submit_request_on_draft,
     search_clear,
 ):
     community_reader = users[0]
@@ -73,9 +69,9 @@ def test_community_publish(
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    record = draft_with_community_factory(reader_client, community.id)
+    record = draft_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
-    submit = submit_request(reader_client, record_id, "publish_draft")
+    submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
     _accept_request(
         reader_client,
         type="publish_draft",
@@ -101,17 +97,17 @@ def test_community_delete(
     users,
     community,
     published_record_with_community_factory,
-    submit_request,
+    submit_request_on_record,
     search_clear,
 ):
     community_reader = users[0]
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
     invite(community_reader, community.id, "reader")
-    record = published_record_with_community_factory(reader_client, community.id)
+    record = published_record_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
 
-    submit = submit_request(reader_client, record_id, "delete_published_record")
+    submit = submit_request_on_record(community_reader.identity, record_id, "delete_published_record")
     _accept_request(
         reader_client,
         type="delete_published_record",
@@ -134,22 +130,24 @@ def test_community_migration(
     logged_client,
     community_owner,
     users,
+    community_get_or_create,
     published_record_with_community_factory,
-    submit_request,
+    submit_request_on_record,
     search_clear,
 ):
     community_reader = users[0]
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
+        community_get_or_create,
         community_owner,
         community_reader,
     )
 
-    record = published_record_with_community_factory(reader_client, community_1.id)
+    record = published_record_with_community_factory(community_reader.identity, community_1.id)
     record_id = record["id"]
     record_before = reader_client.get(f"/thesis/{record_id}")
-    submit = submit_request(
-        reader_client,
+    submit = submit_request_on_record(
+        community_reader.identity,
         record_id,
         "initiate_community_migration",
         create_additional_data={"payload": {"community": str(community_2.id)}},
@@ -184,30 +182,32 @@ def test_community_submission_secondary(
     logged_client,
     community_owner,
     users,
+    community_get_or_create,
     published_record_with_community_factory,
-    create_request,
-    submit_request,
+    create_request_on_record,
+    submit_request_on_record,
     search_clear,
 ):
     community_reader = users[0]
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
+        community_get_or_create,
         community_owner,
         community_reader,
     )
-    record = published_record_with_community_factory(reader_client, community_1.id)
+    record = published_record_with_community_factory(community_reader.identity, community_1.id)
     record_id = record["id"]
 
     record_before = owner_client.get(f"/thesis/{record_id}")
     with pytest.raises(CommunityAlreadyIncludedException):
-        create_request(
-            reader_client,
+        create_request_on_record(
+            community_reader.identity,
             record_id,
             "secondary_community_submission",
             additional_data={"payload": {"community": str(community_1.id)}},
         )
-    submit = submit_request(
-        reader_client,
+    submit = submit_request_on_record(
+        community_reader.identity,
         record_id,
         "secondary_community_submission",
         create_additional_data={"payload": {"community": str(community_2.id)}},
@@ -236,24 +236,25 @@ def test_remove_secondary(
     logged_client,
     community_owner,
     users,
+    community_get_or_create,
     published_record_with_community_factory,
-    create_request,
-    submit_request,
-    get_request_type,
+    create_request_on_record,
+    submit_request_on_record,
     search_clear,
 ):
     community_reader = users[0]
     reader_client, owner_client, community_1, community_2 = _init_env(
         logged_client,
+        community_get_or_create,
         community_owner,
         community_reader,
     )
 
-    record = published_record_with_community_factory(reader_client, community_1.id)
+    record = published_record_with_community_factory(community_reader.identity, community_1.id)
     record_id = record["id"]
 
-    submit_request(
-        reader_client,
+    submit_request_on_record(
+        community_reader.identity,
         record_id,
         "secondary_community_submission",
         create_additional_data={"payload": {"community": str(community_2.id)}},
@@ -266,15 +267,15 @@ def test_remove_secondary(
 
     # todo this should not work - it should not produce a link
     with pytest.raises(PrimaryCommunityException):
-        create_request(
-            reader_client,
+        create_request_on_record(
+            community_reader.identity,
             record_id,
             "remove_secondary_community",
             additional_data={"payload": {"community": str(community_1.id)}},
         )
 
-    submit_request(
-        reader_client,
+    submit_request_on_record(
+        community_reader.identity,
         record_id,
         "remove_secondary_community",
         create_additional_data={"payload": {"community": str(community_2.id)}},
@@ -314,7 +315,7 @@ def test_community_role_ui_serialization(
     users,
     community,
     draft_with_community_factory,
-    submit_request,
+    submit_request_on_draft,
     ui_serialized_community_role,
     search_clear,
 ):
@@ -322,10 +323,10 @@ def test_community_role_ui_serialization(
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
     invite(community_reader, community.id, "reader")
-    record = draft_with_community_factory(reader_client, community.id)
+    record = draft_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
 
-    submit = submit_request(reader_client, record_id, "publish_draft")
+    submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
 
     def compare_result(result):
         assert result.items() >= ui_serialized_community_role(community.id).items()

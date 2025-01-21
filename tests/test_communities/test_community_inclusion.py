@@ -1,6 +1,5 @@
 import pytest
 from invenio_access.permissions import system_identity
-from pytest_oarepo.communities.functions import community_get_or_create
 
 from oarepo_communities.errors import CommunityNotIncludedException
 
@@ -10,8 +9,8 @@ def test_include(
     community_owner,
     community_inclusion_service,
     record_service,
-    search_clear,
-):
+    community_get_or_create,
+    search_clear):
     owner_client = logged_client(community_owner)
 
     community_1 = community_get_or_create(community_owner, slug="comm1")
@@ -53,6 +52,7 @@ def test_remove(
     community_owner,
     community_inclusion_service,
     record_service,
+    community_get_or_create,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
