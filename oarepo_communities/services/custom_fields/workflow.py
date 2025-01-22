@@ -5,7 +5,7 @@ from marshmallow_utils.fields import SanitizedUnicode
 
 
 class WorkflowField(SanitizedUnicode):
-    def _validate(self, value):
+    def _validate(self, value: str) -> None:
         super()._validate(value)
         if value not in current_app.config["WORKFLOWS"]:
             raise ValidationError(
@@ -14,6 +14,6 @@ class WorkflowField(SanitizedUnicode):
 
 
 class WorkflowCF(KeywordCF):
-    def __init__(self, name, field_cls=WorkflowField, **kwargs):
+    def __init__(self, name, field_cls=WorkflowField, **kwargs) -> None:
         """Constructor."""
         super().__init__(name, field_cls=field_cls, **kwargs)

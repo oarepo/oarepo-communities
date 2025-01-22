@@ -1,8 +1,21 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_records_resources.services.base.service import Service
-from invenio_records_resources.services.uow import RecordIndexOp, unit_of_work
+from invenio_records_resources.services.uow import (
+    RecordIndexOp,
+    UnitOfWork,
+    unit_of_work,
+)
 
 from oarepo_communities.errors import CommunityNotIncludedException
+
+if TYPE_CHECKING:
+    from invenio_drafts_resources.records import Record
+    from invenio_records_resources.services.records.service import RecordService
+    from invenio_records_resources.services.uow import UnitOfWork
 
 
 class CommunityInclusionService(Service):
@@ -11,11 +24,18 @@ class CommunityInclusionService(Service):
     The communities service is in charge of managing communities of a given record.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(None)
 
     @unit_of_work()
-    def include(self, record, community_id, record_service, uow=None, default=None):
+    def include(
+        self,
+        record: Record,
+        community_id: str,
+        record_service: RecordService,
+        uow: UnitOfWork = None,
+        default: bool = None,
+    ) -> Record:
         if default is None:
             default = not record.parent.communities
         record.parent.communities.add(community_id, default=default)
@@ -45,7 +65,13 @@ class CommunityInclusionService(Service):
         return record
 
     @unit_of_work()
-    def remove(self, record, community_id, record_service, uow=None):
+    def remove(
+        self,
+        record: Record,
+        community_id: str,
+        record_service: RecordService,
+        uow: UnitOfWork = None,
+    ) -> None:
         """Remove a community from the record."""
 
         # Default community is deleted when the exact same community is removed from the record

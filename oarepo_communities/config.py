@@ -1,3 +1,4 @@
+from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 from oarepo_runtime.i18n import lazy_gettext as _
 
 from .cf.workflows import WorkflowCF, lazy_workflow_options
@@ -8,7 +9,6 @@ from .requests.migration import (
 from .requests.remove_secondary import RemoveSecondaryCommunityRequestType
 from .requests.submission_secondary import SecondaryCommunitySubmissionRequestType
 from .resolvers.ui import CommunityRoleUIResolver
-from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 
 REQUESTS_REGISTERED_TYPES = [
     InitiateCommunityMigrationRequestType(),

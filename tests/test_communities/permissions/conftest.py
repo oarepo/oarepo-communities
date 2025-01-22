@@ -1,19 +1,15 @@
-import json
-
 import pytest
 
 
 @pytest.fixture
 def sample_record_with_community_data(communities):
-    community_aaa = str(communities['aaa'].id)
-    community_bbb = str(communities['bbb'].id)
+    community_aaa = str(communities["aaa"].id)
+    community_bbb = str(communities["bbb"].id)
     return {
-        'parent': {
-            'communities': {
-                'ids': {
-                    community_aaa, community_bbb
-                },
-                'default': community_aaa
+        "parent": {
+            "communities": {
+                "ids": {community_aaa, community_bbb},
+                "default": community_aaa,
             }
         }
     }
