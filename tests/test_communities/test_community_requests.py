@@ -8,6 +8,7 @@ from oarepo_communities.errors import (
     PrimaryCommunityException,
 )
 
+
 def _accept_request(
     receiver_client,
     type,
@@ -72,7 +73,9 @@ def test_community_publish(
 
     record = draft_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
-    submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
+    submit = submit_request_on_draft(
+        community_reader.identity, record_id, "publish_draft"
+    )
     _accept_request(
         reader_client,
         type="publish_draft",
@@ -82,7 +85,11 @@ def test_community_publish(
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="publish_draft", record_id=record_id, link2testclient=link2testclient, is_draft=True
+        owner_client,
+        type="publish_draft",
+        record_id=record_id,
+        link2testclient=link2testclient,
+        is_draft=True,
     )  # owner can
 
     resp_draft = owner_client.get(f"/thesis/{record_id}/draft")
@@ -107,10 +114,14 @@ def test_community_delete(
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
     invite(community_reader, community.id, "reader")
-    record = published_record_with_community_factory(community_reader.identity, community.id)
+    record = published_record_with_community_factory(
+        community_reader.identity, community.id
+    )
     record_id = record["id"]
 
-    submit = submit_request_on_record(community_reader.identity, record_id, "delete_published_record")
+    submit = submit_request_on_record(
+        community_reader.identity, record_id, "delete_published_record"
+    )
     _accept_request(
         reader_client,
         type="delete_published_record",
@@ -119,7 +130,10 @@ def test_community_delete(
         no_accept_link=True,
     )  # reader can't accept the request
     accept_owner = _accept_request(
-        owner_client, type="delete_published_record", record_id=record_id,  link2testclient=link2testclient
+        owner_client,
+        type="delete_published_record",
+        record_id=record_id,
+        link2testclient=link2testclient,
     )  # owner can
 
     resp_record = owner_client.get(f"/thesis/{record_id}")
@@ -148,7 +162,9 @@ def test_community_migration(
         community_reader,
     )
 
-    record = published_record_with_community_factory(community_reader.identity, community_1.id)
+    record = published_record_with_community_factory(
+        community_reader.identity, community_1.id
+    )
     record_id = record["id"]
     record_before = reader_client.get(f"/thesis/{record_id}")
     submit = submit_request_on_record(
@@ -165,10 +181,16 @@ def test_community_migration(
         no_accept_link=True,
     )  # reader can accept the request
     accept_initiate_request_owner = _accept_request(
-        owner_client, type="initiate_community_migration", record_id=record_id,  link2testclient=link2testclient
+        owner_client,
+        type="initiate_community_migration",
+        record_id=record_id,
+        link2testclient=link2testclient,
     )  # confirm should be created and submitted automatically
     accept_confirm_request_owner = _accept_request(
-        owner_client, type="confirm_community_migration", record_id=record_id,  link2testclient=link2testclient
+        owner_client,
+        type="confirm_community_migration",
+        record_id=record_id,
+        link2testclient=link2testclient,
     )
     record_after = owner_client.get(f"/thesis/{record_id}?expand=true")
     assert (
@@ -202,7 +224,9 @@ def test_community_submission_secondary(
         community_owner,
         community_reader,
     )
-    record = published_record_with_community_factory(community_reader.identity, community_1.id)
+    record = published_record_with_community_factory(
+        community_reader.identity, community_1.id
+    )
     record_id = record["id"]
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -227,7 +251,10 @@ def test_community_submission_secondary(
         no_accept_link=True,
     )  # reader can accept the request
     accept_owner = _accept_request(
-        owner_client, type="secondary_community_submission", record_id=record_id,  link2testclient=link2testclient
+        owner_client,
+        type="secondary_community_submission",
+        record_id=record_id,
+        link2testclient=link2testclient,
     )  # owner can
     record_after = owner_client.get(f"/thesis/{record_id}")
 
@@ -259,7 +286,9 @@ def test_remove_secondary(
         community_reader,
     )
 
-    record = published_record_with_community_factory(community_reader.identity, community_1.id)
+    record = published_record_with_community_factory(
+        community_reader.identity, community_1.id
+    )
     record_id = record["id"]
 
     submit_request_on_record(
@@ -269,7 +298,10 @@ def test_remove_secondary(
         create_additional_data={"payload": {"community": str(community_2.id)}},
     )
     accept_owner = _accept_request(
-        owner_client, type="secondary_community_submission", record_id=record_id,  link2testclient=link2testclient
+        owner_client,
+        type="secondary_community_submission",
+        record_id=record_id,
+        link2testclient=link2testclient,
     )
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -297,7 +329,10 @@ def test_remove_secondary(
         no_accept_link=True,
     )  # reader can't accept the request
     accept_owner = _accept_request(
-        owner_client, type="remove_secondary_community", record_id=record_id,  link2testclient=link2testclient
+        owner_client,
+        type="remove_secondary_community",
+        record_id=record_id,
+        link2testclient=link2testclient,
     )  # owner can
 
     record_after = owner_client.get(f"/thesis/{record_id}")
@@ -336,7 +371,9 @@ def test_community_role_ui_serialization(
     record = draft_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
 
-    submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
+    submit = submit_request_on_draft(
+        community_reader.identity, record_id, "publish_draft"
+    )
 
     def compare_result(result):
         assert result.items() >= ui_serialized_community_role(community.id).items()

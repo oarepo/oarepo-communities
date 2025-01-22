@@ -10,7 +10,8 @@ def test_include(
     community_inclusion_service,
     record_service,
     community_get_or_create,
-    search_clear):
+    search_clear,
+):
     owner_client = logged_client(community_owner)
 
     community_1 = community_get_or_create(community_owner, slug="comm1")

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from flask_principal import identity_loaded
 
@@ -17,8 +17,6 @@ from .workflow import community_default_workflow
 
 if TYPE_CHECKING:
     from flask import Flask
-    from typing import Any
-
 
 
 class OARepoCommunities(object):
@@ -80,7 +78,7 @@ class OARepoCommunities(object):
     def urlprefix_serviceid_mapping(self) -> dict[str, str]:
         return get_urlprefix_service_id_mapping()
 
-    def get_community_default_workflow(self, **kwargs)->str | None:
+    def get_community_default_workflow(self, **kwargs) -> str | None:
         return community_default_workflow(**kwargs)
 
     def init_services(self, app: Flask) -> None:
@@ -116,12 +114,13 @@ class OARepoCommunities(object):
             return None
     """
 
-def api_finalize_app(app: Flask)->None:
+
+def api_finalize_app(app: Flask) -> None:
     """Finalize app."""
     finalize_app(app)
 
 
-def finalize_app(app: Flask)->None:
+def finalize_app(app: Flask) -> None:
     """Finalize app."""
 
     # Register services - cannot be done in extension because

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 class CommunityRoleUIResolver(OARepoUIResolver):
     """UI resolver for community role entity references."""
+
     def _get_community_label(self, record: dict, reference: dict[str, str]) -> str:
         if (
             "metadata" not in record or "title" not in record["metadata"]

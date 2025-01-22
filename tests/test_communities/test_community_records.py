@@ -1,5 +1,4 @@
 from pytest_oarepo.communities.functions import invite
-
 from thesis.records.api import ThesisDraft, ThesisRecord
 
 
@@ -53,8 +52,12 @@ def test_search(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
 
-    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
-    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
+    record1 = published_record_with_community_factory(
+        community_owner.identity, community_1.id
+    )
+    record2 = published_record_with_community_factory(
+        community_owner.identity, community_2.id
+    )
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -92,8 +95,12 @@ def test_search_model(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
 
-    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
-    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
+    record1 = published_record_with_community_factory(
+        community_owner.identity, community_1.id
+    )
+    record2 = published_record_with_community_factory(
+        community_owner.identity, community_2.id
+    )
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -124,9 +131,15 @@ def test_user_search(
     community_2 = community_get_or_create(community_owner, "comm2")
     invite(community_reader, community_1.id, "reader")
 
-    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
-    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
-    record3 = draft_with_community_factory(community_reader.identity, str(community_1.id))
+    record1 = draft_with_community_factory(
+        community_owner.identity, str(community_1.id)
+    )
+    record2 = draft_with_community_factory(
+        community_owner.identity, str(community_2.id)
+    )
+    record3 = draft_with_community_factory(
+        community_reader.identity, str(community_1.id)
+    )
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -164,9 +177,15 @@ def test_user_search_model(
     community_2 = community_get_or_create(community_owner, "comm2")
     invite(community_reader, community_1.id, "reader")
 
-    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
-    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
-    record3 = draft_with_community_factory(community_reader.identity, str(community_1.id))
+    record1 = draft_with_community_factory(
+        community_owner.identity, str(community_1.id)
+    )
+    record2 = draft_with_community_factory(
+        community_owner.identity, str(community_2.id)
+    )
+    record3 = draft_with_community_factory(
+        community_reader.identity, str(community_1.id)
+    )
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -196,7 +215,9 @@ def test_search_links(
     community_1 = community_get_or_create(community_owner, "comm1")
 
     for _ in range(30):
-        published_record_with_community_factory(community_owner.identity, community_1.id)
+        published_record_with_community_factory(
+            community_owner.identity, community_1.id
+        )
     ThesisRecord.index.refresh()
 
     def check_links(model_suffix):
@@ -252,8 +273,12 @@ def test_search_ui_serialization(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
 
-    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
-    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
+    record1 = published_record_with_community_factory(
+        community_owner.identity, community_1.id
+    )
+    record2 = published_record_with_community_factory(
+        community_owner.identity, community_2.id
+    )
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()

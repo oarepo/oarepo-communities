@@ -6,7 +6,6 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
 import copy
 from typing import TYPE_CHECKING
@@ -28,6 +27,7 @@ from oarepo_communities.utils import (
 
 if TYPE_CHECKING:
     from typing import Any
+
     from flask_principal import Identity
     from invenio_records_resources.services.base.links import LinksTemplate
     from invenio_records_resources.services.records.results import (

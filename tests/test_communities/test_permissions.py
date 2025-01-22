@@ -1,13 +1,9 @@
-import time
 
 import pytest
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
-from invenio_users_resources.proxies import current_users_service
 from pytest_oarepo.communities.functions import invite, set_community_workflow
-
-from tests.test_communities.test_community_requests import _accept_request
 
 
 def test_disabled_endpoints(
@@ -27,7 +23,9 @@ def test_disabled_endpoints(
     assert create.status_code == 400
     community_1 = community_get_or_create(community_owner, "comm1")
     draft = draft_with_community_factory(community_owner.identity, community_1.id)
-    published_record = published_record_with_community_factory(community_owner.identity, community_1.id)
+    published_record = published_record_with_community_factory(
+        community_owner.identity, community_1.id
+    )
     publish = owner_client.post(f"/thesis/{draft['id']}/draft/actions/publish")
     delete = owner_client.delete(f"/thesis/{published_record['id']}")
     assert publish.status_code == 403
@@ -101,7 +99,6 @@ def test_default_community_workflow_changed(
     assert request_should_be_forbidden.status_code == 403
 
 
-from invenio_communities.generators import CommunityRoleNeed
 from invenio_records_resources.services.errors import PermissionDeniedError
 
 
@@ -146,6 +143,7 @@ def test_can_possibly_create_in_community(
     with pytest.raises(PermissionDeniedError):
         record_service.require_permission(rando_user.identity, "view_deposit_page")
 
+
 def _record_owners_in_record_community_test(
     community_owner,
     users,
@@ -155,8 +153,8 @@ def _record_owners_in_record_community_test(
     record_service,
     community_get_or_create,
     workflow,
-    results
-    ):
+    results,
+):
     # tries to read record when user in record's primary community, in noth primary and secondary, in secondary and
     # in none
     community_curator = users[0]
@@ -193,7 +191,7 @@ def _record_owners_in_record_community_test(
     community_inclusion_service.remove(
         record_service.read_draft(system_identity, record_id)._record,
         community_1.id,
-        record_service=record_service
+        record_service=record_service,
     )
 
     read_com3 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
@@ -201,7 +199,7 @@ def _record_owners_in_record_community_test(
     community_inclusion_service.remove(
         record_service.read_draft(system_identity, record_id)._record,
         community_2.id,
-        record_service=record_service
+        record_service=record_service,
     )
 
     read_com4 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
@@ -231,8 +229,9 @@ def test_record_owners_in_record_community_needs(
         record_service,
         community_get_or_create,
         workflow="record_owner_in_record_community",
-        results=(200, 200, 200, 403)
+        results=(200, 200, 200, 403),
     )
+
 
 def test_record_owners_in_default_record_community_needs(
     community_owner,
@@ -253,6 +252,5 @@ def test_record_owners_in_default_record_community_needs(
         record_service,
         community_get_or_create,
         workflow="record_owner_in_default_record_community",
-        results=(200, 200, 403, 403)
+        results=(200, 200, 403, 403),
     )
-

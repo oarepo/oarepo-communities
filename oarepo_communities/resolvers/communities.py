@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
 import dataclasses
 from typing import TYPE_CHECKING
@@ -9,6 +8,7 @@ from invenio_records_resources.references.entity_resolvers.base import EntityRes
 
 if TYPE_CHECKING:
     from typing import Any
+
     from flask_principal import Identity, Need
 
 

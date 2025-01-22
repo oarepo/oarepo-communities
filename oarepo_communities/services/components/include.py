@@ -11,6 +11,7 @@ from ..permissions.generators import convert_community_ids_to_uuid
 
 if TYPE_CHECKING:
     from typing import Any
+
     from flask_principal import Identity
     from invenio_drafts_resources.records import Record
 

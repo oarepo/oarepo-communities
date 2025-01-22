@@ -23,17 +23,27 @@ def test_community_role_param_interpreter(
     invite(community_reader, community_2.id, "reader")
     invite(community_reader, community_3.id, "reader")
 
-    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
-    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
+    record1 = draft_with_community_factory(
+        community_owner.identity, str(community_1.id)
+    )
+    record2 = draft_with_community_factory(
+        community_owner.identity, str(community_2.id)
+    )
     record3 = draft_with_community_factory(
         community_owner.identity,
         str(community_2.id),
         custom_workflow="curator_publish",  # owner is creator but not receiver of the third request
     )
 
-    response_1 = submit_request_on_draft(community_owner.identity, record1["id"], "publish_draft")
-    response_2 = create_request_on_draft(community_owner.identity, record2["id"], "publish_draft")
-    response_3 = submit_request_on_draft(community_owner.identity, record3["id"], "publish_draft")
+    response_1 = submit_request_on_draft(
+        community_owner.identity, record1["id"], "publish_draft"
+    )
+    response_2 = create_request_on_draft(
+        community_owner.identity, record2["id"], "publish_draft"
+    )
+    response_3 = submit_request_on_draft(
+        community_owner.identity, record3["id"], "publish_draft"
+    )
 
     search_unfiltered = owner_client.get("/requests/")
     assert len(search_unfiltered.json["hits"]["hits"]) == 3

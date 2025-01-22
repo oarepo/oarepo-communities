@@ -1,18 +1,8 @@
-import copy
 import os
-from thesis.proxies import current_service
+
 import pytest
-import yaml
-from flask_security import login_user
-from invenio_access.permissions import system_identity
-from invenio_accounts.testutils import login_user_via_session
 from invenio_app.factory import create_api
-from invenio_communities.cli import create_communities_custom_field
-from invenio_communities.communities.records.api import Community
-from invenio_communities.generators import CommunityRoleNeed
-from invenio_communities.proxies import current_communities
 from invenio_i18n import lazy_gettext as _
-from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_permissions.generators import (
     AnyUser,
     AuthenticatedUser,
@@ -32,9 +22,8 @@ from oarepo_workflows import (
     WorkflowRequestPolicy,
     WorkflowTransitions,
 )
-from thesis.records.api import ThesisDraft
+from thesis.proxies import current_service
 
-from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.services.custom_fields.workflow import WorkflowCF
 from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
@@ -47,36 +36,41 @@ from oarepo_communities.services.permissions.generators import (
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
-from deepmerge import always_merger
 
 pytest_plugins = [
-   "pytest_oarepo.communities.fixtures",
-   "pytest_oarepo.communities.records",
-   "pytest_oarepo.requests.fixtures",
-   "pytest_oarepo.records",
-   "pytest_oarepo.fixtures",
-   "pytest_oarepo.users",
+    "pytest_oarepo.communities.fixtures",
+    "pytest_oarepo.communities.records",
+    "pytest_oarepo.requests.fixtures",
+    "pytest_oarepo.records",
+    "pytest_oarepo.fixtures",
+    "pytest_oarepo.users",
 ]
+
 
 @pytest.fixture(autouse=True)
 def init_communities_cf(init_communities_cf):
     return init_communities_cf
 
+
 @pytest.fixture(scope="module", autouse=True)
 def location(location):
     return location
+
 
 @pytest.fixture()
 def urls():
     return {"BASE_URL": "/thesis/", "BASE_URL_REQUESTS": "/requests/"}
 
+
 @pytest.fixture()
 def record_service():
     return current_service
 
+
 @pytest.fixture()
 def base_model_schema():
     return "local://thesis-1.0.0.json"
+
 
 class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     can_read = [
@@ -283,6 +277,7 @@ WORKFLOWS = {
     ),
 }
 
+
 @pytest.fixture(scope="module")
 def create_app(instance_path, entry_points):
     """Application factory fixture."""
@@ -340,6 +335,7 @@ def app_config(app_config):
     )
     return app_config
 
+
 from invenio_requests.customizations import RequestType
 
 
@@ -369,6 +365,7 @@ def ui_serialized_community():
         }
 
     return _ui_serialized_community
+
 
 @pytest.fixture()
 def clear_babel_context():

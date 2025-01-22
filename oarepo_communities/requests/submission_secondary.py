@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from oarepo_requests.actions.generic import OARepoAcceptAction
@@ -12,6 +13,7 @@ from ..proxies import current_oarepo_communities
 
 if TYPE_CHECKING:
     from typing import Any
+
     from flask_principal import Identity
     from invenio_records_resources.records import Record
     from invenio_records_resources.services.uow import UnitOfWork
