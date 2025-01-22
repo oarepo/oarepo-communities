@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from copy import deepcopy
 from typing import TYPE_CHECKING, Dict
 
@@ -5,8 +8,8 @@ from invenio_communities.communities.records.api import Community
 from invenio_records_resources.services.base.links import Link, preprocess_vars
 from uritemplate import URITemplate
 
-#---
-from invenio_drafts_resources.records import Record
+if TYPE_CHECKING:
+    from invenio_drafts_resources.records import Record
 
 
 class CommunitiesLinks(Link):

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import cached_property
 from typing import TYPE_CHECKING, Dict
 
@@ -13,9 +15,9 @@ from .services.community_records.service import CommunityRecordsService
 from .utils import get_urlprefix_service_id_mapping, load_community_user_needs
 from .workflow import community_default_workflow
 
-#---
-from flask import Flask
-from typing import Any
+if TYPE_CHECKING:
+    from flask import Flask
+    from typing import Any
 
 
 

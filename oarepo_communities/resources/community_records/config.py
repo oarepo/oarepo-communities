@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import marshmallow as ma
@@ -5,8 +6,8 @@ from invenio_drafts_resources.resources import RecordResourceConfig
 from invenio_records_resources.services.base.config import ConfiguratorMixin
 from oarepo_global_search.proxies import current_global_search
 
-#---
-from flask_resources import ResponseHandler
+if TYPE_CHECKING:
+    from flask_resources import ResponseHandler
 
 
 class CommunityRecordsResourceConfig(RecordResourceConfig, ConfiguratorMixin):

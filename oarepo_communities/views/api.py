@@ -1,10 +1,11 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from oarepo_communities.resolvers.communities import CommunityRoleResolver
 
-#---
-from flask import Blueprint, Flask
-from flask.blueprints import BlueprintSetupState
+if TYPE_CHECKING:
+    from flask import Blueprint, Flask
+    from flask.blueprints import BlueprintSetupState
 
 def create_oarepo_communities(app: Flask) -> Blueprint:
     # Do we need to add this to service registry?

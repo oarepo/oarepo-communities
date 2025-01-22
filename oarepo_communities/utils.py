@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from flask import current_app, session
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities, current_identities_cache
@@ -6,10 +9,10 @@ from invenio_records_resources.proxies import current_service_registry
 
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.services.permissions.generators import UserInCommunityNeed
-#---
-from flask_principal import Identity
-from invenio_records_resources.services.records.service import RecordService
-from invenio_records_resources.records import Record
+if TYPE_CHECKING:
+    from flask_principal import Identity
+    from invenio_records_resources.services.records.service import RecordService
+    from invenio_records_resources.records import Record
 
 
 def get_community_needs_for_identity(identity: Identity)->list[tuple[str, str]] | None:

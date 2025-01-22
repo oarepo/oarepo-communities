@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import abc
 import uuid
 from collections import namedtuple
@@ -18,11 +21,11 @@ from oarepo_communities.errors import (
     MissingDefaultCommunityError,
 )
 from oarepo_communities.proxies import current_oarepo_communities
-#---
-from typing import Any
-from flask_principal import Need
-from invenio_drafts_resources.records import Record
-from flask_principal import Identity
+if TYPE_CHECKING:
+    from typing import Any
+    from flask_principal import Need
+    from invenio_drafts_resources.records import Record
+    from flask_principal import Identity
 
 def _user_in_community_need(user, community):
     _Need = namedtuple("Need", ["method", "value", "user", "community"])

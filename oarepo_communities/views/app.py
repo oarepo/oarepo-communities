@@ -1,12 +1,13 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from flask import Blueprint
 
 from oarepo_communities.resolvers.communities import CommunityRoleResolver
 
-#---
-from flask import Blueprint, Flask
-from flask.blueprints import BlueprintSetupState
+if TYPE_CHECKING:
+    from flask import Blueprint, Flask
+    from flask.blueprints import BlueprintSetupState
 
 def create_app_blueprint(app: Flask) -> Blueprint:
     """Create a blueprint for the communities endpoint.

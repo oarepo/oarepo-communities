@@ -12,9 +12,9 @@ from oarepo_requests.resolvers.ui import (
 )
 from oarepo_runtime.i18n import gettext as _
 
-#---
-from flask_principal import Identity
-from oarepo_requests.typing import EntityReference
+if TYPE_CHECKING:
+    from flask_principal import Identity
+    from oarepo_requests.typing import EntityReference
 
 
 class CommunityRoleUIResolver(OARepoUIResolver):

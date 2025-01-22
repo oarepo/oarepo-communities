@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
@@ -10,10 +11,10 @@ from invenio_records_resources.services.uow import (
 
 from oarepo_communities.errors import CommunityNotIncludedException
 
-#---
-from invenio_drafts_resources.records import Record
-from invenio_records_resources.services.records.service import RecordService
-from invenio_records_resources.services.uow import UnitOfWork
+if TYPE_CHECKING:
+    from invenio_drafts_resources.records import Record
+    from invenio_records_resources.services.records.service import RecordService
+    from invenio_records_resources.services.uow import UnitOfWork
 
 
 class CommunityInclusionService(Service):

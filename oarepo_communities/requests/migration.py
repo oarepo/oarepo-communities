@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from typing import TYPE_CHECKING
 
 import marshmallow as ma
@@ -14,14 +17,14 @@ from oarepo_runtime.i18n import lazy_gettext as _
 from ..errors import CommunityAlreadyIncludedException
 from ..proxies import current_oarepo_communities
 
-#---
-from typing import Any
-from flask_principal import Identity
-from invenio_records_resources.records import Record
-from invenio_records_resources.services.uow import UnitOfWork
-from invenio_requests.customizations import RequestType
-from invenio_requests.customizations.actions import RequestAction
-from oarepo_requests.typing import EntityReference
+if TYPE_CHECKING:
+    from typing import Any
+    from flask_principal import Identity
+    from invenio_records_resources.records import Record
+    from invenio_records_resources.services.uow import UnitOfWork
+    from invenio_requests.customizations import RequestType
+    from invenio_requests.customizations.actions import RequestAction
+    from oarepo_requests.typing import EntityReference
 
 
 class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):

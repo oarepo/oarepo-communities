@@ -1,11 +1,15 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from typing import TYPE_CHECKING
 
 from invenio_communities.communities.records.api import Community
 
+
 from oarepo_communities.utils import community_id_from_record
 
-#---
-from typing import Any
+if TYPE_CHECKING:
+    from typing import Any
 
 
 def community_default_workflow(**kwargs: Any)->str | None:

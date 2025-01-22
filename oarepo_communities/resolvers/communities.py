@@ -1,12 +1,15 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import dataclasses
 from typing import TYPE_CHECKING
 
 from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
 from invenio_records_resources.references.entity_resolvers.base import EntityResolver
 
-#---
-from typing import Any
-from flask_principal import Identity, Need
+if TYPE_CHECKING:
+    from typing import Any
+    from flask_principal import Identity, Need
 
 
 @dataclasses.dataclass
