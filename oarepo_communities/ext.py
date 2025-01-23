@@ -70,6 +70,11 @@ class OARepoCommunities(object):
             **app.config.get("COMMUNITIES_ROUTES", {}),
         }
 
+        app.config.setdefault(
+            "NOTIFICATION_RECIPIENTS_RESOLVERS", {}
+        )
+        app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] |=  config.NOTIFICATION_RECIPIENTS_RESOLVERS
+
     @cached_property
     def urlprefix_serviceid_mapping(self):
         return get_urlprefix_service_id_mapping()

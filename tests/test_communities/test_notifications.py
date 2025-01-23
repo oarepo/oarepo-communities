@@ -1,5 +1,3 @@
-from oarepo_requests.notifications.builders.publish import PublishDraftRequestAcceptNotificationBuilder
-
 from .conftest import link_api2testclient
 from .utils import pick_request_type
 

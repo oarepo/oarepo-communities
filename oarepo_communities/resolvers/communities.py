@@ -38,41 +38,6 @@ class CommunityRoleProxy(EntityProxy):
         community_id, role = self._parse_ref_dict()
         return [CommunityRoleNeed(community_id, role)]
 
-    def get_recipients(self, ctx:dict =None, resolved_entity:str = None, **kwargs):
-        """Return community member need."""
-        """
-        def get_recipients(self, ctx: dict, resolved_entity: dict, **kwargs):
-        return [resolved_entity['email']]
-        
-        """
-
-        recipients = []
-        community_id, role = self._parse_ref_dict()
-
-        filter_ = dsl.Q("term", **{"role": role})
-
-        members = current_communities.service.members.scan(
-            system_identity,
-            community_id,
-            extra_filter=filter_,
-        )
-
-        user_ids = []
-        for m in members:
-            if m["member"]["type"] != "user":
-                continue
-            user_ids.append(m["member"]["id"])
-
-        if not user_ids:
-            return recipients
-
-        # todo - use link get_many in 'ui resolvers'
-        entity_resolvers = current_oarepo_requests.entity_reference_ui_resolvers
-        resolver = entity_resolvers["user"]
-        users = resolver._search_many(system_identity, user_ids)
-        mails = [u["email"] for u in users]
-        return mails
-
     def pick_resolved_fields(self, identity, resolved_dict):
         """Select which fields to return when resolving the reference."""
         return {
