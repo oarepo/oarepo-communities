@@ -8,6 +8,9 @@ BUILD_TEST_DIR="tests"
 BUILDER_VENV=".venv-builder"
 TESTS_VENV=".venv-tests"
 
+export PIP_EXTRA_INDEX_URL=https://gitlab.cesnet.cz/api/v4/projects/1408/packages/pypi/simple
+export UV_EXTRA_INDEX_URL=https://gitlab.cesnet.cz/api/v4/projects/1408/packages/pypi/simple
+
 OAREPO_VERSION=${OAREPO_VERSION:-12}
 PYTHON=${PYTHON:-python3}
 
@@ -36,12 +39,10 @@ fi
 ${PYTHON} -m venv $TESTS_VENV
 . $TESTS_VENV/bin/activate
 pip install -U setuptools pip wheel
-pip install "oarepo[tests]==$OAREPO_VERSION.*"
+pip install "oarepo[tests,rdm]==$OAREPO_VERSION.*"
 pip install "./$BUILD_TEST_DIR/${MODEL}[tests]"
-pip install .
-sh forked_install.sh invenio-records-resources
-sh forked_install.sh invenio-requests
-sh forked_install.sh invenio-drafts-resources
-pip install -U --force-reinstall --no-deps https://github.com/oarepo/invenio-rdm-records/archive/oarepo-10.8.0.zip
+pip install ".[tests]"
+
+editable_install oarepo-requests-alt
 
 pytest ./$CODE_TEST_DIR/test_communities

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class CommunityRecordsResourceConfig(RecordResourceConfig, ConfiguratorMixin):
     """Community's records resource config."""
 
-    blueprint_name = "community-records"
+    blueprint_name = "oarepo-community-records"
     url_prefix = "/communities/"
     routes = {
         "list": "<pid_value>/records",

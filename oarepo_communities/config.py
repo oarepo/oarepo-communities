@@ -70,7 +70,5 @@ DISPLAY_USER_COMMUNITIES = True
 DISPLAY_NEW_COMMUNITIES = True
 
 NOTIFICATION_RECIPIENTS_RESOLVERS = {
-    "community_role": {
-        "email": CommunityRoleEmailRecipient
-    }
+    "community_role": {"email": CommunityRoleEmailRecipient}
 }

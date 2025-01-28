@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from flask_principal import identity_loaded
+from deepmerge import always_merger
 
 import oarepo_communities.cli  # noqa - imported to register CLI commands
 
@@ -76,10 +77,12 @@ class OARepoCommunities(object):
             **app.config.get("COMMUNITIES_ROUTES", {}),
         }
 
-        app.config.setdefault(
+        app_registered_event_types = app.config.setdefault(
             "NOTIFICATION_RECIPIENTS_RESOLVERS", {}
         )
-        app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] |=  config.NOTIFICATION_RECIPIENTS_RESOLVERS
+        app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = always_merger.merge(
+            app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
+        )
 
     @cached_property
     def urlprefix_serviceid_mapping(self) -> dict[str, str]:

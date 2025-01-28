@@ -1,4 +1,3 @@
-
 import pytest
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community

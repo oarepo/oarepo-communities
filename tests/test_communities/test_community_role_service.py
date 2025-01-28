@@ -1,9 +1,6 @@
 from invenio_access.permissions import system_identity
 from invenio_records_resources.proxies import current_service_registry
-
-from .conftest import link_api2testclient
-from .test_community_requests import _submit_request
-from .utils import _create_record_in_community
+from pytest_oarepo.communities.functions import invite
 
 
 def _serialized_community_role(id_):
@@ -58,33 +55,33 @@ def test_read(app, community):
 def test_expand_community_role(
     logged_client,
     community_owner,
-    community_reader,
+    users,
     community,
-    request_data_factory,
-    record_service,
+    draft_with_community_factory,
+    submit_request_on_draft,
     ui_serialized_community_role,
+    link2testclient,
     search_clear,
 ):
-    reader_client = logged_client(community_reader)
+    reader = users[0]
+    invite(reader, community.id, "reader")
+    reader_client = logged_client(reader)
     owner_client = logged_client(community_owner)
 
-    record_id = _create_record_in_community(reader_client, community.id).json["id"]
-    submit = _submit_request(
-        reader_client,
-        community.id,
-        "thesis_draft",
-        record_id,
-        "publish_draft",
-        request_data_factory,
+    record_id = draft_with_community_factory(
+        reader.identity, community.id
+    )["id"]
+    submit = submit_request_on_draft(
+        reader.identity, record_id, "publish_draft"
     )
 
-    read = owner_client.get(link_api2testclient(submit.json["links"]["self"]))
+    read = owner_client.get(link2testclient(submit["links"]["self"]))
     read_expanded = owner_client.get(
-        f"{link_api2testclient(submit.json['links']['self'])}?expand=true"
+        f"{link2testclient(submit['links']['self'])}?expand=true"
     )
     assert read_expanded.status_code == 200
     read_expanded_ui_serialization = owner_client.get(
-        f"{link_api2testclient(submit.json['links']['self'])}?expand=true",
+        f"{link2testclient(submit['links']['self'])}?expand=true",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     ).json  # expanded isn't here bc it isn't in the ui serialization schema
     receiver = read_expanded.json["expanded"]["receiver"]

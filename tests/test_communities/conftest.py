@@ -3,10 +3,16 @@ import os
 import pytest
 from invenio_app.factory import create_api
 from invenio_i18n import lazy_gettext as _
+from invenio_notifications.backends import EmailNotificationBackend
 from invenio_records_permissions.generators import (
     AnyUser,
     AuthenticatedUser,
     SystemProcess,
+)
+from invenio_records_resources.references.entity_resolvers import ServiceResultResolver
+from oarepo_requests.notifications.builders.publish import (
+    PublishDraftRequestAcceptNotificationBuilder,
+    PublishDraftRequestSubmitNotificationBuilder,
 )
 from oarepo_requests.receiver import default_workflow_receiver_function
 from oarepo_requests.services.permissions.generators import RequestActive
@@ -36,12 +42,6 @@ from oarepo_communities.services.permissions.generators import (
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
-from tests.test_communities.utils import link_api2testclient
-from invenio_notifications.backends import EmailNotificationBackend
-from oarepo_requests.notifications.builders.publish import PublishDraftRequestAcceptNotificationBuilder, \
-    PublishDraftRequestSubmitNotificationBuilder
-from invenio_records_resources.references.entity_resolvers import ServiceResultResolver
-
 
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
@@ -146,14 +146,20 @@ class DefaultRequests(WorkflowRequestPolicy):
         requesters=[IfInState("draft", [RecordOwnerInDefaultRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
+            submitted="publishing",
+            accepted="published",
+            declined="draft",
+            cancelled="draft",
         ),
     )
     delete_published_record = WorkflowRequest(
         requesters=[IfInState("published", [RecordOwners()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="deleting", accepted="deleted", declined="published", cancelled="published"
+            submitted="deleting",
+            accepted="deleted",
+            declined="published",
+            cancelled="published",
         ),
     )
     edit_published_record = WorkflowRequest(
@@ -188,7 +194,10 @@ class PublishRequestsRecordOwnerInRecordCommunity(DefaultRequests):
         requesters=[IfInState("draft", [RecordOwnerInRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
+            submitted="publishing",
+            accepted="published",
+            declined="draft",
+            cancelled="draft",
         ),
     )
 
@@ -198,7 +207,10 @@ class PublishRequestsRecordOwnerInDefaultRecordCommunity(DefaultRequests):
         requesters=[IfInState("draft", [RecordOwnerInDefaultRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
+            submitted="publishing",
+            accepted="published",
+            declined="draft",
+            cancelled="draft",
         ),
     )
 
@@ -208,14 +220,20 @@ class NoRequests(WorkflowRequestPolicy):
         requesters=[],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
+            submitted="publishing",
+            accepted="published",
+            declined="draft",
+            cancelled="draft",
         ),
     )
     delete_published_record = WorkflowRequest(
         requesters=[],
         recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
-            submitted="deleting", accepted="deleted", declined="published", cancelled="published"
+            submitted="deleting",
+            accepted="deleted",
+            declined="published",
+            cancelled="published",
         ),
     )
     edit_published_record = WorkflowRequest(
@@ -242,10 +260,15 @@ class NoRequests(WorkflowRequestPolicy):
 
 class CuratorPublishRequests(DefaultRequests):
     publish_draft = WorkflowRequest(
-        requesters=[IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])],
+        requesters=[
+            IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])
+        ],
         recipients=[DefaultCommunityRole("curator")],
         transitions=WorkflowTransitions(
-            submitted="publishing", accepted="published", declined="draft", cancelled="draft"
+            submitted="publishing",
+            accepted="published",
+            declined="draft",
+            cancelled="draft",
         ),
     )
 

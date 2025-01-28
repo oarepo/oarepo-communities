@@ -5,15 +5,6 @@ from typing import TYPE_CHECKING
 
 from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
 from invenio_records_resources.references.entity_resolvers.base import EntityResolver
-from invenio_access.permissions import system_identity
-from invenio_notifications.models import Recipient
-from invenio_notifications.services.generators import RecipientGenerator
-from invenio_records.dictutils import dict_lookup
-from invenio_search.engine import dsl
-from invenio_users_resources.proxies import current_users_service
-
-from invenio_communities.proxies import current_communities
-from oarepo_requests.proxies import current_oarepo_requests
 
 if TYPE_CHECKING:
     from typing import Any
