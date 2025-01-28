@@ -150,8 +150,14 @@ def test_user_search(
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
 
-    response_record1 = owner_client.get(f"/communities/{community_1.id}/records")
-    response_record2 = owner_client.get(f"/communities/{community_2.id}/records")
+    response_record1 = owner_client.get(
+        f"/communities/{community_1.id}/records",
+        query_string={"record_status": "published"},
+    )
+    response_record2 = owner_client.get(
+        f"/communities/{community_2.id}/records",
+        query_string={"record_status": "published"},
+    )
 
     response_draft1 = owner_client.get(f"/communities/{community_1.id}/user/records")
     response_draft2 = owner_client.get(f"/communities/{community_2.id}/user/records")
