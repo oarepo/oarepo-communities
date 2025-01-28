@@ -32,7 +32,6 @@ if test -d $BUILD_TEST_DIR/$MODEL; then
 fi
 oarepo-compile-model ./$CODE_TEST_DIR/$MODEL.yaml --output-directory ./$BUILD_TEST_DIR/$MODEL -vvv
 
-
 if test -d $TESTS_VENV ; then
 	rm -rf $TESTS_VENV
 fi
@@ -42,7 +41,5 @@ pip install -U setuptools pip wheel
 pip install "oarepo[tests,rdm]==$OAREPO_VERSION.*"
 pip install "./$BUILD_TEST_DIR/${MODEL}[tests]"
 pip install ".[tests]"
-
-editable_install oarepo-requests-alt
 
 pytest ./$CODE_TEST_DIR/test_communities
