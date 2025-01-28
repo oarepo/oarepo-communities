@@ -431,21 +431,25 @@ def test_community_role_ui_serialization(
         request_data_factory,
     )
 
+    def compare_result(result):
+        assert result.items() >= ui_serialized_community_role(community.id).items()
+        assert result["links"].items() >=   {"self": f"https://127.0.0.1:5000/api/communities/{community.id}",
+            "self_html": "https://127.0.0.1:5000/communities/public",
+        }.items()
+
     request = owner_client.get(
         f"/requests/extended/{submit.json['id']}",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
-    # assert request.json["receiver"] == ui_serialized_community_role(community.id)
+
+    compare_result(request.json["receiver"])
+
     request_list = owner_client.get(
         "/requests/",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     )
-    # todo test cache use in search requests with multiple results
-    assert request_list.json["hits"]["hits"][0][
-        "receiver"
-    ] == ui_serialized_community_role(community.id)
-    print()
 
+    compare_result(request_list.json["hits"]["hits"][0]["receiver"])
 
 """
 def test_community_role_ui_serialization_cs(

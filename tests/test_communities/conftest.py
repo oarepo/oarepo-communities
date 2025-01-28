@@ -241,14 +241,14 @@ class PublishRequestsRecordOwnerInDefaultRecordCommunity(DefaultRequests):
 class NoRequests(WorkflowRequestPolicy):
     publish_draft = WorkflowRequest(
         requesters=[],
-        recipients=[CommunityRole("owner")],
+        recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
             submitted="publishing", accepted="published", declined="draft", cancelled="draft"
         ),
     )
     delete_published_record = WorkflowRequest(
         requesters=[],
-        recipients=[CommunityRole("owner")],
+        recipients=[DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
             submitted="deleting", accepted="deleted", declined="published", cancelled="published"
         ),
@@ -641,10 +641,6 @@ def ui_serialized_community_role():
     def _ui_serialized_community(community_id):
         return {
             "label": "Owner of My Community",
-            "links": {
-                "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
-                "self_html": "https://127.0.0.1:5000/communities/public",  # todo is this correct?
-            },
             "reference": {"community_role": f"{community_id}:owner"},
             "type": "community role",
         }

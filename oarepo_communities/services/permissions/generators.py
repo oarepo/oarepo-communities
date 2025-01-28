@@ -54,7 +54,6 @@ class InAnyCommunity(Generator):
 
 
 class CommunityWorkflowPermission(WorkflowPermission):
-
     def _get_workflow_id(self, record=None, **kwargs):
         # todo - check the record branch too? idk makes more sense to not use the default community's workflow, there is a deeper problem if there's no workflow on the record
         try:
@@ -101,7 +100,7 @@ class DefaultCommunityRoleMixin:
             return [str(record.parent.communities.default.id)]
         except (AttributeError, TypeError) as e:
             try:
-                return [str(record['parent']['communities']['default'])]
+                return [str(record["parent"]["communities"]["default"])]
             except KeyError:
                 raise MissingDefaultCommunityError(
                     f"Default community missing on record {record}."
@@ -143,12 +142,18 @@ class OARepoCommunityRoles(CommunityRoles):
 
     def needs(self, record=None, data=None, **kwargs):
         """Set of Needs granting permission."""
+        _needs = set()
+
+        if record and isinstance(record, Community):
+            for role in self.roles(**kwargs):
+                _needs.add(CommunityRoleNeed(str(record.id), role))
+            return _needs
+
         if record:
             community_ids = self._get_record_communities(record)
         else:
             community_ids = self._get_data_communities(data)
 
-        _needs = set()
         for c in community_ids:
             for role in self.roles(**kwargs):
                 _needs.add(CommunityRoleNeed(c, role))
@@ -171,7 +176,6 @@ class OARepoCommunityRoles(CommunityRoles):
 
 
 class CommunityRole(CommunityRoleMixin, OARepoCommunityRoles):
-
     def __init__(self, role):
         self._role = role
         super().__init__()
@@ -186,7 +190,6 @@ class CommunityRole(CommunityRoleMixin, OARepoCommunityRoles):
 class DefaultCommunityRole(
     DefaultCommunityRoleMixin, RecipientGeneratorMixin, OARepoCommunityRoles
 ):
-
     def __init__(self, role):
         self._role = role
         super().__init__()
@@ -206,7 +209,6 @@ PrimaryCommunityRole = DefaultCommunityRole
 
 
 class TargetCommunityRole(DefaultCommunityRole):
-
     def _get_data_communities(self, data=None, **kwargs):
         try:
             community_id = data["payload"]["community"]
@@ -222,7 +224,6 @@ class TargetCommunityRole(DefaultCommunityRole):
 
 
 class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):
-
     def roles(self, **kwargs):
         """Roles."""
         return [r.name for r in current_roles]
@@ -230,8 +231,8 @@ class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):
     def query_filter_field(self):
         return "parent.communities.ids"
 
-class DefaultCommunityMembers(DefaultCommunityRoleMixin, OARepoCommunityRoles):
 
+class DefaultCommunityMembers(DefaultCommunityRoleMixin, OARepoCommunityRoles):
     def roles(self, **kwargs):
         """Roles."""
         return [r.name for r in current_roles]
