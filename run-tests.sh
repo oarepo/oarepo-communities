@@ -7,7 +7,7 @@ BUILD_TEST_DIR="tests"
 
 BUILDER_VENV=".venv-builder"
 TESTS_VENV=".venv-tests"
-
+export PYTHONWARNINGS="ignore"
 export PIP_EXTRA_INDEX_URL=https://gitlab.cesnet.cz/api/v4/projects/1408/packages/pypi/simple
 export UV_EXTRA_INDEX_URL=https://gitlab.cesnet.cz/api/v4/projects/1408/packages/pypi/simple
 
