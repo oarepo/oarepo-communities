@@ -3,8 +3,8 @@ from __future__ import annotations
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-from flask_principal import identity_loaded
 from deepmerge import always_merger
+from flask_principal import identity_loaded
 
 import oarepo_communities.cli  # noqa - imported to register CLI commands
 

@@ -68,12 +68,8 @@ def test_expand_community_role(
     reader_client = logged_client(reader)
     owner_client = logged_client(community_owner)
 
-    record_id = draft_with_community_factory(
-        reader.identity, community.id
-    )["id"]
-    submit = submit_request_on_draft(
-        reader.identity, record_id, "publish_draft"
-    )
+    record_id = draft_with_community_factory(reader.identity, community.id)["id"]
+    submit = submit_request_on_draft(reader.identity, record_id, "publish_draft")
 
     read = owner_client.get(link2testclient(submit["links"]["self"]))
     read_expanded = owner_client.get(
