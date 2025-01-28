@@ -1,10 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from invenio_communities.communities.records.api import Community
 
 from oarepo_communities.errors import MissingDefaultCommunityError
 from oarepo_communities.utils import community_id_from_record
 
+if TYPE_CHECKING:
+    from typing import Any
 
-def community_default_workflow(**kwargs):
+
+def community_default_workflow(**kwargs: Any) -> str | None:
     # optimization: if community metadata is passed, use it
     if "community_metadata" in kwargs:
         community_metadata = kwargs["community_metadata"]

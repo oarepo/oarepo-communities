@@ -7,16 +7,16 @@ from oarepo_communities.errors import CommunityNotIncludedException
 def test_include(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
     community_inclusion_service,
     record_service,
+    community_get_or_create,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
-    community_3 = community_with_workflow_factory("comm3", community_owner)
+    community_1 = community_get_or_create(community_owner, slug="comm1")
+    community_2 = community_get_or_create(community_owner, slug="comm2")
+    community_3 = community_get_or_create(community_owner, slug="comm3")
 
     response = owner_client.post(f"/communities/{community_1.id}/thesis", json={})
 
@@ -51,15 +51,15 @@ def test_include(
 def test_remove(
     logged_client,
     community_owner,
-    community_with_workflow_factory,
     community_inclusion_service,
     record_service,
+    community_get_or_create,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_with_workflow_factory("comm1", community_owner)
-    community_2 = community_with_workflow_factory("comm2", community_owner)
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
 
     response = owner_client.post(f"/communities/{community_1.id}/thesis", json={})
     record_id = response.json["id"]
