@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-from deepmerge import always_merger
+from deepmerge import conservative_merger
 from flask_principal import identity_loaded
 
 import oarepo_communities.cli  # noqa - imported to register CLI commands
@@ -80,7 +80,7 @@ class OARepoCommunities(object):
         app_registered_event_types = app.config.setdefault(
             "NOTIFICATION_RECIPIENTS_RESOLVERS", {}
         )
-        app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = always_merger.merge(
+        app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
             app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
         )
 

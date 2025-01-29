@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from invenio_communities.proxies import current_communities, current_roles
 from invenio_records_resources.resources.errors import PermissionDeniedError
@@ -15,6 +15,7 @@ from oarepo_runtime.i18n import gettext as _
 if TYPE_CHECKING:
     from flask_principal import Identity
     from oarepo_requests.typing import EntityReference
+    from typing import Any
 
 
 class CommunityRoleUIResolver(OARepoUIResolver):

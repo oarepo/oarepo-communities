@@ -1,17 +1,23 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from invenio_access.models import User
 from invenio_communities.members.records.models import MemberModel
 from invenio_notifications.models import Recipient
 from oarepo_requests.notifications.generators import SpecificEntityRecipient
 
+if TYPE_CHECKING:
+    from typing import Any
 
 class CommunityRoleEmailRecipient(SpecificEntityRecipient):
-    """User recipient generator for a notification."""
+    """Community role recipient generator for a notification."""
 
-    def __call__(self, notification, recipients):
-        """Update required recipient information and add backend id."""
-        community_role = self._resolve_entity()
-        community_id = community_role.community_id
-        role = community_role.role
+    def _get_recipients(
+        self, entity: Any, recipients: dict[Recipient]
+    ) -> dict[Recipient]:
+
+        community_id = entity.community_id
+        role = entity.role
 
         for user in (
             User.query.join(MemberModel)
