@@ -1,0 +1,56 @@
+{# def communities, imagePlaceholder='/static/images/square-placeholder.png', displayedCommunities=3 #}
+<section class="ui segment record-communities" aria-label='{{ _("Communities") }}'>
+    <h2 class="ui small header detail-sidebar-header">{{ _("Communities") }}</h2>
+    <div class="ui unstackable list">
+        {% for community in communities[0:displayedCommunities] %}
+        <div class="item flex align-items-center  {{"rel-mb-1" if not loop.last}}">
+            <img 
+                class="ui mini image"
+                src="{{ community["logo"] }}"
+                alt="{{ community.get("title", "") }}"
+                onerror="this.onerror=null; this.src='{{ imagePlaceholder }}';"
+            >
+            <div class="content">
+                <div class="header">
+                    <a target="blank" rel="noopener noreferrer" href="{{ community["links"]["self_html"] }}">
+                        {{ community.get("title", "") }}
+                    </a>
+                    {% if loop.first %}
+                    <span class="ui label">{{ _("Primary") }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if communities|length > displayedCommunities %}
+    <div class="ui accordion">
+        <div class="title">
+            <i class="dropdown icon"></i>
+            {{ _("Show all communities") }}
+        </div>
+        <div class="content">
+            <div class="ui unstackable list">
+                {% for community in communities[displayedCommunities:] %}
+                <div class="item flex align-items-center {{"rel-mb-1" if not loop.last}}">
+                    <img 
+                        class="ui mini image"
+                        src="{{ community["logo"] }}"
+                        alt="{{ community.get("title", "") }}"
+                        onerror="this.onerror=null; this.src='{{ imagePlaceholder }}';"
+                    >
+                    <div class="content">
+                        <div class="header">
+                            <a target="blank" rel="noopener noreferrer" href="{{ community["links"]["self_html"] }}">
+                                {{ community.get("title", "") }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</section>
