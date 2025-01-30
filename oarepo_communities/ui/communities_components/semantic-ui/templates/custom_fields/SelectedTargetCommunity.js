@@ -17,9 +17,9 @@ const SelectedTargetCommunity = ({ fieldPath, readOnlyLabel }) => {
       enabled: !!selectedCommunityId,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
+      select: (data) => data.data,
     }
   );
-  const targetCommunity = data?.data;
 
   return (
     <React.Fragment>
@@ -28,12 +28,12 @@ const SelectedTargetCommunity = ({ fieldPath, readOnlyLabel }) => {
         <List>
           <CommunityItem
             community={{
-              id: targetCommunity.id,
-              title: targetCommunity.metadata?.title,
-              website: targetCommunity.metadata?.website,
-              logo: targetCommunity.links?.logo,
-              organizations: targetCommunity.metadata?.organizations,
-              links: targetCommunity.links,
+              id: data.id,
+              title: data.metadata?.title,
+              website: data.metadata?.website,
+              logo: data.links?.logo,
+              organizations: data.metadata?.organizations,
+              links: data.links,
             }}
           />
         </List>

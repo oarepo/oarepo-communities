@@ -5,7 +5,7 @@ import { i18next } from "@translations/oarepo_communities";
 import { CommunityItem } from "@js/communities_components/CommunitySelector/CommunityItem";
 import { List } from "semantic-ui-react";
 import { useFormikContext, getIn } from "formik";
-import { search } from "@js/oarepo_vocabularies";
+import { search } from "@js/oarepo_ui/forms";
 
 const serializeOptions = (options) =>
   options?.map((option) => ({
@@ -18,6 +18,9 @@ const serializeOptions = (options) =>
 const TargetCommunitySelector = ({ fieldPath, allowedCommunities }) => {
   const { values } = useFormikContext();
   const selectedCommunityId = getIn(values, fieldPath, "");
+  const selectedCommunity = allowedCommunities.find(
+    (c) => c.id === selectedCommunityId
+  );
 
   return (
     <React.Fragment>
@@ -33,13 +36,9 @@ const TargetCommunitySelector = ({ fieldPath, allowedCommunities }) => {
           autoFocus: true,
         }}
       />
-      {selectedCommunityId && (
+      {selectedCommunity && (
         <List>
-          <CommunityItem
-            community={allowedCommunities.find(
-              (c) => c.id === selectedCommunityId
-            )}
-          />
+          <CommunityItem community={selectedCommunity} />
         </List>
       )}
     </React.Fragment>

@@ -3,7 +3,7 @@ import { i18next } from "@translations/oarepo_communities";
 import { CommunityItem } from "@js/communities_components/CommunitySelector/CommunityItem";
 import { useFormikContext, getIn } from "formik";
 import React from "react";
-import { OverridableContext } from "react-overridable";
+import { OverridableContext, overrideStore } from "react-overridable";
 import {
   EmptyResults,
   Error,
@@ -16,8 +16,10 @@ import {
 } from "react-searchkit";
 import { Grid, Message, List } from "semantic-ui-react";
 import { EmptyResultsElement } from "@js/oarepo_ui";
+
+const appName = "OarepoCommunities.SecondaryCommunitySelector";
 const overriddenComponents = {
-  "EmptyResults.element": EmptyResultsElement,
+  [`${appName}.EmptyResults.element`]: EmptyResultsElement,
 };
 
 const searchConfig = {
@@ -49,11 +51,14 @@ const SecondaryCommunitySelector = ({ fieldPath }) => {
   };
 
   return (
-    <OverridableContext.Provider value={overriddenComponents}>
+    <OverridableContext.Provider
+      value={{ ...overriddenComponents, ...overrideStore.getAll() }}
+    >
       <ReactSearchKit
         searchApi={searchApi}
         urlHandlerApi={{ enabled: false }}
         initialQueryState={searchConfig.initialQueryState}
+        appName="OarepoCommunities.SecondaryCommunitySelector"
       >
         <Grid>
           <Grid.Row>
