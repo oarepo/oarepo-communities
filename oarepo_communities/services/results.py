@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from oarepo_runtime.services.results import ResultsComponent
 from invenio_communities.communities.records.api import Community
+from oarepo_ui.utils import community_to_dict
 
 if TYPE_CHECKING:
     from flask_principal import Identity
@@ -23,7 +24,7 @@ class RecordCommunitiesComponent(ResultsComponent):
         for community_id in record.parent.communities.ids:
             try:
                 community = Community.get_record(community_id)
-                record_communities.append(self.community_to_dict(community))
+                record_communities.append(community_to_dict(community))
             except Exception:
                 continue
 
@@ -36,14 +37,3 @@ class RecordCommunitiesComponent(ResultsComponent):
 
         if record_communities:
             projection["expanded"]["communities"] = record_communities
-
-    def community_to_dict(self, community: Community) -> dict:
-        return {
-            "slug": str(community.slug),
-            "id": str(community.id),
-            "logo": f"/api/communities/{community.id}/logo",
-            "links": {
-                "self_html": f"/communities/{community.id}/records",
-            },
-            **(community.metadata or {}),
-        }

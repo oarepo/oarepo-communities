@@ -337,3 +337,7 @@ msgstr ""
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:36
 msgid "Opens in new tab"
 msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/CommunityItem.jinja:12
+msgid "Community title not provided"
+msgstr ""

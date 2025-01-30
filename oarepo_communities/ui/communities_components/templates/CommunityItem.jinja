@@ -1,0 +1,19 @@
+{#def community, isPrimary=False, imagePlaceholder='/static/images/square-placeholder.png', isLast=False #}
+<div class="item flex align-items-center  {{"rel-mb-1" if not isLast}}">
+    <img 
+        class="ui mini image"
+        src="{{ community["logo"] }}"
+        alt="{{ community.get("title", "") }}"
+        onerror="this.onerror=null; this.src='{{ imagePlaceholder }}';"
+    >
+    <div class="content">
+        <div class="header">
+            <a target="_blank" rel="noopener noreferrer" href="{{ community["links"]["self_html"] }}">
+                {{ community.get("title", _("Community title not provided")) }}
+            </a>
+            {% if isPrimary%}
+            <span class="ui label tiny">{{ _("primary") }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

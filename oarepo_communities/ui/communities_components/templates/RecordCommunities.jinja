@@ -3,24 +3,8 @@
     <h2 class="ui small header detail-sidebar-header">{{ _("Communities") }}</h2>
     <div class="ui unstackable list">
         {% for community in communities[0:displayedCommunities] %}
-        <div class="item flex align-items-center  {{"rel-mb-1" if not loop.last}}">
-            <img 
-                class="ui mini image"
-                src="{{ community["logo"] }}"
-                alt="{{ community.get("title", "") }}"
-                onerror="this.onerror=null; this.src='{{ imagePlaceholder }}';"
-            >
-            <div class="content">
-                <div class="header">
-                    <a target="blank" rel="noopener noreferrer" href="{{ community["links"]["self_html"] }}">
-                        {{ community.get("title", "") }}
-                    </a>
-                    {% if loop.first and communities | length > 1 %}
-                    <span class="ui label tiny">{{ _("primary") }}</span>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+            {% set isPrimary = loop.first and communities | length > 1%}
+            <CommunityItem community={community} isPrimary={isPrimary} isLast={loop.last} />
         {% endfor %}
     </div>
 
@@ -33,21 +17,7 @@
         <div class="content">
             <div class="ui unstackable list">
                 {% for community in communities[displayedCommunities:] %}
-                <div class="item flex align-items-center {{"rel-mb-1" if not loop.last}}">
-                    <img 
-                        class="ui mini image"
-                        src="{{ community["logo"] }}"
-                        alt="{{ community.get("title", "") }}"
-                        onerror="this.onerror=null; this.src='{{ imagePlaceholder }}';"
-                    >
-                    <div class="content">
-                        <div class="header">
-                            <a target="blank" rel="noopener noreferrer" href="{{ community["links"]["self_html"] }}">
-                                {{ community.get("title", "") }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                    <CommunityItem community={community} isLast={loop.last}/>
                 {% endfor %}
             </div>
         </div>
