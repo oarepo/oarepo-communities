@@ -92,7 +92,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
     type_id = "initiate_community_migration"
     name = _("Inititiate Community migration")
 
-    description = _("Request initiation of Community migration.")
+    description = _("Move record to another primary community.")
 
     topic_can_be_none = False
     allowed_topic_ref_types = ModelRefTypes(published=True, draft=False)
@@ -114,7 +114,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         if is_auto_approved(self, identity=identity, topic=topic):
             return _("Inititiate record community migration")
         if not request:
-            return _("Request community migration")
+            return _("Inititiate record community migration")
         match request.status:
             case "submitted":
                 return _("Record community migration initiated")
@@ -135,6 +135,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
             return _(
                 "Click to immediately start record migration. "
                 "After submitting the request will immediatelly be forwarded to responsible person(s) in the target community. "
+                "You will be notified about the decision by email."
             )
 
         if not request:

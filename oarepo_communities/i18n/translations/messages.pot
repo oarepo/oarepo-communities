@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-01-20 21:31+0100\n"
+"POT-Creation-Date: 2025-01-30 21:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,15 +48,12 @@ msgid "Inititiate Community migration"
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:95
-msgid "Request initiation of Community migration."
+msgid "Move record to another primary community."
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:115
-msgid "Inititiate record community migration"
-msgstr ""
-
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:117
-msgid "Request community migration"
+msgid "Inititiate record community migration"
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:120
@@ -71,10 +68,10 @@ msgstr ""
 msgid ""
 "Click to immediately start record migration. After submitting the request "
 "will immediatelly be forwarded to responsible person(s) in the target "
-"community. "
+"community. You will be notified about the decision by email."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:141
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:142
 msgid ""
 "After you submit record community migration request, it will first have to "
 "be approved by responsible person(s) of the current community. Then it will "
@@ -82,73 +79,73 @@ msgid ""
 "will be notified about the decision by email."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:149
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:150
 msgid ""
 "Record community migration request has been submitted. You will be notified "
 "about the decision by email."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:154
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:155
 msgid ""
 "User has requested record community migration. You can now accept or decline"
 " the request."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:158
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:159
 msgid "Record community migration request has been submitted."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:161
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:162
 msgid "Submit to initiate record community migration. "
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:163
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:308
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:164
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:309
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:137
 msgid "Request not yet submitted."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:179
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:254
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:180
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:255
 msgid "Target community:"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:239
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:240
 msgid "confirm Community migration"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:269
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:274
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:270
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:275
 msgid "Confirm record community migration"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:272
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:273
 msgid "Record community migration confirmation pending"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:287
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:288
 msgid ""
 "Confirm the migration of the record to the new primary community. This "
 "request must be accepted by responsible person(s) of the new community."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:295
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:296
 msgid ""
 "The confirmation request has been submitted to the target community. You "
 "will be notified about their decision by email."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:300
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:301
 msgid ""
 "A request to confirm record community migration has been received. You can "
 "now accept or decline the request."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:304
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:305
 msgid "Record community migration confirmation request is pending."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:307
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:308
 msgid "Submit to confirm record community migration."
 msgstr ""
 

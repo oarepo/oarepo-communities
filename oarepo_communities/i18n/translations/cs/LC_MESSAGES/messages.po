@@ -507,3 +507,17 @@ msgstr "Otevře se v nové záložce"
 
 msgid "Target community"
 msgstr "Cílová komunita"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:95
+msgid "Move record to another primary community."
+msgstr "Převést pod jinou primarni komunitu"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:135
+msgid ""
+"Click to immediately start record migration. After submitting the request "
+"will immediatelly be forwarded to responsible person(s) in the target "
+"community. You will be notified about the decision by email."
+msgstr ""
+"Kliknutím okamžitě zahájíte migraci záznamu. Po odeslání žádosti bude "
+"okamžitě předána odpovědné osobě (osobám) v cílové komunitě. O rozhodnutí "
+"budete informováni e-mailem."

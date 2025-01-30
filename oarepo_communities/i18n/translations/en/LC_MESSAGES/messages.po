@@ -318,10 +318,6 @@ msgstr ""
 msgid "Secondary community submission"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:93
-msgid "Request initiation of Community migration."
-msgstr ""
-
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:113
 msgid "Inititiate record community migration"
 msgstr ""
@@ -475,4 +471,15 @@ msgid "Opens in new tab"
 msgstr ""
 
 msgid "Target community"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:95
+msgid "Move record to another primary community."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:135
+msgid ""
+"Click to immediately start record migration. After submitting the request "
+"will immediatelly be forwarded to responsible person(s) in the target "
+"community. You will be notified about the decision by email."
 msgstr ""

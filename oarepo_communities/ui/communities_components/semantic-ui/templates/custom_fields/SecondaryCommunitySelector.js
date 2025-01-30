@@ -20,6 +20,7 @@ import { EmptyResultsElement } from "@js/oarepo_ui";
 const appName = "OarepoCommunities.SecondaryCommunitySelector";
 const overriddenComponents = {
   [`${appName}.EmptyResults.element`]: EmptyResultsElement,
+  ...overrideStore.getAll(),
 };
 
 const searchConfig = {
@@ -51,9 +52,7 @@ const SecondaryCommunitySelector = ({ fieldPath }) => {
   };
 
   return (
-    <OverridableContext.Provider
-      value={{ ...overriddenComponents, ...overrideStore.getAll() }}
-    >
+    <OverridableContext.Provider value={overriddenComponents}>
       <ReactSearchKit
         searchApi={searchApi}
         urlHandlerApi={{ enabled: false }}
