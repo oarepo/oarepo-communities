@@ -326,3 +326,23 @@ msgstr "Odebrat sekundární komunitu"
 #: /home/ron/prace/oarepo-communities/oarepo_communities/requests/submission_secondary.py:29
 msgid "Secondary community submission"
 msgstr "Přijmout do sekundární komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:19
+msgid "primary"
+msgstr "primární"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:31
+msgid "Show all communities"
+msgstr "Zobrazit všechny komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:19
+msgid "Awards"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:35
+msgid "Visit external website"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:36
+msgid "Opens in new tab"
+msgstr ""

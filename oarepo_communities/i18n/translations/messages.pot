@@ -1,14 +1,14 @@
 # Translations template for PROJECT.
-# Copyright (C) 2024 ORGANIZATION
+# Copyright (C) 2025 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-15 10:08+0100\n"
+"POT-Creation-Date: 2025-01-30 08:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,9 +59,23 @@ msgstr ""
 msgid "Secondary community submission"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resolvers/ui.py:59
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resolvers/ui.py:70
 #, python-format
 msgid "%(role)s of %(community)s"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:2
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:3
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:170
+msgid "Communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:19
+msgid "primary"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:31
+msgid "Show all communities"
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13
@@ -94,6 +108,18 @@ msgstr ""
 msgid "New upload"
 msgstr ""
 
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:19
+msgid "Awards"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:35
+msgid "Visit external website"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:36
+msgid "Opens in new tab"
+msgstr ""
+
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:5
 msgid "Profile"
 msgstr ""
@@ -102,27 +128,23 @@ msgstr ""
 msgid "Pages"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:175
-msgid "Communities"
-msgstr ""
-
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:181
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:176
 msgid "Records"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:188
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:183
 msgid "Members"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:196
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:191
 msgid "Settings"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:204
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:199
 msgid "Curation policy"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:212
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:207
 msgid "About"
 msgstr ""
 

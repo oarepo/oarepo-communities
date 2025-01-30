@@ -15,8 +15,8 @@
                     <a target="blank" rel="noopener noreferrer" href="{{ community["links"]["self_html"] }}">
                         {{ community.get("title", "") }}
                     </a>
-                    {% if loop.first %}
-                    <span class="ui label">{{ _("Primary") }}</span>
+                    {% if loop.first and communities | length > 1 %}
+                    <span class="ui label tiny">{{ _("primary") }}</span>
                     {% endif %}
                 </div>
             </div>
