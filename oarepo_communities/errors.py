@@ -127,12 +127,12 @@ RESOURCE_ERROR_HANDLERS = {
     CommunityAlreadyIncludedException: create_error_handler(
         lambda e: CustomHTTPJSONException(
             code=400,
-            description="The community is already included in the record.",
+            description=_("The community is already included in the record."),
             errors=[
                 {
                     "field": "payload.community",
                     "messages": [
-                        "Record is already in this community. Please choose another."
+                        _("Record is already in this community. Please choose another.")
                     ],
                 }
             ],
@@ -142,11 +142,11 @@ RESOURCE_ERROR_HANDLERS = {
     TargetCommunityNotProvidedException: create_error_handler(
         lambda e: CustomHTTPJSONException(
             code=400,
-            description="Target community not provided in the migration request.",
+            description=_("Target community not provided in the migration request."),
             errors=[
                 {
                     "field": "payload.community",
-                    "messages": ["Please select the community"],
+                    "messages": [_("Please select the community")],
                 }
             ],
             error_type="cf_validation_error",
