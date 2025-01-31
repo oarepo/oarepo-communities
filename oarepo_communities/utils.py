@@ -92,7 +92,6 @@ def get_urlprefix_service_id_mapping():
 
 
 def community_id_from_record(record):
-
     if isinstance(record, Community):
         community_id = record.id
     else:
@@ -102,3 +101,15 @@ def community_id_from_record(record):
         except AttributeError:
             return None
     return community_id
+
+
+def community_to_dict(community):
+    return {
+        "slug": str(community.slug),
+        "id": str(community.id),
+        "logo": f"/api/communities/{community.id}/logo",
+        "links": {
+            "self_html": f"/communities/{community.id}/records",
+        },
+        **(community.metadata or {}),
+    }

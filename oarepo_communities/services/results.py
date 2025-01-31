@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from oarepo_runtime.services.results import ResultsComponent
 from invenio_communities.communities.records.api import Community
-from oarepo_ui.utils import community_to_dict
+from oarepo_communities.utils import community_to_dict
 
 if TYPE_CHECKING:
     from flask_principal import Identity
