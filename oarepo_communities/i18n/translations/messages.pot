@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-01-31 16:32+0100\n"
+"POT-Creation-Date: 2025-01-31 17:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -82,29 +82,29 @@ msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:135
 msgid ""
-"Click to immediately start record migration. After submitting the request"
-" will immediatelly be forwarded to responsible person(s) in the target "
+"Click to immediately start record migration. After submitting the request "
+"will immediatelly be forwarded to responsible person(s) in the target "
 "community. You will be notified about the decision by email."
 msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:142
 msgid ""
-"After you submit record community migration request, it will first have "
-"to be approved by responsible person(s) of the current community. Then it"
-" will have to be accepted by responsible persons(s) of the target "
-"community. You will be notified about the decision by email."
+"After you submit record community migration request, it will first have to "
+"be approved by responsible person(s) of the current community. Then it will "
+"have to be accepted by responsible persons(s) of the target community. You "
+"will be notified about the decision by email."
 msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:150
 msgid ""
-"Record community migration request has been submitted. You will be "
-"notified about the decision by email."
+"Record community migration request has been submitted. You will be notified "
+"about the decision by email."
 msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:155
 msgid ""
-"User has requested record community migration. You can now accept or "
-"decline the request."
+"User has requested record community migration. You can now accept or decline"
+" the request."
 msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:159
@@ -153,8 +153,8 @@ msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:301
 msgid ""
-"A request to confirm record community migration has been received. You "
-"can now accept or decline the request."
+"A request to confirm record community migration has been received. You can "
+"now accept or decline the request."
 msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:305
@@ -192,14 +192,14 @@ msgstr ""
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
 msgid ""
 "After submitting record secondary community submission request, it will "
-"first have to be approved by responsible person(s) of the target "
-"community. You will be notified about the decision by email."
+"first have to be approved by responsible person(s) of the target community. "
+"You will be notified about the decision by email."
 msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:119
 msgid ""
-"Record secondary community submission request has been submitted. You "
-"will be notified about the decision by email."
+"Record secondary community submission request has been submitted. You will "
+"be notified about the decision by email."
 msgstr ""
 
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:124
@@ -299,3 +299,70 @@ msgstr ""
 msgid "Community records"
 msgstr ""
 
+msgid "Invitations sent successfully."
+msgstr ""
+
+msgid "The invitations could not be sent. Please try again later."
+msgstr ""
+
+msgid "Invite..."
+msgstr ""
+
+msgid "Invite users to the {{communityTitle}} community"
+msgstr ""
+
+msgid "Invalid emails"
+msgstr ""
+
+msgid ""
+"Emails shall be provided on separate lines. \n"
+"                    Acceptable formats are johndoe@user.com or Doe John <johndoe@user.com>. \n"
+"                    Note that invitations shall be sent only to the valid email addresses."
+msgstr ""
+
+msgid "Role"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Invite"
+msgstr ""
+
+msgid "Community selection"
+msgstr ""
+
+msgid "Please select community in which your work will be published:"
+msgstr ""
+
+msgid ""
+"If you are certain that you wish to proceed with the generic community, "
+"please click on it below."
+msgstr ""
+
+msgid "All records must belong to a community."
+msgstr ""
+
+msgid "Go back"
+msgstr ""
+
+msgid "genericCommunityMessage"
+msgstr ""
+
+msgid "Your record will be published in the following community:"
+msgstr ""
+
+msgid ""
+"Your work will be saved in the following community. Please note that after "
+"saving it will not be possible to transfer it to another community. "
+"Click<1>here</1>to change the selection."
+msgstr ""
+
+msgid "Search in my communities..."
+msgstr ""
+
+msgid "Target community"
+msgstr ""
+
+msgid "Search inside the community..."
+msgstr ""

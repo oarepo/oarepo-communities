@@ -483,3 +483,19 @@ msgid ""
 "will immediatelly be forwarded to responsible person(s) in the target "
 "community. You will be notified about the decision by email."
 msgstr ""
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:130
+msgid "The community is already included in the record."
+msgstr ""
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:135
+msgid "Record is already in this community. Please choose another."
+msgstr ""
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:145
+msgid "Target community not provided in the migration request."
+msgstr ""
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:149
+msgid "Please select the community"
+msgstr ""

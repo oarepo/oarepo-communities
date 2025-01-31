@@ -521,3 +521,19 @@ msgstr ""
 "Kliknutím okamžitě zahájíte migraci záznamu. Po odeslání žádosti bude "
 "okamžitě předána odpovědné osobě (osobám) v cílové komunitě. O rozhodnutí "
 "budete informováni e-mailem."
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:130
+msgid "The community is already included in the record."
+msgstr "Komunita je již zahrnuta v záznamu"
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:135
+msgid "Record is already in this community. Please choose another."
+msgstr "Záznam je již v této komunitě. Prosím vyberte jinou."
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:145
+msgid "Target community not provided in the migration request."
+msgstr "Cílová komunita nebyla uvedena v požadavku na migraci."
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:149
+msgid "Please select the community"
+msgstr "Prosím vyberte komunitu"
