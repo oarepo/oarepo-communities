@@ -9,11 +9,8 @@
 
 from __future__ import annotations
 
-from flask_babelex import lazy_gettext as _
-from marshmallow import ValidationError
-
 import json
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 from flask import g
 from flask_resources import (
@@ -21,7 +18,7 @@ from flask_resources import (
     create_error_handler,
 )
 from flask_resources.serializers.json import JSONEncoder
-
+from marshmallow import ValidationError
 from oarepo_runtime.i18n import lazy_gettext as _
 
 
@@ -57,48 +54,6 @@ class CustomHTTPJSONException(HTTPJSONException):
             body["error_id"] = str(g.sentry_event_id)
 
         return json.dumps(body, cls=JSONEncoder)
-
-
-def community_already_included_entry():
-    """Entry point for CommunityAlreadyIncludedException handler."""
-    return (
-        CommunityAlreadyIncludedException,
-        create_error_handler(
-            lambda e: CustomHTTPJSONException(
-                code=400,
-                description="The community is already included in the record.",
-                errors=[
-                    {
-                        "field": "payload.community",
-                        "messages": [
-                            "Record is already in this community. Please choose another."
-                        ],
-                    }
-                ],
-                error_type="cf_validation_error",
-            )
-        ),
-    )
-
-
-def target_community_not_provided_entry():
-    """Entry point for TargetCommunityNotProvidedException handler."""
-    return (
-        TargetCommunityNotProvidedException,
-        create_error_handler(
-            lambda e: CustomHTTPJSONException(
-                code=400,
-                description="Target community not provided in the migration request.",
-                errors=[
-                    {
-                        "field": "payload.community",
-                        "messages": ["Please select the community"],
-                    }
-                ],
-                error_type="cf_validation_error",
-            )
-        ),
-    )
 
 
 class CommunityAlreadyIncludedException(Exception):
@@ -166,3 +121,35 @@ class OpenRequestAlreadyExists(Exception):
     def description(self):
         """Exception's description."""
         return _("There is already an open inclusion request for this community.")
+
+
+RESOURCE_ERROR_HANDLERS = {
+    CommunityAlreadyIncludedException: create_error_handler(
+        lambda e: CustomHTTPJSONException(
+            code=400,
+            description="The community is already included in the record.",
+            errors=[
+                {
+                    "field": "payload.community",
+                    "messages": [
+                        "Record is already in this community. Please choose another."
+                    ],
+                }
+            ],
+            error_type="cf_validation_error",
+        )
+    ),
+    TargetCommunityNotProvidedException: create_error_handler(
+        lambda e: CustomHTTPJSONException(
+            code=400,
+            description="Target community not provided in the migration request.",
+            errors=[
+                {
+                    "field": "payload.community",
+                    "messages": ["Please select the community"],
+                }
+            ],
+            error_type="cf_validation_error",
+        )
+    ),
+}
