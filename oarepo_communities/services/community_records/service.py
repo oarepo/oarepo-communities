@@ -5,8 +5,10 @@
 # Invenio-RDM-Records is free software; you can redistribute it and/or modify
 # it under the terms of the MIT License; see LICENSE file for more details.
 
-"""RDM Community Records Service."""
+from __future__ import annotations
+
 import copy
+from typing import TYPE_CHECKING
 
 # from invenio_drafts_resources.services.records.service import RecordService
 from invenio_records_resources.services import ServiceSchemaWrapper
@@ -23,6 +25,19 @@ from oarepo_communities.utils import (
 
 # from oarepo_runtime.datastreams.utils import get_service_from_schema_type
 
+if TYPE_CHECKING:
+    from typing import Any
+
+    from flask_principal import Identity
+    from invenio_records_resources.services.base.links import LinksTemplate
+    from invenio_records_resources.services.records.results import (
+        RecordItem,
+        RecordList,
+    )
+    from invenio_records_resources.services.records.service import RecordService
+    from invenio_records_resources.services.uow import UnitOfWork
+    from opensearch_dsl.query import Query
+
 
 class CommunityRecordsService(Service):
     """Community records service.
@@ -31,23 +46,23 @@ class CommunityRecordsService(Service):
     """
 
     @property
-    def community_record_schema(self):
+    def community_record_schema(self) -> ServiceSchemaWrapper:
         """Returns the community schema instance."""
         return ServiceSchemaWrapper(self, schema=self.config.community_record_schema)
 
     def _search(
         self,
-        identity,
-        community_id,
-        search_service,
-        search_method,
-        links_template,
-        params=None,
-        search_preference=None,
-        extra_filter=None,
-        expand=False,
-        **kwargs,
-    ):
+        identity: Identity,
+        community_id: str,
+        search_service: RecordService,
+        search_method: str,
+        links_template: LinksTemplate,
+        params: dict[str, Any] | None = None,
+        search_preference: Any | None = None,
+        extra_filter: Query | None = None,
+        expand: bool = False,
+        **kwargs: Any,
+    ) -> RecordList:
         params = params or {}
         default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
         if extra_filter is not None:
@@ -61,14 +76,14 @@ class CommunityRecordsService(Service):
 
     def search(
         self,
-        identity,
-        community_id,
-        params=None,
-        search_preference=None,
-        extra_filter=None,
-        expand=False,
-        **kwargs,
-    ):
+        identity: Identity,
+        community_id: str,
+        params: dict[str, Any] | None = None,
+        search_preference: Any | None = None,
+        extra_filter: Query | None = None,
+        expand: bool = False,
+        **kwargs: Any,
+    ) -> RecordList:
         params_copy = copy.deepcopy(params)
         facets = params_copy.pop("facets")
         params_copy.update(facets)
@@ -90,15 +105,16 @@ class CommunityRecordsService(Service):
 
     def search_model(
         self,
-        identity,
-        community_id,
-        model_url_name,
-        params=None,
-        search_preference=None,
-        extra_filter=None,
-        expand=False,
-        **kwargs,
-    ):
+        identity: Identity,
+        community_id: str,
+        model_url_name: str,
+        params: dict[str, Any] | None = None,
+        search_preference: Any | None = None,
+        extra_filter: Query | None = None,
+        expand: bool = False,
+        **kwargs: Any,
+    ) -> RecordList:
+
         return self._search(
             identity,
             community_id,
@@ -117,14 +133,15 @@ class CommunityRecordsService(Service):
 
     def user_search(
         self,
-        identity,
-        community_id,
-        params=None,
-        search_preference=None,
-        extra_filter=None,
-        expand=False,
-        **kwargs,
-    ):
+        identity: Identity,
+        community_id: str,
+        params: dict[str, Any] | None = None,
+        search_preference: Any | None = None,
+        extra_filter: Query | None = None,
+        expand: bool = False,
+        **kwargs: Any,
+    ) -> RecordList:
+
         params_copy = copy.deepcopy(params)
         facets = params_copy.pop("facets")
         params_copy.update(facets)
@@ -146,15 +163,16 @@ class CommunityRecordsService(Service):
 
     def user_search_model(
         self,
-        identity,
-        community_id,
-        model_url_name,
-        params=None,
-        search_preference=None,
-        extra_filter=None,
-        expand=False,
-        **kwargs,
-    ):
+        identity: Identity,
+        community_id: str,
+        model_url_name: str,
+        params: dict[str, Any] | None = None,
+        search_preference: Any | None = None,
+        extra_filter: Query | None = None,
+        expand: bool = False,
+        **kwargs: Any,
+    ) -> RecordList:
+
         return self._search(
             identity,
             community_id,
@@ -172,9 +190,16 @@ class CommunityRecordsService(Service):
         )
 
     @unit_of_work()
-    def create_in_community(
-        self, identity, community_id, data, model=None, uow=None, expand=False, **kwargs
-    ):
+    def create(
+        self,
+        identity: Identity,
+        data: dict[str, Any],
+        community_id: str,
+        model: str = None,
+        uow: UnitOfWork | None = None,
+        expand: bool = False,
+        **kwargs: Any,
+    ) -> RecordItem:
         # should the dumper put the entries thing into search? ref CommunitiesField#110, not in rdm; it is in new rdm, i had quite old version
         # community_id may be the slug coming from resource
         if model:
