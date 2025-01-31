@@ -1,6 +1,7 @@
 import pytest
 from pytest_oarepo.communities.functions import invite
 from pytest_oarepo.requests.functions import get_request_type
+from thesis.records.api import ThesisRecord
 
 from oarepo_communities.errors import (
     CommunityAlreadyIncludedException,
@@ -136,8 +137,9 @@ def test_community_delete(
         link2testclient=link2testclient,
     )  # owner can
 
+    ThesisRecord.index.refresh()
     resp_record = owner_client.get(f"/thesis/{record_id}")
-    resp_search = owner_client.get(f"/thesis/")
+    resp_search = owner_client.get("/thesis/")
 
     # record was published
     assert resp_record.status_code == 410
