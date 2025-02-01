@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-01-31 17:09+0100\n"
+"POT-Creation-Date: 2025-02-01 21:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,77 +17,77 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/config.py:36
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:36
 msgid "Workflows"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/config.py:42
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:42
 msgid "Default workflow"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/config.py:43
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:43
 msgid ""
 "Default workflow for the community if workflow is not specified when "
 "depositing a record."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/config.py:55
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:55
 msgid "Allowed workflows"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/config.py:57
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:57
 msgid "Workflows allowed for the community."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:123
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:123
 msgid "There is already an open inclusion request for this community."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:130
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:130
 msgid "The community is already included in the record."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:135
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:135
 msgid "Record is already in this community. Please choose another."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:145
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:145
 msgid "Target community not provided in the migration request."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:149
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:149
 msgid "Please select the community"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:93
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:93
 msgid "Inititiate Community migration"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:95
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:95
 msgid "Move record to another primary community."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:115
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:117
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:115
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:117
 msgid "Inititiate record community migration"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:120
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:120
 msgid "Record community migration initiated"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:122
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:122
 msgid "Request record community migration"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:135
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:135
 msgid ""
 "Click to immediately start record migration. After submitting the request "
 "will immediatelly be forwarded to responsible person(s) in the target "
 "community. You will be notified about the decision by email."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:142
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:142
 msgid ""
 "After you submit record community migration request, it will first have to "
 "be approved by responsible person(s) of the current community. Then it will "
@@ -95,207 +95,207 @@ msgid ""
 "will be notified about the decision by email."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:150
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:150
 msgid ""
 "Record community migration request has been submitted. You will be notified "
 "about the decision by email."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:155
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:155
 msgid ""
 "User has requested record community migration. You can now accept or decline"
 " the request."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:159
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:159
 msgid "Record community migration request has been submitted."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:162
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:162
 msgid "Submit to initiate record community migration. "
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:164
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:309
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:137
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:164
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:309
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:137
 msgid "Request not yet submitted."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:180
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:255
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:180
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:255
 msgid "Target community:"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:240
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:240
 msgid "confirm Community migration"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:270
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:275
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:270
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:275
 msgid "Confirm record community migration"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:273
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:273
 msgid "Record community migration confirmation pending"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:288
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:288
 msgid ""
 "Confirm the migration of the record to the new primary community. This "
 "request must be accepted by responsible person(s) of the new community."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:296
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:296
 msgid ""
 "The confirmation request has been submitted to the target community. You "
 "will be notified about their decision by email."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:301
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:301
 msgid ""
 "A request to confirm record community migration has been received. You can "
 "now accept or decline the request."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:305
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:305
 msgid "Record community migration confirmation request is pending."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/migration.py:308
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:308
 msgid "Submit to confirm record community migration."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/remove_secondary.py:31
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/remove_secondary.py:31
 msgid "Remove secondary community"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:53
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:53
 msgid "Secondary community submission"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:76
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:76
 msgid "Secondary community:"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:94
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:94
 msgid "Initiate record secondary community submission"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:97
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:97
 msgid "Confirm record secondary community submission"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:99
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:99
 msgid "Request record secondary community submission"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
 msgid ""
 "After submitting record secondary community submission request, it will "
 "first have to be approved by responsible person(s) of the target community. "
 "You will be notified about the decision by email."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:119
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:119
 msgid ""
 "Record secondary community submission request has been submitted. You will "
 "be notified about the decision by email."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:124
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:124
 msgid ""
 "User has requested to add secondary community to a record. You can now "
 "accept or decline the request."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:128
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:128
 msgid "Record secondary community submission request has been submitted."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/requests/submission_secondary.py:133
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:133
 msgid "Submit to initiate record secondary community submission."
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/resolvers/ui.py:70
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resolvers/ui.py:70
 #, python-format
 msgid "%(role)s of %(community)s"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:14
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:14
 msgid "Search communities"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:19
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:19
 msgid "Search"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:30
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:30
 msgid "New community"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:41
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:41
 msgid "My communities"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:43
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:59
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:43
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:59
 msgid "See all"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:57
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:57
 msgid "New communities"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/header.html:10
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/header.html:10
 msgid "New upload"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:19
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:19
 msgid "Awards"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:35
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:35
 msgid "Visit external website"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:36
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:36
 msgid "Opens in new tab"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:5
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:5
 msgid "Profile"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:6
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/settings/base.html:6
 msgid "Pages"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:170
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:170
 msgid "Communities"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:176
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:176
 msgid "Records"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:183
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:183
 msgid "Members"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:191
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:191
 msgid "Settings"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:199
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:199
 msgid "Curation policy"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:207
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:207
 msgid "About"
 msgstr ""
 
-#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/CommunityRecordsPage.jinja:7
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/CommunityRecordsPage.jinja:7
 msgid "Community records"
 msgstr ""
 
@@ -359,6 +359,9 @@ msgid ""
 msgstr ""
 
 msgid "Search in my communities..."
+msgstr ""
+
+msgid "Could not fetch community."
 msgstr ""
 
 msgid "Target community"

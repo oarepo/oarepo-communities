@@ -499,3 +499,6 @@ msgstr ""
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:149
 msgid "Please select the community"
 msgstr ""
+
+msgid "Could not fetch community."
+msgstr ""

@@ -537,3 +537,6 @@ msgstr "Cílová komunita nebyla uvedena v požadavku na migraci."
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:149
 msgid "Please select the community"
 msgstr "Prosím vyberte komunitu"
+
+msgid "Could not fetch community."
+msgstr "Nepodařilo se načíst komunitu."
