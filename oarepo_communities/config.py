@@ -1,6 +1,8 @@
+from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 from oarepo_runtime.i18n import lazy_gettext as _
 
 from .cf.workflows import WorkflowCF, lazy_workflow_options
+from .notifications.generators import CommunityRoleEmailRecipient
 from .requests.migration import (
     ConfirmCommunityMigrationRequestType,
     InitiateCommunityMigrationRequestType,
@@ -8,7 +10,6 @@ from .requests.migration import (
 from .requests.remove_secondary import RemoveSecondaryCommunityRequestType
 from .requests.submission_secondary import SecondaryCommunitySubmissionRequestType
 from .resolvers.ui import CommunityRoleUIResolver
-from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 
 REQUESTS_REGISTERED_TYPES = [
     InitiateCommunityMigrationRequestType(),
@@ -67,3 +68,7 @@ COMMUNITIES_ROUTES = {**INVENIO_COMMUNITIES_ROUTES, "my_communities": "/me/commu
 DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
+
+NOTIFICATION_RECIPIENTS_RESOLVERS = {
+    "community_role": {"email": CommunityRoleEmailRecipient}
+}
