@@ -15,5 +15,5 @@ COMMUNITIES_MAPPING = {
 
 class OARepoCommunitiesFieldContext(MappingSystemFieldMixin, CommunitiesFieldContext):
     @property
-    def mapping(self):
+    def mapping(self) -> dict:
         return COMMUNITIES_MAPPING

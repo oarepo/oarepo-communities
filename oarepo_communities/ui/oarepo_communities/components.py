@@ -33,6 +33,6 @@ class GetCommunityComponent(UIResourceComponent):
         permissions["can_create_record"] = can_create_record
         extra_context["community"] = community
         extra_context["permissions"] = permissions
-        search_options["overrides"]["ui_endpoint"] = (
-            f"/communities/{community_id}/records"
-        )
+        search_options["overrides"][
+            "ui_endpoint"
+        ] = f"/communities/{community_id}/records"

@@ -1,5 +1,10 @@
 from __future__ import annotations
 from flask import g
+
+from typing import TYPE_CHECKING
+from typing_extensions import override
+
+
 import marshmallow as ma
 from invenio_access.permissions import system_identity
 from invenio_requests.proxies import current_requests_service
@@ -23,13 +28,15 @@ from ..errors import (
 )
 from ..proxies import current_oarepo_communities
 
-from typing import TYPE_CHECKING, Any
-from typing_extensions import override
-
 if TYPE_CHECKING:
-    from flask_babel.speaklater import LazyString
+    from typing import Any
     from flask_principal import Identity
-    from invenio_drafts_resources.records import Record
+    from invenio_records_resources.records import Record
+    from invenio_records_resources.services.uow import UnitOfWork
+    from invenio_requests.customizations import RequestType
+    from invenio_requests.customizations.actions import RequestAction
+    from oarepo_requests.typing import EntityReference
+    from flask_babel.speaklater import LazyString
     from invenio_requests.records.api import Request
 
 
@@ -38,7 +45,15 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
     Source community accepting the initiate request autocreates confirm request delegated to the target community.
     """
 
-    def apply(self, identity, request_type, topic, uow, *args, **kwargs):
+    def apply(
+        self,
+        identity: Identity,
+        request_type: RequestType,
+        topic: Any,
+        uow: UnitOfWork,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         request_item = current_oarepo_requests_service.create(
             system_identity,
             data={"payload": self.request.get("payload", {})},
@@ -57,7 +72,15 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
 class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
     """Accept action."""
 
-    def apply(self, identity, request_type, topic, uow, *args, **kwargs):
+    def apply(
+        self,
+        identity: Identity,
+        request_type: RequestType,
+        topic: Any,
+        uow: UnitOfWork,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         # coordination along multiple submission like requests? can only one be available at time?
         # ie.
         # and what if the community is deleted before the request is processed?
@@ -186,7 +209,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
 
     @classmethod
     @property
-    def available_actions(cls):
+    def available_actions(cls) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,
             "accept": InitiateCommunityMigrationAcceptAction,
@@ -216,7 +239,16 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
 
         return super().is_applicable_to(identity, topic, *args, **kwargs)
 
-    def can_create(self, identity, data, receiver, topic, creator, *args, **kwargs):
+    def can_create(
+        self,
+        identity: Identity,
+        data: dict,
+        receiver: EntityReference,
+        topic: Record,
+        creator: EntityReference,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
         target_community_id = data.get("payload", {}).get("community", None)
         if not target_community_id:
@@ -310,7 +342,7 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
 
     @classmethod
     @property
-    def available_actions(cls):
+    def available_actions(cls) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,
             "accept": ConfirmCommunityMigrationAcceptAction,
