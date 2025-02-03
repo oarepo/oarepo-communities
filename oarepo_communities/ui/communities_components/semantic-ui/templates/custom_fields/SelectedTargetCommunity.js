@@ -16,6 +16,7 @@ const SelectedTargetCommunity = ({ fieldPath, readOnlyLabel }) => {
     () => httpApplicationJson.get(`/api/communities/${selectedCommunityId}`),
     {
       enabled: !!selectedCommunityId,
+      refetchOnWindowFocus: false,
       select: (data) => data.data,
     }
   );
