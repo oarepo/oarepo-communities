@@ -1,0 +1,14 @@
+.ui.segment {
+  &.record-communities {
+    .ui.image {
+      flex-shrink: 0;
+    }
+    .content {
+      min-width: 0;
+      .header {
+        white-space: normal;
+        word-wrap: break-word;
+      }
+    }
+  }
+}

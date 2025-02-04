@@ -1,0 +1,26 @@
+{# def communities, imagePlaceholder='/static/images/square-placeholder.png', displayedCommunities=3 #}
+<section class="ui segment record-communities" aria-label='{{ _("Communities") }}'>
+    <h2 class="ui small header detail-sidebar-header">{{ _("Communities") }}</h2>
+    <div class="ui unstackable list">
+        {% for community in communities[0:displayedCommunities] %}
+            {% set isPrimary = loop.first and communities | length > 1%}
+            <CommunityItem community={community} isPrimary={isPrimary} isLast={loop.last} />
+        {% endfor %}
+    </div>
+
+    {% if communities|length > displayedCommunities %}
+    <div class="ui accordion">
+        <div class="title">
+            <i class="dropdown icon"></i>
+            {{ _("Show all communities") }}
+        </div>
+        <div class="content">
+            <div class="ui unstackable list">
+                {% for community in communities[displayedCommunities:] %}
+                    <CommunityItem community={community} isLast={loop.last}/>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</section>
