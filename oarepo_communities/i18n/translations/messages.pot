@@ -9,6 +9,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2025-02-01 21:52+0100\n"
+
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -216,9 +217,28 @@ msgstr ""
 msgid "Submit to initiate record secondary community submission."
 msgstr ""
 
+
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resolvers/ui.py:70
 #, python-format
 msgid "%(role)s of %(community)s"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/CommunityItem.jinja:12
+msgid "Community title not provided"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/CommunityItem.jinja:15
+msgid "primary"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:2
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:3
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:170
+msgid "Communities"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:15
+msgid "Show all communities"
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/frontpage.html:13

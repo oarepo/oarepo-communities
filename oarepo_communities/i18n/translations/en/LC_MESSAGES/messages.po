@@ -477,6 +477,12 @@ msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:133
 msgid "Submit to initiate record secondary community submission."
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:19
+msgid "primary"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:31
+msgid "Show all communities"
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:19
@@ -522,4 +528,6 @@ msgid "Please select the community"
 msgstr ""
 
 msgid "Could not fetch community."
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/CommunityItem.jinja:12
+msgid "Community title not provided"
 msgstr ""
