@@ -476,7 +476,6 @@ msgid "Record secondary community submission request has been submitted."
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:133
-msgid "Submit to initiate record secondary community submission."
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:19
 msgid "primary"
 msgstr ""
@@ -527,7 +526,17 @@ msgstr ""
 msgid "Please select the community"
 msgstr ""
 
-msgid "Could not fetch community."
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/CommunityItem.jinja:12
 msgid "Community title not provided"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:151
+msgid "Submit to initiate record secondary community submission."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resources/components/allowed_communities.py:58
+msgid "You have no permission to create record in this community."
+msgstr ""
+
+msgid "Could not fetch community."
 msgstr ""
