@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from invenio_records_resources.services.records.components.base import ServiceComponent
+from oarepo_workflows.services.components.workflow import WorkflowSetupComponent
 
 from oarepo_communities.proxies import current_oarepo_communities
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from flask_principal import Identity
 
 
-class CommunityDefaultWorkflowComponent(ServiceComponent):
+class CommunityDefaultWorkflowComponent(WorkflowSetupComponent):
     # affects all components, so should be placed as the first one
     affects = "*"
 
