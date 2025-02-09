@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 
 class CommunityDefaultWorkflowComponent(ServiceComponent):
+    # affects all components, so should be placed as the first one
+    affects = "*"
 
     def create(
         self, identity: Identity, data: dict[str, Any] = None, **kwargs: Any
