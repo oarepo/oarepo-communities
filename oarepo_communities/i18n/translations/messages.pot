@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-01-30 20:58+0100\n"
+"POT-Creation-Date: 2025-02-13 10:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,51 +17,233 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:36
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:37
 msgid "Workflows"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:42
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:43
 msgid "Default workflow"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:43
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:44
 msgid ""
 "Default workflow for the community if workflow is not specified when "
 "depositing a record."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:55
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:56
 msgid "Allowed workflows"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:57
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/config.py:58
 msgid "Workflows allowed for the community."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:63
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:62
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:100
+msgid "The record is already included in this community."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:74
+msgid "The record is not included in this community."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:80
+msgid "Primary community can't be removed, can only be migrated to another."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:88
+msgid "Default community is not present in the input."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:94
+msgid "Communities are not present in the input."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:129
 msgid "There is already an open inclusion request for this community."
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:71
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:136
+msgid "The community is already included in the record."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:141
+msgid "Record is already in this community. Please choose another."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:151
+msgid "Target community not provided in the migration request."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/errors.py:155
+msgid "Please select the community"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:116
 msgid "Inititiate Community migration"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:107
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:118
+msgid "Move record to another primary community."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:138
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:140
+msgid "Inititiate record community migration"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:143
+msgid "Record community migration initiated"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:145
+msgid "Request record community migration"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:158
+msgid ""
+"Click to immediately start record migration. After submitting the request "
+"will immediatelly be forwarded to responsible person(s) in the target "
+"community. You will be notified about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:165
+msgid ""
+"After you submit record community migration request, it will first have to "
+"be approved by responsible person(s) of the current community. Then it will "
+"have to be accepted by responsible persons(s) of the target community. You "
+"will be notified about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:173
+msgid ""
+"Record community migration request has been submitted. You will be notified "
+"about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:178
+msgid ""
+"User has requested record community migration. You can now accept or decline"
+" the request."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:182
+msgid "Record community migration request has been submitted."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:185
+msgid "Submit to initiate record community migration. "
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:187
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:341
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:153
+msgid "Request not yet submitted."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:203
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:287
+msgid "Target community:"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:272
 msgid "confirm Community migration"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/remove_secondary.py:31
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:302
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:307
+msgid "Confirm record community migration"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:305
+msgid "Record community migration confirmation pending"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:320
+msgid ""
+"Confirm the migration of the record to the new primary community. This "
+"request must be accepted by responsible person(s) of the new community."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:328
+msgid ""
+"The confirmation request has been submitted to the target community. You "
+"will be notified about their decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:333
+msgid ""
+"A request to confirm record community migration has been received. You can "
+"now accept or decline the request."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:337
+msgid "Record community migration confirmation request is pending."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:340
+msgid "Submit to confirm record community migration."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/remove_secondary.py:53
 msgid "Remove secondary community"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:29
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:71
 msgid "Secondary community submission"
 msgstr ""
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resolvers/ui.py:70
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:94
+msgid "Secondary community:"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
+msgid "Add to secondary community"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:115
+msgid "Confirm record secondary community submission"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:117
+msgid "Request record secondary community submission"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:130
+msgid ""
+"After submitting record secondary community submission request, it will "
+"first have to be approved by responsible person(s) of the target community. "
+"You will be notified about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:137
+msgid ""
+"Record secondary community submission request has been submitted. You will "
+"be notified about the decision by email."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:142
+msgid ""
+"User has requested to add secondary community to a record. You can now "
+"accept or decline the request."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:146
+msgid "Record secondary community submission request has been submitted."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:151
+msgid "Submit to add record to secondary community."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resolvers/ui.py:84
 #, python-format
 msgid "%(role)s of %(community)s"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resources/components/allowed_communities.py:58
+msgid "You have no permission to create record in this community."
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/CommunityItem.jinja:12
@@ -213,6 +395,15 @@ msgid ""
 "Your work will be saved in the following community. Please note that after "
 "saving it will not be possible to transfer it to another community. "
 "Click<1>here</1>to change the selection."
+msgstr ""
+
+msgid "Search in my communities..."
+msgstr ""
+
+msgid "Could not fetch community."
+msgstr ""
+
+msgid "Target community"
 msgstr ""
 
 msgid "Search inside the community..."

@@ -338,7 +338,9 @@ msgstr "Záznam není v této komunitě."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:20
 msgid "Primary community can't be removed, can only be migrated to another."
-msgstr "Záznam nemůže být odebrán z hlavní komunity, je možné ho pouze přesunout do jiné."
+msgstr ""
+"Záznam nemůže být odebrán z hlavní komunity, je možné ho pouze přesunout do "
+"jiné."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:28
 msgid "Default community is not present in the input."
@@ -347,6 +349,212 @@ msgstr "Na vstupu chybí výchozí komunita."
 #: /home/ron/prace/oarepo-communities/oarepo_communities/errors.py:34
 msgid "Communities are not present in the input."
 msgstr "Na vstupu chybí komunity."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:93
+msgid "Request initiation of Community migration."
+msgstr "Požádejte o zahájení migrace komunity."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:113
+msgid "Inititiate record community migration"
+msgstr "Zahajte migraci záznamu do komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:115
+msgid "Request community migration"
+msgstr "Požádejte o migraci komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:118
+msgid "Record community migration initiated"
+msgstr "Migrace záznamu do komunity byla zahájena"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:120
+msgid "Request record community migration"
+msgstr "Požádejte o migraci záznamu do komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:133
+msgid ""
+"Click to immediately start record migration. After submitting the request "
+"will immediatelly be forwarded to responsible person(s) in the target "
+"community. "
+msgstr ""
+"Klikněte pro okamžité zahájení migrace záznamu. Po odeslání bude žádost "
+"ihned předána odpovědným osobám v cílové komunitě."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:139
+msgid ""
+"After you submit record community migration request, it will first have to "
+"be approved by responsible person(s) of the current community. Then it will "
+"have to be accepted by responsible persons(s) of the target community. You "
+"will be notified about the decision by email."
+msgstr ""
+"Po odeslání žádosti o migraci záznamu do komunity ji nejprve musí schválit "
+"odpovědné osoby aktuální komunity. Poté ji musí přijmout odpovědné osoby "
+"cílové komunity. O rozhodnutí budete informováni e-mailem."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:147
+msgid ""
+"Record community migration request has been submitted. You will be notified "
+"about the decision by email."
+msgstr ""
+"Žádost o migraci záznamu do komunity byla odeslána. O rozhodnutí budete "
+"informováni e-mailem."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:152
+msgid ""
+"User has requested record community migration. You can now accept or decline"
+" the request."
+msgstr ""
+"Uživatel požádal o migraci záznamu do komunity. Nyní můžete žádost přijmout "
+"nebo odmítnout."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:156
+msgid "Record community migration request has been submitted."
+msgstr "Žádost o migraci záznamu do komunity byla odeslána."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:159
+msgid "Submit to initiate record community migration. "
+msgstr "Odešlete žádost o zahájení migrace záznamu do komunity."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:161
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:306
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:137
+msgid "Request not yet submitted."
+msgstr "Žádost ještě nebyla odeslána."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:177
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:252
+msgid "Target community:"
+msgstr "Cílová komunita:"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:267
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:272
+msgid "Confirm record community migration"
+msgstr "Potvrďte migraci záznamu do komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:270
+msgid "Record community migration confirmation pending"
+msgstr "Čeká se na potvrzení migrace záznamu do komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:285
+msgid ""
+"Confirm the migration of the record to the new primary community. This "
+"request must be accepted by responsible person(s) of the new community."
+msgstr ""
+"Potvrďte migraci záznamu do nové primární komunity. Tuto žádost musí "
+"přijmout odpovědné osoby nové komunity."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:293
+msgid ""
+"The confirmation request has been submitted to the target community. You "
+"will be notified about their decision by email."
+msgstr ""
+"Potvrzovací žádost byla odeslána cílové komunitě. O jejich rozhodnutí budete"
+" informováni e-mailem."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:298
+msgid ""
+"A request to confirm record community migration has been received. You can "
+"now accept or decline the request."
+msgstr ""
+"Byla přijata žádost o potvrzení migrace záznamu do komunity. Nyní můžete "
+"žádost přijmout nebo odmítnout."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:302
+msgid "Record community migration confirmation request is pending."
+msgstr "Žádost o potvrzení migrace záznamu do komunity čeká na vyřízení."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:305
+msgid "Submit to confirm record community migration."
+msgstr "Odešlete žádost o potvrzení migrace záznamu do komunity."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:76
+msgid "Secondary community:"
+msgstr "Sekundární komunita:"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:97
+msgid "Confirm record secondary community submission"
+msgstr "Potvrďte přidání záznamu do sekundární komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:99
+msgid "Request record secondary community submission"
+msgstr "Požádejte o přidání záznamu do sekundární komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
+msgid ""
+"After submitting record secondary community submission request, it will "
+"first have to be approved by responsible person(s) of the target community. "
+"You will be notified about the decision by email."
+msgstr ""
+"Po odeslání žádosti o přidání záznamu do sekundární komunity ji musí nejprve"
+" schválit odpovědné osoby cílové komunity. O rozhodnutí budete informováni "
+"e-mailem."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:119
+msgid ""
+"Record secondary community submission request has been submitted. You will "
+"be notified about the decision by email."
+msgstr ""
+"Žádost o přidání záznamu do sekundární komunity byla odeslána. O rozhodnutí "
+"budete informováni e-mailem."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:124
+msgid ""
+"User has requested to add secondary community to a record. You can now "
+"accept or decline the request."
+msgstr ""
+"Uživatel požádal o přidání záznamu do sekundární komunity. Nyní můžete "
+"žádost přijmout nebo odmítnout."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:128
+msgid "Record secondary community submission request has been submitted."
+msgstr "Žádost o přidání záznamu do sekundární komunity byla odeslána."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:19
+msgid "Awards"
+msgstr "Ocenění"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:35
+msgid "Visit external website"
+msgstr "Navštivte externí webovou stránku"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:36
+msgid "Opens in new tab"
+msgstr "Otevře se v nové záložce"
+
+msgid "Target community"
+msgstr "Cílová komunita"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:95
+msgid "Move record to another primary community."
+msgstr "Převést pod jinou primarni komunitu"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:135
+msgid ""
+"Click to immediately start record migration. After submitting the request "
+"will immediatelly be forwarded to responsible person(s) in the target "
+"community. You will be notified about the decision by email."
+msgstr ""
+"Kliknutím okamžitě zahájíte migraci záznamu. Po odeslání žádosti bude "
+"okamžitě předána odpovědné osobě (osobám) v cílové komunitě. O rozhodnutí "
+"budete informováni e-mailem."
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:130
+msgid "The community is already included in the record."
+msgstr "Komunita je již zahrnuta v záznamu"
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:135
+msgid "Record is already in this community. Please choose another."
+msgstr "Záznam je již v této komunitě. Prosím vyberte jinou."
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:145
+msgid "Target community not provided in the migration request."
+msgstr "Cílová komunita nebyla uvedena v požadavku na migraci."
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:149
+msgid "Please select the community"
+msgstr "Prosím vyberte komunitu"
+
+msgid "Could not fetch community."
+msgstr "Nepodařilo se načíst komunitu."
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/RecordCommunities.jinja:19
 msgid "primary"
@@ -371,3 +579,15 @@ msgstr ""
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/CommunityItem.jinja:12
 msgid "Community title not provided"
 msgstr "Název komunity není uveden"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resources/components/allowed_communities.py:58
+msgid "You have no permission to create record in this community."
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
+msgid "Add to secondary community"
+msgstr "Přidat do sekundární komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:151
+msgid "Submit to add record to secondary community."
+msgstr "Odeslat pro přidání záznamu do sekundární komunity."
