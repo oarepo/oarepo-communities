@@ -109,7 +109,7 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
         # if is_auto_approved(self, identity=identity, topic=topic):
         #     return _("Add secondary community")
         if not request:
-            return _("Initiate record secondary community submission")
+            return _("Add to secondary community")
         match request.status:
             case "submitted":
                 return _("Confirm record secondary community submission")
@@ -148,9 +148,7 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
                 )
             case _:
                 if request_identity_matches(request.created_by, identity):
-                    return _(
-                        "Submit to initiate record secondary community submission."
-                    )
+                    return _("Submit to add record to secondary community.")
 
                 return _("Request not yet submitted.")
 

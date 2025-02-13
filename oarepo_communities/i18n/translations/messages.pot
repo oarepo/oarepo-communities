@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-02-04 10:12+0100\n"
+"POT-Creation-Date: 2025-02-13 10:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -138,7 +138,7 @@ msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:187
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/migration.py:341
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:155
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:153
 msgid "Request not yet submitted."
 msgstr ""
 
@@ -199,7 +199,7 @@ msgid "Secondary community:"
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
-msgid "Initiate record secondary community submission"
+msgid "Add to secondary community"
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:115
@@ -234,7 +234,7 @@ msgid "Record secondary community submission request has been submitted."
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:151
-msgid "Submit to initiate record secondary community submission."
+msgid "Submit to add record to secondary community."
 msgstr ""
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resolvers/ui.py:84

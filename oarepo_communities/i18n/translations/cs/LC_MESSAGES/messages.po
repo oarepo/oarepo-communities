@@ -470,10 +470,6 @@ msgstr "Odešlete žádost o potvrzení migrace záznamu do komunity."
 msgid "Secondary community:"
 msgstr "Sekundární komunita:"
 
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:94
-msgid "Initiate record secondary community submission"
-msgstr "Zahajte přidání záznamu do sekundární komunity"
-
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:97
 msgid "Confirm record secondary community submission"
 msgstr "Potvrďte přidání záznamu do sekundární komunity"
@@ -511,10 +507,6 @@ msgstr ""
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:128
 msgid "Record secondary community submission request has been submitted."
 msgstr "Žádost o přidání záznamu do sekundární komunity byla odeslána."
-
-#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:133
-msgid "Submit to initiate record secondary community submission."
-msgstr "Odešlete žádost o zahájení přidání záznamu do sekundární komunity."
 
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/about/index.html:19
 msgid "Awards"
@@ -591,3 +583,11 @@ msgstr "Název komunity není uveden"
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/resources/components/allowed_communities.py:58
 msgid "You have no permission to create record in this community."
 msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:112
+msgid "Add to secondary community"
+msgstr "Přidat do sekundární komunity"
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:151
+msgid "Submit to add record to secondary community."
+msgstr "Odeslat pro přidání záznamu do sekundární komunity."
