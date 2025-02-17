@@ -34,7 +34,6 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-
         community_id = self.request.receiver.resolve().community_id
         service = get_record_service_for_record(topic)
         community_inclusion_service = (
@@ -75,7 +74,6 @@ class RemoveSecondaryCommunityRequestType(OARepoRequestType):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
         target_community_id = data["payload"]["community"]
         not_included = target_community_id not in topic.parent.communities.ids
@@ -90,10 +88,11 @@ class RemoveSecondaryCommunityRequestType(OARepoRequestType):
     def is_applicable_to(
         cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any
     ) -> bool:
-
         super().is_applicable_to(identity, topic, *args, **kwargs)
         try:
             communities = topic.parent.communities.ids
         except AttributeError:
             return False
-        return len(communities) > 1
+        if len(communities) < 2:
+            return False
+        return super().is_applicable_to(identity, topic, *args, **kwargs)

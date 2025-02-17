@@ -221,7 +221,6 @@ def test_search_links(
     host,
     search_clear,
 ):
-
     owner_client = logged_client(community_owner)
 
     community_1 = community_get_or_create(community_owner, "comm1")
@@ -232,8 +231,8 @@ def test_search_links(
         )
     ThesisRecord.index.refresh()
 
-    def check_links(model_suffix):
-        after_page_suffix = "&size=25&sort=newest"
+    def check_links(model_suffix, sort_order):
+        after_page_suffix = f"&size=25&sort={sort_order}"
         search_links = owner_client.get(
             f"/communities/{community_1.id}/{model_suffix}"
         ).json["links"]
@@ -258,10 +257,10 @@ def test_search_links(
             == f"{host}api/communities/{community_1.id}/{model_suffix}?page=1{after_page_suffix}"
         )
 
-    check_links("records")
-    check_links("thesis")
-    check_links("user/records")
-    check_links("user/thesis")
+    check_links("records", "newest")
+    check_links("thesis", "newest")
+    check_links("user/records", "newest")
+    check_links("user/thesis", "updated-desc")
 
     search_links = owner_client.get(
         f"/communities/{community_1.id}/records?has_draft=true"
