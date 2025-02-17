@@ -1,26 +1,24 @@
 from __future__ import annotations
-from flask import g
 
 from typing import TYPE_CHECKING
-from typing_extensions import override
-
 
 import marshmallow as ma
+from flask import g
 from invenio_access.permissions import system_identity
 from invenio_requests.proxies import current_requests_service
 from oarepo_requests.actions.generic import OARepoAcceptAction
 from oarepo_requests.proxies import current_oarepo_requests_service
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
-from oarepo_runtime.datastreams.utils import get_record_service_for_record
-from oarepo_runtime.i18n import lazy_gettext as _
 from oarepo_requests.utils import (
     is_auto_approved,
-    request_identity_matches,
     open_request_exists,
+    request_identity_matches,
 )
+from oarepo_runtime.datastreams.utils import get_record_service_for_record
+from oarepo_runtime.i18n import lazy_gettext as _
 from oarepo_ui.resources.components import AllowedCommunitiesComponent
-
+from typing_extensions import override
 
 from ..errors import (
     CommunityAlreadyIncludedException,
@@ -30,14 +28,16 @@ from ..proxies import current_oarepo_communities
 
 if TYPE_CHECKING:
     from typing import Any
+
+    from flask_babel.speaklater import LazyString
     from flask_principal import Identity
     from invenio_records_resources.records import Record
     from invenio_records_resources.services.uow import UnitOfWork
     from invenio_requests.customizations import RequestType
     from invenio_requests.customizations.actions import RequestAction
-    from oarepo_requests.typing import EntityReference
-    from flask_babel.speaklater import LazyString
     from invenio_requests.records.api import Request
+    from oarepo_requests.typing import EntityReference
+from invenio_requests.resolvers.registry import ResolverRegistry
 
 
 class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
@@ -54,12 +54,13 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
         *args: Any,
         **kwargs: Any,
     ) -> None:
+        created_by = self.request.created_by.resolve()
         request_item = current_oarepo_requests_service.create(
             system_identity,
             data={"payload": self.request.get("payload", {})},
             request_type=ConfirmCommunityMigrationRequestType.type_id,
             topic=topic,
-            creator={"user": str(self.request.created_by._resolve().id)},
+            creator=ResolverRegistry.reference_entity(created_by),
             uow=uow,
             *args,
             **kwargs,
