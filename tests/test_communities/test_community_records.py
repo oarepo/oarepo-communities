@@ -259,7 +259,7 @@ def test_search_links(
 
     check_links("records", "newest")
     check_links("thesis", "newest")
-    check_links("user/records", "newest")
+    check_links("user/records", "updated-desc")
     check_links("user/thesis", "updated-desc")
 
     search_links = owner_client.get(
