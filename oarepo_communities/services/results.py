@@ -21,14 +21,18 @@ class RecordCommunitiesComponent(ResultsComponent):
             return
 
         record_communities = []
-        for community_id in record.parent.communities.ids:
+        for community_id in record.parent.communities.ids or []:
             try:
                 community = Community.get_record(community_id)
                 record_communities.append(community_to_dict(community))
             except Exception:
                 continue
 
-        default_community_id = str(record.parent.communities.default.id)
+        default_community_id = (
+            str(record.parent.communities.default.id)
+            if record.parent.communities.default
+            else None
+        )
 
         # Sorting communities so the one with the default id is first
         record_communities.sort(
