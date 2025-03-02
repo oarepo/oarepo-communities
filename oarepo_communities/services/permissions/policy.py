@@ -1,3 +1,6 @@
+from invenio_records_permissions.generators import (
+    SystemProcess,
+)
 from oarepo_requests.services.permissions.workflow_policies import (
     RequestBasedWorkflowPermissions,
 )
@@ -27,6 +30,15 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
     can_create = [
         DefaultCommunityMembers(),
     ]
+
+    can_add_community = [SystemProcess()]
+    """Can add community to record"""
+
+    can_remove_community = [SystemProcess()]
+    """Can remove community from record"""
+
+    can_remove_record = [SystemProcess()]
+    """Can remove record from community"""
 
 
 class CommunityWorkflowPermissionPolicy(WorkflowRecordPermissionPolicy):
