@@ -93,6 +93,11 @@ class MissingCommunitiesError(ValidationError):
 
     description = _("Communities are not present in the input.")
 
+class CommunityDoesntExistError(ValidationError):
+    """"""
+
+    description = _("Input community does not exist.")
+
 
 class CommunityAlreadyExists(Exception):
     """The record is already in the community."""
