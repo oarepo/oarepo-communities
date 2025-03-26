@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from oarepo_requests.actions.generic import OARepoAcceptAction
+from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_runtime.datastreams.utils import get_record_service_for_record
@@ -28,19 +28,18 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
     def apply(
         self,
         identity: Identity,
-        request_type: RequestType,
-        topic: Any,
+        state: RequestActionState,
         uow: UnitOfWork,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         community_id = self.request.receiver.resolve().community_id
-        service = get_record_service_for_record(topic)
+        service = get_record_service_for_record(state.topic)
         community_inclusion_service = (
             current_oarepo_communities.community_inclusion_service
         )
         community_inclusion_service.remove(
-            topic, community_id, record_service=service, uow=uow
+            state.topic, community_id, record_service=service, uow=uow
         )
 
 

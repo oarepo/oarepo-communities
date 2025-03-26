@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from oarepo_requests.actions.generic import OARepoAcceptAction
+from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
 from oarepo_runtime.datastreams.utils import get_record_service_for_record
@@ -45,13 +45,13 @@ class CommunitySubmissionAcceptAction(OARepoAcceptAction):
     def apply(
         self,
         identity: Identity,
-        request_type: RequestType,
-        topic: Any,
+        state: RequestActionState,
         uow: UnitOfWork,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         # it seems that the safest way is to just get the community id from the request payload?
+        topic = state.topic
         community_id = self.request.get("payload", {}).get("community", None)
         if not community_id:
             raise TargetCommunityNotProvidedException("Target community not provided.")

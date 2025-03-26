@@ -6,7 +6,7 @@ import marshmallow as ma
 from flask import g
 from invenio_access.permissions import system_identity
 from invenio_requests.proxies import current_requests_service
-from oarepo_requests.actions.generic import OARepoAcceptAction
+from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
 from oarepo_requests.proxies import current_oarepo_requests_service
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
@@ -48,8 +48,7 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
     def apply(
         self,
         identity: Identity,
-        request_type: RequestType,
-        topic: Any,
+        state: RequestActionState,
         uow: UnitOfWork,
         *args: Any,
         **kwargs: Any,
@@ -59,7 +58,7 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
             system_identity,
             data={"payload": self.request.get("payload", {})},
             request_type=ConfirmCommunityMigrationRequestType.type_id,
-            topic=topic,
+            topic=state.topic,
             creator=ResolverRegistry.reference_entity(created_by),
             uow=uow,
             *args,
@@ -76,8 +75,7 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
     def apply(
         self,
         identity: Identity,
-        request_type: RequestType,
-        topic: Any,
+        state: RequestActionState,
         uow: UnitOfWork,
         *args: Any,
         **kwargs: Any,
@@ -85,7 +83,7 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
         # coordination along multiple submission like requests? can only one be available at time?
         # ie.
         # and what if the community is deleted before the request is processed?
-
+        topic = state.topic
         community_id = self.request.get("payload", {}).get("community", None)
         if not community_id:
             raise TargetCommunityNotProvidedException("Target community not provided.")
