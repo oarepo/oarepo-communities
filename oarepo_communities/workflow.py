@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 from invenio_communities.communities.records.api import Community
 
-from oarepo_communities.errors import MissingDefaultCommunityError
+from oarepo_communities.errors import MissingDefaultCommunityError, CommunityDoesntExistError
 from oarepo_communities.utils import community_id_from_record
-
+from invenio_pidstore.errors import PIDDoesNotExistError
 if TYPE_CHECKING:
     from typing import Any
 
@@ -36,5 +36,8 @@ def community_default_workflow(**kwargs: Any) -> str | None:
             )
 
     # use pid resolve so that the community might be both slug or id
-    community = Community.pid.resolve(community_id)
+    try:
+        community = Community.pid.resolve(community_id)
+    except PIDDoesNotExistError:
+        raise CommunityDoesntExistError(community_id)
     return community.custom_fields.get("workflow", "default")
