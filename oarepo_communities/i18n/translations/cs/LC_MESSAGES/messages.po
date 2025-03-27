@@ -591,3 +591,7 @@ msgstr "Přidat do sekundární komunity"
 #: /home/dusanst/Projects/oarepo-communities/oarepo_communities/requests/submission_secondary.py:151
 msgid "Submit to add record to secondary community."
 msgstr "Odeslat pro přidání záznamu do sekundární komunity."
+
+#: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:99
+msgid "Input community does not exist."
+msgstr "Komunita požadovaná v záznamu neexistuje."
