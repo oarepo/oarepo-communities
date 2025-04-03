@@ -72,3 +72,7 @@ DISPLAY_NEW_COMMUNITIES = True
 NOTIFICATION_RECIPIENTS_RESOLVERS = {
     "community_role": {"email": CommunityRoleEmailRecipient}
 }
+
+DATASTREAMS_TRANSFORMERS = {
+    "set_community": "oarepo_communities.datastreams.transformers.SetCommunityTransformer",
+}
