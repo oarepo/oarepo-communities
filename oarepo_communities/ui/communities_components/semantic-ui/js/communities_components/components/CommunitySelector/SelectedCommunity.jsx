@@ -26,14 +26,15 @@ export const SelectedCommunity = ({ fieldPath }) => {
   };
   return (
     <React.Fragment>
-      {values?.id && (
+      {(values?.id ||
+        (selectedCommunityId && allowed_communities.length <= 1)) && (
         <p>
           {i18next.t(
             "Your record will be published in the following community:"
           )}
         </p>
       )}
-      {!values?.id && allowed_communities.length > 1 && (
+      {!values?.id && allowed_communities.length > 1 && selectedCommunity && (
         <Trans i18n={i18next}>
           Your work will be saved in the following community. Please note that
           after saving it will not be possible to transfer it to another
