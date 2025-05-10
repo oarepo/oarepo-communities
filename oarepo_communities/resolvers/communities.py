@@ -30,7 +30,8 @@ class CommunityRoleObj:
         """Return the emails of the community members."""
         member_emails = []
         members: list[MemberModel] = MemberModel.query.filter_by(
-            community_id=self.community_id
+            community_id=self.community_id,
+            role=self.role,
         ).all()
         for member in members:
             try:
