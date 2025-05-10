@@ -1,15 +1,23 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 from typing import TYPE_CHECKING
 
+from invenio_access.models import User
 from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
-from invenio_records_resources.references.entity_resolvers.base import EntityResolver
+from invenio_communities.members.records.models import MemberModel
+from invenio_records_resources.references.entity_resolvers.base import (
+    EntityProxy,
+    EntityResolver,
+)
 
 if TYPE_CHECKING:
     from typing import Any
 
     from flask_principal import Identity, Need
+
+log = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -17,8 +25,23 @@ class CommunityRoleObj:
     community_id: str
     role: str
 
-
-from invenio_records_resources.references.entity_resolvers.base import EntityProxy
+    @property
+    def emails(self) -> list[str]:
+        """Return the emails of the community members."""
+        member_emails = []
+        members: list[MemberModel] = MemberModel.query.filter_by(
+            community_id=self.community_id
+        ).all()
+        for member in members:
+            try:
+                if member.user_id:
+                    user = User.query.get(member.user_id)
+                    member_emails.append(user.email)
+            except Exception:
+                log.error(
+                    "Error retrieving user %s for community members.", member.user_id
+                )
+        return member_emails
 
 
 class CommunityRoleProxy(EntityProxy):
