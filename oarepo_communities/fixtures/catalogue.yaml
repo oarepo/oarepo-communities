@@ -1,0 +1,8 @@
+vocabulary-community-types:
+  - writer: vocabulary
+    vocabulary: communitytypes
+    pid_type: v-comm
+    title:
+      cs: Typy komunit
+      en: Community types
+  - source: community-types.yaml
