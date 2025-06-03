@@ -21,6 +21,7 @@ recursive-include oarepo_communities *.mo
 recursive-include oarepo_communities *.po
 recursive-include oarepo_communities *.pot
 recursive-include oarepo_communities *.scss
+recursive-include oarepo_communities *.yaml
 recursive-exclude tests *
 recursive-include oarepo_communities *.gitkeep
 recursive-include oarepo_communities *.jsx *.less *.json
