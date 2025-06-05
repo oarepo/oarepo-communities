@@ -1,4 +1,10 @@
-#community-members-search-root {
+#community-members-search-root,
+#community-invitations-search-root {
+  @media (min-width: @largestMobileScreen) {
+    .flex.column-mobile {
+      align-items: center;
+    }
+  }
   .ui.table {
     @media all and (max-width: @largestTabletScreen) {
       &:not(.unstackable) {

@@ -26,7 +26,12 @@ from invenio_communities.views.communities import (
 from invenio_communities.views.communities import (
     communities_settings_pages as invenio_communities_settings_pages,
 )
+
 from invenio_communities.views.communities import members as invenio_communities_members
+
+from invenio_communities.views.communities import (
+    invitations as invenio_communities_invitations,
+)
 from invenio_communities.views.ui import (
     _has_about_page_content,
     _has_curation_policy_page_content,
@@ -51,8 +56,8 @@ class CommunityValidationSchema(ma.Schema):
         community = current_service_registry.get("communities").read(
             g.identity, pid_value
         )
-        UICommunityJSONSerializer().dump_obj(community.to_dict())
-        return {"community": community}
+        community_ui = UICommunityJSONSerializer().dump_obj(community.to_dict())
+        return {"community": community, "community_ui": community_ui}
 
 
 request_community_view_args = request_parser(
@@ -81,6 +86,7 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
         "communities_frontpage": "/",
         "communities_search": "/search",
         "communities_new": "/new",
+        "community_invitations": "/<pid_value>/invitations",
     }
     api_service = "records"
 
@@ -127,6 +133,12 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
         self,
     ):
         return invenio_communities_members(
+            pid_value=resource_requestctx.view_args["pid_value"]
+        )
+
+    @request_view_args
+    def community_invitations(self):
+        return invenio_communities_invitations(
             pid_value=resource_requestctx.view_args["pid_value"]
         )
 
@@ -178,6 +190,7 @@ def create_blueprint(app):
             expected_args=["pid_value"],
             **dict(icon="search", permissions=True),
         )
+
         communities.submenu("members").register(
             endpoint="oarepo_communities.members",
             text=_("Members"),

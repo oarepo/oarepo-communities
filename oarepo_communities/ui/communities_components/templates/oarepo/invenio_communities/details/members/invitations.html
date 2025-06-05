@@ -1,0 +1,25 @@
+{% extends "semantic-ui/invenio_communities/details/members/invitations.html" %}
+
+{%- block settings_body %}
+  <div class="thirteen wide computer sixteen wide tablet sixteen wide mobile column">
+   <div class="ui info message">
+        <div class="header">
+            <i class="info circle icon"></i>
+            {{_("This is a preview feature and not all functionalities are available yet.")}}
+        </div>
+    </div>
+    <div
+      id="community-invitations-search-root"
+      data-community='{{ community | tojson }}'
+      data-groups-enabled='{{ config.USERS_RESOURCES_GROUPS_ENABLED | tojson }}'
+      data-communities-all-roles='{{ config.COMMUNITIES_ROLES | tojson }}'
+      data-communities-roles-can-invite='{{ roles_can_invite | tojson }}'
+      data-permissions='{{ permissions | tojson }}'
+      data-invenio-search-config='{{
+        search_app_communities_invitations_config(app_id="InvenioCommunities.InvitationsSearch",
+        endpoint=community["links"]["invitations"]) | tojson }}'>
+    </div>
+  </div>
+
+
+{%- endblock settings_body %}
