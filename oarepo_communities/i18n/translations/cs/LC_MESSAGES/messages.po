@@ -595,3 +595,13 @@ msgstr "Odeslat pro přidání záznamu do sekundární komunity."
 #: /Users/m/w/cesnet/oarepo-communities/oarepo_communities/errors.py:99
 msgid "Input community does not exist."
 msgstr "Komunita požadovaná v záznamu neexistuje."
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/members/base.html:5
+msgid "Invitations"
+msgstr ""
+
+#: /home/dusanst/Projects/oarepo-communities/oarepo_communities/ui/communities_components/templates/oarepo/invenio_communities/details/members/invitations.html:8
+msgid ""
+"This is a preview feature and not all functionalities are available yet."
+msgstr ""
+"Toto je ukázková funkce a ne všechny funkcionality jsou zatím dostupné."

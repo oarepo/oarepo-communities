@@ -20,8 +20,15 @@ import { Formik } from "formik";
 import PropTypes from "prop-types";
 import _debounce from "lodash/debounce";
 import { serializeMembers, findAndValidateEmails } from "./util";
+import { withState } from "react-searchkit";
 
-export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
+const CommunityInvitationsModalComponent = ({
+  rolesCanInvite,
+  community,
+  resetQueryOnSubmit = false,
+  updateQueryState,
+  currentQueryState,
+}) => {
   const { isOpen, close, open } = useConfirmationModal();
   const [successMessage, setSuccessMessage] = useState("");
   const [httpError, setHttpError] = useState("");
@@ -30,7 +37,7 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
     setSuccessMessage("");
     setHttpError("");
     close();
-  }
+  };
 
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
     const serializer = new OARepoDepositSerializer(
@@ -51,21 +58,27 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
         setSuccessMessage(i18next.t("Invitations sent successfully."));
         setTimeout(() => {
           if (isOpen) {
-            handleClose()
+            handleClose();
+            if (resetQueryOnSubmit) {
+              updateQueryState({
+                // when in invitations immediatelly refetch the results when modal closes
+                // so you would see also the invitations that you just sent
+                ...currentQueryState,
+              });
+            }
           }
         }, 2500);
       }
     } catch (error) {
       if (error.response.status >= 400) {
-        console.error(error.response)
+        console.error(error.response);
         setHttpError(`
           ${i18next.t(
             "The invitations could not be sent. Please try again later."
           )}
-          ${error.response.data.message}` // TODO: These needs to get translated in invenio_communities.members.config
-        );
+          ${error.response.data.message}`); // TODO: These needs to get translated in invenio_communities.members.config
         setTimeout(() => {
-          setHttpError("")
+          setHttpError("");
         }, 5000);
       }
     } finally {
@@ -210,6 +223,7 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
                 onClick={handleSubmit}
                 disabled={validEmailsCount === 0 || isSubmitting}
                 loading={isSubmitting}
+                type="button"
               >
                 <Icon name="checkmark" /> {i18next.t("Invite")}{" "}
                 {validEmailsCount > 0 && `(${validEmailsCount})`}
@@ -222,7 +236,14 @@ export const CommunityInvitationsModal = ({ rolesCanInvite, community }) => {
   );
 };
 
-CommunityInvitationsModal.propTypes = {
+export const CommunityInvitationsModal = withState(
+  CommunityInvitationsModalComponent
+);
+
+CommunityInvitationsModalComponent.propTypes = {
   rolesCanInvite: PropTypes.object.isRequired,
   community: PropTypes.object.isRequired,
+  resetQueryOnSubmit: PropTypes.bool,
+  updateQueryState: PropTypes.func,
+  currentQueryState: PropTypes.object,
 };
