@@ -105,7 +105,10 @@ const CommunityInvitationsModalComponent = ({
       initialValues={{
         membersEmails: "",
         members: [],
-        role: "member",
+        // Some repo might not have member role defined
+        role:
+          usersCanInvite.find((u) => u.name === "member")?.name ||
+          usersCanInvite?.[0]?.name,
         emails: { validEmails: [], invalidEmails: [] },
       }}
       validateOnChange={false}
@@ -185,7 +188,10 @@ const CommunityInvitationsModalComponent = ({
                 </Form.Field>
                 <Form.Field required className="rel-mt-1">
                   <FieldLabel label={i18next.t("Role")} />
-                  <List selection>
+                  <List
+                    className="communities community-member-role-list"
+                    selection
+                  >
                     {usersCanInvite.map((u) => (
                       <List.Item
                         key={u.name}
