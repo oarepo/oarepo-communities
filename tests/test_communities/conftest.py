@@ -272,6 +272,20 @@ class CuratorPublishRequests(DefaultRequests):
         ),
     )
 
+class MultipleRecipientsRequests(DefaultRequests):
+    publish_draft = WorkflowRequest(
+        requesters=[
+            IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])
+        ],
+        recipients=[DefaultCommunityRole("curator"), DefaultCommunityRole("owner")],
+        transitions=WorkflowTransitions(
+            submitted="publishing",
+            accepted="published",
+            declined="draft",
+            cancelled="draft",
+        ),
+    )
+
 
 WORKFLOWS = {
     "default": Workflow(
@@ -303,6 +317,11 @@ WORKFLOWS = {
         label=_("For testing assigned param filter."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=CuratorPublishRequests,
+    ),
+    "multiple_recipients": Workflow(
+        label=_("For testing multiple recipient requests.."),
+        permission_policy_cls=TestCommunityWorkflowPermissions,
+        request_policy_cls=MultipleRecipientsRequests,
     ),
 }
 

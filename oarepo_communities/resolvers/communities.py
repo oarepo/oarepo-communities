@@ -11,6 +11,7 @@ from invenio_records_resources.references.entity_resolvers.base import (
     EntityProxy,
     EntityResolver,
 )
+from oarepo_requests.notifications.generators import _extract_entity_email_data
 
 if TYPE_CHECKING:
     from typing import Any
@@ -37,7 +38,7 @@ class CommunityRoleObj:
             try:
                 if member.user_id:
                     user = User.query.get(member.user_id)
-                    member_emails.append(user.email)
+                    member_emails.append(_extract_entity_email_data(user))
             except Exception:
                 log.error(
                     "Error retrieving user %s for community members.", member.user_id
