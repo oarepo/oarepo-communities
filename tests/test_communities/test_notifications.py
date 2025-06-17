@@ -42,6 +42,7 @@ def test_locales(
     submit_request_on_draft,
     link2testclient,
     urls,
+    search_clear,
 ):
     """Test notification being built on review submit."""
 
@@ -78,6 +79,7 @@ def test_locales_multiple_recipients(
     submit_request_on_draft,
     link2testclient,
     urls,
+    search_clear,
 ):
     """Test notification being built on review submit."""
 
