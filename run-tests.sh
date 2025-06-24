@@ -22,8 +22,11 @@ ${PYTHON} -m venv $BUILDER_VENV
 pip install -U setuptools pip wheel
 pip install oarepo-model-builder oarepo-model-builder-requests \
             oarepo-model-builder-drafts \
+            oarepo-model-builder-files \
+            oarepo-model-builder-drafts-files \
             oarepo-model-builder-communities \
-            oarepo-model-builder-workflows
+            oarepo-model-builder-workflows \
+            oarepo-model-builder-rdm
 
 
 curl -L -o forked_install.sh https://github.com/oarepo/nrp-devtools/raw/main/tests/forked_install.sh

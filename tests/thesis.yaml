@@ -3,7 +3,7 @@ record:
     metadata:
       properties:
         title:
-          type: fulltext
+          type: keyword
         status:
           type: keyword
   module:
@@ -17,10 +17,23 @@ record:
 
   draft: {}
 
+  files:
+    properties:
+      metadata:
+        properties:
+          title:
+            type: fulltext
+    use:
+      - invenio_files
+      -
+  draft-files: {}
+
 
 profiles:
   - record
   - draft
+  - files
+  - draft_files
 
 
 settings:

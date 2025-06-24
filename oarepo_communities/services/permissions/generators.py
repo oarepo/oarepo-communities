@@ -281,11 +281,12 @@ class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, Generator):
         return self._needs(record_communities, record=record)
 
     def _needs(self, record_communities: set[str], record: Record = None) -> list[Need]:
-        owners = getattr(record.parent, "owners", None)
+        owners = getattr(record.parent.access, "owned_by", [])
+        owners = owners if isinstance(owners, list) else [owners]
         ret = []
         for owner in owners:
             ret += [
-                UserInCommunityNeed(owner.id, community)
+                UserInCommunityNeed(owner.owner_id, community)
                 for community in record_communities
             ]
         return ret

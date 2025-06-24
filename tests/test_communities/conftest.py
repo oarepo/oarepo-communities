@@ -29,7 +29,7 @@ from oarepo_workflows import (
     WorkflowTransitions,
 )
 from thesis.proxies import current_service
-
+from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
 from oarepo_communities.services.custom_fields.workflow import WorkflowCF
 from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
@@ -50,8 +50,12 @@ pytest_plugins = [
     "pytest_oarepo.records",
     "pytest_oarepo.fixtures",
     "pytest_oarepo.users",
+    "pytest_oarepo.files",
 ]
 
+@pytest.fixture()
+def custom_fields():
+    prepare_cf_indices()
 
 @pytest.fixture(autouse=True)
 def init_communities_cf(init_communities_cf):
@@ -396,6 +400,9 @@ def app_config(app_config):
         ServiceResultResolver(service_id="request_events", type_key="request_event"),
     ]
     app_config["MAIL_DEFAULT_SENDER"] = "test@invenio-rdm-records.org"
+
+    app_config["INVENIO_RDM_ENABLED"] = True
+
     return app_config
 
 

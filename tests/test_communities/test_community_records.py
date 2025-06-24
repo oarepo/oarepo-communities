@@ -44,6 +44,7 @@ def test_search(
     community_owner,
     published_record_with_community_factory,
     community_get_or_create,
+    custom_fields,
     record_service,
     search_clear,
 ):
@@ -80,6 +81,53 @@ def test_search(
     # this now works as user search
     assert len(response_draft1.json["hits"]["hits"]) == 1
     assert len(response_draft2.json["hits"]["hits"]) == 1
+
+    assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
+    assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+
+def test_search_all(
+    logged_client,
+    community_owner,
+    published_record_with_community_factory,
+    draft_with_community_factory,
+    community_get_or_create,
+    record_service,
+    search_clear,
+):
+    owner_client = logged_client(community_owner)
+
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
+
+    record1 = published_record_with_community_factory(
+        community_owner.identity, community_1.id
+    )
+    record2 = published_record_with_community_factory(
+        community_owner.identity, community_2.id
+    )
+
+    record1 = draft_with_community_factory(
+        community_owner.identity, str(community_1.id)
+    )
+    record2 = draft_with_community_factory(
+        community_owner.identity, str(community_2.id)
+    )
+
+    ThesisRecord.index.refresh()
+    ThesisDraft.index.refresh()
+
+    response_record1 = owner_client.get(
+        f"/communities/{community_1.id}/all/records",
+        query_string={"record_status": "published"},
+    )
+    response_record2 = owner_client.get(
+        f"/communities/{community_2.id}/all/records",
+        query_string={"record_status": "published"},
+    )
+
+
+    assert len(response_record1.json["hits"]["hits"]) == 1
+    assert len(response_record2.json["hits"]["hits"]) == 1
 
     assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
