@@ -7,6 +7,8 @@ from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
+import marshmallow as ma
+
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
 from ..proxies import current_oarepo_communities
@@ -50,6 +52,10 @@ class RemoveSecondaryCommunityRequestType(OARepoRequestType):
 
     type_id = "remove_secondary_community"
     name = _("Remove secondary community")
+
+    payload_schema = {
+        "community": ma.fields.Str(required=True),
+    }
 
     creator_can_be_none = False
     topic_can_be_none = False
