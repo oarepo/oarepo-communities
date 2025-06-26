@@ -11,6 +11,7 @@ record:
 
   use:
     - invenio
+    - rdm
 
   permissions:
     presets: [ 'community-workflow' ]
@@ -25,7 +26,6 @@ record:
             type: fulltext
     use:
       - invenio_files
-      -
   draft-files: {}
 
 

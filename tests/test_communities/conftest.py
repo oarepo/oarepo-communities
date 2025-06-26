@@ -43,6 +43,8 @@ from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
 
+from oarepo_runtime.i18n import lazy_gettext as _
+
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
     "pytest_oarepo.communities.records",
@@ -93,10 +95,18 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
         ),
     ]
 
+    can_read_deleted = can_read
+    can_read_all_records = [
+        RecordOwners(),
+        CommunityRole("owner"),
+        CommunityRole("curator"),
+    ]
+
     can_create = [
         DefaultCommunityRole("owner"),
         DefaultCommunityRole("reader"),
     ]
+    can_manage_files = can_create
 
     can_update = [
         IfInState("draft", [RecordOwners()]),
@@ -402,6 +412,23 @@ def app_config(app_config):
     app_config["MAIL_DEFAULT_SENDER"] = "test@invenio-rdm-records.org"
 
     app_config["INVENIO_RDM_ENABLED"] = True
+    app_config["RDM_MODELS"] = {
+            "service_id": "thesis",
+            # deprecated
+            "model_service": "thesis.services.records.service.ThesisService",
+            # deprecated
+            "service_config": "thesis.services.records.config.ThesisServiceConfig",
+            "api_service": "thesis.services.records.service.ThesisService",
+            "api_service_config": "thesis.services.records.config.ThesisServiceConfig",
+            "api_resource": "thesis.resources.records.resource.ThesisResource",
+            "api_resource_config": (
+                "thesis.resources.records.config.ThesisResourceConfig"
+            ),
+            "ui_resource_config": "tests.ui.thesis.ThesisUIResourceConfig",
+            "record_cls": "thesis.records.api.ThesisRecord",
+            "pid_type": "thesis",
+            "draft_cls": "thesis.records.api.ThesisDraft",
+            },
 
     return app_config
 

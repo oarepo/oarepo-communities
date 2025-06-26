@@ -92,12 +92,21 @@ def test_search_all(
     draft_with_community_factory,
     community_get_or_create,
     record_service,
+    users,
     search_clear,
 ):
-    owner_client = logged_client(community_owner)
+    reader = users[0]
+    curator = users[1]
+
+    reader_client = logged_client(reader)
+    curator_client = logged_client(curator)
 
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
+    invite(reader, community_1.id, "reader")
+    invite(curator, community_1.id, "curator")
+
+    owner_client = logged_client(community_owner)
 
     record1 = published_record_with_community_factory(
         community_owner.identity, community_1.id
@@ -106,31 +115,39 @@ def test_search_all(
         community_owner.identity, community_2.id
     )
 
-    record1 = draft_with_community_factory(
+    draft1 = draft_with_community_factory(
         community_owner.identity, str(community_1.id)
     )
-    record2 = draft_with_community_factory(
+    draft2 = draft_with_community_factory(
         community_owner.identity, str(community_2.id)
     )
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
 
-    response_record1 = owner_client.get(
-        f"/communities/{community_1.id}/all/records",
-        query_string={"record_status": "published"},
+    search_community1 = owner_client.get(
+        f"/communities/{community_1.id}/all/records"
     )
-    response_record2 = owner_client.get(
-        f"/communities/{community_2.id}/all/records",
-        query_string={"record_status": "published"},
+    search_community2 = owner_client.get(
+        f"/communities/{community_2.id}/all/records"
     )
 
+    assert len(search_community1.json["hits"]["hits"]) == 2
+    assert len(search_community2.json["hits"]["hits"]) == 2
 
-    assert len(response_record1.json["hits"]["hits"]) == 1
-    assert len(response_record2.json["hits"]["hits"]) == 1
+    assert {hit["id"] for hit in search_community1.json["hits"]["hits"]} == {draft1["id"], record1["id"]}
+    assert {hit["id"] for hit in search_community2.json["hits"]["hits"]} == {draft2["id"], record2["id"]}
 
-    assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
-    assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+    #test separate permissions
+    curator_search = curator_client.get(
+        f"/communities/{community_1.id}/all/records"
+    )
+    reader_search = reader_client.get(
+        f"/communities/{community_1.id}/all/records"
+    )
+
+    assert len(curator_search.json["hits"]["hits"]) == 2
+    assert len(reader_search.json["hits"]["hits"]) == 0
 
 
 # todo tests for search links
@@ -366,13 +383,13 @@ def test_search_ui_serialization(
     assert search_user_global.status_code == 200
     assert search_user_model.status_code == 200
 
-    # todo ui serialization is now recognizable through filtering parent - this might not make sense in the future
+    # this was originally meant to determine the results go through ui serialization
     # ie. define something explicit in model json
-    assert "parent" in search_control.json["hits"]["hits"][0]
-    assert "parent" not in search_global.json["hits"]["hits"][0]
-    assert "parent" not in search_model.json["hits"]["hits"][0]
-    assert "parent" not in search_user_global.json["hits"]["hits"][0]
-    assert "parent" not in search_user_model.json["hits"]["hits"][0]
+    assert "access" in search_control.json["hits"]["hits"][0]
+    assert "access" not in search_global.json["hits"]["hits"][0]
+    assert "access" not in search_model.json["hits"]["hits"][0]
+    assert "access" not in search_user_global.json["hits"]["hits"][0]
+    assert "access" not in search_user_model.json["hits"]["hits"][0]
 
 
 """
