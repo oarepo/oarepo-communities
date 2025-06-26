@@ -121,7 +121,10 @@ def test_community_delete(
     record_id = record["id"]
 
     submit = submit_request_on_record(
-        community_reader.identity, record_id, "delete_published_record"
+        community_reader.identity,
+        record_id,
+        "delete_published_record",
+        create_additional_data={"payload": {"removal_reason": "test reason"}},
     )
     _accept_request(
         reader_client,
