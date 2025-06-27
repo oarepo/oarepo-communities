@@ -57,10 +57,6 @@ pytest_plugins = [
     "pytest_oarepo.files",
 ]
 
-@pytest.fixture()
-def custom_fields():
-    prepare_cf_indices()
-
 @pytest.fixture(autouse=True)
 def init_communities_cf(init_communities_cf):
     return init_communities_cf

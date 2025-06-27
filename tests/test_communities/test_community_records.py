@@ -44,7 +44,6 @@ def test_search(
     community_owner,
     published_record_with_community_factory,
     community_get_or_create,
-    custom_fields,
     record_service,
     search_clear,
 ):
