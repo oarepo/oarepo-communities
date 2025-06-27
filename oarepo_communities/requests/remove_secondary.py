@@ -4,15 +4,14 @@ from typing import TYPE_CHECKING
 
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
 from oarepo_requests.types import ModelRefTypes
-from oarepo_requests.types.generic import OARepoRequestType
 from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
-import marshmallow as ma
 
 
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
 from ..proxies import current_oarepo_communities
-
+import marshmallow as ma
+from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
 if TYPE_CHECKING:
     from typing import Any
 
@@ -47,7 +46,7 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
 
 # Request
 #
-class RemoveSecondaryCommunityRequestType(OARepoRequestType):
+class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRequestType):
     """Review request for submitting a record to a community."""
 
     type_id = "remove_secondary_community"
@@ -60,6 +59,10 @@ class RemoveSecondaryCommunityRequestType(OARepoRequestType):
     creator_can_be_none = False
     topic_can_be_none = False
     allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
+
+    payload_schema = {
+        "community": ma.fields.String(required=True),
+    }
 
     @classmethod
     @property

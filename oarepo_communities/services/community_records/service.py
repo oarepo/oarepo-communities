@@ -103,6 +103,35 @@ class CommunityRecordsService(Service):
             **kwargs,
         )
 
+    def search_all_records(
+        self,
+        identity: Identity,
+        community_id: str,
+        params: dict[str, Any] | None = None,
+        search_preference: Any | None = None,
+        extra_filter: Query | None = None,
+        expand: bool = False,
+        **kwargs: Any,
+    ) -> RecordList:
+        params_copy = copy.deepcopy(params)
+        facets = params_copy.pop("facets")
+        params_copy.update(facets)
+        return self._search(
+            identity,
+            community_id,
+            search_service=current_global_search_service,
+            search_method="search_all_records",
+            links_template=LinksTemplate(
+                self.config.links_search_community_records,
+                context={"args": params_copy, "id": community_id},
+            ),
+            params=params,
+            search_preference=search_preference,
+            extra_filter=extra_filter,
+            expand=expand,
+            **kwargs,
+        )
+
     def search_model(
         self,
         identity: Identity,

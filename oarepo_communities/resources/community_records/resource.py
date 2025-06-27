@@ -22,6 +22,7 @@ class CommunityRecordsResource(RecordResource):
         routes = self.config.routes
         url_rules = [
             route("GET", p(routes["list"]), self.search),
+            route("GET", p(routes["list-all"]), self.search_all_records),
             route("GET", p(routes["list-user"]), self.search_user),
             route("POST", p(routes["list"]), self.create_in_community),
             route(
@@ -50,6 +51,19 @@ class CommunityRecordsResource(RecordResource):
     def search(self) -> tuple[dict, int]:
         """Perform a search over the community's records."""
         hits = self.service.search(
+            identity=g.identity,
+            community_id=resource_requestctx.view_args["pid_value"],
+            params=resource_requestctx.args,
+            search_preference=search_preference(),
+        )
+        return hits.to_dict(), 200
+
+    @request_search_args
+    @request_view_args
+    @response_handler(many=True)
+    def search_all_records(self) -> tuple[dict, int]:
+        """Perform a search over the community's records."""
+        hits = self.service.search_all_records(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],
             params=resource_requestctx.args,

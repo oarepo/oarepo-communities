@@ -38,7 +38,7 @@ def test_include(
         record, community_3.id, default=True, record_service=record_service
     )
     record_after_include = record_service.read_draft(
-        system_identity, record_id, record_service=record_service
+        system_identity, record_id
     )._obj
     assert set(record_after_include.parent["communities"]["ids"]) == {
         community_1.id,

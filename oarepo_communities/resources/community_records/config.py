@@ -21,6 +21,7 @@ class CommunityRecordsResourceConfig(RecordResourceConfig, ConfiguratorMixin):
         "list-model": "<pid_value>/<model>",
         "list-user": "<pid_value>/user/records",
         "list-user-model": "<pid_value>/user/<model>",
+        "list-all": "<pid_value>/all/records",
     }
     request_view_args = {
         **RecordResourceConfig.request_view_args,
