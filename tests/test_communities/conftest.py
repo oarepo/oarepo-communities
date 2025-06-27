@@ -28,6 +28,7 @@ from oarepo_workflows import (
     WorkflowRequestPolicy,
     WorkflowTransitions,
 )
+from pytest_oarepo.vocabularies.config import VOCABULARIES_TEST_CONFIG
 from thesis.proxies import current_service
 from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
 from oarepo_communities.services.custom_fields.workflow import WorkflowCF
@@ -44,6 +45,7 @@ from oarepo_communities.services.permissions.policy import (
 )
 
 from oarepo_runtime.i18n import lazy_gettext as _
+from deepmerge import always_merger
 
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
@@ -429,7 +431,7 @@ def app_config(app_config):
             "pid_type": "thesis",
             "draft_cls": "thesis.records.api.ThesisDraft",
             },
-
+    always_merger.merge(app_config, VOCABULARIES_TEST_CONFIG)
     return app_config
 
 

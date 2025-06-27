@@ -1,8 +1,10 @@
 import pytest
 from pytest_oarepo.communities.functions import invite
-from pytest_oarepo.vocabularies.functions import load_test_vocabularies
 from pytest_oarepo.requests.functions import get_request_type
+from pytest_oarepo.vocabularies.loading import load_test_vocabularies
+
 from thesis.records.api import ThesisRecord
+from invenio_vocabularies.records.api import Vocabulary
 
 from oarepo_communities.errors import (
     CommunityAlreadyIncludedException,
@@ -126,7 +128,7 @@ def test_community_delete(
         community_reader.identity,
         record_id,
         "delete_published_record",
-        create_additional_data={"payload": {"removal_reason": "test reason"}},
+        create_additional_data={"payload": {"removal_reason": "duplicate"}},
     )
     _accept_request(
         reader_client,
