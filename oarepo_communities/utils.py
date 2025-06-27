@@ -68,32 +68,26 @@ def slug2id(slug: str) -> str:
     return str(current_communities.service.record_cls.pid.resolve(slug).id)
 
 
-def get_record_services() -> list[RecordService]:
-    services = []
-    for service_id in set(current_app.config["OAREPO_PRIMARY_RECORD_SERVICE"].values()):
-        services.append(current_service_registry.get(service_id))
-    return services
-
+def get_record_services() -> dict[Record, RecordService]:
+    return {k: current_service_registry.get(v) for k, v in current_app.config["OAREPO_PRIMARY_RECORD_SERVICE"].items()}
 
 def get_service_by_urlprefix(url_prefix: str) -> RecordService:
     return current_service_registry.get(
         current_oarepo_communities.urlprefix_serviceid_mapping[url_prefix]
     )
 
-
 def get_service_from_schema_type(schema_type: str) -> RecordService:
-    for service in get_record_services():
+    for record_cls, service in get_record_services().items():
         if (
-            hasattr(service, "record_cls")
-            and hasattr(service.record_cls, "schema")
-            and service.record_cls.schema.value == schema_type
+            hasattr(record_cls, "schema")
+            and record_cls.schema.value == schema_type
         ):
             return service
 
 
 def get_urlprefix_service_id_mapping() -> dict[str, str]:
     ret = {}
-    services = get_record_services()
+    services = get_record_services().values()
     for service in services:
         if hasattr(service, "config") and hasattr(service.config, "url_prefix"):
             url_prefix = service.config.url_prefix.replace(
