@@ -1,6 +1,6 @@
 import pytest
 from pytest_oarepo.communities.functions import invite
-from pytest_oarepo.vocabularies.functions import load_removal_reasons
+from pytest_oarepo.vocabularies.functions import load_test_vocabularies
 from pytest_oarepo.requests.functions import get_request_type
 from thesis.records.api import ThesisRecord
 
@@ -112,7 +112,7 @@ def test_community_delete(
     link2testclient,
     search_clear,
 ):
-    load_removal_reasons()
+    load_test_vocabularies()
     community_reader = users[0]
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
