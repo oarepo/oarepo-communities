@@ -1,10 +1,7 @@
 import pytest
 from pytest_oarepo.communities.functions import invite
 from pytest_oarepo.requests.functions import get_request_type
-from pytest_oarepo.vocabularies.loading import load_test_vocabularies
-
 from thesis.records.api import ThesisRecord
-from invenio_vocabularies.records.api import Vocabulary
 
 from oarepo_communities.errors import (
     CommunityAlreadyIncludedException,
@@ -112,9 +109,9 @@ def test_community_delete(
     published_record_with_community_factory,
     submit_request_on_record,
     link2testclient,
+    test_vocabularies,
     search_clear,
 ):
-    load_test_vocabularies()
     community_reader = users[0]
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)

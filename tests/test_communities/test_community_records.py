@@ -384,6 +384,8 @@ def test_search_ui_serialization(
 
     # this was originally meant to determine the results go through ui serialization
     # ie. define something explicit in model json
+
+    # todo test community label
     assert "access" in search_control.json["hits"]["hits"][0]
     assert "access" not in search_global.json["hits"]["hits"][0]
     assert "access" not in search_model.json["hits"]["hits"][0]

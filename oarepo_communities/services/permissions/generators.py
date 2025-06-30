@@ -284,7 +284,7 @@ class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, Generator):
     def _needs(self, record_communities: set[str], record: Record = None) -> list[Need]:
         needs = []
         owner_ids = []
-        if current_app.config.get("INVENIO_RDM_ENABLED", False):
+        if current_app.config.get("INVENIO_RDM_ENABLED", False): # remove in rdm 13
             owners = getattr(record.parent.access, "owned_by", None)
             if owners is not None:
                 owners = owners if isinstance(owners, list) else [owners]
