@@ -48,4 +48,6 @@ def community_default_workflow(**kwargs: Any) -> str | None:
         community = Community.pid.resolve(community_id)
     except PIDDoesNotExistError:
         raise CommunityDoesntExistError(community_id)
-    return community.custom_fields.get("workflow", "default")
+    return community.custom_fields.get(
+        "workflow", current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"]
+    )
