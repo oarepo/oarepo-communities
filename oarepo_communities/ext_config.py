@@ -26,3 +26,8 @@ DEFAULT_COMMUNITIES_ROLES = [
         can_manage_roles=["owner", "member"],
     ),
 ]
+
+
+# name of the default workflow for communities. It is used when a community does not have
+# an explicit workflow set
+OAREPO_COMMUNITIES_DEFAULT_WORKFLOW = "default"

@@ -1,4 +1,4 @@
-from flask import request
+from flask import current_app, request
 from invenio_communities.views.communities import HEADER_PERMISSIONS
 from oarepo_ui.resources.components import UIResourceComponent
 
@@ -10,7 +10,9 @@ class GetCommunityComponent(UIResourceComponent):
         community = view_args.get("community")
         community_id = str(community.id)
 
-        workflow_name = community["custom_fields"].get("workflow", "default")
+        workflow_name = community["custom_fields"].get(
+            "workflow", current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"]
+        )
         from oarepo_workflows.errors import InvalidWorkflowError
         from oarepo_workflows.proxies import current_oarepo_workflows
 

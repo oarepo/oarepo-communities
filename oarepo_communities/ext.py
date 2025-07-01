@@ -87,6 +87,11 @@ class OARepoCommunities(object):
             config.DATASTREAMS_TRANSFORMERS
         )
 
+        app.config.setdefault(
+            "OAREPO_COMMUNITIES_DEFAULT_WORKFLOW",
+            ext_config.OAREPO_COMMUNITIES_DEFAULT_WORKFLOW,
+        )
+
     @cached_property
     def urlprefix_serviceid_mapping(self) -> dict[str, str]:
         return get_urlprefix_service_id_mapping()
