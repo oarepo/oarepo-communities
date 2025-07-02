@@ -418,29 +418,16 @@ def ui_serialized_community_role():
 def ui_serialized_community():
     def _ui_serialized_community(community_id):
         return {
-            "label": "My Community",
-            "links": {
-                "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
-                "self_html": "https://127.0.0.1:5000/communities/public",  # todo is this correct?
-            },
-            "reference": {"community": community_id},
-            "type": "community",
-        }
-
+             'access': {'member_policy': 'open', 'members_visibility': 'public', 'record_policy': 'open',
+                        'review_policy': 'closed', 'visibility': 'public'},
+             'children': {'allow': False},
+             'deletion_status': {'is_deleted': False, 'status': 'P'},
+             'id': community_id,
+             'links': {},
+             'metadata': {'title': 'My Community'},
+             'revision_id': 2,
+             'slug': 'comm1',
+             }
     return _ui_serialized_community
 
 
-@pytest.fixture()
-def clear_babel_context():
-
-    # force babel reinitialization when language is switched
-    def _clear_babel_context():
-        try:
-            from flask import g
-            from flask_babel import SimpleNamespace
-
-            g._flask_babel = SimpleNamespace()
-        except ImportError:
-            return
-
-    return _clear_babel_context

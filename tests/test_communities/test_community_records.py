@@ -1,4 +1,6 @@
 from pytest_oarepo.communities.functions import invite
+
+from oarepo_communities.schemas.parent import CommunityUISchema
 from thesis.records.api import ThesisDraft, ThesisRecord
 
 
@@ -277,14 +279,13 @@ def test_search_ui_serialization(
     published_record_with_community_factory,
     community_get_or_create,
     record_service,
+    ui_serialized_community,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
     community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
-
-    record1 = published_record_with_community_factory(
+    published_record_with_community_factory(
         community_owner.identity, community_1.id
     )
     record2 = published_record_with_community_factory(
@@ -295,46 +296,23 @@ def test_search_ui_serialization(
     ThesisDraft.index.refresh()
 
     search_control = owner_client.get(f"/communities/{community_1.id}/records")
-    search_global = owner_client.get(
-        f"/communities/{community_1.id}/records",
-        headers={"Accept": "application/vnd.inveniordm.v1+json"},
-    )
-    search_model = owner_client.get(
-        f"/communities/{community_2.id}/thesis",
-        headers={"Accept": "application/vnd.inveniordm.v1+json"},
-    )
+    test_serialization = ui_serialized_community(community_1.id)
+    api_community_serialization = search_control.json["hits"]["hits"][0]["parent"]["communities"]["entries"][0]
+    test_ui_dates = CommunityUISchema().dump(community_1.data)
 
-    search_user_global = owner_client.get(
-        f"/communities/{community_1.id}/user/records",
-        headers={"Accept": "application/vnd.inveniordm.v1+json"},
-    )
-    search_user_model = owner_client.get(
-        f"/communities/{community_2.id}/user/thesis",
-        headers={"Accept": "application/vnd.inveniordm.v1+json"},
-    )
+    def test_for_search_type(search_type_url):
+        search = owner_client.get(
+            f"/communities/{community_1.id}/{search_type_url}",
+            headers={"Accept": "application/vnd.inveniordm.v1+json"},
+        )
+        assert search.status_code == 200
+        response = search.json["hits"]["hits"][0]["parent"]["communities"]["entries"][0]
+        assert response["created"] == test_ui_dates["created"] != api_community_serialization["created"]
+        assert response["updated"] == test_ui_dates["updated"] != api_community_serialization["updated"]
+        assert test_serialization.items() <= response.items()
 
-    assert search_global.status_code == 200
-    assert search_model.status_code == 200
-    assert search_user_global.status_code == 200
-    assert search_user_model.status_code == 200
-
-    # todo ui serialization is now recognizable through filtering parent - this might not make sense in the future
-    # ie. define something explicit in model json
-    assert "parent" in search_control.json["hits"]["hits"][0]
-    assert "parent" not in search_global.json["hits"]["hits"][0]
-    assert "parent" not in search_model.json["hits"]["hits"][0]
-    assert "parent" not in search_user_global.json["hits"]["hits"][0]
-    assert "parent" not in search_user_model.json["hits"]["hits"][0]
-
-
-"""
-# todo published service conceptual rework
-def test_create_published(community_owner, community, search_clear):
-    # todo how is workflow used in published service?
-    from thesis.proxies import current_published_service
-
-    record = current_published_service.create(
-        system_identity, {"parent": {"communities": {"default": community.id}}}
-    )
-    assert record._record.state == "published"
-"""
+    test_for_search_type("records")
+    test_for_search_type("thesis")
+    test_for_search_type("user/records")
+    test_for_search_type("user/thesis")
+    test_for_search_type("all/records")
