@@ -37,7 +37,10 @@ def community_default_workflow(**kwargs: Any) -> str | None:
             raise MissingDefaultCommunityError("Failed to get community from record.")
     else:
         try:
-            community_id = kwargs["data"]["parent"]["communities"]["default"]
+            if isinstance(kwargs["data"]["parent"]["communities"]["default"], Community):
+                community_id = kwargs["data"]["parent"]["communities"]["default"].id
+            else:
+                community_id = kwargs["data"]["parent"]["communities"]["default"] # called during permission checks unless we want to outsource ma load
         except KeyError:
             raise MissingDefaultCommunityError(
                 "Failed to get community from input data."
