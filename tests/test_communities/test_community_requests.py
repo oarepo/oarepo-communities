@@ -109,6 +109,7 @@ def test_community_delete(
     published_record_with_community_factory,
     submit_request_on_record,
     link2testclient,
+    test_vocabularies,
     search_clear,
 ):
     community_reader = users[0]
@@ -124,7 +125,7 @@ def test_community_delete(
         community_reader.identity,
         record_id,
         "delete_published_record",
-        create_additional_data={"payload": {"removal_reason": "test reason"}},
+        create_additional_data={"payload": {"removal_reason": "duplicate"}},
     )
     _accept_request(
         reader_client,

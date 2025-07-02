@@ -15,8 +15,10 @@ if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_drafts_resources.records import Record
 
+from invenio_drafts_resources.services.records.components.base import BaseRecordFilesComponent
 
 class CommunityInclusionComponent(ServiceComponent):
+    affects = [BaseRecordFilesComponent]
 
     def create(
         self,
