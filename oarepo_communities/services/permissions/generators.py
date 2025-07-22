@@ -22,6 +22,7 @@ from oarepo_communities.errors import (
     TargetCommunityNotProvidedException,
 )
 from oarepo_communities.proxies import current_oarepo_communities
+from flask import current_app
 
 if TYPE_CHECKING:
     from typing import Any
@@ -281,14 +282,23 @@ class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, Generator):
         return self._needs(record_communities, record=record)
 
     def _needs(self, record_communities: set[str], record: Record = None) -> list[Need]:
-        owners = getattr(record.parent, "owners", None)
-        ret = []
-        for owner in owners:
-            ret += [
-                UserInCommunityNeed(owner.id, community)
+        needs = []
+        owner_ids = []
+        if current_app.config.get("INVENIO_RDM_ENABLED", False): # remove in rdm 13
+            owners = getattr(record.parent.access, "owned_by", None)
+            if owners is not None:
+                owners = owners if isinstance(owners, list) else [owners]
+                owner_ids = [owner.owner_id for owner in owners]
+        else:
+            owners = getattr(record.parent, "owners", None)
+            if owners is not None:
+                owner_ids = [owner.id for owner in owners]
+        for owner_id in owner_ids:
+            needs += [
+                UserInCommunityNeed(owner_id, community)
                 for community in record_communities
             ]
-        return ret
+        return needs
 
     def query_filter(self, identity: Identity = None, **kwargs: Any) -> dsl.Q:
         """Filters for current identity as owner."""
