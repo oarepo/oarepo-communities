@@ -352,9 +352,6 @@ def test_search_ui_serialization(
     published_record_with_community_factory(
         community_owner.identity, community_1.id
     )
-    record2 = published_record_with_community_factory(
-        community_owner.identity, community_2.id
-    )
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
