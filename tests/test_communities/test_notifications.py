@@ -1,4 +1,8 @@
 from pytest_oarepo.communities.functions import invite
+from invenio_access.models import User
+from invenio_communities.members.records.models import MemberModel
+from invenio_notifications.models import Recipient
+from invenio_db import db
 
 
 def test_publish_notification_community_role(
@@ -103,3 +107,46 @@ def test_locales_multiple_recipients(
         assert len(sent_mail_cz) == len(sent_mail_en) == 1
         assert sent_mail_cz[0].subject == "Žádost o publikování záznamu blabla"
         assert sent_mail_en[0].subject == "Request to publish record blabla"
+
+def test_notifications_not_sent_to_inactive_users(
+    app,
+    community,
+    community_owner,
+    users,
+    logged_client,
+    draft_with_community_factory,
+    submit_request_on_draft,
+    link2testclient,
+    search_clear,
+):
+    """Test notification being built on review submit."""
+
+    mail = app.extensions.get("mail")
+    assert mail
+
+    invite(users[0], str(community.id), "reader")
+    invite(users[1], str(community.id), "curator")
+    invite(users[2], str(community.id), "curator")
+
+    member = (
+        MemberModel.query
+        .filter_by(user_id=users[2].user.id, community_id=str(community.id))
+        .one()
+    )
+    member.active = False
+    db.session.commit()
+
+    us = User.query.join(MemberModel).filter(MemberModel.community_id == str(community.id)).all()
+    active_users = User.query.join(MemberModel).filter((MemberModel.community_id == str(community.id)) & (MemberModel.active == True)).all()
+
+    assert users[2].user in us and users[2].user not in active_users
+
+    creator = users[0]
+    draft1 = draft_with_community_factory(
+        creator.identity, str(community.id), custom_workflow="curator_publish"
+    )
+    with mail.record_messages() as outbox:
+        submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
+        # check notification is build on submit
+        assert len(outbox) == 1  # both curators should get a mail
+        assert outbox[0].send_to == {"user2@example.org"}
