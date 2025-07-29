@@ -1,5 +1,5 @@
 import marshmallow as ma
-from flask import g, redirect, url_for
+from flask import g, redirect, url_for, current_app
 from flask_menu import current_menu
 from flask_resources import from_conf, request_parser, resource_requestctx
 from invenio_communities.communities.resources.serializer import (
@@ -94,6 +94,9 @@ class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
 
     def search_endpoint_url(self, identity, api_config, overrides={}, **kwargs):
         community_id = resource_requestctx.view_args["community"].to_dict()["id"]
+        search_all = current_app.config.get("COMMUNITIES_RECORDS_SEARCH_ALL", False)
+        if search_all:
+            return f"/api/communities/{community_id}/all/records"
         return f"/api/communities/{community_id}/records"
 
 
