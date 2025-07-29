@@ -33,6 +33,7 @@ class CommunityRoleObj:
         members: list[MemberModel] = MemberModel.query.filter_by(
             community_id=self.community_id,
             role=self.role,
+            active=True,
         ).all()
         for member in members:
             try:
