@@ -154,8 +154,8 @@ def test_notifications_not_sent_to_inactive_users(
     with mail.record_messages() as outbox:
         submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
         # check notification is build on submit
-        assert len(outbox) == 1  # both curators should get a mail
-        assert outbox[0].send_to == {"user2@example.org"}
+        assert len(outbox) == 1  # only one curator active now
+        assert outbox[0].send_to == {users[1].email}
 
 def test_comment_notifications(
     app,
