@@ -1,7 +1,7 @@
 from pytest_oarepo.communities.functions import invite
-from invenio_access.models import User
-from invenio_communities.members.records.models import MemberModel
 from invenio_requests.customizations.event_types import CommentEventType
+from invenio_communities.members.records.models import MemberModel
+from invenio_access.models import User
 import pytest
 
 @pytest.fixture
@@ -113,46 +113,9 @@ def test_locales_multiple_recipients(
         assert sent_mail_cz[0].subject == "Žádost o publikování záznamu blabla"
         assert sent_mail_en[0].subject == "Request to publish record blabla"
 
-def test_comment_notifications(
-    app,
-    users,
-    logged_client,
-    draft_with_community_factory,
-    community,
-    submit_request_on_draft,
-    add_user_in_role,
-    role,
-    events_service,
-    link2testclient,
-    urls,
-):
-    """Test notification being built on review submit."""
-    mail = app.extensions.get("mail")
-    creator = users[0]
-    receiver = users[1]
-    invite(users[0], str(community.id), "reader")
-    invite(receiver, str(community.id), "curator")
-    draft1 = draft_with_community_factory(
-        creator.identity, str(community.id), custom_workflow="curator_publish"
-    ) # so i don't have to create a new workflow
-    submit = submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
-
-    with mail.record_messages() as outbox:
-        content = "ceci nes pa une comment"
-        events_service.create(
-            creator.identity,
-            submit["id"],
-            {"payload": {"content": content}},
-            CommentEventType,
-        )
-        assert len(outbox) == 1 # recipient of the request should get
-        receivers = outbox[0].recipients
-        assert set(receivers) == {receiver.email}
-        assert content in outbox[0].body
-
 def test_notifications_not_sent_to_inactive_users(
-    app,
     db,
+    app,
     community,
     community_owner,
     users,
@@ -193,3 +156,40 @@ def test_notifications_not_sent_to_inactive_users(
         # check notification is build on submit
         assert len(outbox) == 1  # both curators should get a mail
         assert outbox[0].send_to == {"user2@example.org"}
+
+def test_comment_notifications(
+    app,
+    users,
+    logged_client,
+    draft_with_community_factory,
+    community,
+    submit_request_on_draft,
+    add_user_in_role,
+    role,
+    events_service,
+    link2testclient,
+    urls,
+):
+    """Test notification being built on review submit."""
+    mail = app.extensions.get("mail")
+    creator = users[0]
+    receiver = users[1]
+    invite(users[0], str(community.id), "reader")
+    invite(receiver, str(community.id), "curator")
+    draft1 = draft_with_community_factory(
+        creator.identity, str(community.id), custom_workflow="curator_publish"
+    ) # so i don't have to create a new workflow
+    submit = submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
+
+    with mail.record_messages() as outbox:
+        content = "ceci nes pa une comment"
+        events_service.create(
+            creator.identity,
+            submit["id"],
+            {"payload": {"content": content}},
+            CommentEventType,
+        )
+        assert len(outbox) == 1 # recipient of the request should get
+        receivers = outbox[0].recipients
+        assert set(receivers) == {receiver.email}
+        assert content in outbox[0].body
