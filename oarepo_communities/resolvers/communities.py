@@ -4,7 +4,7 @@ import dataclasses
 import logging
 from typing import TYPE_CHECKING
 
-from invenio_access.models import User
+from invenio_access.models import Role, User
 from invenio_communities.communities.entity_resolvers import CommunityRoleNeed
 from invenio_communities.members.records.models import MemberModel
 from invenio_records_resources.references.entity_resolvers.base import (
@@ -39,9 +39,16 @@ class CommunityRoleObj:
                 if member.user_id:
                     user = User.query.get(member.user_id)
                     member_emails.append(_extract_entity_email_data(user))
-            except Exception:
+                if member.group_id:
+                    group = Role.query.get(member.group_id)
+                    for user in group.users:
+                        member_emails.append(_extract_entity_email_data(user))
+            except Exception as e:
                 log.error(
-                    "Error retrieving user %s for community members.", member.user_id
+                    "Error retrieving user %s, group %s for community members: %s",
+                    member.user_id,
+                    member.group_id,
+                    e,
                 )
         return member_emails
 
