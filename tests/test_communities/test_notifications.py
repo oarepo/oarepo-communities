@@ -1,8 +1,6 @@
 from pytest_oarepo.communities.functions import invite
 from invenio_access.models import User
 from invenio_communities.members.records.models import MemberModel
-from invenio_notifications.models import Recipient
-from invenio_db import db
 from invenio_requests.customizations.event_types import CommentEventType
 import pytest
 
@@ -154,6 +152,7 @@ def test_comment_notifications(
 
 def test_notifications_not_sent_to_inactive_users(
     app,
+    db,
     community,
     community_owner,
     users,
