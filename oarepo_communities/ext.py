@@ -92,6 +92,11 @@ class OARepoCommunities(object):
             ext_config.OAREPO_COMMUNITIES_DEFAULT_WORKFLOW,
         )
 
+        app.config.setdefault(
+            "COMMUNITIES_RECORDS_SEARCH_ALL",
+            config.COMMUNITIES_RECORDS_SEARCH_ALL,
+        )
+
     @cached_property
     def urlprefix_serviceid_mapping(self) -> dict[str, str]:
         return get_urlprefix_service_id_mapping()

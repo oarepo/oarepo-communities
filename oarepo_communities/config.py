@@ -76,3 +76,5 @@ NOTIFICATION_RECIPIENTS_RESOLVERS = {
 DATASTREAMS_TRANSFORMERS = {
     "set_community": "oarepo_communities.datastreams.transformers.SetCommunityTransformer",
 }
+
+COMMUNITIES_RECORDS_SEARCH_ALL = False
