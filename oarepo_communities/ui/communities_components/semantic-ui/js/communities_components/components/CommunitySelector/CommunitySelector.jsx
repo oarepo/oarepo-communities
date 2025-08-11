@@ -44,13 +44,8 @@ export const CommunitySelectorComponent = ({
   recordId,
 }) => {
   const lastSelectedCommunity = useRef(null);
-  const {
-    formConfig: {
-      allowed_communities,
-      preselected_community,
-      generic_community,
-    },
-  } = useFormConfig();
+  const { allowed_communities, preselected_community, generic_community } =
+    useFormConfig();
   useEffect(() => {
     if (!recordId) {
       if (preselected_community) {

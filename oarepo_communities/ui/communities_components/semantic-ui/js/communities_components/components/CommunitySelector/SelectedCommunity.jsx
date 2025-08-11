@@ -15,9 +15,7 @@ export const SelectedCommunityComponent = ({
   selectCommunity,
   recordId,
 }) => {
-  const {
-    formConfig: { allowed_communities, generic_community },
-  } = useFormConfig();
+  const { allowed_communities, generic_community } = useFormConfig();
   let selectedCommunity = allowed_communities.find(
     (c) => c.id === selectedCommunityId
   );
