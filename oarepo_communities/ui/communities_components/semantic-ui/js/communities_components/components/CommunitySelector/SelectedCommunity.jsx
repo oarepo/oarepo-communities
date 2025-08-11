@@ -7,13 +7,15 @@ import { Message, Icon, Button, List } from "semantic-ui-react";
 import { GenericCommunityMessage } from "./CommunitySelector";
 import { CommunityItem } from "./CommunityItem";
 import { Trans } from "react-i18next";
+import { connect } from "react-redux";
+import { changeSelectedCommunity } from "@js/oarepo_ui/forms/state/deposit/actions";
 
-export const SelectedCommunity = ({ fieldPath }) => {
-  const {
-    formConfig: { allowed_communities, generic_community },
-  } = useFormConfig();
-  const { values, setFieldValue } = useFormikContext();
-  const selectedCommunityId = getIn(values, fieldPath, "");
+export const SelectedCommunityComponent = ({
+  selectedCommunityId,
+  selectCommunity,
+  recordId,
+}) => {
+  const { allowed_communities, generic_community } = useFormConfig();
   let selectedCommunity = allowed_communities.find(
     (c) => c.id === selectedCommunityId
   );
@@ -22,11 +24,11 @@ export const SelectedCommunity = ({ fieldPath }) => {
     selectedCommunity = generic_community;
   }
   const handleCommunityRemoval = () => {
-    setFieldValue(fieldPath, "");
+    selectCommunity("");
   };
   return (
     <React.Fragment>
-      {(values?.id ||
+      {(recordId ||
         (selectedCommunityId && allowed_communities.length <= 1)) && (
         <p>
           {i18next.t(
@@ -34,7 +36,7 @@ export const SelectedCommunity = ({ fieldPath }) => {
           )}
         </p>
       )}
-      {!values?.id && allowed_communities.length > 1 && selectedCommunity && (
+      {!recordId && allowed_communities.length > 1 && selectedCommunity && (
         <Trans i18n={i18next}>
           Your work will be saved in the following community. Please note that
           after saving it will not be possible to transfer it to another
@@ -64,10 +66,27 @@ export const SelectedCommunity = ({ fieldPath }) => {
   );
 };
 
-SelectedCommunity.propTypes = {
+SelectedCommunityComponent.propTypes = {
   fieldPath: PropTypes.string,
 };
 
-SelectedCommunity.defaultProps = {
+SelectedCommunityComponent.defaultProps = {
   fieldPath: "parent.communities.default",
 };
+
+const mapDispatchToProps = (dispatch) => ({
+  selectCommunity: (communityId) =>
+    dispatch(changeSelectedCommunity(communityId)),
+});
+
+const mapStateToProps = (state) => ({
+  selectedCommunityId: state.deposit.record.parent.communities.default,
+  recordId: state.deposit.record.id,
+});
+
+export const SelectedCommunity = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SelectedCommunityComponent);
+
+export default SelectedCommunity;

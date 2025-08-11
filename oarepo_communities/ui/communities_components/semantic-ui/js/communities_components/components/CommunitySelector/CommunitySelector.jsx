@@ -6,6 +6,8 @@ import { Message, Icon, Modal, List, Button } from "semantic-ui-react";
 import { Trans } from "react-i18next";
 import { i18next } from "@translations/oarepo_communities";
 import { CommunityItem } from "./CommunityItem";
+import { connect } from "react-redux";
+import { changeSelectedCommunity } from "@js/oarepo_ui/forms/state/deposit/actions";
 
 /* TODO: get actual link for the documentation */
 
@@ -36,37 +38,34 @@ export const GenericCommunityMessage = () => (
   </Trans>
 );
 
-export const CommunitySelector = ({ fieldPath }) => {
-  const { values, setFieldValue } = useFormikContext();
+export const CommunitySelectorComponent = ({
+  selectCommunity,
+  selectedCommunityId,
+  recordId,
+}) => {
   const lastSelectedCommunity = useRef(null);
-  const {
-    formConfig: {
-      allowed_communities,
-      preselected_community,
-      generic_community,
-    },
-  } = useFormConfig();
-  const selectedCommunity = getIn(values, "parent.communities.default", "");
+  const { allowed_communities, preselected_community, generic_community } =
+    useFormConfig();
   useEffect(() => {
-    if (!values.id) {
+    if (!recordId) {
       if (preselected_community) {
-        setFieldValue(fieldPath, preselected_community.id);
+        selectCommunity(preselected_community.id);
         lastSelectedCommunity.current = preselected_community.id;
       } else if (allowed_communities.length === 1) {
-        setFieldValue(fieldPath, allowed_communities[0].id);
+        selectCommunity(allowed_communities[0].id);
         lastSelectedCommunity.current = allowed_communities[0].id;
       }
     }
   }, []);
 
   const handleClick = (id) => {
-    setFieldValue(fieldPath, id);
+    selectCommunity(id);
     lastSelectedCommunity.current = id;
   };
   return (
-    !values.id && (
+    !recordId && (
       <Modal
-        open={!selectedCommunity}
+        open={!selectedCommunityId}
         className="communities community-selection-modal"
       >
         <Modal.Header>{i18next.t("Community selection")}</Modal.Header>
@@ -119,9 +118,7 @@ export const CommunitySelector = ({ fieldPath }) => {
               className="ml-0"
               icon
               labelPosition="left"
-              onClick={() =>
-                setFieldValue(fieldPath, lastSelectedCommunity.current)
-              }
+              onClick={() => selectCommunity(lastSelectedCommunity.current)}
             >
               <Icon name="arrow alternate circle left outline" />
               {i18next.t("Go back")}
@@ -144,10 +141,27 @@ export const CommunitySelector = ({ fieldPath }) => {
   );
 };
 
-CommunitySelector.propTypes = {
+CommunitySelectorComponent.propTypes = {
   fieldPath: PropTypes.string,
 };
 
-CommunitySelector.defaultProps = {
+CommunitySelectorComponent.defaultProps = {
   fieldPath: "parent.communities.default",
 };
+
+const mapDispatchToProps = (dispatch) => ({
+  selectCommunity: (communityId) =>
+    dispatch(changeSelectedCommunity(communityId)),
+});
+
+const mapStateToProps = (state) => ({
+  selectedCommunityId: state.deposit.record.parent.communities.default,
+  recordId: state.deposit.record.id,
+});
+
+export const CommunitySelector = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(CommunitySelectorComponent);
+
+export default CommunitySelector;
