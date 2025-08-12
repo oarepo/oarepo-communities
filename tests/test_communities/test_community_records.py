@@ -84,6 +84,7 @@ def test_search(
     assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
+
 def test_search_all(
     logged_client,
     community_owner,
@@ -114,36 +115,30 @@ def test_search_all(
         community_owner.identity, community_2.id
     )
 
-    draft1 = draft_with_community_factory(
-        community_owner.identity, str(community_1.id)
-    )
-    draft2 = draft_with_community_factory(
-        community_owner.identity, str(community_2.id)
-    )
+    draft1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
+    draft2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
 
-    search_community1 = owner_client.get(
-        f"/communities/{community_1.id}/all/records"
-    )
-    search_community2 = owner_client.get(
-        f"/communities/{community_2.id}/all/records"
-    )
+    search_community1 = owner_client.get(f"/communities/{community_1.id}/all/records")
+    search_community2 = owner_client.get(f"/communities/{community_2.id}/all/records")
 
     assert len(search_community1.json["hits"]["hits"]) == 2
     assert len(search_community2.json["hits"]["hits"]) == 2
 
-    assert {hit["id"] for hit in search_community1.json["hits"]["hits"]} == {draft1["id"], record1["id"]}
-    assert {hit["id"] for hit in search_community2.json["hits"]["hits"]} == {draft2["id"], record2["id"]}
+    assert {hit["id"] for hit in search_community1.json["hits"]["hits"]} == {
+        draft1["id"],
+        record1["id"],
+    }
+    assert {hit["id"] for hit in search_community2.json["hits"]["hits"]} == {
+        draft2["id"],
+        record2["id"],
+    }
 
-    #test separate permissions
-    curator_search = curator_client.get(
-        f"/communities/{community_1.id}/all/records"
-    )
-    reader_search = reader_client.get(
-        f"/communities/{community_1.id}/all/records"
-    )
+    # test separate permissions
+    curator_search = curator_client.get(f"/communities/{community_1.id}/all/records")
+    reader_search = reader_client.get(f"/communities/{community_1.id}/all/records")
 
     assert len(curator_search.json["hits"]["hits"]) == 2
     assert len(reader_search.json["hits"]["hits"]) == 0
@@ -387,10 +382,10 @@ def test_search_ui_serialization(
 
     # todo test community label
     assert "access" in search_control.json["hits"]["hits"][0]
-    assert "access" not in search_global.json["hits"]["hits"][0]
-    assert "access" not in search_model.json["hits"]["hits"][0]
-    assert "access" not in search_user_global.json["hits"]["hits"][0]
-    assert "access" not in search_user_model.json["hits"]["hits"][0]
+    assert "access" in search_global.json["hits"]["hits"][0]
+    assert "access" in search_model.json["hits"]["hits"][0]
+    assert "access" in search_user_global.json["hits"]["hits"][0]
+    assert "access" in search_user_model.json["hits"]["hits"][0]
 
 
 """

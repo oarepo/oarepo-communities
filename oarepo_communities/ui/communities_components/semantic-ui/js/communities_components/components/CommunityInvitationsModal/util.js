@@ -41,15 +41,21 @@ const defaultEmailOptions = {
   requireTld: true,
 };
 
+/* eslint-disable */
 const displayName =
   /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\.\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{1,256}(?:[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\,\.\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF\s]{0,256})?<(.+)>$/i;
+
 const emailUserPart = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~]+$/i;
+
 const quotedEmailUser =
   /^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$/i;
+
 const emailUserUtf8Part =
   /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$/i;
+
 const quotedEmailUserUtf8 =
   /^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*$/i;
+/* eslint-enable */
 
 function isByteLength(str, options) {
   let min = 0;
@@ -82,9 +88,11 @@ export const isFQDN = (str, options) => {
       return false;
     }
     // disallow spaces
+    /* eslint-disable */
     if (/[\s\u2002-\u200B\u202F\u205F\u3000\uFEFF\uDB40\uDC20]/.test(tld)) {
       return false;
     }
+    /* eslint-enable */
   }
 
   for (let part, i = 0; i < parts.length; i++) {

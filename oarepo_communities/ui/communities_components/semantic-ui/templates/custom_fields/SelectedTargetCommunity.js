@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import PropTypes from "prop-types";
-import { httpApplicationJson } from "@js/oarepo_ui";
+import { httpApplicationJson } from "@js/oarepo_ui/util";
 import { CommunityItem } from "@js/communities_components/CommunitySelector/CommunityItem";
 import { List, Loader, Dimmer, Message } from "semantic-ui-react";
 import { useFormikContext, getIn } from "formik";

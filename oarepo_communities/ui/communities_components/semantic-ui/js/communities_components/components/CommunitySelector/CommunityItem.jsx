@@ -7,8 +7,8 @@ import { Image } from "react-invenio-forms";
 export const CommunityItem = ({
   community,
   handleClick,
-  renderLinks,
-  active,
+  renderLinks = true,
+  active = false,
 }) => {
   const { id, title, website, logo, organizations } = community;
   return (
@@ -69,14 +69,11 @@ export const CommunityItem = ({
   );
 };
 
+/* eslint-disable react/require-default-props */
 CommunityItem.propTypes = {
   community: PropTypes.object.isRequired,
   handleClick: PropTypes.func,
   renderLinks: PropTypes.bool,
   active: PropTypes.bool,
 };
-
-CommunityItem.defaultProps = {
-  renderLinks: true,
-  active: false,
-};
+/* eslint-enable react/require-default-props */

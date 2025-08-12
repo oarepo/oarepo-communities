@@ -2,11 +2,10 @@
 
 ## Installation
 
-To init custom fields, add them under COMMUNITIES_CUSTOM_FIELDS key to invenio.cfg, 
+To init custom fields, add them under COMMUNITIES_CUSTOM_FIELDS key to invenio.cfg,
 for example
 
-
-``` python
+```python
 from oarepo_communities.cf.permissions import PermissionsCF
 from oarepo_communities.cf.aai import AAIMappingCF
 
@@ -22,5 +21,6 @@ COMMUNITIES_CUSTOM_FIELDS_UI = [{
                 }]
  }]
 ```
+
 and the init cli command:
 invenio communities custom-fields init

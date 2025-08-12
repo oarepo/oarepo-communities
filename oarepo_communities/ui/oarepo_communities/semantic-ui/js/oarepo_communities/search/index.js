@@ -1,4 +1,3 @@
-import React from "react";
 import { parametrize } from "react-overridable";
 import { i18next } from "@translations/oarepo_communities";
 import {
@@ -7,7 +6,7 @@ import {
   DynamicResultsListItem,
   SearchAppLayoutWithSearchbarHOC,
   SearchAppResultViewWithSearchbar,
-} from "@js/oarepo_ui";
+} from "@js/oarepo_ui/search";
 
 const [{ overridableIdPrefix }] = parseSearchAppConfigs();
 

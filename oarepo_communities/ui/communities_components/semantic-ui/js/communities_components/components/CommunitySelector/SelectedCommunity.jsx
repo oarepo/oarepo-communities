@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormikContext, getIn } from "formik";
-import { useFormConfig } from "@js/oarepo_ui";
+import { useFormConfig } from "@js/oarepo_ui/forms";
 import PropTypes from "prop-types";
 import { i18next } from "@translations/oarepo_communities";
 import { Message, Icon, Button, List } from "semantic-ui-react";
@@ -8,18 +8,23 @@ import { GenericCommunityMessage } from "./CommunitySelector";
 import { CommunityItem } from "./CommunityItem";
 import { Trans } from "react-i18next";
 
-export const SelectedCommunity = ({ fieldPath }) => {
+export const SelectedCommunity = ({
+  fieldPath = "parent.communities.default",
+}) => {
   const {
-    formConfig: { allowed_communities, generic_community },
+    formConfig: {
+      allowed_communities: allowedCommunities,
+      generic_community: genericCommunity,
+    },
   } = useFormConfig();
   const { values, setFieldValue } = useFormikContext();
   const selectedCommunityId = getIn(values, fieldPath, "");
-  let selectedCommunity = allowed_communities.find(
+  let selectedCommunity = allowedCommunities.find(
     (c) => c.id === selectedCommunityId
   );
-  const isGeneric = generic_community.id === selectedCommunityId;
+  const isGeneric = genericCommunity.id === selectedCommunityId;
   if (isGeneric) {
-    selectedCommunity = generic_community;
+    selectedCommunity = genericCommunity;
   }
   const handleCommunityRemoval = () => {
     setFieldValue(fieldPath, "");
@@ -27,14 +32,14 @@ export const SelectedCommunity = ({ fieldPath }) => {
   return (
     <React.Fragment>
       {(values?.id ||
-        (selectedCommunityId && allowed_communities.length <= 1)) && (
+        (selectedCommunityId && allowedCommunities.length <= 1)) && (
         <p>
           {i18next.t(
             "Your record will be published in the following community:"
           )}
         </p>
       )}
-      {!values?.id && allowed_communities.length > 1 && selectedCommunity && (
+      {!values?.id && allowedCommunities.length > 1 && selectedCommunity && (
         <Trans i18n={i18next}>
           Your work will be saved in the following community. Please note that
           after saving it will not be possible to transfer it to another
@@ -63,11 +68,9 @@ export const SelectedCommunity = ({ fieldPath }) => {
     </React.Fragment>
   );
 };
+/* eslint-disable react/require-default-props */
 
 SelectedCommunity.propTypes = {
   fieldPath: PropTypes.string,
 };
-
-SelectedCommunity.defaultProps = {
-  fieldPath: "parent.communities.default",
-};
+/* eslint-enable react/require-default-props */

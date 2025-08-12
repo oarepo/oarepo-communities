@@ -14,8 +14,8 @@ import { RestrictedLabel } from "./RestrictedLabel";
 
 export const MobileCommunitiesListItem = ({
   result,
-  communityTypeLabelTransparent,
-  isRestricted,
+  communityTypeLabelTransparent = false,
+  isRestricted = false,
 }) => {
   const communityType = result.ui?.type?.title_l10n;
   return (
@@ -130,12 +130,10 @@ export const MobileCommunitiesListItem = ({
   );
 };
 
+/* eslint-disable react/require-default-props */
 MobileCommunitiesListItem.propTypes = {
   result: PropTypes.object.isRequired,
   communityTypeLabelTransparent: PropTypes.bool,
   isRestricted: PropTypes.bool,
 };
-
-MobileCommunitiesListItem.defaultProps = {
-  communityTypeLabelTransparent: false,
-};
+/* eslint-enable react/require-default-props */

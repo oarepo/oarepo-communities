@@ -15,7 +15,7 @@ import {
   withState,
 } from "react-searchkit";
 import { Grid, Message, List } from "semantic-ui-react";
-import { EmptyResultsElement } from "@js/oarepo_ui";
+import { EmptyResultsElement } from "@js/oarepo_ui/search";
 
 const appName = "OarepoCommunities.SecondaryCommunitySelector";
 const overriddenComponents = {

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { useFormConfig, goBack } from "@js/oarepo_ui";
+import { useFormConfig } from "@js/oarepo_ui/forms";
+import { goBack } from "@js/oarepo_ui/util";
 import { useFormikContext, getIn } from "formik";
 import { Message, Icon, Modal, List, Button } from "semantic-ui-react";
 import { Trans } from "react-i18next";
@@ -36,28 +37,26 @@ export const GenericCommunityMessage = () => (
   </Trans>
 );
 
-export const CommunitySelector = ({ fieldPath }) => {
+export const CommunitySelector = ({
+  fieldPath = "parent.communities.default",
+}) => {
   const { values, setFieldValue } = useFormikContext();
   const lastSelectedCommunity = useRef(null);
   const {
     formConfig: {
-      allowed_communities,
-      preselected_community,
-      generic_community,
+      allowed_communities: allowedCommunities,
+      generic_community: genericCommunity,
+      preselected_community: preselectedCommunity,
     },
   } = useFormConfig();
-  const selectedCommunity = getIn(values, "parent.communities.default", "");
+
   useEffect(() => {
-    if (!values.id) {
-      if (preselected_community) {
-        setFieldValue(fieldPath, preselected_community.id);
-        lastSelectedCommunity.current = preselected_community.id;
-      } else if (allowed_communities.length === 1) {
-        setFieldValue(fieldPath, allowed_communities[0].id);
-        lastSelectedCommunity.current = allowed_communities[0].id;
-      }
+    if (!values.id && preselectedCommunity?.id) {
+      lastSelectedCommunity.current = preselectedCommunity.id;
     }
-  }, []);
+  }, [!values.id, preselectedCommunity?.id]);
+
+  const selectedCommunity = getIn(values, "parent.communities.default", "");
 
   const handleClick = (id) => {
     setFieldValue(fieldPath, id);
@@ -71,7 +70,7 @@ export const CommunitySelector = ({ fieldPath }) => {
       >
         <Modal.Header>{i18next.t("Community selection")}</Modal.Header>
         <Modal.Content>
-          {allowed_communities.length > 1 && (
+          {allowedCommunities.length > 1 && (
             <div className="communities communities-list-scroll-container">
               <p>
                 {i18next.t(
@@ -79,7 +78,7 @@ export const CommunitySelector = ({ fieldPath }) => {
                 )}
               </p>
               <List selection>
-                {allowed_communities.map((c) => (
+                {allowedCommunities.map((c) => (
                   <CommunityItem
                     key={c.id}
                     community={c}
@@ -90,7 +89,7 @@ export const CommunitySelector = ({ fieldPath }) => {
               </List>
             </div>
           )}
-          {allowed_communities.length === 0 && (
+          {allowedCommunities.length === 0 && (
             <React.Fragment>
               <GenericCommunityMessage />{" "}
               <span>
@@ -100,7 +99,7 @@ export const CommunitySelector = ({ fieldPath }) => {
               </span>
               <List selection>
                 <CommunityItem
-                  community={generic_community}
+                  community={genericCommunity}
                   handleClick={handleClick}
                   renderLinks={false}
                 />
@@ -144,10 +143,8 @@ export const CommunitySelector = ({ fieldPath }) => {
   );
 };
 
+/* eslint-disable react/require-default-props */
 CommunitySelector.propTypes = {
   fieldPath: PropTypes.string,
 };
-
-CommunitySelector.defaultProps = {
-  fieldPath: "parent.communities.default",
-};
+/* eslint-enable react/require-default-props */

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   Button,
@@ -9,7 +9,8 @@ import {
   Message,
 } from "semantic-ui-react";
 import { i18next } from "@translations/oarepo_communities";
-import { useConfirmationModal, OARepoDepositSerializer } from "@js/oarepo_ui";
+import { OARepoDepositSerializer } from "@js/oarepo_ui/api";
+import { useConfirmationModal } from "@js/oarepo_ui/forms";
 import {
   TextAreaField,
   http,
@@ -86,13 +87,10 @@ const CommunityInvitationsModalComponent = ({
     }
   };
 
-  const debouncedValidateEmails = useCallback(
-    _debounce((value, setFieldValue) => {
-      const emails = findAndValidateEmails(value);
-      setFieldValue("emails", emails);
-    }, 1000),
-    []
-  );
+  const debouncedValidateEmails = _debounce((value, setFieldValue) => {
+    const emails = findAndValidateEmails(value);
+    setFieldValue("emails", emails);
+  }, 1000);
 
   const handleChange = (value, setFieldValue) => {
     setFieldValue("membersEmails", value);
@@ -112,8 +110,8 @@ const CommunityInvitationsModalComponent = ({
         emails: { validEmails: [], invalidEmails: [] },
       }}
       validateOnChange={false}
-      validateOnBlur={true}
-      enableReinitialize={true}
+      validateOnBlur
+      enableReinitialize
     >
       {({ values, setFieldValue, handleSubmit, resetForm, isSubmitting }) => {
         const validEmailsCount = values.emails.validEmails.length;
@@ -150,6 +148,7 @@ const CommunityInvitationsModalComponent = ({
                   <TextAreaField
                     fieldPath="membersEmails"
                     required
+                    // eslint-disable-next-line jsx-a11y/no-autofocus
                     autoFocus
                     label={
                       <FieldLabel
@@ -246,10 +245,12 @@ export const CommunityInvitationsModal = withState(
   CommunityInvitationsModalComponent
 );
 
+/* eslint-disable react/require-default-props */
 CommunityInvitationsModalComponent.propTypes = {
   rolesCanInvite: PropTypes.object.isRequired,
   community: PropTypes.object.isRequired,
   resetQueryOnSubmit: PropTypes.bool,
-  updateQueryState: PropTypes.func,
-  currentQueryState: PropTypes.object,
+  updateQueryState: PropTypes.func.isRequired,
+  currentQueryState: PropTypes.object.isRequired,
 };
+/* eslint-enable react/require-default-props */
