@@ -402,12 +402,7 @@ def app_config(app_config):
         PublishDraftRequestAcceptNotificationBuilder.type: PublishDraftRequestAcceptNotificationBuilder,
         PublishDraftRequestSubmitNotificationBuilder.type: PublishDraftRequestSubmitNotificationBuilder,
     }
-    app_config["NOTIFICATIONS_ENTITY_RESOLVERS"] = [
-        ServiceResultResolver(service_id="users", type_key="user"),
-        ServiceResultResolver(service_id="community-role", type_key="community_role"),
-        ServiceResultResolver(service_id="requests", type_key="request"),
-        ServiceResultResolver(service_id="request_events", type_key="request_event"),
-    ]
+
     app_config["MAIL_DEFAULT_SENDER"] = "test@invenio-rdm-records.org"
 
     app_config["INVENIO_RDM_ENABLED"] = True

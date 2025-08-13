@@ -83,6 +83,10 @@ class OARepoCommunities(object):
         app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
             app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
         )
+
+        app.config.setdefault("NOTIFICATIONS_ENTITY_RESOLVERS", [])
+        app.config["NOTIFICATIONS_ENTITY_RESOLVERS"] += config.NOTIFICATIONS_ENTITY_RESOLVERS
+
         app.config.setdefault("DATASTREAMS_TRANSFORMERS", {}).update(
             config.DATASTREAMS_TRANSFORMERS
         )
