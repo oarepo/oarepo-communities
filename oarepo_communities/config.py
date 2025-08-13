@@ -10,7 +10,7 @@ from .requests.migration import (
 from .requests.remove_secondary import RemoveSecondaryCommunityRequestType
 from .requests.submission_secondary import SecondaryCommunitySubmissionRequestType
 from .resolvers.ui import CommunityRoleUIResolver
-
+from invenio_records_resources.references.entity_resolvers.results import ServiceResultResolver
 REQUESTS_REGISTERED_TYPES = [
     InitiateCommunityMigrationRequestType(),
     ConfirmCommunityMigrationRequestType(),
@@ -72,6 +72,10 @@ DISPLAY_NEW_COMMUNITIES = True
 NOTIFICATION_RECIPIENTS_RESOLVERS = {
     "community_role": {"email": CommunityRoleEmailRecipient}
 }
+
+NOTIFICATIONS_ENTITY_RESOLVERS = [
+    ServiceResultResolver(service_id="community-role", type_key="community_role"),
+]
 
 DATASTREAMS_TRANSFORMERS = {
     "set_community": "oarepo_communities.datastreams.transformers.SetCommunityTransformer",
