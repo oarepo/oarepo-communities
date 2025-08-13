@@ -387,10 +387,10 @@ def test_search_ui_serialization(
 
     # todo test community label
     assert "access" in search_control.json["hits"]["hits"][0]
-    assert "access" not in search_global.json["hits"]["hits"][0]
-    assert "access" not in search_model.json["hits"]["hits"][0]
-    assert "access" not in search_user_global.json["hits"]["hits"][0]
-    assert "access" not in search_user_model.json["hits"]["hits"][0]
+    assert "access" in search_global.json["hits"]["hits"][0]
+    assert "access" in search_model.json["hits"]["hits"][0]
+    assert "access" in search_user_global.json["hits"]["hits"][0]
+    assert "access" in search_user_model.json["hits"]["hits"][0]
 
 
 """
