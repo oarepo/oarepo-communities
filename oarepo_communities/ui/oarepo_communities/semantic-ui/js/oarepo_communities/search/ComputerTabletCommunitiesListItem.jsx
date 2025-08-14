@@ -14,8 +14,8 @@ import { RestrictedLabel } from "./RestrictedLabel";
 
 export const ComputerTabledCommunitiesListItem = ({
   result,
-  communityTypeLabelTransparent,
-  isRestricted,
+  communityTypeLabelTransparent = false,
+  isRestricted = false,
 }) => {
   const communityType = result.ui?.type?.title_l10n;
 
@@ -116,8 +116,10 @@ export const ComputerTabledCommunitiesListItem = ({
   );
 };
 
+/* eslint-disable react/require-default-props */
 ComputerTabledCommunitiesListItem.propTypes = {
   result: PropTypes.object.isRequired,
   communityTypeLabelTransparent: PropTypes.bool,
   isRestricted: PropTypes.bool,
 };
+/* eslint-enable react/require-default-props */

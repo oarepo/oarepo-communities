@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Label, Icon } from "semantic-ui-react";
 
-export const CommunityTypeLabel = ({ type, transparent }) => {
+export const CommunityTypeLabel = ({ type, transparent = false }) => {
   if (type === undefined) return null;
   return (
     (transparent && (
@@ -19,12 +19,9 @@ export const CommunityTypeLabel = ({ type, transparent }) => {
   );
 };
 
+/* eslint-disable react/require-default-props */
 CommunityTypeLabel.propTypes = {
   type: PropTypes.string,
   transparent: PropTypes.bool,
 };
-
-CommunityTypeLabel.defaultProps = {
-  type: undefined,
-  transparent: false,
-};
+/* eslint-enable react/require-default-props */

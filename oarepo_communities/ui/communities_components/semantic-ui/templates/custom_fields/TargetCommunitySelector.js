@@ -28,7 +28,7 @@ const TargetCommunitySelector = ({ fieldPath, allowedCommunities }) => {
         fieldPath={fieldPath}
         options={serializeOptions(allowedCommunities)}
         multiple={false}
-        required={true}
+        required
         label={i18next.t("Target community")}
         search={search}
         clearable
