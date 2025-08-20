@@ -1,3 +1,13 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
+import marshmallow as ma
+from flask_resources import BaseListSchema, JSONSerializer, MarshmallowSerializer
 from oarepo_ui.resources import (
     BabelComponent,
     PermissionsComponent,
@@ -5,8 +15,6 @@ from oarepo_ui.resources import (
 )
 from oarepo_ui.resources.components.bleach import AllowedHtmlTagsComponent
 from oarepo_ui.resources.components.custom_fields import CustomFieldsComponent
-import marshmallow as ma
-from flask_resources import MarshmallowSerializer, JSONSerializer, BaseListSchema
 
 
 class ModelSchema(ma.Schema):
@@ -27,6 +35,7 @@ class ModelUISerializer(MarshmallowSerializer):
             list_schema_cls=BaseListSchema,
             schema_context={"object_key": "ui"},
         )
+
 
 class ThesisUIResourceConfig(RecordsUIResourceConfig):
     api_service = "thesis"  # must be something included in oarepo, as oarepo is used in tests

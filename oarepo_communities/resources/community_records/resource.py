@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from flask import g
 from flask_resources import resource_requestctx, response_handler, route
 from invenio_drafts_resources.resources import RecordResource
@@ -89,11 +97,7 @@ class CommunityRecordsResource(RecordResource):
     @response_handler()
     @request_data
     def create_in_community(self) -> tuple[dict, int]:
-        model = (
-            resource_requestctx.view_args["model"]
-            if "model" in resource_requestctx.view_args
-            else None
-        )
+        model = resource_requestctx.view_args["model"] if "model" in resource_requestctx.view_args else None
         item = self.service.create(
             identity=g.identity,
             community_id=resource_requestctx.view_args["pid_value"],

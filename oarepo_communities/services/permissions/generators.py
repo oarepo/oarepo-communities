@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 import abc
@@ -6,6 +14,7 @@ from collections import namedtuple
 from functools import reduce
 from typing import TYPE_CHECKING
 
+from flask import current_app
 from invenio_communities.communities.records.api import Community
 from invenio_communities.communities.records.models import CommunityMetadata
 from invenio_communities.generators import CommunityRoleNeed, CommunityRoles
@@ -22,7 +31,6 @@ from oarepo_communities.errors import (
     TargetCommunityNotProvidedException,
 )
 from oarepo_communities.proxies import current_oarepo_communities
-from flask import current_app
 
 if TYPE_CHECKING:
     from typing import Any
@@ -65,21 +73,17 @@ class InAnyCommunity(Generator):
 
 
 class CommunityWorkflowPermission(WorkflowPermission):
-
     def _get_workflow_id(self, record: Record = None, **kwargs: Any) -> str:
-        # todo - check the record branch too? idk makes more sense to not use the default community's workflow, there is a deeper problem if there's no workflow on the record
+        # TODO - check the record branch too? idk makes more sense to not use the default community's workflow, there is a deeper problem if there's no workflow on the record
         try:
             return super()._get_workflow_id(record=None, **kwargs)
         except MissingWorkflowError:
             if not record:
-                workflow_id = current_oarepo_communities.get_community_default_workflow(
-                    **kwargs
-                )
+                workflow_id = current_oarepo_communities.get_community_default_workflow(**kwargs)
                 if not workflow_id:
                     raise MissingWorkflowError("Workflow not defined in input.")
                 return workflow_id
-            else:
-                raise MissingWorkflowError("Workflow not defined on record.")
+            raise MissingWorkflowError("Workflow not defined on record.")
 
 
 def convert_community_ids_to_uuid(community_id: str) -> str | uuid.UUID:
@@ -93,9 +97,7 @@ def convert_community_ids_to_uuid(community_id: str) -> str | uuid.UUID:
 
 
 class CommunityRoleMixin:
-    def _get_record_communities(
-        self, record: Record = None, **kwargs: Any
-    ) -> list[str]:
+    def _get_record_communities(self, record: Record = None, **kwargs: Any) -> list[str]:
         try:
             return record.parent.communities.ids
         except AttributeError:
@@ -109,27 +111,19 @@ class CommunityRoleMixin:
 
 
 class DefaultCommunityRoleMixin:
-    def _get_record_communities(
-        self, record: Record = None, **kwargs: Any
-    ) -> list[str]:
+    def _get_record_communities(self, record: Record = None, **kwargs: Any) -> list[str]:
         try:
             return [str(record.parent.communities.default.id)]
-        except (AttributeError, TypeError) as e:
+        except (AttributeError, TypeError):
             try:
                 return [str(record["parent"]["communities"]["default"])]
             except KeyError:
-                raise MissingDefaultCommunityError(
-                    f"Default community missing on record {record}."
-                )
+                raise MissingDefaultCommunityError(f"Default community missing on record {record}.")
 
     def _get_data_communities(self, data: dict = None, **kwargs: Any) -> list[str]:
-        community_id = (
-            (data or {}).get("parent", {}).get("communities", {}).get("default")
-        )
+        community_id = (data or {}).get("parent", {}).get("communities", {}).get("default")
         if not community_id:
-            raise MissingDefaultCommunityError(
-                "Default community not defined in input data."
-            )
+            raise MissingDefaultCommunityError("Default community not defined in input data.")
         return [convert_community_ids_to_uuid(community_id)]
 
 
@@ -145,22 +139,18 @@ class OARepoCommunityRoles(CommunityRoles):
         return list(community_ids)
 
     @abc.abstractmethod
-    def _get_record_communities(
-        self, record: Record = None, **kwargs: Any
-    ) -> list[str]:
-        raise NotImplementedError()
+    def _get_record_communities(self, record: Record = None, **kwargs: Any) -> list[str]:
+        raise NotImplementedError
 
     @abc.abstractmethod
     def _get_data_communities(self, data: dict = None, **kwargs: Any) -> list[str]:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abc.abstractmethod
     def roles(self, **kwargs: Any) -> list[str]:
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    def needs(
-        self, record: Record = None, data: dict = None, **kwargs: Any
-    ) -> list[Need]:
+    def needs(self, record: Record = None, data: dict = None, **kwargs: Any) -> list[Need]:
         """Set of Needs granting permission."""
         _needs = set()
 
@@ -185,7 +175,7 @@ class OARepoCommunityRoles(CommunityRoles):
 
         returns parent.communities.ids or parent.communities.default
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def query_filter(self, identity: Identity = None, **kwargs: Any) -> dsl.Q:
         """Filter for current identity."""
@@ -196,7 +186,6 @@ class OARepoCommunityRoles(CommunityRoles):
 
 
 class CommunityRole(CommunityRoleMixin, OARepoCommunityRoles):
-
     def __init__(self, role: str) -> None:
         self._role = role
         super().__init__()
@@ -208,10 +197,7 @@ class CommunityRole(CommunityRoleMixin, OARepoCommunityRoles):
         return "parent.communities.ids"
 
 
-class DefaultCommunityRole(
-    DefaultCommunityRoleMixin, RecipientGeneratorMixin, OARepoCommunityRoles
-):
-
+class DefaultCommunityRole(DefaultCommunityRoleMixin, RecipientGeneratorMixin, OARepoCommunityRoles):
     def __init__(self, role: str) -> None:
         self._role = role
         super().__init__()
@@ -231,14 +217,11 @@ PrimaryCommunityRole = DefaultCommunityRole
 
 
 class TargetCommunityRole(DefaultCommunityRole):
-
     def _get_data_communities(self, data: dict = None, **kwargs: Any) -> list[str]:
         try:
             community_id = data["payload"]["community"]
         except KeyError:
-            raise TargetCommunityNotProvidedException(
-                "Community not defined in request payload."
-            )
+            raise TargetCommunityNotProvidedException("Community not defined in request payload.")
         return [community_id]
 
     def reference_receivers(self, **kwargs: Any) -> list[dict[str, str]]:
@@ -247,7 +230,6 @@ class TargetCommunityRole(DefaultCommunityRole):
 
 
 class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):
-
     def roles(self, **kwargs: Any) -> list[str]:
         """Roles."""
         return [r.name for r in current_roles]
@@ -257,7 +239,6 @@ class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):
 
 
 class DefaultCommunityMembers(DefaultCommunityRoleMixin, OARepoCommunityRoles):
-
     def roles(self, **kwargs: Any) -> list[str]:
         """Roles."""
         return [r.name for r in current_roles]
@@ -275,16 +256,14 @@ class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, Generator):
     def _record_communities(self, record: Record = None, **kwargs: Any) -> set[str]:
         return set(self._get_record_communities(record, **kwargs))
 
-    def needs(
-        self, record: Record = None, data: dict = None, **kwargs: Any
-    ) -> list[Need]:
+    def needs(self, record: Record = None, data: dict = None, **kwargs: Any) -> list[Need]:
         record_communities = set(self._get_record_communities(record, **kwargs))
         return self._needs(record_communities, record=record)
 
     def _needs(self, record_communities: set[str], record: Record = None) -> list[Need]:
         needs = []
         owner_ids = []
-        if current_app.config.get("INVENIO_RDM_ENABLED", False): # remove in rdm 13
+        if current_app.config.get("INVENIO_RDM_ENABLED", False):  # remove in rdm 13
             owners = getattr(record.parent.access, "owned_by", None)
             if owners is not None:
                 owners = owners if isinstance(owners, list) else [owners]
@@ -294,26 +273,17 @@ class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, Generator):
             if owners is not None:
                 owner_ids = [owner.id for owner in owners]
         for owner_id in owner_ids:
-            needs += [
-                UserInCommunityNeed(owner_id, community)
-                for community in record_communities
-            ]
+            needs += [UserInCommunityNeed(owner_id, community) for community in record_communities]
         return needs
 
     def query_filter(self, identity: Identity = None, **kwargs: Any) -> dsl.Q:
         """Filters for current identity as owner."""
-        user_in_communities = {
-            (n.user, n.community)
-            for n in identity.provides
-            if n.method == "user_in_community"
-        }
+        user_in_communities = {(n.user, n.community) for n in identity.provides if n.method == "user_in_community"}
         terms = []
         for element in user_in_communities:
             terms.append(
                 dsl.Q("term", **{"parent.owners.user": element[0]})
-                & dsl.Q(
-                    "term", **{f"parent.communities.{self.default_or_ids}": element[1]}
-                )
+                & dsl.Q("term", **{f"parent.communities.{self.default_or_ids}": element[1]})
             )
         if not terms:
             return []
@@ -324,17 +294,13 @@ class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, Generator):
 RecordOwnerInPrimaryRecordCommunity = RecordOwnerInDefaultRecordCommunity
 
 
-class RecordOwnerInRecordCommunity(
-    CommunityRoleMixin, RecordOwnerInDefaultRecordCommunity
-):
+class RecordOwnerInRecordCommunity(CommunityRoleMixin, RecordOwnerInDefaultRecordCommunity):
     default_or_ids = "ids"
 
     # trick to use CommunityRoleMixin instead of DefaultCommunityRoleMixin
     def _record_communities(self, record: Record = None, **kwargs: Any) -> set[str]:
         return set(self._get_record_communities(record, **kwargs))
 
-    def needs(
-        self, record: Record = None, data: dict = None, **kwargs: Any
-    ) -> list[Need]:
+    def needs(self, record: Record = None, data: dict = None, **kwargs: Any) -> list[Need]:
         record_communities = set(self._get_record_communities(record, **kwargs))
         return self._needs(record_communities, record=record)

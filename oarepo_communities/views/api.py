@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -20,8 +28,7 @@ def create_oarepo_communities(app: Flask) -> Blueprint:
 
 def register_community_role_entity_resolver(
     state: BlueprintSetupState,
-) -> None:  # todo consider using different method for registering the resolver
-
+) -> None:  # TODO consider using different method for registering the resolver
     app = state.app
     requests = app.extensions["invenio-requests"]
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())

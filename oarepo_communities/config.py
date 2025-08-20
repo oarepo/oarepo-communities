@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 from oarepo_runtime.i18n import lazy_gettext as _
 
@@ -17,9 +25,7 @@ REQUESTS_REGISTERED_TYPES = [
     RemoveSecondaryCommunityRequestType(),
     SecondaryCommunitySubmissionRequestType(),
 ]
-OAREPO_REQUESTS_DEFAULT_RECEIVER = (
-    "oarepo_requests.receiver.default_workflow_receiver_function"
-)
+OAREPO_REQUESTS_DEFAULT_RECEIVER = "oarepo_requests.receiver.default_workflow_receiver_function"
 REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
 
 ENTITY_REFERENCE_UI_RESOLVERS = {
@@ -42,15 +48,14 @@ DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI = [
                 props=dict(
                     label=_("Default workflow"),
                     description=_(
-                        "Default workflow for the community if "
-                        "workflow is not specified when depositing a record."
+                        "Default workflow for the community if workflow is not specified when depositing a record."
                     ),
                     options=lazy_workflow_options,
                 ),
             ),
             dict(
                 field="allowed_workflows",
-                # todo: need to find a better widget for this
+                # TODO: need to find a better widget for this
                 ui_widget="Dropdown",
                 props=dict(
                     label=_("Allowed workflows"),
@@ -69,9 +74,7 @@ DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
 
-NOTIFICATION_RECIPIENTS_RESOLVERS = {
-    "community_role": {"email": CommunityRoleEmailRecipient}
-}
+NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}}
 
 DATASTREAMS_TRANSFORMERS = {
     "set_community": "oarepo_communities.datastreams.transformers.SetCommunityTransformer",

@@ -1,24 +1,31 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import marshmallow as ma
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
 from oarepo_requests.types import ModelRefTypes
+from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
 from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
 
-
 from ..errors import CommunityNotIncludedException, PrimaryCommunityException
 from ..proxies import current_oarepo_communities
-import marshmallow as ma
-from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
+
 if TYPE_CHECKING:
     from typing import Any
 
     from flask_principal import Identity
     from invenio_records_resources.records import Record
     from invenio_records_resources.services.uow import UnitOfWork
-    from invenio_requests.customizations import RequestType
     from invenio_requests.customizations.actions import RequestAction
     from oarepo_requests.typing import EntityReference
 
@@ -36,12 +43,8 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
     ) -> None:
         community_id = self.request.receiver.resolve().community_id
         service = get_record_service_for_record(state.topic)
-        community_inclusion_service = (
-            current_oarepo_communities.community_inclusion_service
-        )
-        community_inclusion_service.remove(
-            state.topic, community_id, record_service=service, uow=uow
-        )
+        community_inclusion_service = current_oarepo_communities.community_inclusion_service
+        community_inclusion_service.remove(state.topic, community_id, record_service=service, uow=uow)
 
 
 # Request
@@ -86,16 +89,12 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRequestType):
         target_community_id = data["payload"]["community"]
         not_included = target_community_id not in topic.parent.communities.ids
         if not_included:
-            raise CommunityNotIncludedException(
-                "Cannot remove, record is not in this community."
-            )
+            raise CommunityNotIncludedException("Cannot remove, record is not in this community.")
         if target_community_id == str(topic.parent.communities.default.id):
             raise PrimaryCommunityException("Cannot remove record's primary community.")
 
     @classmethod
-    def is_applicable_to(
-        cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any
-    ) -> bool:
+    def is_applicable_to(cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any) -> bool:
         super().is_applicable_to(identity, topic, *args, **kwargs)
         try:
             communities = topic.parent.communities.ids

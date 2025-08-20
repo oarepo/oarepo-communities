@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2023 CERN.
 #
@@ -67,9 +66,7 @@ class CommunityRecordsService(Service):
         default_filter = dsl.Q("term", **{"parent.communities.ids": community_id})
         if extra_filter is not None:
             default_filter = default_filter & extra_filter
-        ret = getattr(search_service, search_method)(
-            identity, params, extra_filter=default_filter
-        )
+        ret = getattr(search_service, search_method)(identity, params, extra_filter=default_filter)
         links_template.context["args"] |= ret._links_tpl.context["args"]
         ret._links_tpl = links_template
         return ret
@@ -143,7 +140,6 @@ class CommunityRecordsService(Service):
         expand: bool = False,
         **kwargs: Any,
     ) -> RecordList:
-
         return self._search(
             identity,
             community_id,
@@ -170,7 +166,6 @@ class CommunityRecordsService(Service):
         expand: bool = False,
         **kwargs: Any,
     ) -> RecordList:
-
         params_copy = copy.deepcopy(params)
         facets = params_copy.pop("facets")
         params_copy.update(facets)
@@ -201,7 +196,6 @@ class CommunityRecordsService(Service):
         expand: bool = False,
         **kwargs: Any,
     ) -> RecordList:
-
         return self._search(
             identity,
             community_id,
@@ -237,10 +231,6 @@ class CommunityRecordsService(Service):
             record_service = get_service_from_schema_type(data["$schema"])
         if not record_service:
             raise ValueError(f"No service found for requested model {model}.")
-        data.setdefault("parent", {}).setdefault("communities", {})[
-            "default"
-        ] = community_id
-        result_item = record_service.create(
-            identity, data, uow=uow, expand=expand, **kwargs
-        )
+        data.setdefault("parent", {}).setdefault("communities", {})["default"] = community_id
+        result_item = record_service.create(identity, data, uow=uow, expand=expand, **kwargs)
         return result_item

@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from invenio_records_permissions.generators import (
     SystemProcess,
 )
@@ -14,8 +22,8 @@ from oarepo_communities.services.permissions.generators import (
 
 
 class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
-    """
-    Base class for community workflow permissions, subclass from it and put the result to Workflow constructor.
+    """Base class for community workflow permissions, subclass from it and put the result to Workflow constructor.
+
     Example:
         class MyWorkflowPermissions(CommunityDefaultWorkflowPermissions):
             can_read = [AnyUser()]
@@ -25,6 +33,7 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
             permission_policy_cls = MyWorkflowPermissions, ...
         )
     }
+
     """
 
     can_create = [

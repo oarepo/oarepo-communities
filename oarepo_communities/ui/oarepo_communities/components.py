@@ -1,12 +1,18 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from flask import current_app, request
 from invenio_communities.views.communities import HEADER_PERMISSIONS
 from oarepo_ui.resources.components import UIResourceComponent
 
 
 class GetCommunityComponent(UIResourceComponent):
-    def before_ui_search(
-        self, *, search_options, extra_context, identity, view_args, **kwargs
-    ):
+    def before_ui_search(self, *, search_options, extra_context, identity, view_args, **kwargs):
         community = view_args.get("community")
         community_id = str(community.id)
 
@@ -17,14 +23,10 @@ class GetCommunityComponent(UIResourceComponent):
         from oarepo_workflows.proxies import current_oarepo_workflows
 
         if workflow_name not in current_oarepo_workflows.record_workflows:
-            raise InvalidWorkflowError(
-                f"Workflow {workflow_name} does not exist in the configuration."
-            )
+            raise InvalidWorkflowError(f"Workflow {workflow_name} does not exist in the configuration.")
 
         workflow = current_oarepo_workflows.record_workflows[workflow_name]
-        permissions = workflow.permissions(
-            "create", data={"parent": {"communities": {"default": community_id}}}
-        )
+        permissions = workflow.permissions("create", data={"parent": {"communities": {"default": community_id}}})
         can_create_record = permissions.allows(identity)
 
         # for consistency with invenio-communities routes
@@ -35,6 +37,4 @@ class GetCommunityComponent(UIResourceComponent):
         permissions["can_create_record"] = can_create_record
         extra_context["community"] = community
         extra_context["permissions"] = permissions
-        search_options["overrides"][
-            "ui_endpoint"
-        ] = f"/communities/{community_id}/records"
+        search_options["overrides"]["ui_endpoint"] = f"/communities/{community_id}/records"

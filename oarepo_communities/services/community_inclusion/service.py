@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -40,19 +48,13 @@ class CommunityInclusionService(Service):
             default = not record.parent.communities
         record.parent.communities.add(community_id, default=default)
 
-        uow.register(
-            ParentRecordCommitOp(
-                record.parent, indexer_context=dict(service=record_service)
-            )
-        )
+        uow.register(ParentRecordCommitOp(record.parent, indexer_context=dict(service=record_service)))
         # comment from RDM:
         # this indexed record might not be the latest version: in this case, it might
         # not be immediately visible in the community's records, when the `all versions`
         # facet is not toggled
-        # todo how to synchronize with rdm sources
-        uow.register(
-            RecordIndexOp(record, indexer=record_service.indexer, index_refresh=True)
-        )
+        # TODO how to synchronize with rdm sources
+        uow.register(RecordIndexOp(record, indexer=record_service.indexer, index_refresh=True))
         """
         uow.register(
             NotificationOp(
@@ -73,7 +75,6 @@ class CommunityInclusionService(Service):
         uow: UnitOfWork = None,
     ) -> None:
         """Remove a community from the record."""
-
         # Default community is deleted when the exact same community is removed from the record
         if community_id not in record.parent.communities.ids:
             raise CommunityNotIncludedException
@@ -84,8 +85,6 @@ class CommunityInclusionService(Service):
                 indexer_context=dict(service=record_service),
             )
         )
-        uow.register(
-            RecordIndexOp(record, indexer=record_service.indexer, index_refresh=True)
-        )
+        uow.register(RecordIndexOp(record, indexer=record_service.indexer, index_refresh=True))
 
-    # todo links to communities on record (through record service config)
+    # TODO links to communities on record (through record service config)
