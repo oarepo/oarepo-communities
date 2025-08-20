@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from functools import cached_property
@@ -22,7 +30,7 @@ if TYPE_CHECKING:
     from flask import Flask
 
 
-class OARepoCommunities(object):
+class OARepoCommunities:
     """OARepo extension of Invenio-Vocabularies."""
 
     def __init__(self, app: Flask = None) -> None:
@@ -41,51 +49,34 @@ class OARepoCommunities(object):
 
     def init_config(self, app: Flask) -> None:
         """Initialize configuration."""
-
         from . import config, ext_config
 
-        app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(
-            config.REQUESTS_ALLOWED_RECEIVERS
-        )
-        app.config.setdefault(
-            "OAREPO_REQUESTS_DEFAULT_RECEIVER", config.OAREPO_REQUESTS_DEFAULT_RECEIVER
-        )
-        app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS", []).extend(
-            config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS
-        )
+        app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(config.REQUESTS_ALLOWED_RECEIVERS)
+        app.config.setdefault("OAREPO_REQUESTS_DEFAULT_RECEIVER", config.OAREPO_REQUESTS_DEFAULT_RECEIVER)
+        app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS", []).extend(config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS)
         app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI", []).extend(
             config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI
         )
-        app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(
-            config.ENTITY_REFERENCE_UI_RESOLVERS
-        )
+        app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(config.ENTITY_REFERENCE_UI_RESOLVERS)
         if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
             app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
-        app.config.setdefault(
-            "DISPLAY_USER_COMMUNITIES", config.DISPLAY_USER_COMMUNITIES
-        )
+        app.config.setdefault("DISPLAY_USER_COMMUNITIES", config.DISPLAY_USER_COMMUNITIES)
         app.config.setdefault("DISPLAY_NEW_COMMUNITIES", config.DISPLAY_NEW_COMMUNITIES)
 
         for k in ext_config.OAREPO_PERMISSIONS_PRESETS:
             if k not in app.config["OAREPO_PERMISSIONS_PRESETS"]:
-                app.config["OAREPO_PERMISSIONS_PRESETS"][k] = (
-                    ext_config.OAREPO_PERMISSIONS_PRESETS[k]
-                )
+                app.config["OAREPO_PERMISSIONS_PRESETS"][k] = ext_config.OAREPO_PERMISSIONS_PRESETS[k]
 
         app.config["COMMUNITIES_ROUTES"] = {
             **config.COMMUNITIES_ROUTES,
             **app.config.get("COMMUNITIES_ROUTES", {}),
         }
 
-        app_registered_event_types = app.config.setdefault(
-            "NOTIFICATION_RECIPIENTS_RESOLVERS", {}
-        )
+        app_registered_event_types = app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
         app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
             app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
         )
-        app.config.setdefault("DATASTREAMS_TRANSFORMERS", {}).update(
-            config.DATASTREAMS_TRANSFORMERS
-        )
+        app.config.setdefault("DATASTREAMS_TRANSFORMERS", {}).update(config.DATASTREAMS_TRANSFORMERS)
 
         app.config.setdefault(
             "OAREPO_COMMUNITIES_DEFAULT_WORKFLOW",
@@ -112,9 +103,7 @@ class OARepoCommunities(object):
         )
 
         self.community_inclusion_service = CommunityInclusionService()
-        self.community_role_service = CommunityRoleService(
-            config=CommunityRoleServiceConfig()
-        )
+        self.community_role_service = CommunityRoleService(config=CommunityRoleServiceConfig())
 
     def init_resources(self, app: Flask) -> None:
         """Initialize communities resources."""
@@ -148,7 +137,6 @@ def api_finalize_app(app: Flask) -> None:
 
 def finalize_app(app: Flask) -> None:
     """Finalize app."""
-
     # Register services - cannot be done in extension because
     # Invenio-Records-Resources might not have been initialized.
     rr_ext = app.extensions["invenio-records-resources"]

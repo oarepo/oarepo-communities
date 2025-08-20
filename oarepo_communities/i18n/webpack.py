@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from invenio_assets.webpack import WebpackThemeBundle
 
 theme = WebpackThemeBundle(
@@ -9,9 +17,7 @@ theme = WebpackThemeBundle(
             "entry": {},
             "dependencies": {},
             "devDependencies": {},
-            "aliases": {
-                "@translations/oarepo_communities": "translations/oarepo_communities/i18next.js"
-            },
+            "aliases": {"@translations/oarepo_communities": "translations/oarepo_communities/i18next.js"},
         }
     },
 )

@@ -1,5 +1,12 @@
-"""
-Record access component for communities service.
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
+"""Record access component for communities service.
 
 This component is responsible for setting access on records based on the access
 defined by the community. If the community is public, nothing is done.

@@ -1,6 +1,15 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 import os
 
 import pytest
+from deepmerge import always_merger
 from invenio_app.factory import create_api
 from invenio_i18n import lazy_gettext as _
 from invenio_notifications.backends import EmailNotificationBackend
@@ -19,6 +28,7 @@ from oarepo_requests.services.permissions.generators import RequestActive
 from oarepo_requests.services.permissions.workflow_policies import (
     CreatorsFromWorkflowRequestsPermissionPolicy,
 )
+from oarepo_runtime.i18n import lazy_gettext as _
 from oarepo_runtime.services.permissions import RecordOwners
 from oarepo_workflows import (
     AutoApprove,
@@ -30,7 +40,7 @@ from oarepo_workflows import (
 )
 from pytest_oarepo.vocabularies.config import VOCABULARIES_TEST_CONFIG
 from thesis.proxies import current_service
-from oarepo_runtime.services.custom_fields.mappings import prepare_cf_indices
+
 from oarepo_communities.services.custom_fields.workflow import WorkflowCF
 from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
@@ -44,9 +54,6 @@ from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
 
-from oarepo_runtime.i18n import lazy_gettext as _
-from deepmerge import always_merger
-
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
     "pytest_oarepo.communities.records",
@@ -55,8 +62,9 @@ pytest_plugins = [
     "pytest_oarepo.fixtures",
     "pytest_oarepo.users",
     "pytest_oarepo.files",
-    "pytest_oarepo.vocabularies"
+    "pytest_oarepo.vocabularies",
 ]
+
 
 @pytest.fixture(autouse=True)
 def init_communities_cf(init_communities_cf):
@@ -68,17 +76,17 @@ def location(location):
     return location
 
 
-@pytest.fixture()
+@pytest.fixture
 def urls():
     return {"BASE_URL": "/thesis/", "BASE_URL_REQUESTS": "/requests/"}
 
 
-@pytest.fixture()
+@pytest.fixture
 def record_service():
     return current_service
 
 
-@pytest.fixture()
+@pytest.fixture
 def base_model_schema():
     return "local://thesis-1.0.0.json"
 
@@ -121,18 +129,12 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
 
 
 class TestWithCuratorCommunityWorkflowPermissions(TestCommunityWorkflowPermissions):
-    can_read = TestCommunityWorkflowPermissions.can_read + [
-        DefaultCommunityRole("curator")
-    ]
+    can_read = TestCommunityWorkflowPermissions.can_read + [DefaultCommunityRole("curator")]
 
-    can_create = TestCommunityWorkflowPermissions.can_create + [
-        DefaultCommunityRole("curator")
-    ]
+    can_create = TestCommunityWorkflowPermissions.can_create + [DefaultCommunityRole("curator")]
 
 
-class TestWithRecordOwnerInRecordCommunityWorkflowPermissions(
-    TestWithCuratorCommunityWorkflowPermissions
-):
+class TestWithRecordOwnerInRecordCommunityWorkflowPermissions(TestWithCuratorCommunityWorkflowPermissions):
     can_read = [
         RecordOwnerInRecordCommunity(),
         IfInState(
@@ -142,9 +144,7 @@ class TestWithRecordOwnerInRecordCommunityWorkflowPermissions(
     ]
 
 
-class TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions(
-    TestWithCuratorCommunityWorkflowPermissions
-):
+class TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions(TestWithCuratorCommunityWorkflowPermissions):
     can_read = [
         RecordOwnerInDefaultRecordCommunity(),
         IfInState(
@@ -273,9 +273,7 @@ class NoRequests(WorkflowRequestPolicy):
 
 class CuratorPublishRequests(DefaultRequests):
     publish_draft = WorkflowRequest(
-        requesters=[
-            IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])
-        ],
+        requesters=[IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])],
         recipients=[DefaultCommunityRole("curator")],
         transitions=WorkflowTransitions(
             submitted="publishing",
@@ -285,11 +283,10 @@ class CuratorPublishRequests(DefaultRequests):
         ),
     )
 
+
 class MultipleRecipientsRequests(DefaultRequests):
     publish_draft = WorkflowRequest(
-        requesters=[
-            IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])
-        ],
+        requesters=[IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])],
         recipients=[DefaultCommunityRole("curator"), DefaultCommunityRole("owner")],
         transitions=WorkflowTransitions(
             submitted="publishing",
@@ -349,12 +346,8 @@ def create_app(instance_path, entry_points):
 def app_config(app_config):
     """Mimic an instance's configuration."""
     app_config["JSONSCHEMAS_HOST"] = "localhost"
-    app_config["RECORDS_REFRESOLVER_CLS"] = (
-        "invenio_records.resolver.InvenioRefResolver"
-    )
-    app_config["RECORDS_REFRESOLVER_STORE"] = (
-        "invenio_jsonschemas.proxies.current_refresolver_store"
-    )
+    app_config["RECORDS_REFRESOLVER_CLS"] = "invenio_records.resolver.InvenioRefResolver"
+    app_config["RECORDS_REFRESOLVER_STORE"] = "invenio_jsonschemas.proxies.current_refresolver_store"
     app_config["RATELIMIT_AUTHENTICATED_USER"] = "200 per second"
     app_config["SEARCH_HOSTS"] = [
         {
@@ -391,9 +384,7 @@ def app_config(app_config):
         ("cs", _("Czech")),
     ]
 
-    app_config["REQUESTS_PERMISSION_POLICY"] = (
-        CreatorsFromWorkflowRequestsPermissionPolicy
-    )
+    app_config["REQUESTS_PERMISSION_POLICY"] = CreatorsFromWorkflowRequestsPermissionPolicy
 
     app_config["NOTIFICATIONS_BACKENDS"] = {
         EmailNotificationBackend.id: EmailNotificationBackend(),
@@ -411,7 +402,8 @@ def app_config(app_config):
     app_config["MAIL_DEFAULT_SENDER"] = "test@invenio-rdm-records.org"
 
     app_config["INVENIO_RDM_ENABLED"] = True
-    app_config["RDM_MODELS"] = {
+    app_config["RDM_MODELS"] = (
+        {
             "service_id": "thesis",
             # deprecated
             "model_service": "thesis.services.records.service.ThesisService",
@@ -420,14 +412,13 @@ def app_config(app_config):
             "api_service": "thesis.services.records.service.ThesisService",
             "api_service_config": "thesis.services.records.config.ThesisServiceConfig",
             "api_resource": "thesis.resources.records.resource.ThesisResource",
-            "api_resource_config": (
-                "thesis.resources.records.config.ThesisResourceConfig"
-            ),
+            "api_resource_config": ("thesis.resources.records.config.ThesisResourceConfig"),
             "ui_resource_config": "tests.ui.thesis.ThesisUIResourceConfig",
             "record_cls": "thesis.records.api.ThesisRecord",
             "pid_type": "thesis",
             "draft_cls": "thesis.records.api.ThesisDraft",
-            },
+        },
+    )
     always_merger.merge(app_config, VOCABULARIES_TEST_CONFIG)
     return app_config
 
@@ -454,7 +445,7 @@ def ui_serialized_community():
             "label": "My Community",
             "links": {
                 "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
-                "self_html": "https://127.0.0.1:5000/communities/public",  # todo is this correct?
+                "self_html": "https://127.0.0.1:5000/communities/public",  # TODO is this correct?
             },
             "reference": {"community": community_id},
             "type": "community",
@@ -463,9 +454,8 @@ def ui_serialized_community():
     return _ui_serialized_community
 
 
-@pytest.fixture()
+@pytest.fixture
 def clear_babel_context():
-
     # force babel reinitialization when language is switched
     def _clear_babel_context():
         try:

@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 import pytest
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
@@ -15,23 +23,20 @@ def test_disabled_endpoints(
     record_service,
     search_clear,
 ):
-
     owner_client = logged_client(community_owner)
     # create should work only through community
     create = owner_client.post("/thesis/", json=default_record_with_workflow_json)
     assert create.status_code == 400
     community_1 = community_get_or_create(community_owner, "comm1")
     draft = draft_with_community_factory(community_owner.identity, community_1.id)
-    published_record = published_record_with_community_factory(
-        community_owner.identity, community_1.id
-    )
+    published_record = published_record_with_community_factory(community_owner.identity, community_1.id)
     publish = owner_client.post(f"/thesis/{draft['id']}/draft/actions/publish")
     delete = owner_client.delete(f"/thesis/{published_record['id']}")
     assert publish.status_code == 403
     assert delete.status_code == 403
 
 
-@pytest.fixture()
+@pytest.fixture
 def service_config():
     from thesis.services.records.config import ThesisServiceConfig
 
@@ -61,18 +66,10 @@ def test_default_community_workflow_changed(
     record2 = draft_with_community_factory(community_owner.identity, community_2.id)
     record4 = draft_with_community_factory(community_reader.identity, community_1.id)
 
-    request_should_be_allowed = owner_client.post(
-        f"/thesis/{record1['id']}/draft/requests/publish_draft"
-    )
-    submit = owner_client.post(
-        link2testclient(request_should_be_allowed.json["links"]["actions"]["submit"])
-    )
-    accept_should_be_denied = reader_client.post(
-        link2testclient(submit.json["links"]["actions"]["accept"])
-    )
-    accept = owner_client.post(
-        link2testclient(submit.json["links"]["actions"]["accept"])
-    )
+    request_should_be_allowed = owner_client.post(f"/thesis/{record1['id']}/draft/requests/publish_draft")
+    submit = owner_client.post(link2testclient(request_should_be_allowed.json["links"]["actions"]["submit"]))
+    accept_should_be_denied = reader_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
+    accept = owner_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
     assert accept_should_be_denied.status_code == 403
     assert request_should_be_allowed.status_code == 201
 
@@ -87,13 +84,9 @@ def test_default_community_workflow_changed(
     set_community_workflow(str(community_1.id), "no")
     record = Community.get_record(str(community_1.id))
     assert record.custom_fields["workflow"] == "no"
-    request_should_still_work = owner_client.post(
-        f"/thesis/{record2['id']}/draft/requests/publish_draft"
-    )
+    request_should_still_work = owner_client.post(f"/thesis/{record2['id']}/draft/requests/publish_draft")
     record5 = draft_with_community_factory(community_owner.identity, community_1.id)
-    request_should_be_forbidden = owner_client.post(
-        f"/thesis/{record5['id']}/draft/requests/publish_draft"
-    )
+    request_should_be_forbidden = owner_client.post(f"/thesis/{record5['id']}/draft/requests/publish_draft")
     assert request_should_still_work.status_code == 201
     assert request_should_be_forbidden.status_code == 403
 
@@ -117,9 +110,7 @@ def test_can_possibly_create_in_community(
     invite(community_curator, community_1.id, "curator")
     record_service.require_permission(community_owner.identity, "view_deposit_page")
     with pytest.raises(PermissionDeniedError):
-        record_service.require_permission(
-            community_curator.identity, "view_deposit_page"
-        )
+        record_service.require_permission(community_curator.identity, "view_deposit_page")
     with pytest.raises(PermissionDeniedError):
         record_service.require_permission(rando_user.identity, "view_deposit_page")
 
@@ -130,9 +121,7 @@ def test_can_possibly_create_in_community(
         data=community_2.data | {"custom_fields": {"workflow": "custom"}},
     )
     invite(community_curator, community_2.id, "curator")
-    community2read = current_communities.service.read(
-        community_curator.identity, community_2.id
-    )
+    community2read = current_communities.service.read(community_curator.identity, community_2.id)
     assert community2read.data["custom_fields"]["workflow"] == "custom"
     Community.index.refresh()
 

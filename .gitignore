@@ -380,5 +380,5 @@ vite.config.ts.timestamp-*
 .DS_Store
 *.DS_Store?
 #
-
-forked_install.sh
+package-lock.json
+pnpm-lock.yaml

@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from invenio_records_resources.services.base.config import (
     ConfiguratorMixin,
     ServiceConfig,
@@ -6,22 +14,12 @@ from invenio_records_resources.services.records.links import pagination_links
 from oarepo_runtime.services.config.service import PermissionsPresetsConfigMixin
 
 
-class CommunityRecordsServiceConfig(
-    PermissionsPresetsConfigMixin, ServiceConfig, ConfiguratorMixin
-):
+class CommunityRecordsServiceConfig(PermissionsPresetsConfigMixin, ServiceConfig, ConfiguratorMixin):
     """Community records service config."""
 
     PERMISSIONS_PRESETS = ["workflow"]
     service_id = "community-records"
-    links_search_community_records = pagination_links(
-        "{+api}/communities/{id}/records{?args*}"
-    )
-    links_search_community_user_records = pagination_links(
-        "{+api}/communities/{id}/user/records{?args*}"
-    )
-    links_search_community_model_records = pagination_links(
-        "{+api}/communities/{id}/{model}{?args*}"
-    )
-    links_search_community_model_user_records = pagination_links(
-        "{+api}/communities/{id}/user/{model}{?args*}"
-    )
+    links_search_community_records = pagination_links("{+api}/communities/{id}/records{?args*}")
+    links_search_community_user_records = pagination_links("{+api}/communities/{id}/user/records{?args*}")
+    links_search_community_model_records = pagination_links("{+api}/communities/{id}/{model}{?args*}")
+    links_search_community_model_user_records = pagination_links("{+api}/communities/{id}/user/{model}{?args*}")

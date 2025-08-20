@@ -1,7 +1,15 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from invenio_communities.communities.records.api import Community
 from invenio_records_resources.services.base.links import Link, preprocess_vars
@@ -14,9 +22,7 @@ if TYPE_CHECKING:
 class CommunitiesLinks(Link):
     """Utility class for keeping track of and resolve links."""
 
-    def __init__(
-        self, uritemplate_strs: Dict, when: callable = None, vars: callable = None
-    ) -> None:
+    def __init__(self, uritemplate_strs: dict, when: callable = None, vars: callable = None) -> None:
         """Constructor."""
         self._uritemplates = {k: URITemplate(v) for k, v in uritemplate_strs.items()}
         self._when_func = when

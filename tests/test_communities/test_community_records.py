@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from pytest_oarepo.communities.functions import invite
 from thesis.records.api import ThesisDraft, ThesisRecord
 
@@ -52,12 +60,8 @@ def test_search(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
 
-    record1 = published_record_with_community_factory(
-        community_owner.identity, community_1.id
-    )
-    record2 = published_record_with_community_factory(
-        community_owner.identity, community_2.id
-    )
+    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
+    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -108,12 +112,8 @@ def test_search_all(
 
     owner_client = logged_client(community_owner)
 
-    record1 = published_record_with_community_factory(
-        community_owner.identity, community_1.id
-    )
-    record2 = published_record_with_community_factory(
-        community_owner.identity, community_2.id
-    )
+    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
+    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
 
     draft1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     draft2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
@@ -144,7 +144,7 @@ def test_search_all(
     assert len(reader_search.json["hits"]["hits"]) == 0
 
 
-# todo tests for search links
+# TODO tests for search links
 
 
 def test_search_model(
@@ -160,12 +160,8 @@ def test_search_model(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
 
-    record1 = published_record_with_community_factory(
-        community_owner.identity, community_1.id
-    )
-    record2 = published_record_with_community_factory(
-        community_owner.identity, community_2.id
-    )
+    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
+    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -196,15 +192,9 @@ def test_user_search(
     community_2 = community_get_or_create(community_owner, "comm2")
     invite(community_reader, community_1.id, "reader")
 
-    record1 = draft_with_community_factory(
-        community_owner.identity, str(community_1.id)
-    )
-    record2 = draft_with_community_factory(
-        community_owner.identity, str(community_2.id)
-    )
-    record3 = draft_with_community_factory(
-        community_reader.identity, str(community_1.id)
-    )
+    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
+    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
+    record3 = draft_with_community_factory(community_reader.identity, str(community_1.id))
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -248,15 +238,9 @@ def test_user_search_model(
     community_2 = community_get_or_create(community_owner, "comm2")
     invite(community_reader, community_1.id, "reader")
 
-    record1 = draft_with_community_factory(
-        community_owner.identity, str(community_1.id)
-    )
-    record2 = draft_with_community_factory(
-        community_owner.identity, str(community_2.id)
-    )
-    record3 = draft_with_community_factory(
-        community_reader.identity, str(community_1.id)
-    )
+    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
+    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
+    record3 = draft_with_community_factory(community_reader.identity, str(community_1.id))
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -285,45 +269,29 @@ def test_search_links(
     community_1 = community_get_or_create(community_owner, "comm1")
 
     for _ in range(30):
-        published_record_with_community_factory(
-            community_owner.identity, community_1.id
-        )
+        published_record_with_community_factory(community_owner.identity, community_1.id)
     ThesisRecord.index.refresh()
 
     def check_links(model_suffix, sort_order):
         after_page_suffix = f"&size=25&sort={sort_order}"
-        search_links = owner_client.get(
-            f"/communities/{community_1.id}/{model_suffix}"
-        ).json["links"]
+        search_links = owner_client.get(f"/communities/{community_1.id}/{model_suffix}").json["links"]
         assert (
-            search_links["self"]
-            == f"{host}api/communities/{community_1.id}/{model_suffix}?page=1{after_page_suffix}"
+            search_links["self"] == f"{host}api/communities/{community_1.id}/{model_suffix}?page=1{after_page_suffix}"
         )
         assert (
-            search_links["next"]
-            == f"{host}api/communities/{community_1.id}/{model_suffix}?page=2{after_page_suffix}"
+            search_links["next"] == f"{host}api/communities/{community_1.id}/{model_suffix}?page=2{after_page_suffix}"
         )
 
-        next_page = owner_client.get(
-            f"/communities/{community_1.id}/{model_suffix}?page=2"
-        ).json["links"]
-        assert (
-            next_page["self"]
-            == f"{host}api/communities/{community_1.id}/{model_suffix}?page=2{after_page_suffix}"
-        )
-        assert (
-            next_page["prev"]
-            == f"{host}api/communities/{community_1.id}/{model_suffix}?page=1{after_page_suffix}"
-        )
+        next_page = owner_client.get(f"/communities/{community_1.id}/{model_suffix}?page=2").json["links"]
+        assert next_page["self"] == f"{host}api/communities/{community_1.id}/{model_suffix}?page=2{after_page_suffix}"
+        assert next_page["prev"] == f"{host}api/communities/{community_1.id}/{model_suffix}?page=1{after_page_suffix}"
 
     check_links("records", "newest")
     check_links("thesis", "newest")
     check_links("user/records", "updated-desc")
     check_links("user/thesis", "updated-desc")
 
-    search_links = owner_client.get(
-        f"/communities/{community_1.id}/records?has_draft=true"
-    ).json["links"]
+    search_links = owner_client.get(f"/communities/{community_1.id}/records?has_draft=true").json["links"]
     assert (
         search_links["self"]
         == f"{host}api/communities/{community_1.id}/records?has_draft=true&page=1&size=25&sort=newest"
@@ -343,12 +311,8 @@ def test_search_ui_serialization(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
 
-    record1 = published_record_with_community_factory(
-        community_owner.identity, community_1.id
-    )
-    record2 = published_record_with_community_factory(
-        community_owner.identity, community_2.id
-    )
+    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
+    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
 
     ThesisRecord.index.refresh()
     ThesisDraft.index.refresh()
@@ -380,7 +344,7 @@ def test_search_ui_serialization(
     # this was originally meant to determine the results go through ui serialization
     # ie. define something explicit in model json
 
-    # todo test community label
+    # TODO test community label
     assert "access" in search_control.json["hits"]["hits"][0]
     assert "access" in search_global.json["hits"]["hits"][0]
     assert "access" in search_model.json["hits"]["hits"][0]

@@ -1,5 +1,13 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
+from collections.abc import Iterable
 from functools import cached_property
-from typing import Iterable
 
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
@@ -39,21 +47,17 @@ class CommunityRoleService(Service):
             "role": role,
             "id": f"{community_id}:{role}",
         }
-        return self.result_item(
-            self, identity, record=result, links_tpl=self.links_item_tpl
-        )
+        return self.result_item(self, identity, record=result, links_tpl=self.links_item_tpl)
 
     def read_many(self, identity, ids: Iterable[str], fields=None, **kwargs):
         if not ids:
             return []
-        community_and_role_split_inputs = {
-            (x.split(":")[0].strip(), x.split(":")[1].strip()) for x in ids
-        }
+        community_and_role_split_inputs = {(x.split(":")[0].strip(), x.split(":")[1].strip()) for x in ids}
         community_ids = {x[0] for x in community_and_role_split_inputs}
 
         clauses = []
         for id_ in community_ids:
-            clauses.append(dsl.Q("term", **{"id": id_}))
+            clauses.append(dsl.Q("term", id=id_))
         query = dsl.Q("bool", minimum_should_match=1, should=clauses)
 
         communities_search_results = self.community_service._read_many(

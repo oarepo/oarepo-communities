@@ -1,18 +1,24 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
-
 
 from typing import TYPE_CHECKING
 
+import marshmallow as ma
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
-from oarepo_runtime.datastreams.utils import get_record_service_for_record
-from oarepo_runtime.i18n import lazy_gettext as _
-import marshmallow as ma
-
 from oarepo_requests.utils import (
     request_identity_matches,
 )
+from oarepo_runtime.datastreams.utils import get_record_service_for_record
+from oarepo_runtime.i18n import lazy_gettext as _
 
 from ..errors import (
     CommunityAlreadyIncludedException,
@@ -26,13 +32,11 @@ if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_records_resources.records import Record
     from invenio_records_resources.services.uow import UnitOfWork
-    from invenio_requests.customizations import RequestType
     from invenio_requests.customizations.actions import RequestAction
     from oarepo_requests.typing import EntityReference
 
 
-from typing import TYPE_CHECKING, Any
-from typing_extensions import override
+from typing import TYPE_CHECKING, Any, override
 
 if TYPE_CHECKING:
     from flask_babel.speaklater import LazyString
@@ -56,12 +60,8 @@ class CommunitySubmissionAcceptAction(OARepoAcceptAction):
         if not community_id:
             raise TargetCommunityNotProvidedException("Target community not provided.")
         service = get_record_service_for_record(topic)
-        community_inclusion_service = (
-            current_oarepo_communities.community_inclusion_service
-        )
-        community_inclusion_service.include(
-            topic, community_id, record_service=service, uow=uow, default=False
-        )
+        community_inclusion_service = current_oarepo_communities.community_inclusion_service
+        community_inclusion_service.include(topic, community_id, record_service=service, uow=uow, default=False)
 
 
 class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
@@ -143,9 +143,7 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
                         "User has requested to add secondary community to a record. "
                         "You can now accept or decline the request."
                     )
-                return _(
-                    "Record secondary community submission request has been submitted."
-                )
+                return _("Record secondary community submission request has been submitted.")
             case _:
                 if request_identity_matches(request.created_by, identity):
                     return _("Submit to add record to secondary community.")
@@ -169,6 +167,4 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
 
         already_included = target_community_id in topic.parent.communities.ids
         if already_included:
-            raise CommunityAlreadyIncludedException(
-                "Record is already included in this community."
-            )
+            raise CommunityAlreadyIncludedException("Record is already included in this community.")
