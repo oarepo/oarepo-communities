@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -27,9 +35,7 @@ def community_default_workflow(**kwargs: Any) -> str | None:
         )
 
     if "record" not in kwargs and "data" not in kwargs:  # nothing to get community from
-        raise MissingDefaultCommunityError(
-            "Can't get community when neither record nor input data are present."
-        )
+        raise MissingDefaultCommunityError("Can't get community when neither record nor input data are present.")
 
     if "record" in kwargs:
         community_id = community_id_from_record(kwargs["record"])
@@ -39,15 +45,11 @@ def community_default_workflow(**kwargs: Any) -> str | None:
         try:
             community_id = kwargs["data"]["parent"]["communities"]["default"]
         except KeyError:
-            raise MissingDefaultCommunityError(
-                "Failed to get community from input data."
-            )
+            raise MissingDefaultCommunityError("Failed to get community from input data.")
 
     # use pid resolve so that the community might be both slug or id
     try:
         community = Community.pid.resolve(community_id)
     except PIDDoesNotExistError:
         raise CommunityDoesntExistError(community_id)
-    return community.custom_fields.get(
-        "workflow", current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"]
-    )
+    return community.custom_fields.get("workflow", current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"])

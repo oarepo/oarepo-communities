@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -23,7 +31,7 @@ def get_community_needs_for_identity(
     # see invenio_communities.utils.load_community_needs
     if identity.id is None:
         # no user is logged in
-        return
+        return None
 
     cache_key = identity_cache_key(identity)
     community_roles = current_identities_cache.get(cache_key)
@@ -33,9 +41,7 @@ def get_community_needs_for_identity(
 
         member_cls = current_communities.service.members.config.record_cls
         managed_community_roles = member_cls.get_memberships(identity)
-        unmanaged_community_roles = member_cls.get_memberships_from_group_ids(
-            identity, roles_ids
-        )
+        unmanaged_community_roles = member_cls.get_memberships_from_group_ids(identity, roles_ids)
         community_roles = managed_community_roles + unmanaged_community_roles
 
         current_identities_cache.set(
@@ -46,7 +52,7 @@ def get_community_needs_for_identity(
 
 
 def load_community_user_needs(identity: Identity) -> None:
-    # todo assuming there's one user and identity_id = user_id
+    # TODO assuming there's one user and identity_id = user_id
     community_roles = get_community_needs_for_identity(identity)
     if not community_roles:
         return
@@ -55,13 +61,9 @@ def load_community_user_needs(identity: Identity) -> None:
     identity.provides |= needs
 
 
-def get_associated_service(
-    record_service: RecordService, service_type: str
-) -> RecordService:
+def get_associated_service(record_service: RecordService, service_type: str) -> RecordService:
     # return getattr(record_service.config, service_type, None)
-    return current_service_registry.get(
-        f"{record_service.config.service_id}_{service_type}"
-    )
+    return current_service_registry.get(f"{record_service.config.service_id}_{service_type}")
 
 
 def slug2id(slug: str) -> str:
@@ -71,17 +73,14 @@ def slug2id(slug: str) -> str:
 def get_record_services() -> dict[Record, RecordService]:
     return {k: current_service_registry.get(v) for k, v in current_app.config["OAREPO_PRIMARY_RECORD_SERVICE"].items()}
 
+
 def get_service_by_urlprefix(url_prefix: str) -> RecordService:
-    return current_service_registry.get(
-        current_oarepo_communities.urlprefix_serviceid_mapping[url_prefix]
-    )
+    return current_service_registry.get(current_oarepo_communities.urlprefix_serviceid_mapping[url_prefix])
+
 
 def get_service_from_schema_type(schema_type: str) -> RecordService:
     for record_cls, service in get_record_services().items():
-        if (
-            hasattr(record_cls, "schema")
-            and record_cls.schema.value == schema_type
-        ):
+        if hasattr(record_cls, "schema") and record_cls.schema.value == schema_type:
             return service
 
 

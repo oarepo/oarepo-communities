@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from invenio_access.permissions import system_identity
 from invenio_records_resources.proxies import current_service_registry
 from pytest_oarepo.communities.functions import invite
@@ -72,9 +80,7 @@ def test_expand_community_role(
     submit = submit_request_on_draft(reader.identity, record_id, "publish_draft")
 
     read = owner_client.get(link2testclient(submit["links"]["self"]))
-    read_expanded = owner_client.get(
-        f"{link2testclient(submit['links']['self'])}?expand=true"
-    )
+    read_expanded = owner_client.get(f"{link2testclient(submit['links']['self'])}?expand=true")
     assert read_expanded.status_code == 200
     read_expanded_ui_serialization = owner_client.get(
         f"{link2testclient(submit['links']['self'])}?expand=true",

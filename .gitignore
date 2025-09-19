@@ -235,6 +235,7 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 *.lcov
+junit.xml
 
 # nyc test coverage
 .nyc_output
@@ -380,5 +381,7 @@ vite.config.ts.timestamp-*
 .DS_Store
 *.DS_Store?
 #
-
-forked_install.sh
+package-lock.json
+pnpm-lock.yaml
+.invenio.private
+_coverage

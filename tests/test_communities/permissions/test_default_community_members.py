@@ -1,11 +1,17 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from invenio_communities.generators import CommunityRoleNeed
 
 from oarepo_communities.services.permissions.generators import DefaultCommunityMembers
 
 
-def test_community_members_needs(
-    app, db, sample_record_with_community_data, communities
-):
+def test_community_members_needs(app, db, sample_record_with_community_data, communities):
     members = DefaultCommunityMembers()
     assert set(members.needs(data=sample_record_with_community_data)) == {
         CommunityRoleNeed(str(communities["aaa"].id), "owner"),
@@ -15,9 +21,7 @@ def test_community_members_needs(
     }
 
 
-def test_community_members_excludes(
-    app, db, sample_record_with_community_data, communities
-):
+def test_community_members_excludes(app, db, sample_record_with_community_data, communities):
     members = DefaultCommunityMembers()
     assert not set(members.excludes(data=sample_record_with_community_data))
 
@@ -31,9 +35,7 @@ def test_community_members_query_filter(
     as_comparable_dict,
 ):
     members = DefaultCommunityMembers()
-    assert as_comparable_dict(
-        members.query_filter(identity=community_owner.identity).to_dict()
-    ) == as_comparable_dict(
+    assert as_comparable_dict(members.query_filter(identity=community_owner.identity).to_dict()) == as_comparable_dict(
         {
             "terms": {
                 "parent.communities.default": [

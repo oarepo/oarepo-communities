@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -16,13 +24,9 @@ class CommunityDefaultWorkflowComponent(WorkflowSetupComponent):
     # affects all components, so should be placed as the first one
     affects = "*"
 
-    def create(
-        self, identity: Identity, data: dict[str, Any] = None, **kwargs: Any
-    ) -> None:
+    def create(self, identity: Identity, data: dict[str, Any] = None, **kwargs: Any) -> None:
         try:
             data["parent"]["workflow"]
         except KeyError:
-            workflow_id = current_oarepo_communities.get_community_default_workflow(
-                data=data
-            )
+            workflow_id = current_oarepo_communities.get_community_default_workflow(data=data)
             data.setdefault("parent", {})["workflow"] = workflow_id

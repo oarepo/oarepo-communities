@@ -1,6 +1,14 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import marshmallow as ma
 from flask import g
@@ -18,7 +26,6 @@ from oarepo_requests.utils import (
 from oarepo_runtime.datastreams.utils import get_record_service_for_record
 from oarepo_runtime.i18n import lazy_gettext as _
 from oarepo_ui.resources.components import AllowedCommunitiesComponent
-from typing_extensions import override
 
 from ..errors import (
     CommunityAlreadyIncludedException,
@@ -33,7 +40,6 @@ if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_records_resources.records import Record
     from invenio_records_resources.services.uow import UnitOfWork
-    from invenio_requests.customizations import RequestType
     from invenio_requests.customizations.actions import RequestAction
     from invenio_requests.records.api import Request
     from oarepo_requests.typing import EntityReference
@@ -41,8 +47,7 @@ from invenio_requests.resolvers.registry import ResolverRegistry
 
 
 class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
-    """
-    Source community accepting the initiate request autocreates confirm request delegated to the target community.
+    """Source community accepting the initiate request autocreates confirm request delegated to the target community.
     """
 
     def apply(
@@ -64,9 +69,7 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
             *args,
             **kwargs,
         )
-        current_requests_service.execute_action(
-            system_identity, request_item.id, "submit", uow=uow
-        )
+        current_requests_service.execute_action(system_identity, request_item.id, "submit", uow=uow)
 
 
 class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
@@ -89,18 +92,14 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
             raise TargetCommunityNotProvidedException("Target community not provided.")
 
         service = get_record_service_for_record(topic)
-        community_inclusion_service = (
-            current_oarepo_communities.community_inclusion_service
-        )
+        community_inclusion_service = current_oarepo_communities.community_inclusion_service
         community_inclusion_service.remove(
             topic,
             str(topic.parent.communities.default.id),
             record_service=service,
             uow=uow,
         )
-        community_inclusion_service.include(
-            topic, community_id, record_service=service, uow=uow, default=True
-        )
+        community_inclusion_service.include(topic, community_id, record_service=service, uow=uow, default=True)
 
 
 class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
@@ -175,8 +174,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
                     )
                 if request_identity_matches(request.receiver, identity):
                     return _(
-                        "User has requested record community migration. "
-                        "You can now accept or decline the request."
+                        "User has requested record community migration. You can now accept or decline the request."
                     )
                 return _("Record community migration request has been submitted.")
             case _:
@@ -187,12 +185,9 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
 
     @property
     def form(self):
-        allowed_communities = AllowedCommunitiesComponent.get_allowed_communities(
-            g.identity, "create"
-        )
+        allowed_communities = AllowedCommunitiesComponent.get_allowed_communities(g.identity, "create")
         allowed_communities = [
-            AllowedCommunitiesComponent.community_to_dict(community)
-            for community in allowed_communities
+            AllowedCommunitiesComponent.community_to_dict(community) for community in allowed_communities
         ]
         return {
             "field": "community",
@@ -215,20 +210,15 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         }
 
     @classmethod
-    def is_applicable_to(
-        cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any
-    ) -> bool:
+    def is_applicable_to(cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any) -> bool:
         """Check if the request type is applicable to the topic."""
-
         if open_request_exists(topic, cls.type_id) or open_request_exists(
             topic, ConfirmCommunityMigrationRequestType.type_id
         ):
             return False
         # check if the user has more than one community to which they can migrate
         allowed_communities_count = 0
-        for _ in AllowedCommunitiesComponent.get_allowed_communities(
-            identity, "create"
-        ):
+        for _ in AllowedCommunitiesComponent.get_allowed_communities(identity, "create"):
             allowed_communities_count += 1
             if allowed_communities_count > 1:
                 break
@@ -252,18 +242,13 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         target_community_id = data.get("payload", {}).get("community", None)
         if not target_community_id:
             raise TargetCommunityNotProvidedException("Target community not provided.")
-        already_included = target_community_id == str(
-            topic.parent.communities.default.id
-        )
+        already_included = target_community_id == str(topic.parent.communities.default.id)
         if already_included:
-            raise CommunityAlreadyIncludedException(
-                "Already inside this primary community."
-            )
+            raise CommunityAlreadyIncludedException("Already inside this primary community.")
 
 
 class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
-    """
-    Performs the primary community migration. The recipient of this request type should be the community
+    """Performs the primary community migration. The recipient of this request type should be the community
     owner of the new community.
     """
 
