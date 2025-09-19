@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 import sys
 
 import click
@@ -37,9 +45,7 @@ def create_community(slug, title, public):
 def list_communities():
     community_service = current_service_registry.get("communities")
     yaml.dump_all(
-        community_service.read_all(
-            system_identity, fields=["id", "slug", "metadata", "access", "featured"]
-        ),
+        community_service.read_all(system_identity, fields=["id", "slug", "metadata", "access", "featured"]),
         sys.stdout,
     )
 

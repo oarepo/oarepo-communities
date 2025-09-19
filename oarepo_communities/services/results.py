@@ -1,8 +1,18 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from oarepo_runtime.services.results import ResultsComponent
+
 from invenio_communities.communities.records.api import Community
+from oarepo_runtime.services.results import ResultsComponent
+
 from oarepo_communities.utils import community_to_dict
 
 if TYPE_CHECKING:
@@ -13,9 +23,7 @@ if TYPE_CHECKING:
 class RecordCommunitiesComponent(ResultsComponent):
     """Component for expanding communities on a record."""
 
-    def update_data(
-        self, identity: Identity, record: Record, projection: dict, expand: bool
-    ) -> None:
+    def update_data(self, identity: Identity, record: Record, projection: dict, expand: bool) -> None:
         """Expand communities if requested."""
         if not expand:
             return
@@ -28,16 +36,10 @@ class RecordCommunitiesComponent(ResultsComponent):
             except Exception:
                 continue
 
-        default_community_id = (
-            str(record.parent.communities.default.id)
-            if record.parent.communities.default
-            else None
-        )
+        default_community_id = str(record.parent.communities.default.id) if record.parent.communities.default else None
 
         # Sorting communities so the one with the default id is first
-        record_communities.sort(
-            key=lambda community: community["id"] != default_community_id
-        )
+        record_communities.sort(key=lambda community: community["id"] != default_community_id)
 
         if record_communities:
             projection["expanded"]["communities"] = record_communities

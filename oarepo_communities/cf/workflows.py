@@ -1,6 +1,15 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
+"""Custom field for associating preferred and allowed workflows to a community."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import marshmallow as ma
 from flask import current_app
@@ -10,23 +19,30 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-def validate_workflow(value: str) -> bool:
-    return value in current_app.config["WORKFLOWS"]
+def validate_workflow(code: str) -> bool:
+    """Validate that the workflow with the given code exists."""
+    return code in current_app.config["WORKFLOWS"]
 
 
 class WorkflowSchemaField(ma.fields.Str):
+    """A custom Marshmallow field for validating workflow codes."""
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(validate=[validate_workflow], **kwargs)
 
 
 class WorkflowCF(KeywordCF):
+    """A custom field for associating preferred and allowed workflows to a community."""
     def __init__(self, name: str, **kwargs: Any) -> None:
         super().__init__(name, field_cls=WorkflowSchemaField, **kwargs)
 
 
 # hack to get lazy choices serialized to JSON
-class LazyChoices(list):
-    def __init__(self, func: callable):
+class LazyChoices[T](list[T]):
+    """Invenio uses default JSON encoder which does not support lazy objects, such as localized strings.
+
+    This class wraps a callable returning a list and implements list interface to make it JSON serializable.
+    """
+    def __init__(self, func: Callable[[], list[T]]) -> None:
         self._func = func
 
     def __iter__(self):
@@ -40,8 +56,5 @@ class LazyChoices(list):
 
 
 lazy_workflow_options = LazyChoices(
-    lambda: [
-        {"id": name, "title_l10n": w.label}
-        for name, w in current_app.config["WORKFLOWS"].items()
-    ]
+    lambda: [{"id": name, "title_l10n": w.label} for name, w in current_app.config["WORKFLOWS"].items()]
 )

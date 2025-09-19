@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -13,18 +21,17 @@ from oarepo_requests.resolvers.ui import (
 from oarepo_runtime.i18n import gettext as _
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from flask_principal import Identity
     from oarepo_requests.typing import EntityReference
-    from typing import Any
 
 
 class CommunityRoleUIResolver(OARepoUIResolver):
     """UI resolver for community role entity references."""
 
     def _get_community_label(self, record: dict, reference: dict[str, str]) -> str:
-        if (
-            "metadata" not in record or "title" not in record["metadata"]
-        ):  # username undefined?
+        if "metadata" not in record or "title" not in record["metadata"]:  # username undefined?
             if "slug" in record:
                 label = record["slug"]
             else:
@@ -40,10 +47,7 @@ class CommunityRoleUIResolver(OARepoUIResolver):
         # reuse reference_entity somehow?
         return f"{entity['community']['id']}:{entity['role']}"
 
-    def _search_many(
-        self, identity: Identity, ids: list[str], *args: Any, **kwargs: Any
-    ) -> list[dict]:
-
+    def _search_many(self, identity: Identity, ids: list[str], *args: Any, **kwargs: Any) -> list[dict]:
         if not ids:
             return []
         values_map = {
@@ -57,10 +61,7 @@ class CommunityRoleUIResolver(OARepoUIResolver):
             actual_results.append(actual_result)
         return actual_results
 
-    def _search_one(
-        self, identity: Identity, _id: str, *args: Any, **kwargs: Any
-    ) -> dict | None:
-
+    def _search_one(self, identity: Identity, _id: str, *args: Any, **kwargs: Any) -> dict | None:
         reference = {self.reference_type: _id}
         proxy = ResolverRegistry.resolve_entity_proxy(reference)
         community_id, role = proxy._parse_ref_dict()
@@ -70,10 +71,7 @@ class CommunityRoleUIResolver(OARepoUIResolver):
             return None
         return {"community": community, "role": role}
 
-    def _get_entity_ui_representation(
-        self, entity: dict, reference: EntityReference
-    ) -> UIResolvedReference:
-
+    def _get_entity_ui_representation(self, entity: dict, reference: EntityReference) -> UIResolvedReference:
         community_record = entity["community"]
         community_label = self._get_community_label(community_record, reference)
         role_label = self._get_role_label(entity["role"])
@@ -81,8 +79,6 @@ class CommunityRoleUIResolver(OARepoUIResolver):
         return UIResolvedReference(
             reference=reference,
             type="community role",
-            label=_(
-                "%(role)s of %(community)s", role=role_label, community=community_label
-            ),
+            label=_("%(role)s of %(community)s", role=role_label, community=community_label),
             links=self._extract_links_from_resolved_reference(community_record),
         )

@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 import pytest
 from pytest_oarepo.communities.functions import invite
 from pytest_oarepo.requests.functions import get_request_type
@@ -20,9 +28,7 @@ def _accept_request(
     **kwargs,
 ):
     if is_draft:
-        record_after_submit = receiver_client.get(
-            f"/thesis/{record_id}/draft?expand=true"
-        )
+        record_after_submit = receiver_client.get(f"/thesis/{record_id}/draft?expand=true")
     else:
         record_after_submit = receiver_client.get(f"/thesis/{record_id}?expand=true")
 
@@ -74,9 +80,7 @@ def test_community_publish(
 
     record = draft_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
-    submit = submit_request_on_draft(
-        community_reader.identity, record_id, "publish_draft"
-    )
+    submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
     _accept_request(
         reader_client,
         type="publish_draft",
@@ -116,9 +120,7 @@ def test_community_delete(
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
     invite(community_reader, community.id, "reader")
-    record = published_record_with_community_factory(
-        community_reader.identity, community.id
-    )
+    record = published_record_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
 
     submit = submit_request_on_record(
@@ -168,9 +170,7 @@ def test_community_migration(
         community_reader,
     )
 
-    record = published_record_with_community_factory(
-        community_reader.identity, community_1.id
-    )
+    record = published_record_with_community_factory(community_reader.identity, community_1.id)
     record_id = record["id"]
     record_before = reader_client.get(f"/thesis/{record_id}")
     submit = submit_request_on_record(
@@ -199,16 +199,10 @@ def test_community_migration(
         link2testclient=link2testclient,
     )
     record_after = owner_client.get(f"/thesis/{record_id}?expand=true")
-    assert (
-        record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
-    )
-    assert record_before.json["parent"]["communities"]["ids"] == [
-        community_1.data["id"]
-    ]
+    assert record_before.json["parent"]["communities"]["default"] == community_1.data["id"]
+    assert record_before.json["parent"]["communities"]["ids"] == [community_1.data["id"]]
 
-    assert (
-        record_after.json["parent"]["communities"]["default"] == community_2.data["id"]
-    )
+    assert record_after.json["parent"]["communities"]["default"] == community_2.data["id"]
     assert record_after.json["parent"]["communities"]["ids"] == [community_2.data["id"]]
 
 
@@ -230,9 +224,7 @@ def test_community_submission_secondary(
         community_owner,
         community_reader,
     )
-    record = published_record_with_community_factory(
-        community_reader.identity, community_1.id
-    )
+    record = published_record_with_community_factory(community_reader.identity, community_1.id)
     record_id = record["id"]
 
     record_before = owner_client.get(f"/thesis/{record_id}")
@@ -292,9 +284,7 @@ def test_remove_secondary(
         community_reader,
     )
 
-    record = published_record_with_community_factory(
-        community_reader.identity, community_1.id
-    )
+    record = published_record_with_community_factory(community_reader.identity, community_1.id)
     record_id = record["id"]
 
     submit_request_on_record(
@@ -312,7 +302,7 @@ def test_remove_secondary(
 
     record_before = owner_client.get(f"/thesis/{record_id}")
 
-    # todo this should not work - it should not produce a link
+    # TODO this should not work - it should not produce a link
     with pytest.raises(PrimaryCommunityException):
         create_request_on_record(
             community_reader.identity,
@@ -349,9 +339,9 @@ def test_remove_secondary(
     assert set(record_after.json["parent"]["communities"]["ids"]) == {community_1.id}
 
     # assert link is not present
-    applicable_requests = reader_client.get(
-        link2testclient(record["links"]["applicable-requests"])
-    ).json["hits"]["hits"]
+    applicable_requests = reader_client.get(link2testclient(record["links"]["applicable-requests"])).json["hits"][
+        "hits"
+    ]
     assert get_request_type(applicable_requests, "remove_secondary_community") is None
     with pytest.raises(CommunityNotIncludedException):
         reader_client.post(
@@ -377,9 +367,7 @@ def test_community_role_ui_serialization(
     record = draft_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
 
-    submit = submit_request_on_draft(
-        community_reader.identity, record_id, "publish_draft"
-    )
+    submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
 
     def compare_result(result):
         assert result.items() >= ui_serialized_community_role(community.id).items()

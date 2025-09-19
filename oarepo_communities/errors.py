@@ -9,13 +9,12 @@
 
 from __future__ import annotations
 
-
 from flask_resources import (
     create_error_handler,
 )
 from marshmallow import ValidationError
-from oarepo_runtime.i18n import lazy_gettext as _
 from oarepo_requests.errors import CustomHTTPJSONException
+from oarepo_runtime.i18n import lazy_gettext as _
 
 
 class CommunityAlreadyIncludedException(Exception):
@@ -39,9 +38,7 @@ class CommunityNotIncludedException(Exception):
 class PrimaryCommunityException(Exception):
     """The record is already in the community."""
 
-    description = _(
-        "Primary community can't be removed, can only be migrated to another."
-    )
+    description = _("Primary community can't be removed, can only be migrated to another.")
 
 
 class MissingDefaultCommunityError(ValidationError):
@@ -79,9 +76,7 @@ class RecordCommunityMissing(Exception):
     @property
     def description(self) -> str:
         """Exception description."""
-        return "The record {record_id} in not included in the community {community_id}.".format(
-            record_id=self.record_id, community_id=self.community_id
-        )
+        return f"The record {self.record_id} in not included in the community {self.community_id}."
 
 
 class OpenRequestAlreadyExists(Exception):
@@ -105,9 +100,7 @@ RESOURCE_ERROR_HANDLERS = {
             request_payload_errors=[
                 {
                     "field": "payload.community",
-                    "messages": [
-                        _("Record is already in this community. Please choose another.")
-                    ],
+                    "messages": [_("Record is already in this community. Please choose another.")],
                 }
             ],
         )

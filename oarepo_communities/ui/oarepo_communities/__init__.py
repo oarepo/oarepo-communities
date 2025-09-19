@@ -1,5 +1,13 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
+#
+# oarepo-communities is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 import marshmallow as ma
-from flask import g, redirect, url_for, current_app
+from flask import current_app, g, redirect, url_for
 from flask_menu import current_menu
 from flask_resources import from_conf, request_parser, resource_requestctx
 from invenio_communities.communities.resources.serializer import (
@@ -26,12 +34,10 @@ from invenio_communities.views.communities import (
 from invenio_communities.views.communities import (
     communities_settings_pages as invenio_communities_settings_pages,
 )
-
-from invenio_communities.views.communities import members as invenio_communities_members
-
 from invenio_communities.views.communities import (
     invitations as invenio_communities_invitations,
 )
+from invenio_communities.views.communities import members as invenio_communities_members
 from invenio_communities.views.ui import (
     _has_about_page_content,
     _has_curation_policy_page_content,
@@ -53,16 +59,12 @@ class CommunityValidationSchema(ma.Schema):
     def load(self, data, *args, **kwargs):
         pid_value = data.get("pid_value")
 
-        community = current_service_registry.get("communities").read(
-            g.identity, pid_value
-        )
+        community = current_service_registry.get("communities").read(g.identity, pid_value)
         community_ui = UICommunityJSONSerializer().dump_obj(community.to_dict())
         return {"community": community, "community_ui": community_ui}
 
 
-request_community_view_args = request_parser(
-    from_conf("request_community_view_args"), location="view_args"
-)
+request_community_view_args = request_parser(from_conf("request_community_view_args"), location="view_args")
 
 
 class CommunityRecordsUIResourceConfig(GlobalSearchUIResourceConfig):
@@ -119,47 +121,35 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
     def communities_settings(
         self,
     ):
-        return invenio_communities_settings(
-            pid_value=resource_requestctx.view_args["pid_value"]
-        )
+        return invenio_communities_settings(pid_value=resource_requestctx.view_args["pid_value"])
 
     @request_view_args
     def communities_settings_pages(
         self,
     ):
-        return invenio_communities_settings_pages(
-            pid_value=resource_requestctx.view_args["pid_value"]
-        )
+        return invenio_communities_settings_pages(pid_value=resource_requestctx.view_args["pid_value"])
 
     @request_view_args
     def members(
         self,
     ):
-        return invenio_communities_members(
-            pid_value=resource_requestctx.view_args["pid_value"]
-        )
+        return invenio_communities_members(pid_value=resource_requestctx.view_args["pid_value"])
 
     @request_view_args
     def community_invitations(self):
-        return invenio_communities_invitations(
-            pid_value=resource_requestctx.view_args["pid_value"]
-        )
+        return invenio_communities_invitations(pid_value=resource_requestctx.view_args["pid_value"])
 
     @request_view_args
     def communities_curation_policy(
         self,
     ):
-        return invenio_communities_curation_policy(
-            pid_value=resource_requestctx.view_args["pid_value"]
-        )
+        return invenio_communities_curation_policy(pid_value=resource_requestctx.view_args["pid_value"])
 
     @request_view_args
     def communities_about(
         self,
     ):
-        return invenio_communities_about(
-            pid_value=resource_requestctx.view_args["pid_value"]
-        )
+        return invenio_communities_about(pid_value=resource_requestctx.view_args["pid_value"])
 
     def communities_frontpage(self):
         return invenio_communities_frontpage()
@@ -173,10 +163,7 @@ class CommunityRecordsUIResource(GlobalSearchUIResource):
 
 def create_blueprint(app):
     """Register blueprint for this resource."""
-
-    app_blueprint = CommunityRecordsUIResource(
-        CommunityRecordsUIResourceConfig()
-    ).as_blueprint()
+    app_blueprint = CommunityRecordsUIResource(CommunityRecordsUIResourceConfig()).as_blueprint()
 
     @app_blueprint.before_app_first_request
     def init_menu():
@@ -199,7 +186,7 @@ def create_blueprint(app):
             text=_("Members"),
             order=30,
             expected_args=["pid_value"],
-            **{"icon": "users", "permissions": "can_members_search_public"},
+            icon="users", permissions="can_members_search_public",
         )
 
         communities.submenu("settings").register(
@@ -207,7 +194,7 @@ def create_blueprint(app):
             text=_("Settings"),
             order=40,
             expected_args=["pid_value"],
-            **{"icon": "settings", "permissions": "can_update"},
+            icon="settings", permissions="can_update",
         )
 
         communities.submenu("curation_policy").register(
@@ -216,7 +203,7 @@ def create_blueprint(app):
             order=50,
             visible_when=_has_curation_policy_page_content,
             expected_args=["pid_value"],
-            **{"icon": "balance scale", "permissions": "can_read"},
+            icon="balance scale", permissions="can_read",
         )
         communities.submenu("about").register(
             endpoint="oarepo_communities.communities_about",
@@ -224,7 +211,7 @@ def create_blueprint(app):
             order=60,
             visible_when=_has_about_page_content,
             expected_args=["pid_value"],
-            **{"icon": "info", "permissions": "can_read"},
+            icon="info", permissions="can_read",
         )
 
     return app_blueprint
