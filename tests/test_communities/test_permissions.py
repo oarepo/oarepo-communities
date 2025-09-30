@@ -10,6 +10,7 @@ import pytest
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
+from oarepo_runtime.typing import record_from_result
 from pytest_oarepo.communities.functions import invite, set_community_workflow
 
 
@@ -69,7 +70,7 @@ def test_default_community_workflow_changed(
     request_should_be_allowed = owner_client.post(f"/thesis/{record1['id']}/draft/requests/publish_draft")
     submit = owner_client.post(link2testclient(request_should_be_allowed.json["links"]["actions"]["submit"]))
     accept_should_be_denied = reader_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
-    accept = owner_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
+    owner_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
     assert accept_should_be_denied.status_code == 403
     assert request_should_be_allowed.status_code == 201
 
@@ -142,7 +143,7 @@ def _record_owners_in_record_community_test(
     community_get_or_create,
     workflow,
     results,
-):
+) -> None:
     # tries to read record when user in record's primary community, in noth primary and secondary, in secondary and
     # in none
     community_curator = users[0]
@@ -162,7 +163,7 @@ def _record_owners_in_record_community_test(
     read_com1 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
 
     community_inclusion_service.include(
-        record_service.read_draft(system_identity, record_id)._record,
+        record_from_result(record_service.read_draft(system_identity, record_id)),
         community_2.id,
         record_service=record_service,
         default=False,
@@ -171,13 +172,13 @@ def _record_owners_in_record_community_test(
     read_com2 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
 
     community_inclusion_service.include(
-        record_service.read_draft(system_identity, record_id)._record,
+        record_from_result(record_service.read_draft(system_identity, record_id)),
         community_3.id,
         record_service=record_service,
         default=True,
     )
     community_inclusion_service.remove(
-        record_service.read_draft(system_identity, record_id)._record,
+        record_from_result(record_service.read_draft(system_identity, record_id)),
         community_1.id,
         record_service=record_service,
     )
@@ -185,7 +186,7 @@ def _record_owners_in_record_community_test(
     read_com3 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
 
     community_inclusion_service.remove(
-        record_service.read_draft(system_identity, record_id)._record,
+        record_from_result(record_service.read_draft(system_identity, record_id)),
         community_2.id,
         record_service=record_service,
     )
@@ -207,7 +208,7 @@ def test_record_owners_in_record_community_needs(
     draft_with_community_factory,
     record_service,
     search_clear,
-):
+) -> None:
     _record_owners_in_record_community_test(
         community_owner,
         users,
@@ -230,7 +231,7 @@ def test_record_owners_in_default_record_community_needs(
     draft_with_community_factory,
     record_service,
     search_clear,
-):
+) -> None:
     _record_owners_in_record_community_test(
         community_owner,
         users,

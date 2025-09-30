@@ -385,3 +385,6 @@ package-lock.json
 pnpm-lock.yaml
 .invenio.private
 _coverage
+
+.vscode/
+.idea/

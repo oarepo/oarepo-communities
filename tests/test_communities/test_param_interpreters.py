@@ -39,9 +39,9 @@ def test_community_role_param_interpreter(
         custom_workflow="curator_publish",  # owner is creator but not receiver of the third request
     )
 
-    response_1 = submit_request_on_draft(community_owner.identity, record1["id"], "publish_draft")
-    response_2 = create_request_on_draft(community_owner.identity, record2["id"], "publish_draft")
-    response_3 = submit_request_on_draft(community_owner.identity, record3["id"], "publish_draft")
+    submit_request_on_draft(community_owner.identity, record1["id"], "publish_draft")
+    create_request_on_draft(community_owner.identity, record2["id"], "publish_draft")
+    submit_request_on_draft(community_owner.identity, record3["id"], "publish_draft")
 
     search_unfiltered = owner_client.get("/requests/")
     assert len(search_unfiltered.json["hits"]["hits"]) == 3

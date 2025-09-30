@@ -6,20 +6,25 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
-from oarepo_runtime.datastreams.transformers import BaseTransformer
-from oarepo_runtime.datastreams.types import StreamBatch
+from __future__ import annotations
+
+from typing import Any, override
+
+from flask_principal import Identity
+from invenio_vocabularies.datastreams import StreamEntry
+from invenio_vocabularies.datastreams.transformers import BaseTransformer
 
 
 class SetCommunityTransformer(BaseTransformer):
     """Add community to the record."""
 
-    def __init__(self, identity, *, community, **kwargs) -> None:
+    def __init__(self, identity: Identity, *, community: str, **kwargs: Any) -> None:
+        """Initialize the transformer."""
         super().__init__()
         self.community = community
         self.identity = identity
 
-    def apply(self, batch: StreamBatch, *args, **kwargs) -> StreamBatch:
-        if not len(batch.entries):
-            return batch
-        for entry in batch.entries:
-            entry.entry.setdefault("parent", {}).setdefault("communities", {}).setdefault("default", self.community)
+    @override
+    def apply(self, stream_entry: StreamEntry, *args: Any, **kwargs: Any) -> StreamEntry:
+        stream_entry.entry.setdefault("parent", {}).setdefault("communities", {}).setdefault("default", self.community)
+        return stream_entry

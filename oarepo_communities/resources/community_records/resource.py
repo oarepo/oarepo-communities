@@ -6,6 +6,8 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+from __future__ import annotations
+
 from flask import g
 from flask_resources import resource_requestctx, response_handler, route
 from invenio_drafts_resources.resources import RecordResource

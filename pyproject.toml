@@ -7,14 +7,22 @@ license = "MIT"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     # "oarepo-requests",
-    "oarepo-runtime>=2.0.0dev5,<3.0.0",
-    # "oarepo-workflows",
+    "oarepo[rdm,s3]>=14.0.0dev0,<15.0.0",
+    "oarepo-runtime>=2.0.0dev23,<3.0.0",
+    "oarepo-ui>=6.0.0dev7,<7.0.0",
+    "oarepo-workflows>=2.0.0dev3,<3.0.0",
 ]
 
 [project.optional-dependencies]
+dev = [
+    "oarepo-invenio-typing-stubs",
+]
 tests = [
     # "oarepo-vocabularies",
     # "pytest-oarepo",
+]
+oarepo14 = [
+    "oarepo[rdm,s3]>=14.0.0dev0,<15.0.0",
 ]
 
 [project.urls]
@@ -81,3 +89,5 @@ include = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.metadata]
+allow-direct-references = true

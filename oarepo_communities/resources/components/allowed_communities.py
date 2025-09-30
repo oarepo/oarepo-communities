@@ -7,6 +7,8 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 #
 
+from __future__ import annotations
+
 from flask_principal import Identity
 from invenio_communities.communities.records.api import Community
 from invenio_records_resources.services.errors import PermissionDeniedError

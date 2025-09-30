@@ -1,7 +1,0 @@
-.ui.list {
-  &.communities.community-member-role-list {
-    .item.active {
-      border: 1px solid @primaryColor;
-    }
-  }
-}
