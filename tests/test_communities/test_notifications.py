@@ -140,11 +140,12 @@ def test_notifications_not_sent_to_inactive_users(
     us = User.query.join(MemberModel).filter(MemberModel.community_id == str(community.id)).all()
     active_users = (
         User.query.join(MemberModel)
-        .filter((MemberModel.community_id == str(community.id)) & (MemberModel.active == True))
+        .filter((MemberModel.community_id == str(community.id)) & (MemberModel.active.is_(True)))
         .all()
     )
 
-    assert users[2].user in us and users[2].user not in active_users
+    assert users[2].user in us
+    assert users[2].user not in active_users
 
     creator = users[0]
     draft1 = draft_with_community_factory(creator.identity, str(community.id), custom_workflow="curator_publish")

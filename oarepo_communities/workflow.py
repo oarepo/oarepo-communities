@@ -6,6 +6,12 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""A helper function to get the default workflow for a community.
+
+This function is registered in oarepo_workflows and is used to get the default workflow
+from the community id inside the record's metadata.
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -25,7 +31,9 @@ if TYPE_CHECKING:
 
 
 def community_default_workflow(**kwargs: Any) -> str | None:
+    """Get default workflow for the community."""
     # optimization: if community metadata is passed, use it
+    # TODO: where it gets passed from?
     if "community_metadata" in kwargs:
         community_metadata = kwargs["community_metadata"]
         custom_fields = community_metadata.json.get("custom_fields", {})
@@ -44,12 +52,13 @@ def community_default_workflow(**kwargs: Any) -> str | None:
     else:
         try:
             community_id = kwargs["data"]["parent"]["communities"]["default"]
-        except KeyError:
-            raise MissingDefaultCommunityError("Failed to get community from input data.")
+        except KeyError as e:
+            raise MissingDefaultCommunityError("Failed to get community from input data.") from e
 
     # use pid resolve so that the community might be both slug or id
     try:
         community = Community.pid.resolve(community_id)
-    except PIDDoesNotExistError:
-        raise CommunityDoesntExistError(community_id)
+    except PIDDoesNotExistError as e:
+        raise CommunityDoesntExistError(community_id) from e
+
     return community.custom_fields.get("workflow", current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"])

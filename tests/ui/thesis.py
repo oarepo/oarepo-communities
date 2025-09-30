@@ -6,6 +6,12 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Thesis UI resource for tests."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import marshmallow as ma
 from flask_resources import BaseListSchema, JSONSerializer, MarshmallowSerializer
 from oarepo_ui.resources import (
@@ -16,11 +22,18 @@ from oarepo_ui.resources import (
 from oarepo_ui.resources.components.bleach import AllowedHtmlTagsComponent
 from oarepo_ui.resources.components.custom_fields import CustomFieldsComponent
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
 
 class ModelSchema(ma.Schema):
+    """Schema for serializing the model."""
+
     title = ma.fields.String()
 
     class Meta:
+        """Meta class to include unknown fields."""
+
         unknown = ma.INCLUDE
 
 
@@ -38,18 +51,20 @@ class ModelUISerializer(MarshmallowSerializer):
 
 
 class ThesisUIResourceConfig(RecordsUIResourceConfig):
+    """Thesis UI resource config for tests."""
+
     api_service = "thesis"  # must be something included in oarepo, as oarepo is used in tests
 
     blueprint_name = "thesis"
     url_prefix = "/thesis"
     ui_serializer_class = ModelUISerializer
-    templates = {
+    templates: Mapping[str, str] = {
         **RecordsUIResourceConfig.templates,
     }
 
-    components = [
+    components = (
         BabelComponent,
         PermissionsComponent,
         AllowedHtmlTagsComponent,
         CustomFieldsComponent,
-    ]
+    )

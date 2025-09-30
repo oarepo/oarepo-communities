@@ -27,7 +27,6 @@ from oarepo_requests.services.permissions.generators import RequestActive
 from oarepo_requests.services.permissions.workflow_policies import (
     CreatorsFromWorkflowRequestsPermissionPolicy,
 )
-from oarepo_runtime.i18n import lazy_gettext as _
 from oarepo_runtime.services.permissions import RecordOwners
 from oarepo_workflows import (
     AutoApprove,
@@ -91,7 +90,9 @@ def base_model_schema():
 
 
 class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
-    can_read = [
+    """Test workflow permissions with community roles."""
+
+    can_read = (
         RecordOwners(),
         AuthenticatedUser(),  # need for request receivers - temporary
         CommunityRole("owner"),
@@ -99,61 +100,75 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
             "published",
             [AnyUser()],
         ),
-    ]
+    )
 
     can_read_deleted = can_read
-    can_read_all_records = [
+    can_read_all_records = (
         RecordOwners(),
         CommunityRole("owner"),
         CommunityRole("curator"),
-    ]
+    )
 
-    can_create = [
+    can_create = (
         DefaultCommunityRole("owner"),
         DefaultCommunityRole("reader"),
-    ]
+    )
     can_manage_files = can_create
 
-    can_update = [
+    can_update = (
         IfInState("draft", [RecordOwners()]),
         IfInState("publishing", [RecordOwners()]),
         IfInState("published", [CommunityRole("owner")]),
-    ]
+    )
 
-    can_delete = [
+    can_delete = (
         IfInState("draft", [RecordOwners()]),
         IfInState("publishing", [RecordOwners()]),
         IfInState("deleting", [RequestActive()]),
-    ]
+    )
 
 
 class TestWithCuratorCommunityWorkflowPermissions(TestCommunityWorkflowPermissions):
-    can_read = TestCommunityWorkflowPermissions.can_read + [DefaultCommunityRole("curator")]
+    """Like TestCommunityWorkflowPermissions but curator can read all records."""
 
-    can_create = TestCommunityWorkflowPermissions.can_create + [DefaultCommunityRole("curator")]
+    can_read = (
+        *TestCommunityWorkflowPermissions.can_read,
+        DefaultCommunityRole("curator"),
+    )
+
+    can_create = (
+        *TestCommunityWorkflowPermissions.can_create,
+        DefaultCommunityRole("curator"),
+    )
 
 
 class TestWithRecordOwnerInRecordCommunityWorkflowPermissions(TestWithCuratorCommunityWorkflowPermissions):
-    can_read = [
+    """Like TestWithCuratorCommunityWorkflowPermissions but record owner in record community can read."""
+
+    can_read = (
         RecordOwnerInRecordCommunity(),
         IfInState(
             "published",
             [AnyUser()],
         ),
-    ]
+    )
 
 
 class TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions(TestWithCuratorCommunityWorkflowPermissions):
-    can_read = [
+    """Like TestWithCuratorCommunityWorkflowPermissions but record owner in default community can read."""
+
+    can_read = (
         RecordOwnerInDefaultRecordCommunity(),
         IfInState(
             "published",
             [AnyUser()],
         ),
-    ]
+    )
 
 
 class DefaultRequests(WorkflowRequestPolicy):
+    """Default requests with record owner as the only requester."""
+
     publish_draft = WorkflowRequest(
         requesters=[IfInState("draft", [RecordOwnerInDefaultRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
@@ -202,6 +217,8 @@ class DefaultRequests(WorkflowRequestPolicy):
 
 
 class PublishRequestsRecordOwnerInRecordCommunity(DefaultRequests):
+    """Like DefaultRequests but record owner in record community can submit publish request."""
+
     publish_draft = WorkflowRequest(
         requesters=[IfInState("draft", [RecordOwnerInRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
@@ -215,6 +232,8 @@ class PublishRequestsRecordOwnerInRecordCommunity(DefaultRequests):
 
 
 class PublishRequestsRecordOwnerInDefaultRecordCommunity(DefaultRequests):
+    """Like DefaultRequests but record owner in default community can submit publish request."""
+
     publish_draft = WorkflowRequest(
         requesters=[IfInState("draft", [RecordOwnerInDefaultRecordCommunity()])],
         recipients=[DefaultCommunityRole("owner")],
@@ -228,6 +247,8 @@ class PublishRequestsRecordOwnerInDefaultRecordCommunity(DefaultRequests):
 
 
 class NoRequests(WorkflowRequestPolicy):
+    """No requests are possible."""
+
     publish_draft = WorkflowRequest(
         requesters=[],
         recipients=[DefaultCommunityRole("owner")],
@@ -271,6 +292,8 @@ class NoRequests(WorkflowRequestPolicy):
 
 
 class CuratorPublishRequests(DefaultRequests):
+    """Workflow requests with curator as the only recipient."""
+
     publish_draft = WorkflowRequest(
         requesters=[IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])],
         recipients=[DefaultCommunityRole("curator")],
@@ -284,6 +307,8 @@ class CuratorPublishRequests(DefaultRequests):
 
 
 class MultipleRecipientsRequests(DefaultRequests):
+    """Workflow requests with multiple recipients."""
+
     publish_draft = WorkflowRequest(
         requesters=[IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])],
         recipients=[DefaultCommunityRole("curator"), DefaultCommunityRole("owner")],
@@ -422,7 +447,7 @@ from invenio_requests.customizations import RequestType
 
 @pytest.fixture
 def ui_serialized_community_role():
-    def _ui_serialized_community(community_id):
+    def _ui_serialized_community(community_id: str) -> dict:
         return {
             "label": "Owner of My Community",
             "reference": {"community_role": f"{community_id}:owner"},
@@ -434,12 +459,12 @@ def ui_serialized_community_role():
 
 @pytest.fixture
 def ui_serialized_community():
-    def _ui_serialized_community(community_id):
+    def _ui_serialized_community(community_id: str) -> dict:
         return {
             "label": "My Community",
             "links": {
                 "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
-                "self_html": "https://127.0.0.1:5000/communities/public",  # TODO is this correct?
+                "self_html": "https://127.0.0.1:5000/communities/public",  # TODO: is this correct?
             },
             "reference": {"community": community_id},
             "type": "community",
@@ -451,12 +476,12 @@ def ui_serialized_community():
 @pytest.fixture
 def clear_babel_context():
     # force babel reinitialization when language is switched
-    def _clear_babel_context():
+    def _clear_babel_context() -> None:
         try:
             from flask import g
             from flask_babel import SimpleNamespace
 
-            g._flask_babel = SimpleNamespace()
+            g._flask_babel = SimpleNamespace()  # noqa: SLF001
         except ImportError:
             return
 

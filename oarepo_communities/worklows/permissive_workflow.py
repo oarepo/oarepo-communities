@@ -6,6 +6,10 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Permissive workflow for communities."""
+
+from __future__ import annotations
+
 from functools import partial
 
 from invenio_records_permissions.generators import AnyUser
@@ -22,28 +26,32 @@ from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
 
 from oarepo_communities.services.permissions.generators import PrimaryCommunityMembers
 
+# TODO: should this class be here? It seems that if needed, it should be in oarepo_workflows or oarepo_requests
+
 
 class PermissiveWorkflowPermissions(DefaultWorkflowPermissions):
-    can_create = [PrimaryCommunityMembers()]
+    """Permissions for permissive workflow."""
 
-    can_read = [
+    can_create = (PrimaryCommunityMembers(),)
+
+    can_read = (
         RecordOwners(),
         IfInState(
             "published",
             then_=[AnyUser()],
         ),
-    ]
+    )
 
-    can_update = [
+    can_update = (
         IfInState(
             "draft",
             then_=[
                 RecordOwners(),
             ],
         ),
-    ]
+    )
 
-    can_delete = [
+    can_delete = (
         # draft can be deleted, published record must be deleted via request
         IfInState(
             "draft",
@@ -51,10 +59,12 @@ class PermissiveWorkflowPermissions(DefaultWorkflowPermissions):
                 RecordOwners(),
             ],
         ),
-    ]
+    )
 
 
 class DefaultWorkflowRequests(WorkflowRequestPolicy):
+    """Default requests for permissive workflow."""
+
     publish_draft = WorkflowRequest(
         # if the record is in draft state, the owner or curator can request publishing
         requesters=[IfInState("draft", then_=[RecordOwners()])],

@@ -6,6 +6,10 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+from __future__ import annotations
+
+from typing import Any
+
 import pytest
 
 
@@ -25,11 +29,11 @@ def sample_record_with_community_data(communities):
 
 @pytest.fixture
 def as_comparable_dict():
-    def _as_comparable(d):
+    def _as_comparable(d: Any) -> Any:
         if isinstance(d, dict):
             return {k: _as_comparable(v) for k, v in sorted(d.items())}
         if isinstance(d, (list, tuple)):
-            return set(_as_comparable(v) for v in d)
+            return {_as_comparable(v) for v in d}  # type: ignore[reportUnhashable]
         return d
 
     return _as_comparable

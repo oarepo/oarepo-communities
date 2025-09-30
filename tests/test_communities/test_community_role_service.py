@@ -11,7 +11,7 @@ from invenio_records_resources.proxies import current_service_registry
 from pytest_oarepo.communities.functions import invite
 
 
-def _serialized_community_role(id_):
+def _serialized_community_role(id_) -> dict:
     return {
         "community": {
             "access": {
@@ -22,7 +22,6 @@ def _serialized_community_role(id_):
                 "visibility": "public",
             },
             "children": {"allow": False},
-            # "created": "2024-10-31T10:44:13.951403+00:00",
             "custom_fields": {"workflow": "default"},
             "deletion_status": {"is_deleted": False, "status": "P"},
             "id": id_,
@@ -30,7 +29,6 @@ def _serialized_community_role(id_):
             "metadata": {"title": "My Community"},
             "revision_id": 2,
             "slug": "public",
-            # "updated": "2024-10-31T10:44:14.012001+00:00",
         },
         "id": f"{id_}:owner",
         "role": "owner",
@@ -38,13 +36,13 @@ def _serialized_community_role(id_):
     }
 
 
-def _check_result(response_community_role, id_):
+def _check_result(response_community_role, id_) -> None:
     response_community_role["community"].pop("created")
     response_community_role["community"].pop("updated")
     assert response_community_role == _serialized_community_role(id_)
 
 
-def _check_result_pick_resolved_field(response_community_role, id_):
+def _check_result_pick_resolved_field(response_community_role, id_) -> None:
     # this comes from the result of pick_resolver_fields of the CommunityRoleProxy method;
     # the read method of the service uses the ResultItem serialization; result might be different
     response_community_role["links"] = {}
@@ -73,18 +71,18 @@ def test_expand_community_role(
 ):
     reader = users[0]
     invite(reader, community.id, "reader")
-    reader_client = logged_client(reader)
     owner_client = logged_client(community_owner)
 
     record_id = draft_with_community_factory(reader.identity, community.id)["id"]
     submit = submit_request_on_draft(reader.identity, record_id, "publish_draft")
 
-    read = owner_client.get(link2testclient(submit["links"]["self"]))
+    owner_client.get(link2testclient(submit["links"]["self"]))
     read_expanded = owner_client.get(f"{link2testclient(submit['links']['self'])}?expand=true")
     assert read_expanded.status_code == 200
-    read_expanded_ui_serialization = owner_client.get(
+    ui_data = owner_client.get(
         f"{link2testclient(submit['links']['self'])}?expand=true",
         headers={"Accept": "application/vnd.inveniordm.v1+json"},
     ).json  # expanded isn't here bc it isn't in the ui serialization schema
+    assert "expanded" not in ui_data
     receiver = read_expanded.json["expanded"]["receiver"]
     _check_result_pick_resolved_field(receiver, str(community.id))

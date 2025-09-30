@@ -6,6 +6,8 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Registration of the communities app blueprint."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -15,11 +17,11 @@ from flask import Blueprint
 from oarepo_communities.resolvers.communities import CommunityRoleResolver
 
 if TYPE_CHECKING:
-    from flask import Blueprint, Flask
+    from flask import Flask
     from flask.blueprints import BlueprintSetupState
 
 
-def create_app_blueprint(app: Flask) -> Blueprint:
+def create_app_blueprint(_app: Flask) -> Blueprint:
     """Create a blueprint for the communities endpoint.
 
     :param app: Flask application
@@ -29,7 +31,9 @@ def create_app_blueprint(app: Flask) -> Blueprint:
     return blueprint
 
 
+# TODO: do this in finalizer, not in record_once as that has been removed
 def register_community_role_entity_resolver(state: BlueprintSetupState) -> None:
+    """Register the community role entity resolver."""
     app = state.app
     requests = app.extensions["invenio-requests"]
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())

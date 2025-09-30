@@ -47,8 +47,7 @@ from invenio_requests.resolvers.registry import ResolverRegistry
 
 
 class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
-    """Source community accepting the initiate request autocreates confirm request delegated to the target community.
-    """
+    """Source community accepting the initiate request autocreates confirm request delegated to the target community."""
 
     def apply(
         self,

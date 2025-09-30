@@ -6,6 +6,8 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+from typing import Any
+
 import pytest
 from pytest_oarepo.communities.functions import invite
 from pytest_oarepo.requests.functions import get_request_type
@@ -20,13 +22,13 @@ from oarepo_communities.errors import (
 
 def _accept_request(
     receiver_client,
-    type,
+    type,  # noqa: A002
     record_id,
     link2testclient,
     is_draft=False,
     no_accept_link=False,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> Any:
     if is_draft:
         record_after_submit = receiver_client.get(f"/thesis/{record_id}/draft?expand=true")
     else:
@@ -42,8 +44,7 @@ def _accept_request(
         assert "accept" not in request_dict["links"]["actions"]
         return None
     accept_link = link2testclient(request_dict["links"]["actions"]["accept"])
-    receiver_response = receiver_client.post(accept_link)
-    return receiver_response
+    return receiver_client.post(accept_link)
 
 
 def _init_env(
@@ -51,7 +52,7 @@ def _init_env(
     community_get_or_create,
     community_owner,
     community_reader,
-):
+) -> tuple:
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
@@ -80,7 +81,7 @@ def test_community_publish(
 
     record = draft_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
-    submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
+    submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
     _accept_request(
         reader_client,
         type="publish_draft",
@@ -89,7 +90,7 @@ def test_community_publish(
         is_draft=True,
         no_accept_link=True,
     )  # reader can accept the request
-    accept_owner = _accept_request(
+    _accept_request(
         owner_client,
         type="publish_draft",
         record_id=record_id,
@@ -123,7 +124,7 @@ def test_community_delete(
     record = published_record_with_community_factory(community_reader.identity, community.id)
     record_id = record["id"]
 
-    submit = submit_request_on_record(
+    submit_request_on_record(
         community_reader.identity,
         record_id,
         "delete_published_record",
@@ -136,7 +137,7 @@ def test_community_delete(
         link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can't accept the request
-    accept_owner = _accept_request(
+    _accept_request(
         owner_client,
         type="delete_published_record",
         record_id=record_id,
@@ -173,7 +174,7 @@ def test_community_migration(
     record = published_record_with_community_factory(community_reader.identity, community_1.id)
     record_id = record["id"]
     record_before = reader_client.get(f"/thesis/{record_id}")
-    submit = submit_request_on_record(
+    submit_request_on_record(
         community_reader.identity,
         record_id,
         "initiate_community_migration",
@@ -186,13 +187,13 @@ def test_community_migration(
         link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can accept the request
-    accept_initiate_request_owner = _accept_request(
+    _accept_request(
         owner_client,
         type="initiate_community_migration",
         record_id=record_id,
         link2testclient=link2testclient,
     )  # confirm should be created and submitted automatically
-    accept_confirm_request_owner = _accept_request(
+    _accept_request(
         owner_client,
         type="confirm_community_migration",
         record_id=record_id,
@@ -235,7 +236,7 @@ def test_community_submission_secondary(
             "secondary_community_submission",
             additional_data={"payload": {"community": str(community_1.id)}},
         )
-    submit = submit_request_on_record(
+    submit_request_on_record(
         community_reader.identity,
         record_id,
         "secondary_community_submission",
@@ -248,7 +249,7 @@ def test_community_submission_secondary(
         link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can accept the request
-    accept_owner = _accept_request(
+    _accept_request(
         owner_client,
         type="secondary_community_submission",
         record_id=record_id,
@@ -293,7 +294,7 @@ def test_remove_secondary(
         "secondary_community_submission",
         create_additional_data={"payload": {"community": str(community_2.id)}},
     )
-    accept_owner = _accept_request(
+    _accept_request(
         owner_client,
         type="secondary_community_submission",
         record_id=record_id,
@@ -302,7 +303,7 @@ def test_remove_secondary(
 
     record_before = owner_client.get(f"/thesis/{record_id}")
 
-    # TODO this should not work - it should not produce a link
+    # TODO: this should not work - it should not produce a link
     with pytest.raises(PrimaryCommunityException):
         create_request_on_record(
             community_reader.identity,
@@ -324,7 +325,7 @@ def test_remove_secondary(
         link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can't accept the request
-    accept_owner = _accept_request(
+    _accept_request(
         owner_client,
         type="remove_secondary_community",
         record_id=record_id,
@@ -361,7 +362,6 @@ def test_community_role_ui_serialization(
     search_clear,
 ):
     community_reader = users[0]
-    reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
     invite(community_reader, community.id, "reader")
     record = draft_with_community_factory(community_reader.identity, community.id)
@@ -369,7 +369,7 @@ def test_community_role_ui_serialization(
 
     submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
 
-    def compare_result(result):
+    def compare_result(result) -> None:
         assert result.items() >= ui_serialized_community_role(community.id).items()
         assert (
             result["links"].items()

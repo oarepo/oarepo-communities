@@ -6,6 +6,8 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Views for communities API."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -16,19 +18,24 @@ if TYPE_CHECKING:
     from flask import Blueprint, Flask
     from flask.blueprints import BlueprintSetupState
 
+    from oarepo_communities.ext import OARepoCommunities
+
 
 def create_oarepo_communities(app: Flask) -> Blueprint:
+    """Create a blueprint for the communities endpoint."""
     # Do we need to add this to service registry?
     # - use similar pattern like in invenio-requests etc? finalize app and api-finalize-app in entrypoints?
-    ext = app.extensions["oarepo-communities"]
+    ext: OARepoCommunities = app.extensions["oarepo-communities"]
     blueprint = ext.community_records_resource.as_blueprint()
     blueprint.record_once(register_community_role_entity_resolver)
     return blueprint
 
 
+# TODO: move this to finalizer, not record once as that has been removed
 def register_community_role_entity_resolver(
     state: BlueprintSetupState,
-) -> None:  # TODO consider using different method for registering the resolver
+) -> None:  # TODO: consider using different method for registering the resolver
+    """Register the community role entity resolver."""
     app = state.app
     requests = app.extensions["invenio-requests"]
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())

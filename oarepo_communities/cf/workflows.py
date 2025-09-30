@@ -7,16 +7,17 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 #
 """Custom field for associating preferred and allowed workflows to a community."""
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, override
 
-import marshmallow as ma
 from flask import current_app
 from invenio_records_resources.services.custom_fields import KeywordCF
+from marshmallow_utils.fields import SanitizedUnicode
 
 if TYPE_CHECKING:
-    from typing import Any
+    from collections.abc import Callable, Iterator
 
 
 def validate_workflow(code: str) -> bool:
@@ -24,37 +25,51 @@ def validate_workflow(code: str) -> bool:
     return code in current_app.config["WORKFLOWS"]
 
 
-class WorkflowSchemaField(ma.fields.Str):
+class WorkflowSchemaField(SanitizedUnicode):
     """A custom Marshmallow field for validating workflow codes."""
+
     def __init__(self, **kwargs: Any) -> None:
+        """Initialize the field with a workflow validator."""
         super().__init__(validate=[validate_workflow], **kwargs)
 
 
 class WorkflowCF(KeywordCF):
     """A custom field for associating preferred and allowed workflows to a community."""
+
     def __init__(self, name: str, **kwargs: Any) -> None:
+        """Initialize the custom field with a specific Marshmallow field for workflow validation."""
         super().__init__(name, field_cls=WorkflowSchemaField, **kwargs)
 
 
-# hack to get lazy choices serialized to JSON
 class LazyChoices[T](list[T]):
     """Invenio uses default JSON encoder which does not support lazy objects, such as localized strings.
 
     This class wraps a callable returning a list and implements list interface to make it JSON serializable.
     """
+
     def __init__(self, func: Callable[[], list[T]]) -> None:
+        """Initialize the lazy choices with a callable."""
         self._func = func
 
-    def __iter__(self):
+    @override
+    def __iter__(self) -> Iterator[T]:
+        """Return an iterator over the choices."""
         return iter(self._func())
 
-    def __getitem__(self, item):
+    @override
+    def __getitem__(self, item: int) -> T:  # type: ignore[override]
         return self._func()[item]
 
-    def __len__(self):
+    @override
+    def __len__(self) -> int:
         return len(self._func())
 
 
-lazy_workflow_options = LazyChoices(
-    lambda: [{"id": name, "title_l10n": w.label} for name, w in current_app.config["WORKFLOWS"].items()]
+# TODO: use current_workflows here
+lazy_workflow_options = LazyChoices[dict[str, str]](
+    lambda: [
+        {"id": name, "title_l10n": w.label}  # type: ignore
+        for name, w in current_app.config["WORKFLOWS"].items()  # type: ignore
+    ]
 )
+"""A lazy list of available workflows for use in form choices."""

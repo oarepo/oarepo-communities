@@ -8,6 +8,7 @@
 #
 import pytest
 from invenio_access.permissions import system_identity
+from oarepo_runtime.typing import record_from_result
 
 from oarepo_communities.errors import CommunityNotIncludedException
 
@@ -29,11 +30,11 @@ def test_include(
     response = owner_client.post(f"/communities/{community_1.id}/thesis", json={})
 
     record_id = response.json["id"]
-    record = record_service.read_draft(system_identity, record_id)._obj
+    record = record_from_result(record_service.read_draft(system_identity, record_id))
 
     community_inclusion_service.include(record, community_2.id, record_service=record_service)
 
-    record_after_include = record_service.read_draft(system_identity, record_id)._obj
+    record_after_include = record_from_result(record_service.read_draft(system_identity, record_id))
     assert set(record_after_include.parent["communities"]["ids"]) == {
         community_1.id,
         community_2.id,
@@ -41,7 +42,7 @@ def test_include(
     assert record_after_include.parent["communities"]["default"] == community_1.id
 
     community_inclusion_service.include(record, community_3.id, default=True, record_service=record_service)
-    record_after_include = record_service.read_draft(system_identity, record_id)._obj
+    record_after_include = record_from_result(record_service.read_draft(system_identity, record_id))
     assert set(record_after_include.parent["communities"]["ids"]) == {
         community_1.id,
         community_2.id,
@@ -65,9 +66,9 @@ def test_remove(
 
     response = owner_client.post(f"/communities/{community_1.id}/thesis", json={})
     record_id = response.json["id"]
-    record = record_service.read_draft(system_identity, record_id)._obj
+    record = record_from_result(record_service.read_draft(system_identity, record_id))
     community_inclusion_service.include(record, community_2.id, record_service=record_service)
-    record_after_include = record_service.read_draft(system_identity, record_id)._obj
+    record_after_include = record_from_result(record_service.read_draft(system_identity, record_id))
 
     with pytest.raises(CommunityNotIncludedException):
         community_inclusion_service.remove(
@@ -76,7 +77,7 @@ def test_remove(
             record_service=record_service,
         )
     community_inclusion_service.remove(record, community_2.id, record_service=record_service)
-    record_after_remove = record_service.read_draft(system_identity, record_id)._obj
+    record_after_remove = record_from_result(record_service.read_draft(system_identity, record_id))
 
     assert set(record_after_include.parent["communities"]["ids"]) == {
         community_1.id,

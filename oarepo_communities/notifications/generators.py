@@ -6,6 +6,8 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Notification generators for community roles."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -13,7 +15,10 @@ from typing import TYPE_CHECKING
 from invenio_access.models import User
 from invenio_communities.members.records.models import MemberModel
 from invenio_notifications.models import Recipient
-from oarepo_requests.notifications.generators import SpecificEntityRecipient, _extract_entity_email_data
+from oarepo_requests.notifications.generators import (
+    SpecificEntityRecipient,
+    _extract_entity_email_data,
+)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -23,6 +28,7 @@ class CommunityRoleEmailRecipient(SpecificEntityRecipient):
     """Community role recipient generator for a notification."""
 
     def _get_recipients(self, entity: Any) -> dict[str, Recipient]:
+        """Get recipients for the given entity."""
         community_id = entity.community_id
         role = entity.role
 
