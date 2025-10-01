@@ -6,20 +6,32 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Service config for a community-role service."""
+
 from __future__ import annotations
 
-from invenio_records_resources.services.base.config import ServiceConfig
-from oarepo_runtime.services.results import ArrayRecordItem, ArrayRecordList
+from typing import TYPE_CHECKING, Any
 
-from oarepo_communities.resolvers.communities import CommunityRoleObj
-from oarepo_communities.services.community_role.schema import CommunityRoleSchema
+from invenio_records_resources.services.base.config import ServiceConfig
+from invenio_records_resources.services.records.results import RecordItem
+from oarepo_workflows.services.results import InMemoryResultList
+
+from oarepo_communities.records.api import CommunityRoleRecord
+
+from .schema import CommunityRoleSchema
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 class CommunityRoleServiceConfig(ServiceConfig):
-    service_id = "community-role"
-    links_item = {}
+    """Service config for a community-role service."""
 
-    result_item_cls = ArrayRecordItem
-    result_list_cls = ArrayRecordList
-    record_cls = CommunityRoleObj
+    service_id = "community-role"
+    links_item: Mapping[str, Any] = {}
+
+    record_cls = CommunityRoleRecord
     schema = CommunityRoleSchema
+
+    result_item_cls = RecordItem
+    result_list_cls = InMemoryResultList

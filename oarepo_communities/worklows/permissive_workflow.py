@@ -12,8 +12,8 @@ from __future__ import annotations
 
 from functools import partial
 
+from invenio_rdm_records.services.generators import RecordOwners
 from invenio_records_permissions.generators import AnyUser
-from oarepo_runtime.services.permissions.generators import RecordOwners
 from oarepo_workflows import (
     AutoApprove,
     IfInState,
@@ -100,6 +100,7 @@ class DefaultWorkflowRequests(WorkflowRequestPolicy):
 
 PermissiveWorkflow = partial(
     Workflow,
+    code="permissive",
     label="Permissive workflow",
     permission_policy_cls=PermissiveWorkflowPermissions,
     request_policy_cls=DefaultWorkflowRequests,

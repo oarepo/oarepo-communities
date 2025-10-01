@@ -14,11 +14,12 @@ from the community id inside the record's metadata.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from flask import current_app
 from invenio_communities.communities.records.api import Community
 from invenio_pidstore.errors import PIDDoesNotExistError
+from oarepo_workflows import Workflow, current_oarepo_workflows
 
 from oarepo_communities.errors import (
     CommunityDoesntExistError,
@@ -30,35 +31,41 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-def community_default_workflow(**kwargs: Any) -> str | None:
+def community_default_workflow(**kwargs: Any) -> Workflow:
     """Get default workflow for the community."""
     # optimization: if community metadata is passed, use it
-    # TODO: where it gets passed from?
     if "community_metadata" in kwargs:
         community_metadata = kwargs["community_metadata"]
-        custom_fields = community_metadata.json.get("custom_fields", {})
-        return custom_fields.get(
-            "workflow",
-            current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"],
-        )
+        return get_workflow_from_community_custom_fields(community_metadata.json.get("custom_fields", {}))
 
     if "record" not in kwargs and "data" not in kwargs:  # nothing to get community from
         raise MissingDefaultCommunityError("Can't get community when neither record nor input data are present.")
 
+    community_id: str | None
     if "record" in kwargs:
         community_id = community_id_from_record(kwargs["record"])
-        if not community_id:
-            raise MissingDefaultCommunityError("Failed to get community from record.")
     else:
         try:
             community_id = kwargs["data"]["parent"]["communities"]["default"]
         except KeyError as e:
             raise MissingDefaultCommunityError("Failed to get community from input data.") from e
 
+    if community_id is None:
+        raise MissingDefaultCommunityError("Failed to get community from record.")
+
     # use pid resolve so that the community might be both slug or id
     try:
-        community = Community.pid.resolve(community_id)
+        community = cast("Community", Community.pid.resolve(community_id))
     except PIDDoesNotExistError as e:
         raise CommunityDoesntExistError(community_id) from e
 
-    return community.custom_fields.get("workflow", current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"])
+    return get_workflow_from_community_custom_fields(community.custom_fields)
+
+
+def get_workflow_from_community_custom_fields(custom_fields: dict) -> Workflow:
+    """Get workflow from community custom fields."""
+    workflow_id = custom_fields.get(
+        "workflow",
+        current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"],
+    )
+    return current_oarepo_workflows.get_workflow(workflow_id)

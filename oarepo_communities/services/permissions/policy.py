@@ -6,6 +6,8 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Permissions for communities based on workflows."""
+
 from __future__ import annotations
 
 from invenio_records_permissions.generators import (
@@ -38,20 +40,23 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
 
     """
 
-    can_create = [
-        DefaultCommunityMembers(),
-    ]
+    can_create = (DefaultCommunityMembers(),)
 
-    can_add_community = [SystemProcess()]
+    can_add_community = (SystemProcess(),)
     """Can add community to record"""
 
-    can_remove_community = [SystemProcess()]
+    can_remove_community = (SystemProcess(),)
     """Can remove community from record"""
 
-    can_remove_record = [SystemProcess()]
+    can_remove_record = (SystemProcess(),)
     """Can remove record from community"""
 
 
 class CommunityWorkflowPermissionPolicy(WorkflowRecordPermissionPolicy):
-    can_create = [CommunityWorkflowPermission("create")]
-    can_view_deposit_page = [InAnyCommunity(CommunityWorkflowPermission("create"))]
+    """Workflow permission policy for communities.
+
+    It redefines the can_create permission to allow
+    """
+
+    can_create = (CommunityWorkflowPermission("create"),)
+    can_view_deposit_page = (InAnyCommunity(CommunityWorkflowPermission("create")),)

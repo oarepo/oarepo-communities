@@ -39,7 +39,7 @@ class CommunityRoleEmailRecipient(SpecificEntityRecipient):
                 .filter(
                     MemberModel.role == role,
                     MemberModel.community_id == str(community_id),
-                    MemberModel.active == True,
+                    MemberModel.active.is_(True),
                 )
                 .all()
             )

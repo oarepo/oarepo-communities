@@ -15,27 +15,13 @@ from typing import TYPE_CHECKING
 from oarepo_communities.resolvers.communities import CommunityRoleResolver
 
 if TYPE_CHECKING:
-    from flask import Blueprint, Flask
-    from flask.blueprints import BlueprintSetupState
-
-    from oarepo_communities.ext import OARepoCommunities
-
-
-def create_oarepo_communities(app: Flask) -> Blueprint:
-    """Create a blueprint for the communities endpoint."""
-    # Do we need to add this to service registry?
-    # - use similar pattern like in invenio-requests etc? finalize app and api-finalize-app in entrypoints?
-    ext: OARepoCommunities = app.extensions["oarepo-communities"]
-    blueprint = ext.community_records_resource.as_blueprint()
-    blueprint.record_once(register_community_role_entity_resolver)
-    return blueprint
+    from flask import Flask
 
 
 # TODO: move this to finalizer, not record once as that has been removed
-def register_community_role_entity_resolver(
-    state: BlueprintSetupState,
+def register_community_role_entity_resolver_finalizer(
+    app: Flask,
 ) -> None:  # TODO: consider using different method for registering the resolver
     """Register the community role entity resolver."""
-    app = state.app
     requests = app.extensions["invenio-requests"]
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())

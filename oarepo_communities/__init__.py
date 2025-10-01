@@ -6,4 +6,8 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""oarepo-communities package."""
+
+from __future__ import annotations
+
 __version__ = "6.0.0dev0"

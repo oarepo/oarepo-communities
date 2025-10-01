@@ -6,34 +6,32 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""oarepo-communities extension."""
+
 from __future__ import annotations
 
-from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from deepmerge import conservative_merger
 from flask_principal import identity_loaded
 
 import oarepo_communities.cli  # noqa - imported to register CLI commands
 
-from .resources.community_records.config import CommunityRecordsResourceConfig
-from .resources.community_records.resource import CommunityRecordsResource
-from .services.community_inclusion.service import CommunityInclusionService
-from .services.community_records.config import CommunityRecordsServiceConfig
-from .services.community_records.service import CommunityRecordsService
 from .services.community_role.config import CommunityRoleServiceConfig
 from .services.community_role.service import CommunityRoleService
-from .utils import get_urlprefix_service_id_mapping, load_community_user_needs
+from .utils import load_community_user_needs
 from .workflow import community_default_workflow
 
 if TYPE_CHECKING:
     from flask import Flask
+    from flask_principal import Identity
+    from oarepo_workflows import Workflow
 
 
 class OARepoCommunities:
     """OARepo extension of Invenio-Vocabularies."""
 
-    def __init__(self, app: Flask = None) -> None:
+    def __init__(self, app: Flask | None = None) -> None:
         """Extension initialization."""
         if app:
             self.init_app(app)
@@ -42,7 +40,6 @@ class OARepoCommunities:
         """Flask application initialization."""
         self.app = app
         self.init_services(app)
-        self.init_resources(app)
         self.init_hooks(app)
         self.init_config(app)
         app.extensions["oarepo-communities"] = self
@@ -57,15 +54,10 @@ class OARepoCommunities:
         app.config.setdefault("DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI", []).extend(
             config.DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI
         )
-        app.config.setdefault("ENTITY_REFERENCE_UI_RESOLVERS", {}).update(config.ENTITY_REFERENCE_UI_RESOLVERS)
         if "OAREPO_PERMISSIONS_PRESETS" not in app.config:
             app.config["OAREPO_PERMISSIONS_PRESETS"] = {}
         app.config.setdefault("DISPLAY_USER_COMMUNITIES", config.DISPLAY_USER_COMMUNITIES)
         app.config.setdefault("DISPLAY_NEW_COMMUNITIES", config.DISPLAY_NEW_COMMUNITIES)
-
-        for k in ext_config.OAREPO_PERMISSIONS_PRESETS:
-            if k not in app.config["OAREPO_PERMISSIONS_PRESETS"]:
-                app.config["OAREPO_PERMISSIONS_PRESETS"][k] = ext_config.OAREPO_PERMISSIONS_PRESETS[k]
 
         app.config["COMMUNITIES_ROUTES"] = {
             **config.COMMUNITIES_ROUTES,
@@ -92,46 +84,26 @@ class OARepoCommunities:
             config.COMMUNITIES_RECORDS_SEARCH_ALL,
         )
 
-    @cached_property
-    def urlprefix_serviceid_mapping(self) -> dict[str, str]:
-        return get_urlprefix_service_id_mapping()
+    def get_community_default_workflow(self, **kwargs: Any) -> Workflow:
+        """Get default workflow for the community.
 
-    def get_community_default_workflow(self, **kwargs) -> str | None:
+        It will have a look if the kwargs contain 'community_metadata' or 'record' or 'data'
+        and will try to get the community from there. If no community is found, it will
+        raise an exception.
+        """
         return community_default_workflow(**kwargs)
 
-    def init_services(self, app: Flask) -> None:
+    def init_services(self, _app: Flask) -> None:
         """Initialize communities service."""
         # Services
-        self.community_records_service = CommunityRecordsService(
-            config=CommunityRecordsServiceConfig.build(app),
-        )
-
-        self.community_inclusion_service = CommunityInclusionService()
         self.community_role_service = CommunityRoleService(config=CommunityRoleServiceConfig())
-
-    def init_resources(self, app: Flask) -> None:
-        """Initialize communities resources."""
-        # Resources
-        self.community_records_resource = CommunityRecordsResource(
-            config=CommunityRecordsResourceConfig.build(app),
-            service=self.community_records_service,
-        )
 
     def init_hooks(self, app: Flask) -> None:
         """Initialize hooks."""
 
         @identity_loaded.connect_via(app)
-        def on_identity_loaded(_, identity):
+        def on_identity_loaded(_: Flask, identity: Identity) -> None:
             load_community_user_needs(identity)
-
-    """
-    def get_default_community_from_record(self, record: Record, **kwargs: Any):
-        record = record.parent if hasattr(record, "parent") else record
-        try:
-            return record.communities.default.id
-        except AttributeError:
-            return None
-    """
 
 
 def api_finalize_app(app: Flask) -> None:
@@ -144,34 +116,13 @@ def finalize_app(app: Flask) -> None:
     # Register services - cannot be done in extension because
     # Invenio-Records-Resources might not have been initialized.
     rr_ext = app.extensions["invenio-records-resources"]
-    # idx_ext = app.extensions["invenio-indexer"]
-    ext = app.extensions["oarepo-communities"]
+    ext: OARepoCommunities = app.extensions["oarepo-communities"]
 
     # services
-    rr_ext.registry.register(
-        ext.community_records_service,
-        service_id=ext.community_records_service.config.service_id,
-    )
     rr_ext.registry.register(
         ext.community_role_service,
         service_id=ext.community_role_service.config.service_id,
     )
-    # indexers
-    # idx_ext.registry.register(ext.community_records_service.indexer, indexer_id="communities")
-
-    #
-    # Workaround for https://github.com/inveniosoftware/invenio-communities/pull/1192
-    #
-    if isinstance(app.config["COMMUNITIES_CUSTOM_FIELDS"], dict):
-        assert not app.config["COMMUNITIES_CUSTOM_FIELDS"]
-        app.config["COMMUNITIES_CUSTOM_FIELDS"] = []
-
-    if isinstance(app.config["COMMUNITIES_CUSTOM_FIELDS_UI"], dict):
-        assert not app.config["COMMUNITIES_CUSTOM_FIELDS_UI"]
-        app.config["COMMUNITIES_CUSTOM_FIELDS_UI"] = []
-    #
-    # end of workaround
-    #
 
     for cf in app.config["DEFAULT_COMMUNITIES_CUSTOM_FIELDS"]:
         for target_cf in app.config["COMMUNITIES_CUSTOM_FIELDS"]:

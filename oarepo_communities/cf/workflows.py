@@ -68,8 +68,8 @@ class LazyChoices[T](list[T]):
 # TODO: use current_workflows here
 lazy_workflow_options = LazyChoices[dict[str, str]](
     lambda: [
-        {"id": name, "title_l10n": w.label}  # type: ignore
-        for name, w in current_app.config["WORKFLOWS"].items()  # type: ignore
+        {"id": name, "title_l10n": w.label}  # type: ignore[]
+        for name, w in current_app.config["WORKFLOWS"].items()  # type: ignore[]
     ]
 )
 """A lazy list of available workflows for use in form choices."""
