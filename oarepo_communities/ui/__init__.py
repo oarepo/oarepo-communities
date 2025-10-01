@@ -6,3 +6,6 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""UI components for records within communities."""
+
+from __future__ import annotations

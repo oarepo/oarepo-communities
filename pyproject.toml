@@ -52,6 +52,10 @@ oarepo_communities_ui = "oarepo_communities.ui.oarepo_communities:create_bluepri
 
 [project.entry-points."invenio_base.finalize_app"]
 oarepo_communities = "oarepo_communities.ext:finalize_app"
+oarepo_communities_entity_resolver = "oarepo_communities.views.api:register_community_role_entity_resolver_finalizer"
+
+[project.entry-points."invenio_base.api_finalize_app"]
+oarepo_communities_entity_resolver = "oarepo_communities.views.api:register_community_role_entity_resolver_finalizer"
 
 [project.entry-points."invenio_i18n.translations"]
 oarepo_communities_messages = "oarepo_communities.i18n"

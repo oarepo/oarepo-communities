@@ -6,35 +6,32 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Default configuration for oarepo-communities."""
+
 from __future__ import annotations
 
-from oarepo_communities.services.permissions.policy import (
-    CommunityWorkflowPermissionPolicy,
-)
 from oarepo_communities.worklows.permissive_workflow import PermissiveWorkflow
 
-OAREPO_PERMISSIONS_PRESETS = {
-    "community-workflow": CommunityWorkflowPermissionPolicy,
-}
+# TODO: Add CommunityWorkflowPermissionPolicy to presets
 
 COMMUNITY_WORKFLOWS = {
     "default": PermissiveWorkflow(),
 }
 
 DEFAULT_COMMUNITIES_ROLES = [
-    dict(
-        name="member",
-        title="Member",
-        description="Community member.",
-    ),
-    dict(
-        name="owner",
-        title="Community owner",
-        description="Can manage community.",
-        is_owner=True,
-        can_manage=True,
-        can_manage_roles=["owner", "member"],
-    ),
+    {
+        "name": "member",
+        "title": "Member",
+        "description": "Community member.",
+    },
+    {
+        "name": "owner",
+        "title": "Community owner",
+        "description": "Can manage community.",
+        "is_owner": True,
+        "can_manage": True,
+        "can_manage_roles": ["owner", "member"],
+    },
 ]
 
 

@@ -6,11 +6,15 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Configuration for oarepo-communities."""
+
 from __future__ import annotations
 
 from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
-from invenio_records_resources.references.entity_resolvers.results import ServiceResultResolver
-from oarepo_runtime.i18n import lazy_gettext as _
+from invenio_i18n import lazy_gettext as _
+from invenio_records_resources.references.entity_resolvers.results import (
+    ServiceResultResolver,
+)
 
 from .cf.workflows import WorkflowCF, lazy_workflow_options
 from .notifications.generators import CommunityRoleEmailRecipient
@@ -20,7 +24,6 @@ from .requests.migration import (
 )
 from .requests.remove_secondary import RemoveSecondaryCommunityRequestType
 from .requests.submission_secondary import SecondaryCommunitySubmissionRequestType
-from .resolvers.ui import CommunityRoleUIResolver
 
 REQUESTS_REGISTERED_TYPES = [
     InitiateCommunityMigrationRequestType(),
@@ -30,10 +33,6 @@ REQUESTS_REGISTERED_TYPES = [
 ]
 OAREPO_REQUESTS_DEFAULT_RECEIVER = "oarepo_requests.receiver.default_workflow_receiver_function"
 REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
-
-ENTITY_REFERENCE_UI_RESOLVERS = {
-    "community_role": CommunityRoleUIResolver("community_role"),
-}
 
 
 DEFAULT_COMMUNITIES_CUSTOM_FIELDS = [
@@ -45,28 +44,28 @@ DEFAULT_COMMUNITIES_CUSTOM_FIELDS_UI = [
     {
         "section": _("Workflows"),
         "fields": [
-            dict(
-                field="workflow",
-                ui_widget="Dropdown",
-                props=dict(
-                    label=_("Default workflow"),
-                    description=_(
+            {
+                "field": "workflow",
+                "ui_widget": "Dropdown",
+                "props": {
+                    "label": _("Default workflow"),
+                    "description": _(
                         "Default workflow for the community if workflow is not specified when depositing a record."
                     ),
-                    options=lazy_workflow_options,
-                ),
-            ),
-            dict(
-                field="allowed_workflows",
+                    "options": lazy_workflow_options,
+                },
+            },
+            {
+                "field": "allowed_workflows",
                 # TODO: need to find a better widget for this
-                ui_widget="Dropdown",
-                props=dict(
-                    label=_("Allowed workflows"),
-                    multiple=True,
-                    description=_("Workflows allowed for the community."),
-                    options=lazy_workflow_options,
-                ),
-            ),
+                "ui_widget": "Dropdown",
+                "props": {
+                    "label": _("Allowed workflows"),
+                    "multiple": True,
+                    "description": _("Workflows allowed for the community."),
+                    "options": lazy_workflow_options,
+                },
+            },
         ],
     }
 ]

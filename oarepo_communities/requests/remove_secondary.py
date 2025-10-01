@@ -6,33 +6,44 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+"""Request type for removing a record from a secondary community."""
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, override
 
 import marshmallow as ma
+from invenio_drafts_resources.records import Record as RecordWithParent
+from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
+from invenio_i18n import lazy_gettext as _
+from invenio_notifications.services.uow import NotificationOp
+from invenio_rdm_records.notifications.builders import (
+    CommunityInclusionAcceptNotificationBuilder,
+)
+from invenio_records_resources.services.uow import RecordIndexOp
+from invenio_requests.customizations.actions import RequestAction
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
-from oarepo_runtime.datastreams.utils import get_record_service_for_record
-from oarepo_runtime.i18n import lazy_gettext as _
+from oarepo_requests.utils import classproperty
+from oarepo_runtime import current_runtime
 
-from ..errors import CommunityNotIncludedException, PrimaryCommunityException
-from ..proxies import current_oarepo_communities
+from ..errors import CommunityNotIncludedError, PrimaryCommunityError
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from typing import Any
 
     from flask_principal import Identity
+    from invenio_db.uow import UnitOfWork
     from invenio_records_resources.records import Record
-    from invenio_records_resources.services.uow import UnitOfWork
-    from invenio_requests.customizations.actions import RequestAction
     from oarepo_requests.typing import EntityReference
 
 
 class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
     """Accept action."""
 
+    @override
     def apply(
         self,
         identity: Identity,
@@ -41,10 +52,24 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        community_id = self.request.receiver.resolve().community_id
-        service = get_record_service_for_record(state.topic)
-        community_inclusion_service = current_oarepo_communities.community_inclusion_service
-        community_inclusion_service.remove(state.topic, community_id, record_service=service, uow=uow)
+        record = cast("RecordWithParent", state.topic)
+        community = self.request.receiver.resolve()
+        service = current_runtime.get_record_service_for_record(state.topic)
+
+        record.parent.communities.remove(community, request=self.request, default=True)
+
+        service = current_runtime.get_record_service_for_record(record)
+
+        uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
+        uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
+
+        if kwargs.get("send_notification", True):
+            uow.register(
+                NotificationOp(
+                    CommunityInclusionAcceptNotificationBuilder.build(identity=identity, request=self.request)
+                )
+            )
+        super().execute(identity, uow)
 
 
 # Request
@@ -55,26 +80,25 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRequestType):
     type_id = "remove_secondary_community"
     name = _("Remove secondary community")
 
-    payload_schema = {
+    payload_schema: Mapping[str, ma.fields.Field] | None = {
         "community": ma.fields.Str(required=True),
     }
 
     creator_can_be_none = False
     topic_can_be_none = False
-    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)
+    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)  # type: ignore[assignment]
 
-    payload_schema = {
-        "community": ma.fields.String(required=True),
-    }
-
-    @classmethod
-    @property
-    def available_actions(cls) -> dict[str, type[RequestAction]]:
+    @classproperty[dict[str, type[RequestAction]]]
+    @override
+    def available_actions(  # type: ignore[override] # TODO: fix in requests
+        cls,  # noqa: N805
+    ) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,
             "accept": RemoveSecondaryCommunityAcceptAction,
         }
 
+    @override
     def can_create(
         self,
         identity: Identity,
@@ -87,19 +111,25 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRequestType):
     ) -> None:
         super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
         target_community_id = data["payload"]["community"]
+        if not isinstance(topic, RecordWithParent):
+            raise CommunityNotIncludedError("Record has no parent.")
+
         not_included = target_community_id not in topic.parent.communities.ids
         if not_included:
-            raise CommunityNotIncludedException("Cannot remove, record is not in this community.")
+            raise CommunityNotIncludedError("Cannot remove, record is not in this community.")
         if target_community_id == str(topic.parent.communities.default.id):
-            raise PrimaryCommunityException("Cannot remove record's primary community.")
+            raise PrimaryCommunityError("Cannot remove record's primary community.")
 
     @classmethod
+    @override
     def is_applicable_to(cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any) -> bool:
         super().is_applicable_to(identity, topic, *args, **kwargs)
+        if not isinstance(topic, RecordWithParent):
+            return False
         try:
             communities = topic.parent.communities.ids
         except AttributeError:
             return False
-        if len(communities) < 2:
-            return False
-        return super().is_applicable_to(identity, topic, *args, **kwargs)
+        if len(communities) > 1:
+            return cast("bool", super().is_applicable_to(identity, topic, *args, **kwargs))
+        return False

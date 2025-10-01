@@ -10,22 +10,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
-from flask import current_app, session
+from flask import session
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities, current_identities_cache
 from invenio_communities.utils import identity_cache_key
-from invenio_records_resources.proxies import current_service_registry
 
-from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.services.permissions.generators import UserInCommunityNeed
 
 if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_communities.members.records import Member as MemberRecord
     from invenio_drafts_resources.records import Record
-    from invenio_records_resources.services.records.service import RecordService
 
 
 def get_community_needs_for_identity(
@@ -64,67 +61,19 @@ def load_community_user_needs(identity: Identity) -> None:
     if not community_roles:
         return
     communities = {community_role[0] for community_role in community_roles}
-    needs = {UserInCommunityNeed(identity.id, community) for community in communities}
-    identity.provides |= needs
-
-
-# TODO: why is this needed?
-def get_associated_service(record_service: RecordService, service_type: str) -> RecordService:
-    """Get associated service for given record service and service type.
-
-    The type might be, for example, files
-    """
-    return current_service_registry.get(f"{record_service.config.service_id}_{service_type}")
-
-
-def slug2id(slug: str) -> str:
-    """Convert community slug to id."""
-    return str(current_communities.service.record_cls.pid.resolve(slug).id)
-
-
-def get_record_services() -> dict[Record, RecordService]:
-    """TODO: remove this to use the current runtime instead."""
-    return {k: current_service_registry.get(v) for k, v in current_app.config["OAREPO_PRIMARY_RECORD_SERVICE"].items()}
-
-
-# TODO: why is this needed?
-def get_service_by_urlprefix(url_prefix: str) -> RecordService:
-    """Get service for given URL prefix."""
-    return current_service_registry.get(current_oarepo_communities.urlprefix_serviceid_mapping[url_prefix])
-
-
-# TODO: move to runtime
-def get_service_from_schema_type(schema_type: str) -> RecordService:
-    """Get service for given schema type."""
-    for record_cls, service in get_record_services().items():
-        if hasattr(record_cls, "schema") and record_cls.schema.value == schema_type:
-            return service
-    raise KeyError(f"No service found for schema type {schema_type}")
-
-
-# TODO: why is this needed?
-def get_urlprefix_service_id_mapping() -> dict[str, str]:
-    """Get mapping of URL prefixes to service IDs."""
-    ret = {}
-    services = get_record_services().values()
-    for service in services:
-        if hasattr(service, "config") and hasattr(service.config, "url_prefix"):
-            url_prefix = service.config.url_prefix.replace(
-                "/", ""
-            )  # this might be problematic bc idk if there's a reason for multiword prefix -
-            # but that is a problem for using model view arg too
-            ret[url_prefix] = service.config.service_id
-    return ret
+    needs = {UserInCommunityNeed.from_user_community(identity.id, community) for community in communities}
+    identity.provides |= needs  # type: ignore[arg-type]
 
 
 def community_id_from_record(record: Record) -> str | None:
     """Get community ID from record or its parent community."""
+    community_id: str
     if isinstance(record, Community):
-        community_id = record.id
+        community_id = str(record.id)
     else:
-        record = record.parent if hasattr(record, "parent") else record
+        parent_record: Any = record.parent if hasattr(record, "parent") else record
         try:
-            community_id = record.communities.default.id
+            community_id = str(parent_record.communities.default.id)
         except AttributeError:
             return None
     return community_id

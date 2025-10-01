@@ -7,3 +7,5 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 #
 """Custom fields applicable to communities, such as selector for workflows."""
+
+from __future__ import annotations
