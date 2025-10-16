@@ -16,6 +16,7 @@ from flask import current_app
 from invenio_records_resources.services.custom_fields import KeywordCF
 from marshmallow import ValidationError
 from marshmallow_utils.fields import SanitizedUnicode
+from oarepo_workflows import current_oarepo_workflows
 
 if TYPE_CHECKING:
     from marshmallow.fields import Field
@@ -28,8 +29,8 @@ class WorkflowField(SanitizedUnicode):
     def _validate(self, value: str) -> None:
         """Validate the workflow exists."""
         super()._validate(value)
-        if value not in current_app.config["WORKFLOWS"]:
-            raise ValidationError("Trying to set nonexistent workflow {value} on community.")
+        if value not in current_oarepo_workflows.workflow_by_code:
+            raise ValidationError(f"Trying to set nonexistent workflow {value} on community.")
 
 
 class WorkflowCF(KeywordCF):

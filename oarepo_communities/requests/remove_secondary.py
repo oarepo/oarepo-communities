@@ -37,7 +37,6 @@ if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_db.uow import UnitOfWork
     from invenio_records_resources.records import Record
-    from oarepo_requests.typing import EntityReference
 
 
 class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
@@ -53,10 +52,9 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
         **kwargs: Any,
     ) -> None:
         record = cast("RecordWithParent", state.topic)
-        community = self.request.receiver.resolve()
-        service = current_runtime.get_record_service_for_record(state.topic)
+        community = self.request["payload"]["community"]
 
-        record.parent.communities.remove(community, request=self.request, default=True)
+        record.parent.communities.remove(community)
 
         service = current_runtime.get_record_service_for_record(record)
 
@@ -69,7 +67,6 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
                     CommunityInclusionAcceptNotificationBuilder.build(identity=identity, request=self.request)
                 )
             )
-        super().execute(identity, uow)
 
 
 # Request
@@ -103,9 +100,9 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRequestType):
         self,
         identity: Identity,
         data: dict,
-        receiver: EntityReference,
+        receiver: dict[str, str],
         topic: Record,
-        creator: EntityReference,
+        creator: dict[str, str],
         *args: Any,
         **kwargs: Any,
     ) -> None:

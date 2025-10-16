@@ -17,6 +17,7 @@ from flask import g
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_drafts_resources.records.api import Record as RecordWithParent
+from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_i18n import lazy_gettext as _
 from invenio_notifications.services.uow import NotificationOp
 from invenio_rdm_records.notifications.builders import (
@@ -24,16 +25,17 @@ from invenio_rdm_records.notifications.builders import (
 )
 from invenio_rdm_records.requests.community_inclusion import is_access_restriction_valid
 from invenio_rdm_records.services.errors import InvalidAccessRestrictions
+from invenio_records_resources.services.uow import RecordIndexOp
 from invenio_requests.customizations.actions import RequestAction
-from invenio_requests.proxies import current_requests_service
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
-from oarepo_requests.proxies import current_oarepo_requests_service
+from oarepo_requests.proxies import current_requests_service
 from oarepo_requests.types import ModelRefTypes
 from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
 from oarepo_requests.utils import (
     classproperty,
     open_request_exists,
 )
+from oarepo_runtime import current_runtime
 
 from oarepo_communities.ui.allowed_communities import AllowedCommunitiesComponent
 from oarepo_communities.utils import community_to_dict
@@ -61,7 +63,6 @@ if TYPE_CHECKING:
     from invenio_db.uow import UnitOfWork
     from invenio_records_resources.records import Record
     from invenio_requests.records.api import Request
-    from oarepo_requests.typing import EntityReference
 
 
 from invenio_requests.resolvers.registry import ResolverRegistry
@@ -81,7 +82,7 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
     ) -> None:
         request = cast("Request", self.request)
         created_by = request.created_by.resolve()
-        request_item = current_oarepo_requests_service.create(
+        request_item = current_requests_service.create(
             system_identity,
             data={"payload": request.get("payload", {})},
             request_type=ConfirmCommunityMigrationRequestType.type_id,
@@ -118,7 +119,13 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
         if not is_access_restriction_valid(record, community):
             raise InvalidAccessRestrictions("Invalid access restrictions between target community and record.")
 
-        add_record_to_community(record, community, self.request, uow, default=True)
+        record.parent.communities.remove(record.parent.communities.default)
+        record.parent.communities.add(community, request=self.request, default=True)
+
+        service = current_runtime.get_record_service_for_record(record)
+
+        uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
+        uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
 
         if kwargs.get("send_notification", True):
             uow.register(
@@ -126,7 +133,6 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
                     CommunityInclusionAcceptNotificationBuilder.build(identity=identity, request=self.request)
                 )
             )
-        super().execute(identity, uow)
 
 
 class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
@@ -143,7 +149,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
     type_id = "initiate_community_migration"
     name = _("Inititiate Community migration")
 
-    description = _("Move record to another primary community.")
+    description = _("Move record to another primary community.")  # type: ignore[reportAssignmentType]
 
     topic_can_be_none = False
     allowed_topic_ref_types = ModelRefTypes(published=True, draft=False)  # type: ignore[assignment]
@@ -220,7 +226,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
 
     editable = False
 
-    @classproperty[dict[str, RequestAction]]
+    @classproperty
     @override
     def available_actions(  # type: ignore[override]
         cls,  # noqa: N805
@@ -254,9 +260,9 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
         self,
         identity: Identity,
         data: dict,
-        receiver: EntityReference,
+        receiver: dict[str, str],
         topic: Record,
-        creator: EntityReference,
+        creator: dict[str, str],
         *args: Any,
         **kwargs: Any,
     ) -> None:

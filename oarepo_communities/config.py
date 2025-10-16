@@ -12,12 +12,8 @@ from __future__ import annotations
 
 from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 from invenio_i18n import lazy_gettext as _
-from invenio_records_resources.references.entity_resolvers.results import (
-    ServiceResultResolver,
-)
 
 from .cf.workflows import WorkflowCF, lazy_workflow_options
-from .notifications.generators import CommunityRoleEmailRecipient
 from .requests.migration import (
     ConfirmCommunityMigrationRequestType,
     InitiateCommunityMigrationRequestType,
@@ -76,11 +72,8 @@ DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
 
-NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}}
+# TODO: notifications config
 
-NOTIFICATIONS_ENTITY_RESOLVERS = [
-    ServiceResultResolver(service_id="community-role", type_key="community_role"),
-]
 
 DATASTREAMS_TRANSFORMERS = {
     "set_community": "oarepo_communities.datastreams.transformers.SetCommunityTransformer",

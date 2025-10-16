@@ -45,17 +45,17 @@ if TYPE_CHECKING:
     from invenio_requests.customizations import RequestType
     from oarepo_workflows import Workflow
 
-
+# TODO: (invenio) changing identity ids from str to int is kind of weird? or something else happened?
 class UserInCommunityNeed(NamedTuple):
     """Need for user in community."""
 
     method: str
     value: str
-    user: str
+    user: str | int
     community: str
 
     @classmethod
-    def from_user_community(cls, user: str, community: str) -> UserInCommunityNeed:
+    def from_user_community(cls, user: str | int, community: str) -> UserInCommunityNeed:
         """Create need from user and community."""
         return cls("user_in_community", f"{user}:{community}", user, community)
 
@@ -377,7 +377,7 @@ class RecordOwnerInRecordCommunityBase(CommunityRoleMixinProtocol, Generator):
 
         for owner_id in owner_ids:
             needs += [
-                UserInCommunityNeed.from_user_community(str(owner_id), community) for community in record_communities
+                UserInCommunityNeed.from_user_community(owner_id, community) for community in record_communities
             ]
         return needs
 
