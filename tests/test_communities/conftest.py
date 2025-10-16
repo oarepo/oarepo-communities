@@ -11,25 +11,23 @@ from __future__ import annotations
 import os
 
 import pytest
-from deepmerge import always_merger
+from flask import Blueprint
 from invenio_app.factory import create_api
 from invenio_i18n import lazy_gettext as _
-from invenio_notifications.backends import EmailNotificationBackend
+from invenio_rdm_records.services.generators import RecordOwners, IfRecordDeleted
 from invenio_records_permissions.generators import (
     AnyUser,
     AuthenticatedUser,
     SystemProcess,
 )
-from oarepo_requests.notifications.builders.publish import (
-    PublishDraftRequestAcceptNotificationBuilder,
-    PublishDraftRequestSubmitNotificationBuilder,
-)
+from invenio_requests.customizations import RequestType
+from oarepo_rdm import rdm_minimal_preset
+from oarepo_requests.model.presets.requests import requests_preset
 from oarepo_requests.receiver import default_workflow_receiver_function
 from oarepo_requests.services.permissions.generators import RequestActive
 from oarepo_requests.services.permissions.workflow_policies import (
     CreatorsFromWorkflowRequestsPermissionPolicy,
 )
-from oarepo_runtime.services.permissions import RecordOwners
 from oarepo_workflows import (
     AutoApprove,
     IfInState,
@@ -38,9 +36,9 @@ from oarepo_workflows import (
     WorkflowRequestPolicy,
     WorkflowTransitions,
 )
-from pytest_oarepo.vocabularies.config import VOCABULARIES_TEST_CONFIG
-from thesis.proxies import current_service
+from oarepo_workflows.model.presets import workflows_preset
 
+from oarepo_communities.model.presets import communities_preset
 from oarepo_communities.services.custom_fields.workflow import WorkflowCF
 from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
@@ -62,12 +60,69 @@ pytest_plugins = [
     "pytest_oarepo.fixtures",
     "pytest_oarepo.users",
     "pytest_oarepo.files",
-    "pytest_oarepo.vocabularies",
 ]
 
 
+@pytest.fixture(scope="module")
+def app(app):
+
+    """
+    bp = Blueprint("communities_test_ui", __name__)
+
+    @bp.route("/communities_test/preview/<pid_value>", methods=["GET"])
+    def preview(pid_value: str) -> str:
+        return "preview ok"
+
+    @bp.route("/communities_test/", methods=["GET"])
+    def search() -> str:
+        return "search ok"
+
+    @bp.route("/communities_test/uploads/<pid_value>", methods=["GET"])  # draft self_html
+    def deposit_edit(pid_value: str) -> str:
+        return "deposit edit ok"
+
+    @bp.route("/communities_test/uploads/new", methods=["GET"])
+    def deposit_create() -> str:
+        return "deposit create ok"
+
+    @bp.route("/communities_test/records/<pid_value>")
+    def record_detail(pid_value) -> str:
+        return "detail ok"
+
+    @bp.route("/communities_test/records/<pid_value>/latest", methods=["GET"])
+    def record_latest(pid_value: str) -> str:
+        return "latest ok"
+
+    @bp.route("/communities_test/records/<pid_value>/export/<export_format>", methods=["GET"])
+    def export(pid_value, export_format: str) -> str:
+        return "export ok"
+    """
+
+
+    bp = Blueprint("invenio_app_rdm_communities", __name__)
+
+    @bp.route("/invenio_app_rdm_communities/communities_home", methods=["GET"])
+    def communities_home(pid_value: str) -> str:
+        return "communities_home ok"
+
+    app.register_blueprint(bp)
+
+
+    bp = Blueprint("community-records", __name__)
+
+    @bp.route("/community-records/search", methods=["GET"])
+    def search(pid_value: str) -> str:
+        return "search ok"
+
+    app.register_blueprint(bp)
+
+
+    return app
+
+
+
 @pytest.fixture(autouse=True)
-def init_communities_cf(init_communities_cf):
+def init_communities_custom_fields(init_communities_cf):
     return init_communities_cf
 
 
@@ -78,12 +133,62 @@ def location(location):
 
 @pytest.fixture
 def urls():
-    return {"BASE_URL": "/thesis/", "BASE_URL_REQUESTS": "/requests/"}
+    return {"BASE_URL": "/communities-test", "BASE_URL_REQUESTS": "/requests/"}
+
+@pytest.fixture(scope="session")
+def model_types():
+    """Model types fixture."""
+    # Define the model types used in the tests
+    return {
+        "Metadata": {
+            "properties": {
+                "title": {"type": "fulltext+keyword", "required": True},
+                "creators": {
+                    "type": "array",
+                    "items": {"type": "keyword"},
+                },
+                "contributors": {
+                    "type": "array",
+                    "items": {"type": "keyword"},
+                },
+            }
+        }
+    }
+
+
+@pytest.fixture(scope="session")
+def communities_model(model_types):
+    from oarepo_model.api import model
+
+    model = model(
+        name="communities_test",
+        version="1.0.0",
+        presets=[
+            rdm_minimal_preset,
+            workflows_preset,
+            requests_preset,
+            communities_preset,
+        ],
+        types=[model_types],
+        metadata_type="Metadata",
+        customizations=[],
+        #configuration={"ui_blueprint_name": "communities_test_ui"},
+        configuration={}
+    )
+    model.register()
+    return model
 
 
 @pytest.fixture
-def record_service():
-    return current_service
+def record_service(communities_model):
+    return communities_model.proxies.current_service
+
+@pytest.fixture
+def requests_service():
+    from oarepo_requests.proxies import current_requests_service
+
+    return current_requests_service
+
 
 
 @pytest.fixture
@@ -104,7 +209,7 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
         ),
     )
 
-    can_read_deleted = can_read
+    # can_read_deleted = (IfRecordDeleted(then_=[UserManager, SystemProcess()], else_=[SameAs("can_read")]),)
     can_read_all_records = (
         RecordOwners(),
         CommunityRole("owner"),
@@ -286,11 +391,6 @@ class NoRequests(WorkflowRequestPolicy):
         recipients=[TargetCommunityRole("owner")],
         transitions=WorkflowTransitions(),
     )
-    community_migration = WorkflowRequest(
-        requesters=[],
-        recipients=[TargetCommunityRole("owner")],
-        transitions=WorkflowTransitions(),
-    )
 
 
 class CuratorPublishRequests(DefaultRequests):
@@ -323,43 +423,50 @@ class MultipleRecipientsRequests(DefaultRequests):
     )
 
 
-WORKFLOWS = {
-    "default": Workflow(
+WORKFLOWS = [
+    Workflow(
+        code="default",
         label=_("Default workflow"),
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=DefaultRequests,
     ),
-    "custom": Workflow(
+    Workflow(
+        code="custom",
         label=_("For checking if workflow changed."),
         permission_policy_cls=TestWithCuratorCommunityWorkflowPermissions,
         request_policy_cls=DefaultRequests,
     ),
-    "record_owner_in_record_community": Workflow(
+    Workflow(
+        code="record_owner_in_record_community",
         label=_("For testing RecordOwnerInRecordCommunity generator."),
         permission_policy_cls=TestWithRecordOwnerInRecordCommunityWorkflowPermissions,
         request_policy_cls=PublishRequestsRecordOwnerInRecordCommunity,
     ),
-    "record_owner_in_default_record_community": Workflow(
+    Workflow(
+        code="record_owner_in_default_record_community",
         label=_("For testing RecordOwnerInDefaultRecordCommunity generator."),
         permission_policy_cls=TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions,
         request_policy_cls=PublishRequestsRecordOwnerInDefaultRecordCommunity,
     ),
-    "no": Workflow(
+    Workflow(
+        code="no",
         label=_("Can't do any requests."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=NoRequests,
     ),
-    "curator_publish": Workflow(
+   Workflow(
+        code="curator_publish",
         label=_("For testing assigned param filter."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=CuratorPublishRequests,
     ),
-    "multiple_recipients": Workflow(
+    Workflow(
+        code="multiple_recipients",
         label=_("For testing multiple recipient requests.."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=MultipleRecipientsRequests,
     ),
-}
+]
 
 
 @pytest.fixture(scope="module")
@@ -412,13 +519,17 @@ def app_config(app_config):
 
     app_config["REQUESTS_PERMISSION_POLICY"] = CreatorsFromWorkflowRequestsPermissionPolicy
 
+    """
     app_config["NOTIFICATIONS_BACKENDS"] = {
         EmailNotificationBackend.id: EmailNotificationBackend(),
     }
+
     app_config["NOTIFICATIONS_BUILDERS"] = {
         PublishDraftRequestAcceptNotificationBuilder.type: PublishDraftRequestAcceptNotificationBuilder,
         PublishDraftRequestSubmitNotificationBuilder.type: PublishDraftRequestSubmitNotificationBuilder,
     }
+    always_merger.merge(app_config, VOCABULARIES_TEST_CONFIG)
+    """
 
     app_config["MAIL_DEFAULT_SENDER"] = "test@invenio-rdm-records.org"
 
@@ -440,11 +551,8 @@ def app_config(app_config):
             "draft_cls": "thesis.records.api.ThesisDraft",
         },
     )
-    always_merger.merge(app_config, VOCABULARIES_TEST_CONFIG)
+
     return app_config
-
-
-from invenio_requests.customizations import RequestType
 
 
 @pytest.fixture

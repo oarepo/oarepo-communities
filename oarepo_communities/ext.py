@@ -12,10 +12,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from deepmerge import conservative_merger
 from flask_principal import identity_loaded
 
 import oarepo_communities.cli  # noqa - imported to register CLI commands
+from .resolvers.communities import CommunityRoleResolver
 
 from .services.community_role.config import CommunityRoleServiceConfig
 from .services.community_role.service import CommunityRoleService
@@ -64,13 +64,7 @@ class OARepoCommunities:
             **app.config.get("COMMUNITIES_ROUTES", {}),
         }
 
-        app_registered_event_types = app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
-        app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
-            app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
-        )
-
-        app.config.setdefault("NOTIFICATIONS_ENTITY_RESOLVERS", [])
-        app.config["NOTIFICATIONS_ENTITY_RESOLVERS"] += config.NOTIFICATIONS_ENTITY_RESOLVERS
+        # TODO: notifications config
 
         app.config.setdefault("DATASTREAMS_TRANSFORMERS", {}).update(config.DATASTREAMS_TRANSFORMERS)
 
@@ -149,3 +143,6 @@ def finalize_app(app: Flask) -> None:
         from .ext_config import DEFAULT_COMMUNITIES_ROLES
 
         app.config["COMMUNITIES_ROLES"] = DEFAULT_COMMUNITIES_ROLES
+
+    requests = app.extensions["invenio-requests"]
+    requests.entity_resolvers_registry.register_type(CommunityRoleResolver())

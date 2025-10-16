@@ -18,8 +18,8 @@ dev = [
     "oarepo-invenio-typing-stubs",
 ]
 tests = [
-    # "oarepo-vocabularies",
-    # "pytest-oarepo",
+    "pytest-oarepo",
+    "oarepo-rdm>=1.0.0.dev4",
 ]
 oarepo14 = [
     "oarepo[rdm,s3]>=14.0.0dev0,<15.0.0",
@@ -36,8 +36,13 @@ oarepo_communities_records_ui_theme = "oarepo_communities.ui.oarepo_communities.
 [project.entry-points."invenio_base.api_apps"]
 oarepo_communities = "oarepo_communities.ext:OARepoCommunities"
 
-[project.entry-points."invenio_base.api_blueprints"]
-oarepo_communities = "oarepo_communities.views.api:create_oarepo_communities"
+# [project.entry-points."invenio_base.blueprints"]
+# oarepo_communities = "oarepo_communities.views.app:create_app_blueprint"
+# oarepo_communities_components = "oarepo_communities.ui.communities_components:create_blueprint"
+#oarepo_communities_ui = "oarepo_communities.ui.oarepo_communities:create_blueprint"
+
+# [project.entry-points."invenio_base.api_blueprints"]
+# oarepo_communities = "oarepo_communities.views.api:create_oarepo_communities"
 
 [project.entry-points."invenio_base.api_finalize_app"]
 oarepo_communities = "oarepo_communities.ext:api_finalize_app"
@@ -45,17 +50,10 @@ oarepo_communities = "oarepo_communities.ext:api_finalize_app"
 [project.entry-points."invenio_base.apps"]
 oarepo_communities = "oarepo_communities.ext:OARepoCommunities"
 
-[project.entry-points."invenio_base.blueprints"]
-oarepo_communities = "oarepo_communities.views.app:create_app_blueprint"
-oarepo_communities_components = "oarepo_communities.ui.communities_components:create_blueprint"
-oarepo_communities_ui = "oarepo_communities.ui.oarepo_communities:create_blueprint"
+
 
 [project.entry-points."invenio_base.finalize_app"]
 oarepo_communities = "oarepo_communities.ext:finalize_app"
-oarepo_communities_entity_resolver = "oarepo_communities.views.api:register_community_role_entity_resolver_finalizer"
-
-[project.entry-points."invenio_base.api_finalize_app"]
-oarepo_communities_entity_resolver = "oarepo_communities.views.api:register_community_role_entity_resolver_finalizer"
 
 [project.entry-points."invenio_i18n.translations"]
 oarepo_communities_messages = "oarepo_communities.i18n"

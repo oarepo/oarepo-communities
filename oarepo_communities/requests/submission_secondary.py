@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 import marshmallow as ma
+from invenio_communities.communities.records.api import Community
 from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_i18n import lazy_gettext as _
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
@@ -21,7 +22,6 @@ from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
 from oarepo_requests.utils import (
     classproperty,
 )
-from tests.conftest import Community
 
 from ..errors import (
     CommunityAlreadyIncludedError,
@@ -44,7 +44,6 @@ if TYPE_CHECKING:
     from invenio_db.uow import UnitOfWork
     from invenio_records_resources.records import Record
     from invenio_requests.customizations.actions import RequestAction
-    from oarepo_requests.typing import EntityReference
 
 
 from typing import TYPE_CHECKING, Any, override
@@ -159,9 +158,9 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
         self,
         identity: Identity,
         data: dict,
-        receiver: EntityReference,
+        receiver: dict[str, str],
         topic: Record,
-        creator: EntityReference,
+        creator: dict[str, str],
         *args: Any,
         **kwargs: Any,
     ) -> None:

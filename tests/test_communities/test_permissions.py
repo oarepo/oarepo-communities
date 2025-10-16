@@ -12,6 +12,7 @@ import pytest
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
+from invenio_records_resources.services.errors import PermissionDeniedError
 from oarepo_runtime.typing import record_from_result
 from pytest_oarepo.communities.functions import invite, set_community_workflow
 
@@ -92,9 +93,6 @@ def test_default_community_workflow_changed(
     request_should_be_forbidden = owner_client.post(f"/thesis/{record5['id']}/draft/requests/publish_draft")
     assert request_should_still_work.status_code == 201
     assert request_should_be_forbidden.status_code == 403
-
-
-from invenio_records_resources.services.errors import PermissionDeniedError
 
 
 def test_can_possibly_create_in_community(
