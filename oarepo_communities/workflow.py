@@ -68,4 +68,4 @@ def get_workflow_from_community_custom_fields(custom_fields: dict) -> Workflow:
         "workflow",
         current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"],
     )
-    return current_oarepo_workflows.get_workflow(workflow_id)
+    return current_oarepo_workflows.workflow_by_code[workflow_id]

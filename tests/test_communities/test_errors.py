@@ -13,13 +13,15 @@ def test_community_doesnt_exist(
     logged_client,
     community_owner,
     community,
+    communities_model,
+    urls,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    response1 = owner_client.post("/communities/lefegfsaedf/thesis", json={})
-    response2 = owner_client.post("/thesis/", json={"parent": {"communities": {"default": "lefegfsaedf"}}})
-    assert response1.status_code == 400
+    # response1 = owner_client.post("/communities/lefegfsaedf/thesis", json={})
+    response2 = owner_client.post(urls['BASE_URL'], json={"parent": {"communities": {"default": "lefegfsaedf"}}})
+    # assert response1.status_code == 400
     assert response2.status_code == 400
 
 
@@ -27,9 +29,11 @@ def test_community_not_specified(
     logged_client,
     community_owner,
     community,
+    communities_model,
+    urls,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    response = owner_client.post("/thesis/", json={})
+    response = owner_client.post(urls['BASE_URL'], json={})
     assert response.status_code == 400

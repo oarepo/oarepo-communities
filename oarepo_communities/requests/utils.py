@@ -125,12 +125,40 @@ def on_request_creator[T: Callable](msg: LazyString) -> Callable[[T], T]:
 def add_record_to_community(
     record: Record,
     community: Community,
-    request: Request,
+    request: Request | None,
     uow: UnitOfWork,
     default: bool = False,
 ) -> None:
     """Add record to community, ensuring the parent is also in the community."""
     record.parent.communities.add(community, request=request, default=default)
+
+    service = current_runtime.get_record_service_for_record(record)
+
+    uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
+    uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
+
+def change_primary_community(
+    record: Record,
+    community: Community,
+    request: Request,
+    uow: UnitOfWork,
+) -> None:
+    """Add record to community, ensuring the parent is also in the community."""
+    record.parent.communities.remove(record.parent.communities.default)
+    record.parent.communities.add(community, request=request, default=True)
+
+    service = current_runtime.get_record_service_for_record(record)
+
+    uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
+    uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
+
+def remove_record_from_community(
+    record: Record,
+    community: Community,
+    uow: UnitOfWork,
+) -> None:
+    """Add record to community, ensuring the parent is also in the community."""
+    record.parent.communities.remove(community)
 
     service = current_runtime.get_record_service_for_record(record)
 

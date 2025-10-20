@@ -28,6 +28,7 @@ from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
 from oarepo_requests.utils import classproperty
 from oarepo_runtime import current_runtime
 
+from .utils import remove_record_from_community
 from ..errors import CommunityNotIncludedError, PrimaryCommunityError
 
 if TYPE_CHECKING:
@@ -54,12 +55,7 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
         record = cast("RecordWithParent", state.topic)
         community = self.request["payload"]["community"]
 
-        record.parent.communities.remove(community)
-
-        service = current_runtime.get_record_service_for_record(record)
-
-        uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
-        uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
+        remove_record_from_community(record, community, uow)
 
         if kwargs.get("send_notification", True):
             uow.register(

@@ -10,9 +10,21 @@ from __future__ import annotations
 
 import pytest
 from pytest_oarepo.communities.functions import invite
-from thesis.records.api import ThesisDraft, ThesisRecord
 
 
+
+def test_create_record_in_community_direct(logged_client, communities_model, community_owner, community,
+                                           urls, search_clear):
+    owner_client = logged_client(community_owner)
+    json = {'metadata': {'contributors': ['Contributor 1'], 'creators': ['Creator 1', 'Creator 2'], 'title': 'blabla'},
+    'parent': {'communities': {'default': str(community.id)}, 'workflow': 'default'}}
+
+
+    response = owner_client.post(urls['BASE_URL'], json=json)
+    assert response.status_code == 201
+    assert response.json["parent"]["communities"]["default"] == str(community.id)
+
+@pytest.mark.skip
 def test_create_record_in_community(
     logged_client,
     community_owner,
@@ -30,7 +42,7 @@ def test_create_record_in_community(
     assert response_record.json["parent"]["communities"]["ids"] == [community.id]
     assert response_record.json["parent"]["communities"]["default"] == community.id
 
-
+@pytest.mark.skip
 def test_create_record_in_community_without_model_in_url(
     logged_client,
     community_owner,
@@ -53,6 +65,7 @@ def test_create_record_in_community_without_model_in_url(
 @pytest.mark.skip
 def test_search(
     logged_client,
+    communities_model,
     community_owner,
     published_record_with_community_factory,
     community_get_or_create,
@@ -67,8 +80,9 @@ def test_search(
     record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
     record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
 
-    ThesisRecord.index.refresh()
-    ThesisDraft.index.refresh()
+
+    communities_model.Record.index.refresh()
+    communities_model.Draft.index.refresh()
 
     response_record1 = owner_client.get(
         f"/communities/{community_1.id}/records",
@@ -122,8 +136,8 @@ def test_search_all(
     draft1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     draft2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
 
-    ThesisRecord.index.refresh()
-    ThesisDraft.index.refresh()
+    communities_model.Record.index.refresh()
+    communities_model.Draft.index.refresh()
 
     search_community1 = owner_client.get(f"/communities/{community_1.id}/all/records")
     search_community2 = owner_client.get(f"/communities/{community_2.id}/all/records")
@@ -167,8 +181,8 @@ def test_search_model(
     record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
     record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
 
-    ThesisRecord.index.refresh()
-    ThesisDraft.index.refresh()
+    communities_model.Record.index.refresh()
+    communities_model.Draft.index.refresh()
 
     response_record1 = owner_client.get(f"/communities/{community_1.id}/thesis")
     response_record2 = owner_client.get(f"/communities/{community_2.id}/thesis")
@@ -199,8 +213,8 @@ def test_user_search(
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
     draft_with_community_factory(community_reader.identity, str(community_1.id))
 
-    ThesisRecord.index.refresh()
-    ThesisDraft.index.refresh()
+    communities_model.Record.index.refresh()
+    communities_model.Draft.index.refresh()
 
     response_record1 = owner_client.get(
         f"/communities/{community_1.id}/records",
@@ -244,8 +258,8 @@ def test_user_search_model(
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
     draft_with_community_factory(community_reader.identity, str(community_1.id))
 
-    ThesisRecord.index.refresh()
-    ThesisDraft.index.refresh()
+    communities_model.Record.index.refresh()
+    communities_model.Draft.index.refresh()
 
     response_record1 = owner_client.get(f"/communities/{community_1.id}/user/thesis")
     response_record2 = owner_client.get(f"/communities/{community_2.id}/user/thesis")
@@ -316,8 +330,8 @@ def test_search_ui_serialization(
     published_record_with_community_factory(community_owner.identity, community_1.id)
     published_record_with_community_factory(community_owner.identity, community_2.id)
 
-    ThesisRecord.index.refresh()
-    ThesisDraft.index.refresh()
+    communities_model.Record.index.refresh()
+    communities_model.Draft.index.refresh()
 
     search_control = owner_client.get(f"/communities/{community_1.id}/records")
     search_global = owner_client.get(

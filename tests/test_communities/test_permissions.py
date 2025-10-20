@@ -13,6 +13,7 @@ from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.errors import PermissionDeniedError
+from oarepo_rdm.oai.percolator import init_percolators
 from oarepo_runtime.typing import record_from_result
 from pytest_oarepo.communities.functions import invite, set_community_workflow
 
@@ -25,61 +26,58 @@ def test_disabled_endpoints(
     default_record_with_workflow_json,
     community_get_or_create,
     record_service,
+    urls,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
     # create should work only through community
-    create = owner_client.post("/thesis/", json=default_record_with_workflow_json)
+    create = owner_client.post(urls['BASE_URL'], json=default_record_with_workflow_json)
     assert create.status_code == 400
     community_1 = community_get_or_create(community_owner, "comm1")
-    draft = draft_with_community_factory(community_owner.identity, community_1.id)
-    published_record = published_record_with_community_factory(community_owner.identity, community_1.id)
-    publish = owner_client.post(f"/thesis/{draft['id']}/draft/actions/publish")
-    delete = owner_client.delete(f"/thesis/{published_record['id']}")
+    draft = draft_with_community_factory(community_owner.identity, str(community_1.id))
+    published_record = published_record_with_community_factory(community_owner.identity, str(community_1.id))
+    publish = owner_client.post(f"{urls['BASE_URL']}/{draft['id']}/draft/actions/publish")
+    delete = owner_client.delete(f"{urls['BASE_URL']}/{published_record['id']}")
     assert publish.status_code == 403
     assert delete.status_code == 403
-
-
-@pytest.fixture
-def service_config():
-    from thesis.services.records.config import ThesisServiceConfig
-
-    return ThesisServiceConfig
 
 
 def test_default_community_workflow_changed(
     logged_client,
     community_owner,
     users,
-    service_config,
     community_get_or_create,
     draft_with_community_factory,
+    create_request_on_draft,
     link2testclient,
+    get_action_url,
+    urls,
     search_clear,
 ):
+    init_percolators()
     community_reader = users[0]
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
-    invite(community_reader, community_1.id, "reader")
-    invite(community_reader, community_2.id, "reader")
+    invite(community_reader, str(community_1.id), "reader")
+    invite(community_reader, str(community_2.id), "reader")
 
-    record1 = draft_with_community_factory(community_owner.identity, community_1.id)
-    record2 = draft_with_community_factory(community_owner.identity, community_2.id)
-    record4 = draft_with_community_factory(community_reader.identity, community_1.id)
+    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
+    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
+    record4 = draft_with_community_factory(community_reader.identity, str(community_1.id))
 
-    request_should_be_allowed = owner_client.post(f"/thesis/{record1['id']}/draft/requests/publish_draft")
-    submit = owner_client.post(link2testclient(request_should_be_allowed.json["links"]["actions"]["submit"]))
+
+    request_should_be_allowed = create_request_on_draft(community_owner.identity, record1["id"], "publish_draft")
+    submit = owner_client.post(link2testclient(request_should_be_allowed.links["actions"]["submit"]))
     accept_should_be_denied = reader_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
-    owner_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
+    owner_client.post(link2testclient(submit.json["links"]["actions"]["accept"])) # TODO: link should not show if permission denied
     assert accept_should_be_denied.status_code == 403
-    assert request_should_be_allowed.status_code == 201
 
     # old permissions should not allow this for reader, but reader is in editors so it should be fine with new ones
     update_draft = reader_client.put(
-        f"/thesis/{record4['id']}/draft",
+        f"{urls['BASE_URL']}/{record4['id']}/draft",
         json=record4 | {"metadata": {"title": "should do"}},
     )
     assert update_draft.status_code == 200
@@ -88,18 +86,16 @@ def test_default_community_workflow_changed(
     set_community_workflow(str(community_1.id), "no")
     record = Community.get_record(str(community_1.id))
     assert record.custom_fields["workflow"] == "no"
-    request_should_still_work = owner_client.post(f"/thesis/{record2['id']}/draft/requests/publish_draft")
-    record5 = draft_with_community_factory(community_owner.identity, community_1.id)
-    request_should_be_forbidden = owner_client.post(f"/thesis/{record5['id']}/draft/requests/publish_draft")
-    assert request_should_still_work.status_code == 201
-    assert request_should_be_forbidden.status_code == 403
+    create_request_on_draft(community_owner.identity, record2["id"], "publish_draft")
+    record5 = draft_with_community_factory(community_owner.identity, str(community_1.id))
+    with pytest.raises(PermissionDeniedError):
+        create_request_on_draft(community_owner.identity, record5["id"], "publish_draft")
 
 
 def test_can_possibly_create_in_community(
     community_owner,
     users,
     community_get_or_create,
-    service_config,
     record_service,
     search_clear,
 ):
@@ -108,7 +104,7 @@ def test_can_possibly_create_in_community(
     community_curator = users[0]
     rando_user = users[1]
     community_1 = community_get_or_create(community_owner, "comm1")
-    invite(community_curator, community_1.id, "curator")
+    invite(community_curator, str(community_1.id), "curator")
     record_service.require_permission(community_owner.identity, "view_deposit_page")
     with pytest.raises(PermissionDeniedError):
         record_service.require_permission(community_curator.identity, "view_deposit_page")
@@ -116,13 +112,9 @@ def test_can_possibly_create_in_community(
         record_service.require_permission(rando_user.identity, "view_deposit_page")
 
     community_2 = community_get_or_create(community_owner, "comm2")
-    current_communities.service.update(
-        community_owner.identity,
-        id_=community_2.id,
-        data=community_2.data | {"custom_fields": {"workflow": "custom"}},
-    )
-    invite(community_curator, community_2.id, "curator")
-    community2read = current_communities.service.read(community_curator.identity, community_2.id)
+    set_community_workflow(str(community_2.id), "custom")
+    invite(community_curator, str(community_2.id), "curator")
+    community2read = current_communities.service.read(community_curator.identity, str(community_2.id))
     assert community2read.data["custom_fields"]["workflow"] == "custom"
     Community.index.refresh()
 
@@ -137,11 +129,11 @@ def _record_owners_in_record_community_test(
     community_owner,
     users,
     logged_client,
-    community_inclusion_service,
     draft_with_community_factory,
     record_service,
     community_get_or_create,
     workflow,
+    urls,
     results,
 ) -> None:
     # tries to read record when user in record's primary community, in noth primary and secondary, in secondary and
@@ -155,43 +147,31 @@ def _record_owners_in_record_community_test(
 
     record = draft_with_community_factory(
         community_owner.identity,
-        community_1.id,
+        str(community_1.id),
         custom_workflow=workflow,
     )
     record_id = record["id"]
 
-    read_com1 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
+    read_com1 = owner_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")
 
-    community_inclusion_service.include(
-        record_from_result(record_service.read_draft(system_identity, record_id)),
-        community_2.id,
-        record_service=record_service,
-        default=False,
-    )
+    record = record_from_result(record_service.read_draft(system_identity, record_id))
+    record.parent.communities.add(community_2, default=False)
+    record.parent.commit()
 
-    read_com2 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
+    read_com2 = owner_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")
 
-    community_inclusion_service.include(
-        record_from_result(record_service.read_draft(system_identity, record_id)),
-        community_3.id,
-        record_service=record_service,
-        default=True,
-    )
-    community_inclusion_service.remove(
-        record_from_result(record_service.read_draft(system_identity, record_id)),
-        community_1.id,
-        record_service=record_service,
-    )
+    record = record_from_result(record_service.read_draft(system_identity, record_id))
+    record.parent.communities.add(community_3, default=False)
+    record.parent.communities.remove(community_1)
+    record.parent.commit()
 
-    read_com3 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
+    read_com3 = owner_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")
 
-    community_inclusion_service.remove(
-        record_from_result(record_service.read_draft(system_identity, record_id)),
-        community_2.id,
-        record_service=record_service,
-    )
+    record = record_from_result(record_service.read_draft(system_identity, record_id))
+    record.parent.communities.remove(community_2)
+    record.parent.commit()
 
-    read_com4 = owner_client.get(f"/thesis/{record_id}/draft?expand=true")
+    read_com4 = owner_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")
 
     assert read_com1.status_code == results[0]
     assert read_com2.status_code == results[1]
@@ -201,9 +181,9 @@ def _record_owners_in_record_community_test(
 
 def test_record_owners_in_record_community_needs(
     community_owner,
+    urls,
     users,
     logged_client,
-    community_inclusion_service,
     community_get_or_create,
     draft_with_community_factory,
     record_service,
@@ -213,20 +193,20 @@ def test_record_owners_in_record_community_needs(
         community_owner,
         users,
         logged_client,
-        community_inclusion_service,
         draft_with_community_factory,
         record_service,
         community_get_or_create,
         workflow="record_owner_in_record_community",
+        urls=urls,
         results=(200, 200, 200, 403),
     )
 
 
 def test_record_owners_in_default_record_community_needs(
     community_owner,
+    urls,
     users,
     logged_client,
-    community_inclusion_service,
     community_get_or_create,
     draft_with_community_factory,
     record_service,
@@ -236,10 +216,10 @@ def test_record_owners_in_default_record_community_needs(
         community_owner,
         users,
         logged_client,
-        community_inclusion_service,
         draft_with_community_factory,
         record_service,
         community_get_or_create,
         workflow="record_owner_in_default_record_community",
+        urls=urls,
         results=(200, 200, 403, 403),
     )
