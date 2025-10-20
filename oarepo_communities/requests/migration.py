@@ -51,7 +51,7 @@ from .utils import (
     on_request_creator,
     on_request_submitted,
     on_request_submitted_creator,
-    on_request_submitted_receiver,
+    on_request_submitted_receiver, change_primary_community,
 )
 
 if TYPE_CHECKING:
@@ -119,13 +119,7 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
         if not is_access_restriction_valid(record, community):
             raise InvalidAccessRestrictions("Invalid access restrictions between target community and record.")
 
-        record.parent.communities.remove(record.parent.communities.default)
-        record.parent.communities.add(community, request=self.request, default=True)
-
-        service = current_runtime.get_record_service_for_record(record)
-
-        uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
-        uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
+        change_primary_community(record, community, self.request, uow)
 
         if kwargs.get("send_notification", True):
             uow.register(

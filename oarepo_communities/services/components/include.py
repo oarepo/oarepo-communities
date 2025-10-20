@@ -10,9 +10,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_records_resources.services.records.components.base import ServiceComponent
+from invenio_records_resources.services.uow import RecordCommitOp
+from invenio_db import db
 from oarepo_communities.errors import MissingDefaultCommunityError
 from ..permissions.generators import convert_community_ids_to_uuid
+from ...requests.utils import add_record_to_community
 
 if TYPE_CHECKING:
     from typing import Any
@@ -21,7 +25,6 @@ if TYPE_CHECKING:
     from invenio_drafts_resources.records import Record
 
 from invenio_drafts_resources.services.records.components.base import BaseRecordFilesComponent
-
 
 class CommunityInclusionComponent(ServiceComponent):
     affects = [BaseRecordFilesComponent]

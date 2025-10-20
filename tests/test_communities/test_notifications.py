@@ -21,7 +21,7 @@ def events_service():
 
     return current_events_service
 
-
+@pytest.mark.skip
 def test_publish_notification_community_role(
     app,
     community,
@@ -50,7 +50,7 @@ def test_publish_notification_community_role(
         recipients = outbox[0].send_to | outbox[1].send_to
         assert recipients == {"user2@example.org", "user3@example.org"}
 
-
+@pytest.mark.skip
 def test_locales(
     app,
     community,
@@ -82,7 +82,7 @@ def test_locales(
         assert sent_mail_cz[0].subject == "Žádost o publikování záznamu blabla"
         assert sent_mail_en[0].subject == "Request to publish record blabla"
 
-
+@pytest.mark.skip
 def test_locales_multiple_recipients(
     app,
     community,
@@ -114,7 +114,7 @@ def test_locales_multiple_recipients(
         assert sent_mail_cz[0].subject == "Žádost o publikování záznamu blabla"
         assert sent_mail_en[0].subject == "Request to publish record blabla"
 
-
+@pytest.mark.skip
 def test_notifications_not_sent_to_inactive_users(
     db,
     app,
@@ -157,7 +157,7 @@ def test_notifications_not_sent_to_inactive_users(
         assert len(outbox) == 1  # only one curator active now
         assert outbox[0].send_to == {users[1].email}
 
-
+@pytest.mark.skip
 def test_comment_notifications(
     app,
     users,

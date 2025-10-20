@@ -9,24 +9,29 @@
 from __future__ import annotations
 
 from invenio_communities.communities.records.api import Community
+from oarepo_rdm.oai.percolator import init_percolators
+from invenio_communities.proxies import current_communities
 
 
 def test_change_workflow(
     logged_client,
+    communities_model,
     community_owner,
     community,
     search_clear,
 ):
+    init_percolators() # TODO: automate?
     owner_client = logged_client(community_owner)
+    community_item = current_communities.service.read(community_owner.identity, community.id)
 
     result = owner_client.put(
         f"/communities/{community.id}",
-        json=community.data | {"custom_fields": {"workflow": "doesnotexist"}},
+        json= community_item.data | {"custom_fields": {"workflow": "doesnotexist"}},
     )
     assert result.status_code == 400
     result = owner_client.put(
         f"/communities/{community.id}",
-        json=community.data | {"custom_fields": {"workflow": "custom"}},
+        json= community_item.data | {"custom_fields": {"workflow": "custom"}},
     )
     assert result.status_code == 200
     community_id = str(community.id)

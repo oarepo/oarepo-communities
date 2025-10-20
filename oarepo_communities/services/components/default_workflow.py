@@ -34,5 +34,5 @@ class CommunityDefaultWorkflowComponent(WorkflowSetupComponent):
             raise ValueError("data is required when creating a record")  # pragma: no cover
 
         if not data.get("parent", {}).get("workflow"):
-            workflow_id = current_oarepo_communities.get_community_default_workflow(data=data)
-            data.setdefault("parent", {})["workflow"] = workflow_id
+            workflow = current_oarepo_communities.get_community_default_workflow(data=data)
+            data.setdefault("parent", {})["workflow"] = workflow.code

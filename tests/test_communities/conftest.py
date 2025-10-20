@@ -52,6 +52,10 @@ from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
 
+import logging
+from logging.handlers import RotatingFileHandler
+
+
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
     "pytest_oarepo.communities.records",
@@ -133,7 +137,7 @@ def location(location):
 
 @pytest.fixture
 def urls():
-    return {"BASE_URL": "/communities-test", "BASE_URL_REQUESTS": "/requests/"}
+    return {"BASE_URL": "/communities-test", "BASE_URL_REQUESTS": "/requests"}
 
 @pytest.fixture(scope="session")
 def model_types():

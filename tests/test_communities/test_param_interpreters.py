@@ -29,9 +29,9 @@ def test_community_role_param_interpreter(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
     community_3 = community_get_or_create(community_curator, "comm3")
-    invite(community_reader, community_1.id, "reader")
-    invite(community_reader, community_2.id, "reader")
-    invite(community_reader, community_3.id, "reader")
+    invite(community_reader, str(community_1.id), "reader")
+    invite(community_reader, str(community_2.id), "reader")
+    invite(community_reader, str(community_3.id), "reader")
 
     record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
