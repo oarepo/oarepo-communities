@@ -60,6 +60,7 @@ def test_read(app, community):
     r = result.to_dict()
     _check_result(r, community_id)
 
+
 @pytest.mark.skip
 def test_expand_community_role(
     logged_client,

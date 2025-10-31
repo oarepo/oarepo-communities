@@ -17,8 +17,7 @@ from invenio_communities.communities.records.api import Community
 from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_i18n import lazy_gettext as _
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
-from oarepo_requests.types import ModelRefTypes
-from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
+from oarepo_requests.types.generic import NonDuplicableOARepoRecordRequestType
 from oarepo_requests.utils import (
     classproperty,
 )
@@ -76,12 +75,11 @@ class CommunitySubmissionAcceptAction(OARepoAcceptAction):
         add_record_to_community(cast("RecordWithParent", topic), community, self.request, uow)
 
 
-class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRequestType):
+class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestType):
     """Review request for submitting a record to a community."""
 
     type_id = "secondary_community_submission"
     name = _("Secondary community submission")
-    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)  # type: ignore[assignment]
     editable = False
 
     @classproperty

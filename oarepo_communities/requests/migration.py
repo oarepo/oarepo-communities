@@ -17,7 +17,6 @@ from flask import g
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_drafts_resources.records.api import Record as RecordWithParent
-from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_i18n import lazy_gettext as _
 from invenio_notifications.services.uow import NotificationOp
 from invenio_rdm_records.notifications.builders import (
@@ -25,17 +24,14 @@ from invenio_rdm_records.notifications.builders import (
 )
 from invenio_rdm_records.requests.community_inclusion import is_access_restriction_valid
 from invenio_rdm_records.services.errors import InvalidAccessRestrictions
-from invenio_records_resources.services.uow import RecordIndexOp
 from invenio_requests.customizations.actions import RequestAction
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
 from oarepo_requests.proxies import current_requests_service
-from oarepo_requests.types import ModelRefTypes
-from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
+from oarepo_requests.types.generic import NonDuplicableOARepoRecordRequestType
 from oarepo_requests.utils import (
     classproperty,
     open_request_exists,
 )
-from oarepo_runtime import current_runtime
 
 from oarepo_communities.ui.allowed_communities import AllowedCommunitiesComponent
 from oarepo_communities.utils import community_to_dict
@@ -45,13 +41,13 @@ from ..errors import (
     TargetCommunityNotProvidedError,
 )
 from .utils import (
-    add_record_to_community,
     auto_approved_message,
+    change_primary_community,
     no_request_message,
     on_request_creator,
     on_request_submitted,
     on_request_submitted_creator,
-    on_request_submitted_receiver, change_primary_community,
+    on_request_submitted_receiver,
 )
 
 if TYPE_CHECKING:
@@ -81,13 +77,12 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
         **kwargs: Any,
     ) -> None:
         request = cast("Request", self.request)
-        created_by = request.created_by.resolve()
         request_item = current_requests_service.create(
             system_identity,
             data={"payload": request.get("payload", {})},
             request_type=ConfirmCommunityMigrationRequestType.type_id,
             topic=state.topic,
-            creator=ResolverRegistry.reference_entity(created_by),
+            creator=ResolverRegistry.reference_entity(state.created_by),
             uow=uow,
             **kwargs,
         )
@@ -129,7 +124,7 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
             )
 
 
-class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
+class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType):
     """Request which is used to start migrating record from one primary community to another one.
 
     The recipient of this request type should be the community role of the current
@@ -146,7 +141,6 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
     description = _("Move record to another primary community.")  # type: ignore[reportAssignmentType]
 
     topic_can_be_none = False
-    allowed_topic_ref_types = ModelRefTypes(published=True, draft=False)  # type: ignore[assignment]
     payload_schema: Mapping[str, ma.fields.Field] | None = {
         "community": ma.fields.String(),
     }
@@ -271,7 +265,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
             raise CommunityAlreadyIncludedError("Already inside this primary community.")
 
 
-class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
+class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType):
     """Performs the primary community migration.
 
     The recipient of this request type should be the community owner of the new community.
@@ -279,8 +273,6 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRequestType):
 
     type_id = "confirm_community_migration"
     name = _("confirm Community migration")
-
-    allowed_topic_ref_types = ModelRefTypes(published=True, draft=False)  # type: ignore[assignment]
 
     payload_schema: Mapping[str, ma.fields.Field] | None = {
         "community": ma.fields.String(),

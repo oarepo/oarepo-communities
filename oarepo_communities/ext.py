@@ -12,11 +12,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from deepmerge import conservative_merger
 from flask_principal import identity_loaded
 
 import oarepo_communities.cli  # noqa - imported to register CLI commands
-from .resolvers.communities import CommunityRoleResolver
 
+from .resolvers.communities import CommunityRoleResolver
 from .services.community_role.config import CommunityRoleServiceConfig
 from .services.community_role.service import CommunityRoleService
 from .utils import load_community_user_needs
@@ -64,8 +65,10 @@ class OARepoCommunities:
             **app.config.get("COMMUNITIES_ROUTES", {}),
         }
 
-        # TODO: notifications config
-
+        app_registered_event_types = app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
+        app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
+            app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
+        )
         app.config.setdefault("DATASTREAMS_TRANSFORMERS", {}).update(config.DATASTREAMS_TRANSFORMERS)
 
         app.config.setdefault(

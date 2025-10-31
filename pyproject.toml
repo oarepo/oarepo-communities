@@ -61,6 +61,9 @@ oarepo_communities_messages = "oarepo_communities.i18n"
 [project.entry-points."invenio_requests.entity_resolvers"]
 community_role = "oarepo_communities.resolvers.communities:CommunityRoleResolver"
 
+[project.entry-points."invenio_notifications.entity_resolvers"]
+community_role = "oarepo_communities.notifications:community_role_notification_resolver"
+
 [project.entry-points."invenio_requests.types"]
 confirm-community-migration = "oarepo_communities.requests.migration:ConfirmCommunityMigrationRequestType"
 initiate-community-migration = "oarepo_communities.requests.migration:InitiateCommunityMigrationRequestType"

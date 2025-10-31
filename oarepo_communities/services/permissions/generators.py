@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import abc
 import uuid
-from functools import reduce
+from functools import reduce, wraps
 from typing import TYPE_CHECKING, NamedTuple, Protocol, cast, override
 
 from flask_principal import Need
@@ -22,8 +22,8 @@ from invenio_communities.generators import CommunityRoleNeed
 from invenio_communities.proxies import current_roles
 from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
-from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
+from oarepo_runtime.services.generators import Generator
 from oarepo_workflows.errors import MissingWorkflowError
 from oarepo_workflows.requests import RecipientGeneratorMixin
 from oarepo_workflows.services.permissions import FromRecordWorkflow
@@ -36,14 +36,27 @@ from oarepo_communities.errors import (
 from oarepo_communities.proxies import current_oarepo_communities
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
     from typing import Any
 
     from flask_principal import Identity
     from invenio_communities.generators import _Need as CommunityRoleNeedType
-    from invenio_records_resources.records import Record
+    from invenio_drafts_resources.records import Record
     from invenio_requests.customizations import RequestType
     from oarepo_workflows import Workflow
+
+
+def require_draft_record(fn: Callable) -> Callable:
+    """Ensure that the record is a draft."""
+
+    @wraps(fn)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        if "record" in kwargs and not isinstance(kwargs["record"], RecordWithParent):
+            raise TypeError("Record in community must have a parent! Did you forget to use drafts?")
+        return fn(*args, **kwargs)
+
+    return wrapper
+
 
 # TODO: (invenio) changing identity ids from str to int is kind of weird? or something else happened?
 class UserInCommunityNeed(NamedTuple):
@@ -97,6 +110,7 @@ class CommunityWorkflowPermission(FromRecordWorkflow):
     """
 
     @override
+    @require_draft_record
     def _get_workflow(self, record: Record | None = None, **context: Any) -> Workflow:
         try:
             return super()._get_workflow(record=record, **context)
@@ -216,7 +230,7 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
         # if called on community, returns the required roles bound to the community id
         if record and isinstance(record, Community):
             for role in self.roles(**kwargs):
-                _needs.add(CommunityRoleNeed(str(record.id), role))
+                _needs.add(CommunityRoleNeed(str(record.id), role))  # type: ignore[reportArgumentType]
             return list(_needs)
 
         community_ids = self._get_record_communities(record) if record is not None else self._get_data_communities(data)
@@ -225,7 +239,8 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
         # provides any of them
         for c in community_ids:
             for role in self.roles(**kwargs):
-                _needs.add(CommunityRoleNeed(c, role))
+                # "invenio_communities.generators.Need" is not assignable to "flask_principal.Need"
+                _needs.add(CommunityRoleNeed(c, role))  # type: ignore[reportArgumentType]
         return list(_needs)
 
     @abc.abstractmethod
@@ -279,6 +294,7 @@ class DefaultCommunityRole(DefaultCommunityRoleMixin, RecipientGeneratorMixin, O
         return [self._role]
 
     @override
+    @require_draft_record
     def reference_receivers(
         self,
         record: Record | None = None,
@@ -359,11 +375,12 @@ class RecordOwnerInRecordCommunityBase(CommunityRoleMixinProtocol, Generator):
     default_or_ids: str
 
     @override
-    def needs(self, record: Record | None = None, data: dict | None = None, **kwargs: Any) -> list[Need]:
+    @require_draft_record
+    def needs(self, *, record: Record, data: dict | None = None, **kwargs: Any) -> list[Need]:
         record_communities = set(self._get_record_communities(record, **kwargs))
         return cast("list[Need]", self._needs(record_communities, record=record))
 
-    def _needs(self, record_communities: set[str], record: Record | None = None) -> list[UserInCommunityNeed]:
+    def _needs(self, record_communities: set[str], record: Record) -> list[UserInCommunityNeed]:
         needs: list[UserInCommunityNeed] = []
         owner_ids: list[int] = []
 
@@ -376,9 +393,7 @@ class RecordOwnerInRecordCommunityBase(CommunityRoleMixinProtocol, Generator):
             owner_ids = [owner.owner_id for owner in owners]
 
         for owner_id in owner_ids:
-            needs += [
-                UserInCommunityNeed.from_user_community(owner_id, community) for community in record_communities
-            ]
+            needs += [UserInCommunityNeed.from_user_community(owner_id, community) for community in record_communities]
         return needs
 
     @override

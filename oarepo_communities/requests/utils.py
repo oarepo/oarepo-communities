@@ -137,6 +137,7 @@ def add_record_to_community(
     uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
     uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
 
+
 def change_primary_community(
     record: Record,
     community: Community,
@@ -151,6 +152,7 @@ def change_primary_community(
 
     uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
     uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
+
 
 def remove_record_from_community(
     record: Record,

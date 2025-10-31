@@ -31,7 +31,7 @@ def test_disabled_endpoints(
 ):
     owner_client = logged_client(community_owner)
     # create should work only through community
-    create = owner_client.post(urls['BASE_URL'], json=default_record_with_workflow_json)
+    create = owner_client.post(urls["BASE_URL"], json=default_record_with_workflow_json)
     assert create.status_code == 400
     community_1 = community_get_or_create(community_owner, "comm1")
     draft = draft_with_community_factory(community_owner.identity, str(community_1.id))
@@ -68,12 +68,12 @@ def test_default_community_workflow_changed(
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
     record4 = draft_with_community_factory(community_reader.identity, str(community_1.id))
 
-
     request_should_be_allowed = create_request_on_draft(community_owner.identity, record1["id"], "publish_draft")
     submit = owner_client.post(link2testclient(request_should_be_allowed.links["actions"]["submit"]))
     accept_should_be_denied = reader_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
-    owner_client.post(link2testclient(submit.json["links"]["actions"]["accept"])) # TODO: link should not show if permission denied
     assert accept_should_be_denied.status_code == 403
+
+    owner_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
 
     # old permissions should not allow this for reader, but reader is in editors so it should be fine with new ones
     update_draft = reader_client.put(
@@ -161,8 +161,8 @@ def _record_owners_in_record_community_test(
     read_com2 = owner_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")
 
     record = record_from_result(record_service.read_draft(system_identity, record_id))
-    record.parent.communities.add(community_3, default=False)
     record.parent.communities.remove(community_1)
+    record.parent.communities.add(community_3, default=True)
     record.parent.commit()
 
     read_com3 = owner_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")

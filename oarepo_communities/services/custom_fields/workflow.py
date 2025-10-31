@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, override
 
-from flask import current_app
 from invenio_records_resources.services.custom_fields import KeywordCF
 from marshmallow import ValidationError
 from marshmallow_utils.fields import SanitizedUnicode
