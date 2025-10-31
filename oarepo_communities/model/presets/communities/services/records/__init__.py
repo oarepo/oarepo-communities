@@ -7,6 +7,6 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 #
 
-"""OARepo model presets for communities-related service functionality."""
+"""OARepo model presets for communities-related record service functionality."""
 
 from __future__ import annotations

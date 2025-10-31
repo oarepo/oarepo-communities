@@ -14,22 +14,18 @@ from typing import TYPE_CHECKING, cast, override
 
 import marshmallow as ma
 from invenio_drafts_resources.records import Record as RecordWithParent
-from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_i18n import lazy_gettext as _
 from invenio_notifications.services.uow import NotificationOp
 from invenio_rdm_records.notifications.builders import (
     CommunityInclusionAcceptNotificationBuilder,
 )
-from invenio_records_resources.services.uow import RecordIndexOp
 from invenio_requests.customizations.actions import RequestAction
 from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
-from oarepo_requests.types import ModelRefTypes
-from oarepo_requests.types.generic import NonDuplicableOARepoRequestType
+from oarepo_requests.types.generic import NonDuplicableOARepoRecordRequestType
 from oarepo_requests.utils import classproperty
-from oarepo_runtime import current_runtime
 
-from .utils import remove_record_from_community
 from ..errors import CommunityNotIncludedError, PrimaryCommunityError
+from .utils import remove_record_from_community
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -67,7 +63,7 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
 
 # Request
 #
-class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRequestType):
+class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRecordRequestType):
     """Review request for submitting a record to a community."""
 
     type_id = "remove_secondary_community"
@@ -79,7 +75,6 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRequestType):
 
     creator_can_be_none = False
     topic_can_be_none = False
-    allowed_topic_ref_types = ModelRefTypes(published=True, draft=True)  # type: ignore[assignment]
 
     @classproperty[dict[str, type[RequestAction]]]
     @override

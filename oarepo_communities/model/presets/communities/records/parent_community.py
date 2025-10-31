@@ -6,20 +6,14 @@
 # oarepo-model is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
-"""Preset for creating draft record metadata model.
-
-This module provides a preset that creates a DraftMetadata database model
-for storing draft record information. It includes the DraftMetadataBase
-and ParentRecordMixin to enable proper draft functionality and parent
-record relationships.
-"""
+"""Preset for creating parent record - community relationship metadata model."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, override
+
 from invenio_communities.records.records.models import CommunityRelationMixin
 from invenio_db import db
-
 from oarepo_model.customizations import (
     AddBaseClasses,
     AddClass,
@@ -59,8 +53,4 @@ class ParentCommunityMetadataPreset(Preset):
             "__record_model__",
             dependencies["ParentRecordMetadata"],
         )
-        yield AddBaseClasses(
-            "ParentCommunityMetadata",
-            db.Model,
-            CommunityRelationMixin
-        )
+        yield AddBaseClasses("ParentCommunityMetadata", db.Model, CommunityRelationMixin)

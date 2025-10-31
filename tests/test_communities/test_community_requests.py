@@ -14,6 +14,7 @@ import pytest
 from pytest_oarepo.communities.functions import invite
 from pytest_oarepo.requests.functions import get_request_type
 
+
 def _accept_request(
     receiver_client,
     type,  # noqa: A002
@@ -115,7 +116,7 @@ def test_community_delete(
     link2testclient,
     urls,
     # TODO: delete request reason validation
-    # test_vocabularies, #noqa
+    # test_vocabularies,
     communities_model,
     search_clear,
 ):
@@ -149,7 +150,7 @@ def test_community_delete(
     )  # owner can
     communities_model.Record.index.refresh()
     resp_record = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
-    resp_search = owner_client.get(urls['BASE_URL'])
+    resp_search = owner_client.get(urls["BASE_URL"])
 
     # record was published
     assert resp_record.status_code == 410
@@ -369,6 +370,7 @@ def test_remove_secondary(
             json={"payload": {"community": str(community_2.id)}},
         )
      """
+
 
 @pytest.mark.skip
 def test_community_role_ui_serialization(

@@ -14,19 +14,8 @@ from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES
 from invenio_i18n import lazy_gettext as _
 
 from .cf.workflows import WorkflowCF, lazy_workflow_options
-from .requests.migration import (
-    ConfirmCommunityMigrationRequestType,
-    InitiateCommunityMigrationRequestType,
-)
-from .requests.remove_secondary import RemoveSecondaryCommunityRequestType
-from .requests.submission_secondary import SecondaryCommunitySubmissionRequestType
+from .notifications.generators import CommunityRoleEmailRecipient
 
-REQUESTS_REGISTERED_TYPES = [
-    InitiateCommunityMigrationRequestType(),
-    ConfirmCommunityMigrationRequestType(),
-    RemoveSecondaryCommunityRequestType(),
-    SecondaryCommunitySubmissionRequestType(),
-]
 OAREPO_REQUESTS_DEFAULT_RECEIVER = "oarepo_requests.receiver.default_workflow_receiver_function"
 REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
 
@@ -72,7 +61,7 @@ DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
 
-# TODO: notifications config
+NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}}
 
 
 DATASTREAMS_TRANSFORMERS = {

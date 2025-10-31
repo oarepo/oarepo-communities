@@ -14,13 +14,12 @@ import pytest
 from flask import Blueprint
 from invenio_app.factory import create_api
 from invenio_i18n import lazy_gettext as _
-from invenio_rdm_records.services.generators import RecordOwners, IfRecordDeleted
+from invenio_rdm_records.services.generators import RecordOwners
 from invenio_records_permissions.generators import (
     AnyUser,
     AuthenticatedUser,
     SystemProcess,
 )
-from invenio_requests.customizations import RequestType
 from oarepo_rdm import rdm_minimal_preset
 from oarepo_requests.model.presets.requests import requests_preset
 from oarepo_requests.receiver import default_workflow_receiver_function
@@ -52,10 +51,6 @@ from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
 
-import logging
-from logging.handlers import RotatingFileHandler
-
-
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
     "pytest_oarepo.communities.records",
@@ -69,9 +64,7 @@ pytest_plugins = [
 
 @pytest.fixture(scope="module")
 def app(app):
-
-    """
-    bp = Blueprint("communities_test_ui", __name__)
+    """Bp = Blueprint("communities_test_ui", __name__).
 
     @bp.route("/communities_test/preview/<pid_value>", methods=["GET"])
     def preview(pid_value: str) -> str:
@@ -101,8 +94,6 @@ def app(app):
     def export(pid_value, export_format: str) -> str:
         return "export ok"
     """
-
-
     bp = Blueprint("invenio_app_rdm_communities", __name__)
 
     @bp.route("/invenio_app_rdm_communities/communities_home", methods=["GET"])
@@ -110,7 +101,6 @@ def app(app):
         return "communities_home ok"
 
     app.register_blueprint(bp)
-
 
     bp = Blueprint("community-records", __name__)
 
@@ -120,9 +110,7 @@ def app(app):
 
     app.register_blueprint(bp)
 
-
     return app
-
 
 
 @pytest.fixture(autouse=True)
@@ -138,6 +126,7 @@ def location(location):
 @pytest.fixture
 def urls():
     return {"BASE_URL": "/communities-test", "BASE_URL_REQUESTS": "/requests"}
+
 
 @pytest.fixture(scope="session")
 def model_types():
@@ -176,8 +165,7 @@ def communities_model(model_types):
         types=[model_types],
         metadata_type="Metadata",
         customizations=[],
-        #configuration={"ui_blueprint_name": "communities_test_ui"},
-        configuration={}
+        configuration={},
     )
     model.register()
     return model
@@ -187,12 +175,12 @@ def communities_model(model_types):
 def record_service(communities_model):
     return communities_model.proxies.current_service
 
+
 @pytest.fixture
 def requests_service():
     from oarepo_requests.proxies import current_requests_service
 
     return current_requests_service
-
 
 
 @pytest.fixture
@@ -213,7 +201,6 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
         ),
     )
 
-    # can_read_deleted = (IfRecordDeleted(then_=[UserManager, SystemProcess()], else_=[SameAs("can_read")]),)
     can_read_all_records = (
         RecordOwners(),
         CommunityRole("owner"),
@@ -458,7 +445,7 @@ WORKFLOWS = [
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=NoRequests,
     ),
-   Workflow(
+    Workflow(
         code="curator_publish",
         label=_("For testing assigned param filter."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
@@ -503,7 +490,6 @@ def app_config(app_config):
     }
     app_config["FILES_REST_DEFAULT_STORAGE_CLASS"] = "L"
 
-    app_config["REQUESTS_REGISTERED_TYPES"] = [RequestType()]
     app_config["GLOBAL_SEARCH_MODELS"] = [
         {
             "model_service": "thesis.services.records.service.ThesisService",

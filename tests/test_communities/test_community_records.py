@@ -8,22 +8,22 @@
 #
 from __future__ import annotations
 
-import pytest
-from pytest_oarepo.communities.functions import invite
 
-
-
-def test_create_record_in_community_direct(logged_client, communities_model, community_owner, community,
-                                           urls, search_clear):
+def test_create_record_in_community_direct(
+    logged_client, communities_model, community_owner, community, urls, search_clear
+):
     owner_client = logged_client(community_owner)
-    json = {'metadata': {'contributors': ['Contributor 1'], 'creators': ['Creator 1', 'Creator 2'], 'title': 'blabla'},
-    'parent': {'communities': {'default': str(community.id)}, 'workflow': 'default'}}
+    json = {
+        "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
+        "parent": {"communities": {"default": str(community.id)}, "workflow": "default"},
+    }
 
-
-    response = owner_client.post(urls['BASE_URL'], json=json)
+    response = owner_client.post(urls["BASE_URL"], json=json)
     assert response.status_code == 201
     assert response.json["parent"]["communities"]["default"] == str(community.id)
 
+
+"""
 @pytest.mark.skip
 def test_create_record_in_community(
     logged_client,
@@ -41,6 +41,7 @@ def test_create_record_in_community(
     response_record = owner_client.get(f"{urls['BASE_URL']}/{response.json['id']}/draft")
     assert response_record.json["parent"]["communities"]["ids"] == [community.id]
     assert response_record.json["parent"]["communities"]["default"] == community.id
+
 
 @pytest.mark.skip
 def test_create_record_in_community_without_model_in_url(
@@ -62,6 +63,7 @@ def test_create_record_in_community_without_model_in_url(
     assert response_record.json["parent"]["communities"]["ids"] == [community.id]
     assert response_record.json["parent"]["communities"]["default"] == community.id
 
+
 @pytest.mark.skip
 def test_search(
     logged_client,
@@ -79,7 +81,6 @@ def test_search(
 
     record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
     record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
-
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
@@ -105,6 +106,7 @@ def test_search(
 
     assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+
 
 @pytest.mark.skip
 def test_search_all(
@@ -164,6 +166,7 @@ def test_search_all(
 
 # TODO: tests for search links
 
+
 @pytest.mark.skip
 def test_search_model(
     logged_client,
@@ -192,6 +195,7 @@ def test_search_model(
 
     assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+
 
 @pytest.mark.skip
 def test_user_search(
@@ -237,6 +241,7 @@ def test_user_search(
     assert response_draft1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_draft2.json["hits"]["hits"][0]["id"] == record2["id"]
 
+
 @pytest.mark.skip
 def test_user_search_model(
     logged_client,
@@ -269,6 +274,7 @@ def test_user_search_model(
 
     assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+
 
 @pytest.mark.skip
 def test_search_links(
@@ -312,6 +318,7 @@ def test_search_links(
         search_links["self"]
         == f"{host}api/communities/{community_1.id}/records?has_draft=true&page=1&size=25&sort=newest"
     )
+
 
 @pytest.mark.skip
 def test_search_ui_serialization(
@@ -367,15 +374,4 @@ def test_search_ui_serialization(
     assert "access" in search_user_global.json["hits"]["hits"][0]
     assert "access" in search_user_model.json["hits"]["hits"][0]
 
-
-"""
-# todo published service conceptual rework
-def test_create_published(community_owner, community, search_clear):
-    # todo how is workflow used in published service?
-    from thesis.proxies import current_published_service
-
-    record = current_published_service.create(
-        system_identity, {"parent": {"communities": {"default": community.id}}}
-    )
-    assert record._record.state == "published"
 """
