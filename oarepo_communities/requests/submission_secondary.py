@@ -16,7 +16,7 @@ import marshmallow as ma
 from invenio_communities.communities.records.api import Community
 from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_i18n import lazy_gettext as _
-from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
+from oarepo_requests.actions.generic import OARepoAcceptAction
 from oarepo_requests.types.generic import NonDuplicableOARepoRecordRequestType
 from oarepo_requests.utils import (
     classproperty,
@@ -61,18 +61,16 @@ class CommunitySubmissionAcceptAction(OARepoAcceptAction):
     def apply(
         self,
         identity: Identity,
-        state: RequestActionState,
         uow: UnitOfWork,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         # it seems that the safest way is to just get the community id from the request payload?
-        topic = state.topic
         community_id = self.request.get("payload", {}).get("community", None)
         if not community_id:
             raise TargetCommunityNotProvidedError("Target community not provided.")
         community = Community.get_record(community_id)
-        add_record_to_community(cast("RecordWithParent", topic), community, self.request, uow)
+        add_record_to_community(cast("RecordWithParent", self.topic), community, self.request, uow)
 
 
 class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestType):

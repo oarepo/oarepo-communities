@@ -8,8 +8,6 @@
 #
 from __future__ import annotations
 
-from pytest_oarepo.communities.functions import invite
-
 
 def test_community_role_param_interpreter(
     logged_client,
@@ -20,6 +18,7 @@ def test_community_role_param_interpreter(
     draft_with_community_factory,
     create_request_on_draft,
     submit_request_on_draft,
+    invite,
     search_clear,
 ):
     community_reader = users[0]

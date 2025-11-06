@@ -11,7 +11,6 @@ from __future__ import annotations
 import pytest
 from invenio_access.permissions import system_identity
 from invenio_records_resources.proxies import current_service_registry
-from pytest_oarepo.communities.functions import invite
 
 
 def _serialized_community_role(id_) -> dict:
@@ -71,6 +70,7 @@ def test_expand_community_role(
     submit_request_on_draft,
     ui_serialized_community_role,
     link2testclient,
+    invite,
     search_clear,
 ):
     reader = users[0]

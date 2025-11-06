@@ -11,44 +11,48 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from pytest_oarepo.communities.functions import invite
 from pytest_oarepo.requests.functions import get_request_type
 
 
-def _accept_request(
-    receiver_client,
-    type,  # noqa: A002
-    record_id,
-    link2testclient,
-    urls,
-    is_draft=False,
-    no_accept_link=False,
-    **kwargs: Any,
-) -> Any:
-    if is_draft:
-        record_after_submit = receiver_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")
-    else:
-        record_after_submit = receiver_client.get(f"{urls['BASE_URL']}/{record_id}?expand=true")
+@pytest.fixture
+def accept_request(urls, link2testclient):
+    def _accept_request(
+        receiver_client,
+        type_,
+        record_id,
+        is_draft=False,
+        no_accept_link=False,
+        **kwargs: Any,
+    ) -> Any:
+        if is_draft:
+            record_after_submit = receiver_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")
+        else:
+            record_after_submit = receiver_client.get(f"{urls['BASE_URL']}/{record_id}?expand=true")
 
-    request_dict = {}
-    for request in record_after_submit.json["expanded"]["requests"]:
-        if request["type"] == type:
-            request_dict = request
-    assert request_dict
+        request_dict = {}
+        for request in record_after_submit.json["expanded"]["requests"]:
+            if request["type"] == type_:
+                request_dict = request
+        assert request_dict
 
-    if no_accept_link:
-        assert "accept" not in request_dict["links"]["actions"]
-        return None
-    accept_link = link2testclient(request_dict["links"]["actions"]["accept"])
-    return receiver_client.post(accept_link)
+        if no_accept_link:
+            assert "accept" not in request_dict["links"]["actions"]
+            return None
+        accept_link = link2testclient(request_dict["links"]["actions"]["accept"])
+        return receiver_client.post(accept_link)
+
+    return _accept_request
 
 
-def _init_env(
+@pytest.fixture
+def env(
     logged_client,
+    users,
     community_get_or_create,
     community_owner,
-    community_reader,
+    invite,
 ) -> tuple:
+    community_reader = users[0]
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
@@ -68,7 +72,8 @@ def test_community_publish(
     draft_with_community_factory,
     submit_request_on_draft,
     communities_model,
-    link2testclient,
+    accept_request,
+    invite,
     urls,
     search_clear,
 ):
@@ -80,21 +85,17 @@ def test_community_publish(
     record = draft_with_community_factory(community_reader.identity, str(community.id))
     record_id = record["id"]
     submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
-    _accept_request(
+    accept_request(
         reader_client,
-        urls=urls,
-        type="publish_draft",
+        type_="publish_draft",
         record_id=record_id,
-        link2testclient=link2testclient,
         is_draft=True,
         no_accept_link=True,
     )  # reader can accept the request
-    _accept_request(
+    accept_request(
         owner_client,
-        urls=urls,
-        type="publish_draft",
+        type_="publish_draft",
         record_id=record_id,
-        link2testclient=link2testclient,
         is_draft=True,
     )  # owner can
 
@@ -118,6 +119,8 @@ def test_community_delete(
     # TODO: delete request reason validation
     # test_vocabularies,
     communities_model,
+    invite,
+    accept_request,
     search_clear,
 ):
     community_reader = users[0]
@@ -133,20 +136,16 @@ def test_community_delete(
         "delete_published_record",
         create_additional_data={"payload": {"removal_reason": "duplicate"}},
     )
-    _accept_request(
+    accept_request(
         reader_client,
-        urls=urls,
-        type="delete_published_record",
+        type_="delete_published_record",
         record_id=record_id,
-        link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can't accept the request
-    _accept_request(
+    accept_request(
         owner_client,
-        urls=urls,
-        type="delete_published_record",
+        type_="delete_published_record",
         record_id=record_id,
-        link2testclient=link2testclient,
     )  # owner can
     communities_model.Record.index.refresh()
     resp_record = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
@@ -158,54 +157,39 @@ def test_community_delete(
 
 
 def test_community_migration(
-    logged_client,
-    community_owner,
-    users,
-    community_get_or_create,
     published_record_with_community_factory,
     submit_request_on_record,
-    link2testclient,
     urls,
+    env,
+    accept_request,
     search_clear,
 ):
-    community_reader = users[0]
-    reader_client, owner_client, community_1, community_2 = _init_env(
-        logged_client,
-        community_get_or_create,
-        community_owner,
-        community_reader,
-    )
+    reader_client, owner_client, community_1, community_2 = env[0], env[1], env[2], env[3]
 
-    record = published_record_with_community_factory(community_reader.identity, str(community_1.id))
+    record = published_record_with_community_factory(reader_client.user_fixture.identity, str(community_1.id))
     record_id = record["id"]
     record_before = reader_client.get(f"{urls['BASE_URL']}/{record_id}")
     submit_request_on_record(
-        community_reader.identity,
+        reader_client.user_fixture.identity,
         record_id,
         "initiate_community_migration",
         create_additional_data={"payload": {"community": str(community_2.id)}},
     )
-    _accept_request(
+    accept_request(
         reader_client,
-        urls=urls,
-        type="initiate_community_migration",
+        type_="initiate_community_migration",
         record_id=record_id,
-        link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can accept the request
-    _accept_request(
+    accept_request(
         owner_client,
-        urls=urls,
-        type="initiate_community_migration",
+        type_="initiate_community_migration",
         record_id=record_id,
-        link2testclient=link2testclient,
     )  # confirm should be created and submitted automatically
-    _accept_request(
+    accept_request(
         owner_client,
-        urls=urls,
-        type="confirm_community_migration",
+        type_="confirm_community_migration",
         record_id=record_id,
-        link2testclient=link2testclient,
     )
     record_after = owner_client.get(f"{urls['BASE_URL']}/{record_id}?expand=true")
     assert record_before.json["parent"]["communities"]["default"] == str(community_1.id)
@@ -216,25 +200,16 @@ def test_community_migration(
 
 
 def test_community_submission_secondary(
-    logged_client,
-    community_owner,
-    users,
-    community_get_or_create,
     published_record_with_community_factory,
     create_request_on_record,
     submit_request_on_record,
-    link2testclient,
     urls,
+    env,
+    accept_request,
     search_clear,
 ):
-    community_reader = users[0]
-    reader_client, owner_client, community_1, community_2 = _init_env(
-        logged_client,
-        community_get_or_create,
-        community_owner,
-        community_reader,
-    )
-    record = published_record_with_community_factory(community_reader.identity, str(community_1.id))
+    reader_client, owner_client, community_1, community_2 = env[0], env[1], env[2], env[3]
+    record = published_record_with_community_factory(reader_client.user_fixture.identity, str(community_1.id))
     record_id = record["id"]
 
     record_before = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
@@ -248,25 +223,21 @@ def test_community_submission_secondary(
         )
     """
     submit_request_on_record(
-        community_reader.identity,
+        reader_client.user_fixture.identity,
         record_id,
         "secondary_community_submission",
         create_additional_data={"payload": {"community": str(community_2.id)}},
     )
-    _accept_request(
+    accept_request(
         reader_client,
-        urls=urls,
-        type="secondary_community_submission",
+        type_="secondary_community_submission",
         record_id=record_id,
-        link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can accept the request
-    _accept_request(
+    accept_request(
         owner_client,
-        urls=urls,
-        type="secondary_community_submission",
+        type_="secondary_community_submission",
         record_id=record_id,
-        link2testclient=link2testclient,
     )  # owner can
     record_after = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
 
@@ -280,40 +251,30 @@ def test_community_submission_secondary(
 
 
 def test_remove_secondary(
-    logged_client,
-    community_owner,
-    users,
-    community_get_or_create,
     published_record_with_community_factory,
     create_request_on_record,
     submit_request_on_record,
     link2testclient,
     urls,
+    env,
+    accept_request,
     search_clear,
 ):
-    community_reader = users[0]
-    reader_client, owner_client, community_1, community_2 = _init_env(
-        logged_client,
-        community_get_or_create,
-        community_owner,
-        community_reader,
-    )
+    reader_client, owner_client, community_1, community_2 = env[0], env[1], env[2], env[3]
 
-    record = published_record_with_community_factory(community_reader.identity, str(community_1.id))
+    record = published_record_with_community_factory(reader_client.user_fixture.identity, str(community_1.id))
     record_id = record["id"]
 
     submit_request_on_record(
-        community_reader.identity,
+        reader_client.user_fixture.identity,
         record_id,
         "secondary_community_submission",
         create_additional_data={"payload": {"community": str(community_2.id)}},
     )
-    _accept_request(
+    accept_request(
         owner_client,
-        urls=urls,
-        type="secondary_community_submission",
+        type_="secondary_community_submission",
         record_id=record_id,
-        link2testclient=link2testclient,
     )
 
     record_before = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
@@ -330,25 +291,21 @@ def test_remove_secondary(
     """
 
     submit_request_on_record(
-        community_reader.identity,
+        reader_client.user_fixture.identity,
         record_id,
         "remove_secondary_community",
         create_additional_data={"payload": {"community": str(community_2.id)}},
     )
-    _accept_request(
+    accept_request(
         reader_client,
-        urls=urls,
-        type="remove_secondary_community",
+        type_="remove_secondary_community",
         record_id=record_id,
-        link2testclient=link2testclient,
         no_accept_link=True,
     )  # reader can't accept the request
-    _accept_request(
+    accept_request(
         owner_client,
-        urls=urls,
-        type="remove_secondary_community",
+        type_="remove_secondary_community",
         record_id=record_id,
-        link2testclient=link2testclient,
     )  # owner can
 
     record_after = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
@@ -381,6 +338,7 @@ def test_community_role_ui_serialization(
     draft_with_community_factory,
     submit_request_on_draft,
     ui_serialized_community_role,
+    invite,
     search_clear,
 ):
     community_reader = users[0]

@@ -15,7 +15,7 @@ from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.errors import PermissionDeniedError
 from oarepo_rdm.oai.percolator import init_percolators
 from oarepo_runtime.typing import record_from_result
-from pytest_oarepo.communities.functions import invite, set_community_workflow
+from pytest_oarepo.communities.functions import set_community_workflow
 
 
 def test_disabled_endpoints(
@@ -50,7 +50,7 @@ def test_default_community_workflow_changed(
     draft_with_community_factory,
     create_request_on_draft,
     link2testclient,
-    get_action_url,
+    invite,
     urls,
     search_clear,
 ):
@@ -97,6 +97,7 @@ def test_can_possibly_create_in_community(
     users,
     community_get_or_create,
     record_service,
+    invite,
     search_clear,
 ):
     # tries to .. in with one community with default workflow allowing reader and owner, than adds another community
