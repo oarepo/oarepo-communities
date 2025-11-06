@@ -80,6 +80,7 @@ class OARepoCommunities:
             "COMMUNITIES_RECORDS_SEARCH_ALL",
             config.COMMUNITIES_RECORDS_SEARCH_ALL,
         )
+        app.config.setdefault("RDM_SEARCH_ARGS_SCHEMA", config.RDM_SEARCH_ARGS_SCHEMA)
 
     def get_community_default_workflow(self, **kwargs: Any) -> Workflow:
         """Get default workflow for the community.

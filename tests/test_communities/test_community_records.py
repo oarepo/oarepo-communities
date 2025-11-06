@@ -8,63 +8,28 @@
 #
 from __future__ import annotations
 
+from typing import Any
+
+import pytest
+
+
+def _community_data(community) -> dict[str, Any]:
+    return {
+        "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
+        "parent": {"communities": {"default": str(community.id)}, "workflow": "default"},
+    }
+
 
 def test_create_record_in_community_direct(
     logged_client, communities_model, community_owner, community, urls, search_clear
 ):
     owner_client = logged_client(community_owner)
-    json = {
-        "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
-        "parent": {"communities": {"default": str(community.id)}, "workflow": "default"},
-    }
-
-    response = owner_client.post(urls["BASE_URL"], json=json)
+    response = owner_client.post(urls["BASE_URL"], json=_community_data(community))
     assert response.status_code == 201
     assert response.json["parent"]["communities"]["default"] == str(community.id)
 
 
-"""
-@pytest.mark.skip
-def test_create_record_in_community(
-    logged_client,
-    community_owner,
-    community,
-    urls,
-    search_clear,
-):
-    owner_client = logged_client(community_owner)
-
-    response = owner_client.post(f"/communities/{community.id}/thesis", json={})
-    assert response.json["parent"]["communities"]["ids"] == [community.id]
-    assert response.json["parent"]["communities"]["default"] == community.id
-
-    response_record = owner_client.get(f"{urls['BASE_URL']}/{response.json['id']}/draft")
-    assert response_record.json["parent"]["communities"]["ids"] == [community.id]
-    assert response_record.json["parent"]["communities"]["default"] == community.id
-
-
-@pytest.mark.skip
-def test_create_record_in_community_without_model_in_url(
-    logged_client,
-    community_owner,
-    community,
-    search_clear,
-):
-    owner_client = logged_client(community_owner)
-
-    response = owner_client.post(
-        f"/communities/{community.id}/records",
-        json={"$schema": "local://thesis-1.0.0.json"},
-    )
-    assert response.json["parent"]["communities"]["ids"] == [community.id]
-    assert response.json["parent"]["communities"]["default"] == community.id
-
-    response_record = owner_client.get(f"/thesis/{response.json['id']}/draft")
-    assert response_record.json["parent"]["communities"]["ids"] == [community.id]
-    assert response_record.json["parent"]["communities"]["default"] == community.id
-
-
-@pytest.mark.skip
+# TODO: where to add the links?
 def test_search(
     logged_client,
     communities_model,
@@ -72,6 +37,7 @@ def test_search(
     published_record_with_community_factory,
     community_get_or_create,
     record_service,
+    link2testclient,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
@@ -79,23 +45,21 @@ def test_search(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
 
-    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
-    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
+    record1 = published_record_with_community_factory(community_owner.identity, str(community_1.id))
+    record2 = published_record_with_community_factory(community_owner.identity, str(community_2.id))
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
 
     response_record1 = owner_client.get(
-        f"/communities/{community_1.id}/records",
-        query_string={"record_status": "published"},
+        f"/records?q=parent.communities.default:{community_1.id}",
     )
     response_record2 = owner_client.get(
-        f"/communities/{community_2.id}/records",
-        query_string={"record_status": "published"},
+        f"/records?q=parent.communities.default:{community_2.id}",
     )
 
-    response_draft1 = owner_client.get(f"/communities/{community_1.id}/user/records")
-    response_draft2 = owner_client.get(f"/communities/{community_2.id}/user/records")
+    response_draft1 = owner_client.get(f"/user/records?q=parent.communities.default:{community_1.id}")
+    response_draft2 = owner_client.get(f"/user/records?q=parent.communities.default:{community_2.id}")
 
     assert len(response_record1.json["hits"]["hits"]) == 1
     assert len(response_record2.json["hits"]["hits"]) == 1
@@ -108,14 +72,16 @@ def test_search(
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="Search all not not implemented in RDM service")
 def test_search_all(
     logged_client,
+    communities_model,
     community_owner,
     published_record_with_community_factory,
     draft_with_community_factory,
     community_get_or_create,
     record_service,
+    invite,
     users,
     search_clear,
 ):
@@ -132,8 +98,8 @@ def test_search_all(
 
     owner_client = logged_client(community_owner)
 
-    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
-    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
+    record1 = published_record_with_community_factory(community_owner.identity, str(community_1.id))
+    record2 = published_record_with_community_factory(community_owner.identity, str(community_2.id))
 
     draft1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     draft2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
@@ -141,8 +107,8 @@ def test_search_all(
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
 
-    search_community1 = owner_client.get(f"/communities/{community_1.id}/all/records")
-    search_community2 = owner_client.get(f"/communities/{community_2.id}/all/records")
+    search_community1 = owner_client.get(f"/all/records?q=parent.communities.default:{community_1.id}")
+    search_community2 = owner_client.get(f"/all/records?q=parent.communities.default:{community_2.id}")
 
     assert len(search_community1.json["hits"]["hits"]) == 2
     assert len(search_community2.json["hits"]["hits"]) == 2
@@ -157,19 +123,19 @@ def test_search_all(
     }
 
     # test separate permissions
-    curator_search = curator_client.get(f"/communities/{community_1.id}/all/records")
-    reader_search = reader_client.get(f"/communities/{community_1.id}/all/records")
+    curator_search = curator_client.get(f"/all/records?q=parent.communities.default:{community_1.id}")
+    reader_search = reader_client.get(f"/all/records?q=parent.communities.default:{community_1.id}")
 
     assert len(curator_search.json["hits"]["hits"]) == 2
     assert len(reader_search.json["hits"]["hits"]) == 0
 
 
-# TODO: tests for search links
+from urllib.parse import urlencode
 
 
-@pytest.mark.skip
 def test_search_model(
     logged_client,
+    communities_model,
     community_owner,
     published_record_with_community_factory,
     community_get_or_create,
@@ -181,14 +147,20 @@ def test_search_model(
     community_1 = community_get_or_create(community_owner, "comm1")
     community_2 = community_get_or_create(community_owner, "comm2")
 
-    record1 = published_record_with_community_factory(community_owner.identity, community_1.id)
-    record2 = published_record_with_community_factory(community_owner.identity, community_2.id)
+    record1 = published_record_with_community_factory(community_owner.identity, str(community_1.id))
+    record2 = published_record_with_community_factory(community_owner.identity, str(community_2.id))
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
 
-    response_record1 = owner_client.get(f"/communities/{community_1.id}/thesis")
-    response_record2 = owner_client.get(f"/communities/{community_2.id}/thesis")
+    query1_url = urlencode(
+        {"q": f'parent.communities.default:{community_1.id} AND $schema:"local://communities_test-v1.0.0.json"'}
+    )
+    query2_url = urlencode(
+        {"q": f'parent.communities.default:{community_2.id} AND $schema:"local://communities_test-v1.0.0.json"'}
+    )
+    response_record1 = owner_client.get(f"/records?{query1_url}")
+    response_record2 = owner_client.get(f"/records?{query2_url}")
 
     assert len(response_record1.json["hits"]["hits"]) == 1
     assert len(response_record2.json["hits"]["hits"]) == 1
@@ -197,15 +169,17 @@ def test_search_model(
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
-@pytest.mark.skip
 def test_user_search(
     logged_client,
+    communities_model,
     community_owner,
     users,
     draft_with_community_factory,
     community_get_or_create,
+    invite,
     search_clear,
 ):
+    # TODO: should community owner be able to see records of users from the same community on /user/records url?
     community_reader = users[0]
     owner_client = logged_client(community_owner)
 
@@ -215,22 +189,18 @@ def test_user_search(
 
     record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
-    draft_with_community_factory(community_reader.identity, str(community_1.id))
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
 
-    response_record1 = owner_client.get(
-        f"/communities/{community_1.id}/records",
-        query_string={"record_status": "published"},
-    )
-    response_record2 = owner_client.get(
-        f"/communities/{community_2.id}/records",
-        query_string={"record_status": "published"},
-    )
+    query1_url = urlencode({"q": f"parent.communities.default:{community_1.id} AND record_status:published"})
+    query2_url = urlencode({"q": f"parent.communities.default:{community_2.id} AND record_status:published"})
 
-    response_draft1 = owner_client.get(f"/communities/{community_1.id}/user/records")
-    response_draft2 = owner_client.get(f"/communities/{community_2.id}/user/records")
+    response_record1 = owner_client.get(f"/user/records?{query1_url}")
+    response_record2 = owner_client.get(f"/user/records?{query2_url}")
+
+    response_draft1 = owner_client.get(f"/user/records?q=parent.communities.default:{community_1.id}")
+    response_draft2 = owner_client.get(f"/user/records?q=parent.communities.default:{community_2.id}")
 
     assert len(response_record1.json["hits"]["hits"]) == 0
     assert len(response_record2.json["hits"]["hits"]) == 0
@@ -242,14 +212,15 @@ def test_user_search(
     assert response_draft2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
-@pytest.mark.skip
 def test_user_search_model(
     logged_client,
+    communities_model,
     community_owner,
     users,
     draft_with_community_factory,
     community_get_or_create,
     record_service,
+    invite,
     search_clear,
 ):
     community_reader = users[0]
@@ -261,13 +232,17 @@ def test_user_search_model(
 
     record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
-    draft_with_community_factory(community_reader.identity, str(community_1.id))
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
-
-    response_record1 = owner_client.get(f"/communities/{community_1.id}/user/thesis")
-    response_record2 = owner_client.get(f"/communities/{community_2.id}/user/thesis")
+    query1_url = urlencode(
+        {"q": f'parent.communities.default:{community_1.id} AND $schema:"local://communities_test-v1.0.0.json"'}
+    )
+    query2_url = urlencode(
+        {"q": f'parent.communities.default:{community_2.id} AND $schema:"local://communities_test-v1.0.0.json"'}
+    )
+    response_record1 = owner_client.get(f"/user/records?{query1_url}")
+    response_record2 = owner_client.get(f"/user/records?{query2_url}")
 
     assert len(response_record1.json["hits"]["hits"]) == 1
     assert len(response_record2.json["hits"]["hits"]) == 1
@@ -276,9 +251,10 @@ def test_user_search_model(
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="Decide how the links should look.")
 def test_search_links(
     logged_client,
+    communities_model,
     community_owner,
     published_record_with_community_factory,
     community_get_or_create,
@@ -291,12 +267,12 @@ def test_search_links(
     community_1 = community_get_or_create(community_owner, "comm1")
 
     for _ in range(30):
-        published_record_with_community_factory(community_owner.identity, community_1.id)
-    ThesisRecord.index.refresh()
+        published_record_with_community_factory(community_owner.identity, str(community_1.id))
+    communities_model.Record.index.refresh()
 
     def check_links(model_suffix, sort_order) -> None:
         after_page_suffix = f"&size=25&sort={sort_order}"
-        search_links = owner_client.get(f"/communities/{community_1.id}/{model_suffix}").json["links"]
+        search_links = owner_client.get(f"/records?q=parent.communities.default:{community_1.id}").json["links"]
         assert (
             search_links["self"] == f"{host}api/communities/{community_1.id}/{model_suffix}?page=1{after_page_suffix}"
         )
@@ -323,6 +299,7 @@ def test_search_links(
 @pytest.mark.skip
 def test_search_ui_serialization(
     logged_client,
+    communities_model,
     community_owner,
     published_record_with_community_factory,
     community_get_or_create,
@@ -373,5 +350,3 @@ def test_search_ui_serialization(
     assert "access" in search_model.json["hits"]["hits"][0]
     assert "access" in search_user_global.json["hits"]["hits"][0]
     assert "access" in search_user_model.json["hits"]["hits"][0]
-
-"""

@@ -25,7 +25,7 @@ from invenio_rdm_records.notifications.builders import (
 from invenio_rdm_records.requests.community_inclusion import is_access_restriction_valid
 from invenio_rdm_records.services.errors import InvalidAccessRestrictions
 from invenio_requests.customizations.actions import RequestAction
-from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
+from oarepo_requests.actions.generic import OARepoAcceptAction
 from oarepo_requests.proxies import current_requests_service
 from oarepo_requests.types.generic import NonDuplicableOARepoRecordRequestType
 from oarepo_requests.utils import (
@@ -61,9 +61,6 @@ if TYPE_CHECKING:
     from invenio_requests.records.api import Request
 
 
-from invenio_requests.resolvers.registry import ResolverRegistry
-
-
 class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
     """Source community accepting the initiate request autocreates confirm request delegated to the target community."""
 
@@ -71,7 +68,6 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
     def apply(
         self,
         identity: Identity,
-        state: RequestActionState,
         uow: UnitOfWork,
         *args: Any,
         **kwargs: Any,
@@ -81,8 +77,10 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
             system_identity,
             data={"payload": request.get("payload", {})},
             request_type=ConfirmCommunityMigrationRequestType.type_id,
-            topic=state.topic,
-            creator=ResolverRegistry.reference_entity(state.created_by),
+            topic=self.topic,
+            # not sure about whether this is always available
+            # self.request.created_by.resolve() should always work but breaks (probably incorrect) typing
+            creator=self.request["created_by"],
             uow=uow,
             **kwargs,
         )
@@ -96,7 +94,6 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
     def apply(
         self,
         identity: Identity,
-        state: RequestActionState,
         uow: UnitOfWork,
         *args: Any,
         **kwargs: Any,
@@ -105,16 +102,15 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
         # ie.
         # and what if the community is deleted before the request is processed?
 
-        record = self.request.topic.resolve()
         community_id = self.request.get("payload", {}).get("community", None)
         if not community_id:
             raise TargetCommunityNotProvidedError("Target community not provided.")
         community = cast("Community", Community.pid.resolve(community_id))
 
-        if not is_access_restriction_valid(record, community):
+        if not is_access_restriction_valid(self.topic, community):  # type: ignore[reportArgumentType]
             raise InvalidAccessRestrictions("Invalid access restrictions between target community and record.")
 
-        change_primary_community(record, community, self.request, uow)
+        change_primary_community(cast("RecordWithParent", self.topic), community, self.request, uow)
 
         if kwargs.get("send_notification", True):
             uow.register(

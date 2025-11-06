@@ -12,7 +12,6 @@ import pytest
 from invenio_access.models import User
 from invenio_communities.members.records.models import MemberModel
 from invenio_requests.customizations.event_types import CommentEventType
-from pytest_oarepo.communities.functions import invite
 
 
 @pytest.fixture
@@ -31,6 +30,7 @@ def test_publish_notification_community_role(
     draft_with_community_factory,
     submit_request_on_draft,
     link2testclient,
+    invite,
     search_clear,
 ):
     """Test notification being built on review submit."""
@@ -61,6 +61,7 @@ def test_locales(
     submit_request_on_draft,
     link2testclient,
     urls,
+    invite,
     search_clear,
 ):
     """Test notification being built on review submit."""
@@ -94,6 +95,7 @@ def test_locales_multiple_recipients(
     submit_request_on_draft,
     link2testclient,
     urls,
+    invite,
     search_clear,
 ):
     """Test notification being built on review submit."""
@@ -125,6 +127,7 @@ def test_notifications_not_sent_to_inactive_users(
     draft_with_community_factory,
     submit_request_on_draft,
     link2testclient,
+    invite,
     search_clear,
 ):
     """Test notification being built on review submit."""
@@ -169,6 +172,7 @@ def test_comment_notifications(
     role,
     events_service,
     link2testclient,
+    invite,
     urls,
 ):
     """Test notification being built on review submit."""

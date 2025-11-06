@@ -20,7 +20,7 @@ from invenio_rdm_records.notifications.builders import (
     CommunityInclusionAcceptNotificationBuilder,
 )
 from invenio_requests.customizations.actions import RequestAction
-from oarepo_requests.actions.generic import OARepoAcceptAction, RequestActionState
+from oarepo_requests.actions.generic import OARepoAcceptAction
 from oarepo_requests.types.generic import NonDuplicableOARepoRecordRequestType
 from oarepo_requests.utils import classproperty
 
@@ -43,15 +43,14 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
     def apply(
         self,
         identity: Identity,
-        state: RequestActionState,
         uow: UnitOfWork,
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        record = cast("RecordWithParent", state.topic)
+        topic = cast("RecordWithParent", self.topic)
         community = self.request["payload"]["community"]
 
-        remove_record_from_community(record, community, uow)
+        remove_record_from_community(topic, community, uow)
 
         if kwargs.get("send_notification", True):
             uow.register(
