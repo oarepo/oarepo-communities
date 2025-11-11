@@ -16,7 +16,8 @@ from invenio_rdm_records.resources.args import RDMSearchRequestArgsSchema
 from marshmallow import fields
 
 from .cf.workflows import WorkflowCF, lazy_workflow_options
-from .notifications.generators import CommunityRoleEmailRecipient
+
+# from .notifications.generators import CommunityRoleEmailRecipient # noqa
 
 OAREPO_REQUESTS_DEFAULT_RECEIVER = "oarepo_requests.receiver.default_workflow_receiver_function"
 REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
@@ -63,7 +64,7 @@ DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
 
-NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}}
+# NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}} # noqa
 
 
 DATASTREAMS_TRANSFORMERS = {
