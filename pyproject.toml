@@ -7,7 +7,7 @@ license = "MIT"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "oarepo-requests>=3.0.0dev1",
-    "oarepo[rdm,s3]>=14.0.0dev0,<15.0.0",
+    "oarepo[rdm,tests]>=14.0.0dev0,<15.0.0",
     "oarepo-runtime>=2.0.0dev23,<3.0.0",
     "oarepo-workflows>=2.0.0dev3,<3.0.0",
 ]
@@ -29,7 +29,7 @@ tests = [
 ]
 
 oarepo14 = [
-    "oarepo[rdm,s3]>=14.0.0dev0,<15.0.0",
+    "oarepo[rdm,tests]>=14.0.0dev0,<15.0.0",
 ]
 
 [project.entry-points."invenio_assets.webpack"]
