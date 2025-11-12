@@ -110,7 +110,7 @@ class CommunityWorkflowPermission(FromRecordWorkflow):
     """
 
     @override
-    @require_draft_record
+    @require_draft_record  # we are expecting a draft allowed framework to be always used with communities
     def _get_workflow(self, record: Record | None = None, **context: Any) -> Workflow:
         try:
             return super()._get_workflow(record=record, **context)
@@ -378,7 +378,9 @@ class RecordOwnerInRecordCommunityBase(CommunityRoleMixinProtocol, Generator):
     @require_draft_record
     def needs(self, *, record: Record, data: dict | None = None, **kwargs: Any) -> list[Need]:
         record_communities = set(self._get_record_communities(record, **kwargs))
-        return cast("list[Need]", self._needs(record_communities, record=record))
+        return cast(
+            "list[Need]", self._needs(record_communities, record=record)
+        )  # there isn't a common ancestor for Need
 
     def _needs(self, record_communities: set[str], record: Record) -> list[UserInCommunityNeed]:
         needs: list[UserInCommunityNeed] = []

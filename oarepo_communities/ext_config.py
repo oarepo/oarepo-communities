@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from oarepo_communities.worklows.permissive_workflow import PermissiveWorkflow
 
+# TODO: why separate config and ext_config?
 # TODO: Add CommunityWorkflowPermissionPolicy to presets
 
 COMMUNITY_WORKFLOWS = {

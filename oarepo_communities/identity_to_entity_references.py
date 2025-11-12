@@ -8,6 +8,7 @@
 #
 """Convert identity community roles to entity references."""
 
+# TODO: used anywhere?
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast

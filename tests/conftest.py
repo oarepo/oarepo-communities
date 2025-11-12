@@ -38,7 +38,6 @@ from oarepo_workflows import (
 from oarepo_workflows.model.presets import workflows_preset
 
 from oarepo_communities.model.presets import communities_preset
-from oarepo_communities.services.custom_fields.workflow import WorkflowCF
 from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
     CommunityRole,
@@ -64,36 +63,6 @@ pytest_plugins = [
 
 @pytest.fixture(scope="module")
 def app(app):
-    """Bp = Blueprint("communities_test_ui", __name__).
-
-    @bp.route("/communities_test/preview/<pid_value>", methods=["GET"])
-    def preview(pid_value: str) -> str:
-        return "preview ok"
-
-    @bp.route("/communities_test/", methods=["GET"])
-    def search() -> str:
-        return "search ok"
-
-    @bp.route("/communities_test/uploads/<pid_value>", methods=["GET"])  # draft self_html
-    def deposit_edit(pid_value: str) -> str:
-        return "deposit edit ok"
-
-    @bp.route("/communities_test/uploads/new", methods=["GET"])
-    def deposit_create() -> str:
-        return "deposit create ok"
-
-    @bp.route("/communities_test/records/<pid_value>")
-    def record_detail(pid_value) -> str:
-        return "detail ok"
-
-    @bp.route("/communities_test/records/<pid_value>/latest", methods=["GET"])
-    def record_latest(pid_value: str) -> str:
-        return "latest ok"
-
-    @bp.route("/communities_test/records/<pid_value>/export/<export_format>", methods=["GET"])
-    def export(pid_value, export_format: str) -> str:
-        return "export ok"
-    """
     bp = Blueprint("invenio_app_rdm_communities", __name__)
 
     @bp.route("/invenio_app_rdm_communities/communities_home", methods=["GET"])
@@ -114,7 +83,7 @@ def app(app):
 
 
 @pytest.fixture(autouse=True)
-def init_communities_custom_fields(init_communities_cf):
+def init_communities_custom_fields(app, init_communities_cf):
     return init_communities_cf
 
 
@@ -501,8 +470,6 @@ def app_config(app_config):
     app_config["OAREPO_REQUESTS_DEFAULT_RECEIVER"] = default_workflow_receiver_function
     app_config["WORKFLOWS"] = WORKFLOWS
 
-    app_config["COMMUNITIES_CUSTOM_FIELDS"] = [WorkflowCF(name="workflow")]
-    app_config["COMMUNITIES_CUSTOM_FIELDS_UI"] = []
     app_config["I18N_LANGUAGES"] = [
         ("cs", _("Czech")),
     ]
@@ -555,34 +522,3 @@ def ui_serialized_community_role():
         }
 
     return _ui_serialized_community
-
-
-@pytest.fixture
-def ui_serialized_community():
-    def _ui_serialized_community(community_id: str) -> dict:
-        return {
-            "label": "My Community",
-            "links": {
-                "self": f"https://127.0.0.1:5000/api/communities/{community_id}",
-                "self_html": "https://127.0.0.1:5000/communities/public",  # TODO: is this correct?
-            },
-            "reference": {"community": community_id},
-            "type": "community",
-        }
-
-    return _ui_serialized_community
-
-
-@pytest.fixture
-def clear_babel_context():
-    # force babel reinitialization when language is switched
-    def _clear_babel_context() -> None:
-        try:
-            from flask import g
-            from flask_babel import SimpleNamespace
-
-            g._flask_babel = SimpleNamespace()  # noqa: SLF001
-        except ImportError:
-            return
-
-    return _clear_babel_context

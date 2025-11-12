@@ -27,6 +27,9 @@ from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
 from oarepo_communities.services.permissions.generators import PrimaryCommunityMembers
 
 # TODO: should this class be here? It seems that if needed, it should be in oarepo_workflows or oarepo_requests
+# "default permissions" is already covered by oarepo_communities.services.permissions.policy.
+# CommunityDefaultWorkflowPermissions
+# and afaik we have no concrete workflows outside of tests or repository implementations anywhere
 
 
 class PermissiveWorkflowPermissions(DefaultWorkflowPermissions):

@@ -12,8 +12,6 @@ from __future__ import annotations
 
 from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 from invenio_i18n import lazy_gettext as _
-from invenio_rdm_records.resources.args import RDMSearchRequestArgsSchema
-from marshmallow import fields
 
 from .cf.workflows import WorkflowCF, lazy_workflow_options
 
@@ -72,8 +70,3 @@ DATASTREAMS_TRANSFORMERS = {
 }
 
 COMMUNITIES_RECORDS_SEARCH_ALL = False
-
-
-RDM_SEARCH_ARGS_SCHEMA = type(
-    "CommunitiesRecordsArgsSchema", (RDMSearchRequestArgsSchema,), {"parent.communities.default": fields.Str()}
-)

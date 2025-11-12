@@ -26,7 +26,9 @@ if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_drafts_resources.records import Record
 
-from invenio_drafts_resources.services.records.components.base import BaseRecordFilesComponent
+from invenio_drafts_resources.services.records.components.base import (
+    BaseRecordFilesComponent,
+)
 
 
 class CommunityInclusionComponent(ServiceComponent):
@@ -48,4 +50,5 @@ class CommunityInclusionComponent(ServiceComponent):
         except KeyError as exc:
             raise MissingDefaultCommunityError("Default community not defined in input.") from exc
 
+        # TODO: can we add to communities via slugs?
         record.parent.communities.add(convert_community_ids_to_uuid(community_id), default=True)

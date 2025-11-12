@@ -80,6 +80,11 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
     name = _("Secondary community submission")
     editable = False
 
+    topic_can_be_none = False
+    payload_schema: Mapping[str, ma.fields.Field] = {  # type: ignore[assignment]
+        "community": ma.fields.String(required=True),
+    }
+
     @classproperty
     @override
     def available_actions(  # type: ignore[override]
@@ -89,11 +94,6 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
             **super().available_actions,
             "accept": CommunitySubmissionAcceptAction,
         }
-
-    topic_can_be_none = False
-    payload_schema: Mapping[str, ma.fields.Field] = {  # type: ignore[assignment]
-        "community": ma.fields.String(required=True),
-    }
 
     form: Mapping[str, Any] = {
         "field": "community",

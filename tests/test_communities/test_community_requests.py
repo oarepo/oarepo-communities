@@ -164,7 +164,12 @@ def test_community_migration(
     accept_request,
     search_clear,
 ):
-    reader_client, owner_client, community_1, community_2 = env[0], env[1], env[2], env[3]
+    reader_client, owner_client, community_1, community_2 = (
+        env[0],
+        env[1],
+        env[2],
+        env[3],
+    )
 
     record = published_record_with_community_factory(reader_client.user_fixture.identity, str(community_1.id))
     record_id = record["id"]
@@ -208,7 +213,12 @@ def test_community_submission_secondary(
     accept_request,
     search_clear,
 ):
-    reader_client, owner_client, community_1, community_2 = env[0], env[1], env[2], env[3]
+    reader_client, owner_client, community_1, community_2 = (
+        env[0],
+        env[1],
+        env[2],
+        env[3],
+    )
     record = published_record_with_community_factory(reader_client.user_fixture.identity, str(community_1.id))
     record_id = record["id"]
 
@@ -260,7 +270,12 @@ def test_remove_secondary(
     accept_request,
     search_clear,
 ):
-    reader_client, owner_client, community_1, community_2 = env[0], env[1], env[2], env[3]
+    reader_client, owner_client, community_1, community_2 = (
+        env[0],
+        env[1],
+        env[2],
+        env[3],
+    )
 
     record = published_record_with_community_factory(reader_client.user_fixture.identity, str(community_1.id))
     record_id = record["id"]
