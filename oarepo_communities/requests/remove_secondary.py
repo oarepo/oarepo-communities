@@ -47,10 +47,9 @@ class RemoveSecondaryCommunityAcceptAction(OARepoAcceptAction):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        topic = cast("RecordWithParent", self.topic)
         community = self.request["payload"]["community"]
 
-        remove_record_from_community(topic, community, uow)
+        remove_record_from_community(cast("RecordWithParent", self.topic), community, uow)
 
         if kwargs.get("send_notification", True):
             uow.register(

@@ -72,10 +72,9 @@ class InitiateCommunityMigrationAcceptAction(OARepoAcceptAction):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        request = cast("Request", self.request)
         request_item = current_requests_service.create(
             system_identity,
-            data={"payload": request.get("payload", {})},
+            data={"payload": self.request.get("payload", {})},
             request_type=ConfirmCommunityMigrationRequestType.type_id,
             topic=self.topic,
             # not sure about whether this is always available
@@ -136,11 +135,62 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
 
     description = _("Move record to another primary community.")  # type: ignore[reportAssignmentType]
 
+    editable = False
     topic_can_be_none = False
     payload_schema: Mapping[str, ma.fields.Field] | None = {
         "community": ma.fields.String(),
     }
     receiver_can_be_none = True
+
+    @classproperty
+    @override
+    def available_actions(  # type: ignore[override]
+        cls,  # noqa: N805
+    ) -> dict[str, type[RequestAction]]:
+        return {
+            **super().available_actions,
+            "accept": InitiateCommunityMigrationAcceptAction,
+        }
+
+    @classmethod
+    def is_applicable_to(cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any) -> bool:
+        """Check if the request type is applicable to the topic."""
+        if open_request_exists(topic, cls.type_id) or open_request_exists(
+            topic, ConfirmCommunityMigrationRequestType.type_id
+        ):
+            return False
+        # check if the user has more than one community to which they can migrate
+        allowed_communities_count = 0
+        for __ in AllowedCommunitiesComponent.get_allowed_communities(identity, "create"):
+            allowed_communities_count += 1
+            if allowed_communities_count > 1:
+                break
+
+        if allowed_communities_count <= 1:
+            return False
+
+        return super().is_applicable_to(identity, topic, *args, **kwargs)  # type: ignore[no-any-return]
+
+    @override
+    def can_create(
+        self,
+        identity: Identity,
+        data: dict,
+        receiver: dict[str, str],
+        topic: Record,
+        creator: dict[str, str],
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
+        target_community_id = data.get("payload", {}).get("community", None)
+        if not target_community_id:
+            raise TargetCommunityNotProvidedError("Target community not provided.")
+        if not isinstance(topic, RecordWithParent):
+            raise TypeError("Topic must be a draft record.")
+        already_included = target_community_id == str(topic.parent.communities.default.id)
+        if already_included:
+            raise CommunityAlreadyIncludedError("Already inside this primary community.")
 
     @override
     @auto_approved_message(_("Inititiate record community migration"))
@@ -208,58 +258,6 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
             },
         }
 
-    editable = False
-
-    @classproperty
-    @override
-    def available_actions(  # type: ignore[override]
-        cls,  # noqa: N805
-    ) -> dict[str, type[RequestAction]]:
-        return {
-            **super().available_actions,
-            "accept": InitiateCommunityMigrationAcceptAction,
-        }
-
-    @classmethod
-    def is_applicable_to(cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any) -> bool:
-        """Check if the request type is applicable to the topic."""
-        if open_request_exists(topic, cls.type_id) or open_request_exists(
-            topic, ConfirmCommunityMigrationRequestType.type_id
-        ):
-            return False
-        # check if the user has more than one community to which they can migrate
-        allowed_communities_count = 0
-        for __ in AllowedCommunitiesComponent.get_allowed_communities(identity, "create"):
-            allowed_communities_count += 1
-            if allowed_communities_count > 1:
-                break
-
-        if allowed_communities_count <= 1:
-            return False
-
-        return super().is_applicable_to(identity, topic, *args, **kwargs)  # type: ignore[no-any-return]
-
-    @override
-    def can_create(
-        self,
-        identity: Identity,
-        data: dict,
-        receiver: dict[str, str],
-        topic: Record,
-        creator: dict[str, str],
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
-        super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
-        target_community_id = data.get("payload", {}).get("community", None)
-        if not target_community_id:
-            raise TargetCommunityNotProvidedError("Target community not provided.")
-        if not isinstance(topic, RecordWithParent):
-            raise TypeError("Topic must be a draft record.")
-        already_included = target_community_id == str(topic.parent.communities.default.id)
-        if already_included:
-            raise CommunityAlreadyIncludedError("Already inside this primary community.")
-
 
 class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType):
     """Performs the primary community migration.
@@ -273,6 +271,16 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType)
     payload_schema: Mapping[str, ma.fields.Field] | None = {
         "community": ma.fields.String(),
     }
+
+    @classproperty[dict[str, type[RequestAction]]]
+    @override
+    def available_actions(  # type: ignore[override] # TODO: fix in requests
+        cls,  # noqa: N805
+    ) -> dict[str, type[RequestAction]]:
+        return {
+            **super().available_actions,
+            "accept": ConfirmCommunityMigrationAcceptAction,
+        }
 
     @property
     def form(self) -> dict[str, Any]:
@@ -331,13 +339,3 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType)
     ) -> str | LazyString:
         """Return the stateful description of the request."""
         return _("Request not yet submitted.")
-
-    @classproperty[dict[str, type[RequestAction]]]
-    @override
-    def available_actions(  # type: ignore[override] # TODO: fix in requests
-        cls,  # noqa: N805
-    ) -> dict[str, type[RequestAction]]:
-        return {
-            **super().available_actions,
-            "accept": ConfirmCommunityMigrationAcceptAction,
-        }

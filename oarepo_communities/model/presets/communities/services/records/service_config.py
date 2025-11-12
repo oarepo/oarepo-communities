@@ -19,7 +19,9 @@ from oarepo_model.customizations import (
 )
 from oarepo_model.presets import Preset
 
-from oarepo_communities.services.components.default_workflow import CommunityDefaultWorkflowComponent
+from oarepo_communities.services.components.default_workflow import (
+    CommunityDefaultWorkflowComponent,
+)
 from oarepo_communities.services.components.include import CommunityInclusionComponent
 
 if TYPE_CHECKING:

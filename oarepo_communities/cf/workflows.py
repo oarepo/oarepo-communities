@@ -12,19 +12,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, override
 
-from flask import current_app
+from flask_babel import LazyString
 from invenio_records_resources.services.custom_fields import KeywordCF
 from marshmallow_utils.fields import SanitizedUnicode
+from oarepo_workflows.proxies import current_oarepo_workflows
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+
 
 class WorkflowSchemaField(SanitizedUnicode):
     """A custom Marshmallow field for validating workflow codes."""
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the field with a workflow validator."""
-        super().__init__(validate=[lambda code: code in current_app.config["WORKFLOWS"]], **kwargs)
+        super().__init__(validate=[lambda code: code in current_oarepo_workflows.workflow_by_code], **kwargs)
 
 
 class WorkflowCF(KeywordCF):
@@ -59,12 +61,8 @@ class LazyChoices[T](list[T]):
         return len(self._func())
 
 
-# TODO: use current_workflows here
-lazy_workflow_options = LazyChoices[dict[str, str]](
-    lambda: [
-        {"id": name, "title_l10n": w.label}  # type: ignore[]
-        for name, w in current_workflows.workflow_by_code  # type: ignore[]
-    ]
+lazy_workflow_options = LazyChoices[dict[str, str | LazyString]](
+    lambda: [{"id": name, "title_l10n": w.label} for name, w in current_oarepo_workflows.workflow_by_code.items()]
 )
 
 """A lazy list of available workflows for use in form choices."""

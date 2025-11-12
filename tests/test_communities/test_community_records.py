@@ -9,22 +9,39 @@
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlencode
 
 import pytest
 
 
 def _community_data(community) -> dict[str, Any]:
     return {
-        "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
-        "parent": {"communities": {"default": str(community.id)}, "workflow": "default"},
+        "metadata": {
+            "contributors": ["Contributor 1"],
+            "creators": ["Creator 1", "Creator 2"],
+            "title": "blabla",
+        },
+        "parent": {
+            "communities": {"default": str(community.id)},
+            "workflow": "default",
+        },
     }
 
 
-def test_create_record_in_community_direct(
+def test_create_record_in_community(logged_client, communities_model, community_owner, community, urls, search_clear):
+    owner_client = logged_client(community_owner)
+    response = owner_client.post(urls["BASE_URL"], json=_community_data(community))
+    assert response.status_code == 201
+    assert response.json["parent"]["communities"]["default"] == str(community.id)
+
+
+def test_create_record_in_community_default_workflow(
     logged_client, communities_model, community_owner, community, urls, search_clear
 ):
     owner_client = logged_client(community_owner)
-    response = owner_client.post(urls["BASE_URL"], json=_community_data(community))
+    data = _community_data(community)
+    del data["parent"]["workflow"]
+    response = owner_client.post(urls["BASE_URL"], json=data)
     assert response.status_code == 201
     assert response.json["parent"]["communities"]["default"] == str(community.id)
 
@@ -130,9 +147,6 @@ def test_search_all(
     assert len(reader_search.json["hits"]["hits"]) == 0
 
 
-from urllib.parse import urlencode
-
-
 def test_search_model(
     logged_client,
     communities_model,
@@ -180,6 +194,7 @@ def test_user_search(
     search_clear,
 ):
     # TODO: should community owner be able to see records of users from the same community on /user/records url?
+    # - in the rdm-12 test this was enforced by OwnersComponent; what is the approach now? -
     community_reader = users[0]
     owner_client = logged_client(community_owner)
 
@@ -189,6 +204,7 @@ def test_user_search(
 
     record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
+    record3 = draft_with_community_factory(community_reader.identity, str(community_1.id))  # noqa
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
@@ -344,7 +360,6 @@ def test_search_ui_serialization(
     # this was originally meant to determine the results go through ui serialization
     # ie. define something explicit in model json
 
-    # TODO: test community label
     assert "access" in search_control.json["hits"]["hits"][0]
     assert "access" in search_global.json["hits"]["hits"][0]
     assert "access" in search_model.json["hits"]["hits"][0]

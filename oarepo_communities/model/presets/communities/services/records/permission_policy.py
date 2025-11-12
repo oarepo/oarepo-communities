@@ -17,7 +17,9 @@ from invenio_records_permissions.policies.records import RecordPermissionPolicy
 from oarepo_model.customizations import ChangeBase, Customization
 from oarepo_model.presets import Preset
 
-from oarepo_communities.services.permissions.policy import CommunityWorkflowPermissionPolicy
+from oarepo_communities.services.permissions.policy import (
+    CommunityWorkflowPermissionPolicy,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Generator

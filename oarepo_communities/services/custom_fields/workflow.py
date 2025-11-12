@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+# TODO: this is already defined in .cf?
 from typing import TYPE_CHECKING, Any, override
 
 from invenio_records_resources.services.custom_fields import KeywordCF
