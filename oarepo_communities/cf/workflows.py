@@ -19,18 +19,12 @@ from marshmallow_utils.fields import SanitizedUnicode
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
-
-def validate_workflow(code: str) -> bool:
-    """Validate that the workflow with the given code exists."""
-    return code in current_app.config["WORKFLOWS"]
-
-
 class WorkflowSchemaField(SanitizedUnicode):
     """A custom Marshmallow field for validating workflow codes."""
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the field with a workflow validator."""
-        super().__init__(validate=[validate_workflow], **kwargs)
+        super().__init__(validate=[lambda code: code in current_app.config["WORKFLOWS"]], **kwargs)
 
 
 class WorkflowCF(KeywordCF):
@@ -69,7 +63,8 @@ class LazyChoices[T](list[T]):
 lazy_workflow_options = LazyChoices[dict[str, str]](
     lambda: [
         {"id": name, "title_l10n": w.label}  # type: ignore[]
-        for name, w in current_app.config["WORKFLOWS"].items()  # type: ignore[]
+        for name, w in current_workflows.workflow_by_code  # type: ignore[]
     ]
 )
+
 """A lazy list of available workflows for use in form choices."""
