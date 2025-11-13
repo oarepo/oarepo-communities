@@ -204,7 +204,7 @@ def test_user_search(
 
     record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
-    record3 = draft_with_community_factory(community_reader.identity, str(community_1.id))  # noqa
+    # record3 = draft_with_community_factory(community_reader.identity, str(community_1.id))  # noqa
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()

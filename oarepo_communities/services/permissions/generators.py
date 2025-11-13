@@ -58,7 +58,6 @@ def require_draft_record(fn: Callable) -> Callable:
     return wrapper
 
 
-# TODO: (invenio) changing identity ids from str to int is kind of weird? or something else happened?
 class UserInCommunityNeed(NamedTuple):
     """Need for user in community."""
 
