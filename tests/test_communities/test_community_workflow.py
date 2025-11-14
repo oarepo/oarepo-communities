@@ -20,7 +20,12 @@ def test_change_workflow(
     community,
     search_clear,
 ):
-    init_percolators()  # TODO: automate?
+    # the issue here is that community creates and updates OAI sets on commit and while invenio just logs
+    # missing oai index on create, on update it tries to delete the percolator index and this crashes
+    # when it does not exist.
+    # see invenio_oaiserver.receivers.after_insert_oai_set; invenio_oaiserver.receivers.after_update_oai_set;
+    # invenio_oaiserver.percolator._new_percolator and _delete_percolator
+    init_percolators()
     owner_client = logged_client(community_owner)
     community_item = current_communities.service.read(community_owner.identity, community.id)
 

@@ -6,6 +6,6 @@
 # oarepo-communities is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
-"""Custom fields applicable to communities, such as selector for workflows."""
+"""Community records service module."""
 
 from __future__ import annotations

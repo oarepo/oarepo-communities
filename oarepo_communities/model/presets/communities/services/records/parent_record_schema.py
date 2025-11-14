@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, override
 
-import marshmallow as ma
-from marshmallow import Schema, fields
+from invenio_rdm_records.services.schemas.parent.communities import CommunitiesSchema
+from marshmallow_utils.fields import NestedAttribute
 from oarepo_model.customizations import (
     AddMixins,
     Customization,
@@ -28,18 +28,13 @@ if TYPE_CHECKING:
     from oarepo_model.model import InvenioModel
 
 
-# TODO: How to use RDM here? - invenio_rdm_records.services.schemas.parent.communities
-class CommunitiesParentSchema(Schema):
-    """Schema for communities field."""
-
-    ids = fields.List(fields.String())
-    default = fields.String()
-
-
 class CommunitiesParentRecordSchemaMixin:
     """Mixin for parent record schema."""
 
-    communities = ma.fields.Nested(CommunitiesParentSchema)
+    # side effect of default = fields.String(attribute="default.id", allow_none=True) is that we need different
+    # data loading in permissions (called before validation) and in schema (called after validation)
+    # also iirc NestedAttribute caused issues in ui serialization
+    communities = NestedAttribute(CommunitiesSchema)
 
 
 class CommunitiesParentRecordSchemaPreset(Preset):
