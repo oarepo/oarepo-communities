@@ -14,7 +14,8 @@ from typing import TYPE_CHECKING, Any
 
 from flask_principal import identity_loaded
 
-import oarepo_communities.cli  # noqa - imported to register CLI commands
+import oarepo_communities.cli
+import oarepo_communities.config
 
 from .resolvers.communities import CommunityRoleResolver
 from .services.community_role.config import CommunityRoleServiceConfig
@@ -46,7 +47,7 @@ class OARepoCommunities:
 
     def init_config(self, app: Flask) -> None:
         """Initialize configuration."""
-        from . import config, ext_config
+        from . import config
 
         app.config.setdefault("REQUESTS_ALLOWED_RECEIVERS", []).extend(config.REQUESTS_ALLOWED_RECEIVERS)
         app.config.setdefault("OAREPO_REQUESTS_DEFAULT_RECEIVER", config.OAREPO_REQUESTS_DEFAULT_RECEIVER)
@@ -70,11 +71,10 @@ class OARepoCommunities:
             app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
         )
         """
-        app.config.setdefault("DATASTREAMS_TRANSFORMERS", {}).update(config.DATASTREAMS_TRANSFORMERS)
 
         app.config.setdefault(
             "OAREPO_COMMUNITIES_DEFAULT_WORKFLOW",
-            ext_config.OAREPO_COMMUNITIES_DEFAULT_WORKFLOW,
+            oarepo_communities.config.OAREPO_COMMUNITIES_DEFAULT_WORKFLOW,
         )
 
         app.config.setdefault(
@@ -135,18 +135,6 @@ def finalize_app(app: Flask) -> None:
                 break
         else:
             app.config["COMMUNITIES_CUSTOM_FIELDS_UI"].append(cf)
-
-    if not app.config.get("WORKFLOWS"):
-        # set up default workflows if not set
-        from .ext_config import COMMUNITY_WORKFLOWS
-
-        app.config["WORKFLOWS"] = COMMUNITY_WORKFLOWS
-
-    if not app.config.get("COMMUNITIES_ROLES"):
-        # set up default roles if not set up
-        from .ext_config import DEFAULT_COMMUNITIES_ROLES
-
-        app.config["COMMUNITIES_ROLES"] = DEFAULT_COMMUNITIES_ROLES
 
     requests = app.extensions["invenio-requests"]
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())

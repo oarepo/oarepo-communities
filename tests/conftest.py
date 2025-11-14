@@ -71,14 +71,6 @@ def app(app):
 
     app.register_blueprint(bp)
 
-    bp = Blueprint("community-records", __name__)
-
-    @bp.route("/community-records/search", methods=["GET"])
-    def search(pid_value: str) -> str:
-        return "search ok"
-
-    app.register_blueprint(bp)
-
     return app
 
 

@@ -46,9 +46,8 @@ class CommunityInclusionComponent(ServiceComponent):
         **kwargs: Any,
     ) -> None:
         try:
-            community_id = data["parent"]["communities"]["default"]
+            community_id = data["parent"]["communities"]["default"]["id"]
         except KeyError as exc:
             raise MissingDefaultCommunityError("Default community not defined in input.") from exc
 
-        # TODO: can we add to communities via slugs?
         record.parent.communities.add(convert_community_ids_to_uuid(community_id), default=True)

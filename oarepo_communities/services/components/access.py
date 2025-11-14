@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from invenio_records_resources.records.api import Record
 
 
-# TODO: is this needed?
 class CommunityRecordAccessComponent(ServiceComponent):
     """Component setting record access field based on the community's access."""
 

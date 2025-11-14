@@ -12,6 +12,7 @@ from typing import Any
 from urllib.parse import urlencode
 
 import pytest
+from invenio_communities import current_communities
 
 
 def _community_data(community) -> dict[str, Any]:
@@ -35,6 +36,17 @@ def test_create_record_in_community(logged_client, communities_model, community_
     assert response.json["parent"]["communities"]["default"] == str(community.id)
 
 
+def test_create_record_in_community_by_slug(
+    logged_client, communities_model, community_owner, community, urls, search_clear
+):
+    owner_client = logged_client(community_owner)
+    data = _community_data(community)
+    data["parent"]["communities"]["default"] = community.slug
+    response = owner_client.post(urls["BASE_URL"], json=data)
+    assert response.status_code == 201
+    assert response.json["parent"]["communities"]["default"] == str(community.id)
+
+
 def test_create_record_in_community_default_workflow(
     logged_client, communities_model, community_owner, community, urls, search_clear
 ):
@@ -46,7 +58,6 @@ def test_create_record_in_community_default_workflow(
     assert response.json["parent"]["communities"]["default"] == str(community.id)
 
 
-# TODO: where to add the links?
 def test_search(
     logged_client,
     communities_model,
@@ -84,6 +95,39 @@ def test_search(
     # this now works as user search
     assert len(response_draft1.json["hits"]["hits"]) == 1
     assert len(response_draft2.json["hits"]["hits"]) == 1
+
+    assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
+    assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
+
+
+def test_search_community_records(
+    logged_client,
+    communities_model,
+    community_owner,
+    published_record_with_community_factory,
+    community_get_or_create,
+    record_service,
+    link2testclient,
+    search_clear,
+):
+    owner_client = logged_client(community_owner)
+
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
+    community1_item = current_communities.service.read(community_owner.identity, community_1.id)
+    community2_item = current_communities.service.read(community_owner.identity, community_2.id)
+
+    record1 = published_record_with_community_factory(community_owner.identity, str(community_1.id))
+    record2 = published_record_with_community_factory(community_owner.identity, str(community_2.id))
+
+    communities_model.Record.index.refresh()
+    communities_model.Draft.index.refresh()
+
+    response_record1 = owner_client.get(link2testclient(community1_item.links["records"]))
+    response_record2 = owner_client.get(link2testclient(community2_item.links["records"]))
+
+    assert len(response_record1.json["hits"]["hits"]) == 1
+    assert len(response_record2.json["hits"]["hits"]) == 1
 
     assert response_record1.json["hits"]["hits"][0]["id"] == record1["id"]
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
@@ -193,8 +237,6 @@ def test_user_search(
     invite,
     search_clear,
 ):
-    # TODO: should community owner be able to see records of users from the same community on /user/records url?
-    # - in the rdm-12 test this was enforced by OwnersComponent; what is the approach now? -
     community_reader = users[0]
     owner_client = logged_client(community_owner)
 
@@ -204,7 +246,6 @@ def test_user_search(
 
     record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
-    # record3 = draft_with_community_factory(community_reader.identity, str(community_1.id))  # noqa
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()

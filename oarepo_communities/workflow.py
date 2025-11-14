@@ -46,9 +46,12 @@ def community_default_workflow(**kwargs: Any) -> Workflow:
         community_id = community_id_from_record(kwargs["record"])
     else:
         try:
-            community_id = kwargs["data"]["parent"]["communities"]["default"]
-        except KeyError as e:
-            raise MissingDefaultCommunityError("Failed to get community from input data.") from e
+            community_id = kwargs["data"]["parent"]["communities"]["default"]["id"]
+        except (KeyError, TypeError):
+            try:
+                community_id = kwargs["data"]["parent"]["communities"]["default"]
+            except KeyError as e:
+                raise MissingDefaultCommunityError("Failed to get community from input data.") from e
 
     if community_id is None:
         raise MissingDefaultCommunityError("Failed to get community from record.")

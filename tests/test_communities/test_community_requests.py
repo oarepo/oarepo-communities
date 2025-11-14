@@ -13,6 +13,8 @@ from typing import Any
 import pytest
 from pytest_oarepo.requests.functions import get_request_type
 
+from oarepo_communities.errors import CommunityAlreadyIncludedError
+
 
 @pytest.fixture
 def accept_request(urls, link2testclient):
@@ -211,6 +213,7 @@ def test_community_submission_secondary(
     urls,
     env,
     accept_request,
+    link2testclient,
     search_clear,
 ):
     reader_client, owner_client, community_1, community_2 = (
@@ -223,15 +226,13 @@ def test_community_submission_secondary(
     record_id = record["id"]
 
     record_before = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
-    """
-    with pytest.raises(CommunityAlreadyIncludedException):
+    with pytest.raises(CommunityAlreadyIncludedError):
         create_request_on_record(
-            community_reader.identity,
+            reader_client.user_fixture.identity,
             record_id,
             "secondary_community_submission",
             additional_data={"payload": {"community": str(community_1.id)}},
         )
-    """
     submit_request_on_record(
         reader_client.user_fixture.identity,
         record_id,
@@ -293,8 +294,10 @@ def test_remove_secondary(
     )
 
     record_before = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
+    reader_client.get(link2testclient(record_before.json["links"]["applicable-requests"])).json["hits"]
 
     # TODO: this should not work - it should not produce a link
+    # i'm not sure i get this - eg if i call applicable-requests, i can't know which community is to be removed
     """
     with pytest.raises(PrimaryCommunityException):
         create_request_on_record(
@@ -335,13 +338,6 @@ def test_remove_secondary(
         "hits"
     ]
     assert get_request_type(applicable_requests, "remove_secondary_community") is None
-    """
-    with pytest.raises(CommunityNotIncludedException):
-        reader_client.post(
-            f"/thesis/{record_id}/requests/remove_secondary_community",
-            json={"payload": {"community": str(community_2.id)}},
-        )
-     """
 
 
 @pytest.mark.skip

@@ -19,6 +19,7 @@ from oarepo_model.customizations import (
 )
 from oarepo_model.presets import Preset
 
+from oarepo_communities.services.components.access import CommunityRecordAccessComponent
 from oarepo_communities.services.components.default_workflow import (
     CommunityDefaultWorkflowComponent,
 )
@@ -45,3 +46,4 @@ class CommunitiesServiceConfigPreset(Preset):
     ) -> Generator[Customization]:
         yield AddToList("record_service_components", CommunityDefaultWorkflowComponent)
         yield AddToList("record_service_components", CommunityInclusionComponent)
+        yield AddToList("record_service_components", CommunityRecordAccessComponent)

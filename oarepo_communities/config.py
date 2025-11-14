@@ -13,7 +13,7 @@ from __future__ import annotations
 from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 from invenio_i18n import lazy_gettext as _
 
-from .cf.workflows import WorkflowCF, lazy_workflow_options
+from .services.custom_fields.workflow import WorkflowCF, lazy_workflow_options
 
 # from .notifications.generators import CommunityRoleEmailRecipient # noqa
 
@@ -65,8 +65,8 @@ DISPLAY_NEW_COMMUNITIES = True
 # NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}} # noqa
 
 
-DATASTREAMS_TRANSFORMERS = {
-    "set_community": "oarepo_communities.datastreams.transformers.SetCommunityTransformer",
-}
-
 COMMUNITIES_RECORDS_SEARCH_ALL = False
+
+# name of the default workflow for communities. It is used when a community does not have
+# an explicit workflow set
+OAREPO_COMMUNITIES_DEFAULT_WORKFLOW = "default"

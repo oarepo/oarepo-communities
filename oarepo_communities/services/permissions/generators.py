@@ -191,7 +191,7 @@ class DefaultCommunityRoleMixin(CommunityRoleMixinProtocol):
 
     @override
     def _get_data_communities(self, data: dict | None = None, **kwargs: Any) -> list[str]:
-        community_id = (data or {}).get("parent", {}).get("communities", {}).get("default")
+        community_id = (data or {}).get("parent", {}).get("communities", {}).get("default", {})
         if not community_id:
             raise MissingDefaultCommunityError("Default community not defined in input data.")
         return [convert_community_ids_to_uuid(community_id)]
