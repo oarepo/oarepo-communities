@@ -13,8 +13,6 @@ from __future__ import annotations
 from invenio_records_resources.references.entity_resolvers import ServiceResultResolver
 
 
-# TODO: decide standard way to do this -config loading race condition with initialization- issue
-# (redoing init in finalize_app)?
 def community_role_notification_resolver() -> ServiceResultResolver:
     """Return community role notification resolver."""
     return ServiceResultResolver(service_id="community-role", type_key="community_role")

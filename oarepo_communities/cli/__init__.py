@@ -11,20 +11,15 @@
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING, cast
 
 import click
 import yaml
 from flask.cli import with_appcontext
 from invenio_access.permissions import system_identity
 from invenio_accounts.models import User
+from invenio_communities import current_communities
 from invenio_communities.cli import communities
 from invenio_communities.communities.records.api import Community
-from invenio_records_resources.proxies import current_service_registry
-
-if TYPE_CHECKING:
-    from invenio_communities.communities.services import CommunityService
-    from invenio_communities.members.services import MemberService
 
 
 @communities.command(name="create")
@@ -34,8 +29,7 @@ if TYPE_CHECKING:
 @with_appcontext
 def create_community(slug: str, title: str, public: bool) -> None:
     """Create a community."""
-    community_service = cast("CommunityService", current_service_registry.get("communities"))
-    community_service.create(
+    current_communities.service.create(
         system_identity,
         {
             "slug": slug,
@@ -49,9 +43,8 @@ def create_community(slug: str, title: str, public: bool) -> None:
 @with_appcontext
 def list_communities() -> None:
     """List all communities."""
-    community_service = cast("CommunityService", current_service_registry.get("communities"))
     yaml.dump_all(
-        community_service.read_all(system_identity, fields=["id", "slug", "metadata", "access", "featured"]),
+        current_communities.service.read_all(system_identity, fields=["id", "slug", "metadata", "access", "featured"]),
         sys.stdout,
     )
 
@@ -79,8 +72,7 @@ def add_community_member(community: str, email: str, role: str) -> None:
         raise click.ClickException(f"User with email {email} not found")
     user_id = user.id
 
-    members_service = cast("MemberService", current_service_registry.get("members"))
-    members_service.add(
+    current_communities.service.members.add(
         system_identity,
         str(community_id),
         {
@@ -109,8 +101,7 @@ def remove_community_member(community: str, email: str) -> None:
         raise click.ClickException(f"User with email {email} not found")
     user_id = user.id
 
-    members_service = cast("MemberService", current_service_registry.get("members"))
-    members_service.delete(
+    current_communities.service.members.delete(
         system_identity,
         community_id,
         {
