@@ -70,7 +70,7 @@ class OARepoCommunities:
 
         app_registered_event_types = app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
         app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
-            app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
+            app_notification_recipients_resolvers, config.NOTIFICATION_RECIPIENTS_RESOLVERS
         )
 
         app.config.setdefault(
