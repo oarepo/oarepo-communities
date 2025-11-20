@@ -13,6 +13,7 @@ from __future__ import annotations
 from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
 from invenio_i18n import lazy_gettext as _
 
+from .notifications.generators import CommunityRoleEmailRecipient
 from .services.custom_fields.workflow import WorkflowCF, lazy_workflow_options
 
 # from .notifications.generators import CommunityRoleEmailRecipient # noqa
@@ -62,7 +63,7 @@ DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
 
-# NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}} # noqa
+NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}}
 
 
 COMMUNITIES_RECORDS_SEARCH_ALL = False

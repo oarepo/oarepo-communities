@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from deepmerge import conservative_merger
 from flask_principal import identity_loaded
 
 import oarepo_communities.cli
@@ -65,12 +66,11 @@ class OARepoCommunities:
             **app.config.get("COMMUNITIES_ROUTES", {}),
         }
 
-        app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
-        """
+        app_notification_recipients_resolvers = app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
+
         app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
-            app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
+            app_notification_recipients_resolvers, config.NOTIFICATION_RECIPIENTS_RESOLVERS
         )
-        """
 
         app.config.setdefault(
             "OAREPO_COMMUNITIES_DEFAULT_WORKFLOW",
