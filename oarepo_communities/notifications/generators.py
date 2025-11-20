@@ -10,16 +10,18 @@
 
 from __future__ import annotations
 
-"""
+from typing import Any
+
+from invenio_accounts.models import User
+from invenio_communities.members import MemberModel
+from invenio_notifications.models import Recipient
 from oarepo_requests.notifications.generators import SpecificEntityRecipient, _extract_entity_email_data
-"""
 
 
-# """Community role recipient generator for a notification."""
-"""
 class CommunityRoleEmailRecipient(SpecificEntityRecipient):
+    """Community role recipient generator for notifications."""
 
-
+    # TODO: can member be a group? emails method suggested so
     def _get_recipients(self, entity: Any) -> dict[str, Recipient]:
         community_id = entity.community.id
         role = entity.role
@@ -36,4 +38,3 @@ class CommunityRoleEmailRecipient(SpecificEntityRecipient):
                 .all()
             )
         }
-"""
