@@ -33,9 +33,9 @@ oarepo14 = [
 ]
 
 [project.entry-points."invenio_assets.webpack"]
-oarepo_communities_components_ui_theme = "oarepo_communities.ui.communities_components.webpack:theme"
-oarepo_communities_i18n = "oarepo_communities.i18n.webpack:theme"
-oarepo_communities_records_ui_theme = "oarepo_communities.ui.oarepo_communities.webpack:theme"
+# oarepo_communities_components_ui_theme = "oarepo_communities.ui.communities_components.webpack:theme"
+# oarepo_communities_i18n = "oarepo_communities.i18n.webpack:theme"
+# oarepo_communities_records_ui_theme = "oarepo_communities.ui.oarepo_communities.webpack:theme"
 
 [project.entry-points."invenio_base.api_apps"]
 oarepo_communities = "oarepo_communities.ext:OARepoCommunities"
