@@ -33,7 +33,6 @@ from oarepo_requests.utils import (
     open_request_exists,
 )
 
-from oarepo_communities.ui.allowed_communities import AllowedCommunitiesComponent
 from oarepo_communities.utils import community_to_dict
 
 from ..errors import (
@@ -43,6 +42,7 @@ from ..errors import (
 from .utils import (
     auto_approved_message,
     change_primary_community,
+    get_allowed_communities,
     no_request_message,
     on_request_creator,
     on_request_submitted,
@@ -153,20 +153,20 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
         }
 
     @classmethod
+    @override
     def is_applicable_to(cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any) -> bool:
         """Check if the request type is applicable to the topic."""
+        if not isinstance(topic, RecordWithParent):
+            raise TypeError("Topic must be a draft record.")
         if open_request_exists(topic, cls.type_id) or open_request_exists(
             topic, ConfirmCommunityMigrationRequestType.type_id
         ):
             return False
-        # check if the user has more than one community to which they can migrate
-        allowed_communities_count = 0
-        for __ in AllowedCommunitiesComponent.get_allowed_communities(identity, "create"):
-            allowed_communities_count += 1
-            if allowed_communities_count > 1:
+        # check if the user has a community to migrate the record to
+        for community in get_allowed_communities(identity, "create"):
+            if str(community.id) != str(topic.parent.communities.default.id):
                 break
-
-        if allowed_communities_count <= 1:
+        else:
             return False
 
         return super().is_applicable_to(identity, topic, *args, **kwargs)  # type: ignore[no-any-return]
@@ -246,7 +246,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
     @property
     def form(self) -> dict[str, Any]:
         """Form configuration for request form."""
-        allowed_communities = AllowedCommunitiesComponent.get_allowed_communities(g.identity, "create")
+        allowed_communities = get_allowed_communities(g.identity, "create")
         serialized_allowed_communities = [community_to_dict(community) for community in allowed_communities]
         return {
             "field": "community",
