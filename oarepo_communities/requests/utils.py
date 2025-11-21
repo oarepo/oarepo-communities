@@ -11,9 +11,10 @@
 from __future__ import annotations
 
 # TODO: this file needs to be moved to oarepo_requests
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from typing import TYPE_CHECKING, Any, cast
 
+from invenio_communities.communities.records.api import Community
 from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_records_resources.services.uow import RecordIndexOp
 from oarepo_requests.utils import (
@@ -22,10 +23,11 @@ from oarepo_requests.utils import (
 )
 from oarepo_runtime import current_runtime
 
+from oarepo_communities.workflow import get_workflow_from_community_custom_fields
+
 if TYPE_CHECKING:
     from flask_babel.speaklater import LazyString
     from flask_principal import Identity
-    from invenio_communities.communities.records.api import Community
     from invenio_db.uow import UnitOfWork
     from invenio_drafts_resources.records.api import Record
     from invenio_requests.customizations.request_types import RequestType
@@ -166,3 +168,23 @@ def remove_record_from_community(
 
     uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
     uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
+
+
+def get_allowed_communities(identity: Identity, action: str) -> Generator[Community]:
+    """Get communities where the user has the given permission."""
+    community_ids = set()
+    for need in identity.provides:
+        if need.method == "community" and need.value:
+            community_ids.add(need.value)
+
+    for community_id in community_ids:
+        community = Community.get_record(community_id)
+        if user_has_permission(identity, community, action):
+            yield community
+
+
+def user_has_permission(identity: Identity, community: Community, action: str) -> bool:
+    """Check if the user has permission to perform the action in the community."""
+    wf = get_workflow_from_community_custom_fields(community.custom_fields)
+    permissions = wf.permissions(action, data={"parent": {"communities": {"default": str(community.id)}}})
+    return cast("bool", permissions.allows(identity))

@@ -20,6 +20,7 @@ from flask import current_app
 from invenio_communities.communities.records.api import Community
 from invenio_pidstore.errors import PIDDoesNotExistError
 from oarepo_workflows import Workflow, current_oarepo_workflows
+from oarepo_workflows.errors import InvalidWorkflowError
 
 from oarepo_communities.errors import (
     CommunityDoesntExistError,
@@ -71,4 +72,7 @@ def get_workflow_from_community_custom_fields(custom_fields: dict) -> Workflow:
         "workflow",
         current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"],
     )
-    return current_oarepo_workflows.workflow_by_code[workflow_id]
+    try:
+        return current_oarepo_workflows.workflow_by_code[workflow_id]
+    except KeyError:
+        raise InvalidWorkflowError(f"Workflow {workflow_id} does not exist in the configuration.") from None
