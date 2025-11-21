@@ -157,7 +157,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
     def is_applicable_to(cls, identity: Identity, topic: Record, *args: Any, **kwargs: Any) -> bool:
         """Check if the request type is applicable to the topic."""
         if not isinstance(topic, RecordWithParent):
-            raise TypeError("Topic must be a draft record.")
+            raise TypeError("Topic must be a drafts supporting record.") # pragma: no cover
         if open_request_exists(topic, cls.type_id) or open_request_exists(
             topic, ConfirmCommunityMigrationRequestType.type_id
         ):
