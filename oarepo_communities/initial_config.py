@@ -9,6 +9,8 @@
 
 from __future__ import annotations
 
-from oarepo_communities.services.community_records.service import CommunityRecordsService
+from oarepo_communities.services.community_records.service import (
+    CommunityRecordsService,
+)
 
 RDM_RECORDS_COMMUNITY_RECORDS_SERVICE_CLASS = CommunityRecordsService

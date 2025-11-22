@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any, override
 from invenio_communities.records.records.models import CommunityRelationMixin
 from invenio_db import db
 from oarepo_model.customizations import (
-    AddBaseClasses,
+    AddBaseClass,
     AddClass,
     AddClassField,
     Customization,
@@ -53,4 +53,5 @@ class ParentCommunityMetadataPreset(Preset):
             "__record_model__",
             dependencies["ParentRecordMetadata"],
         )
-        yield AddBaseClasses("ParentCommunityMetadata", db.Model, CommunityRelationMixin)
+        yield AddBaseClass("ParentCommunityMetadata", db.Model)
+        yield AddBaseClass("ParentCommunityMetadata", CommunityRelationMixin)

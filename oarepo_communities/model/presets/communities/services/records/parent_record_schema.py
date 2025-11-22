@@ -16,8 +16,8 @@ from typing import TYPE_CHECKING, Any, override
 from invenio_rdm_records.services.schemas.parent.communities import CommunitiesSchema
 from marshmallow_utils.fields import NestedAttribute
 from oarepo_model.customizations import (
-    AddMixins,
     Customization,
+    PrependMixin,
 )
 from oarepo_model.presets import Preset
 
@@ -49,4 +49,4 @@ class CommunitiesParentRecordSchemaPreset(Preset):
         model: InvenioModel,
         dependencies: dict[str, Any],
     ) -> Generator[Customization]:
-        yield AddMixins("ParentRecordSchema", CommunitiesParentRecordSchemaMixin)
+        yield PrependMixin("ParentRecordSchema", CommunitiesParentRecordSchemaMixin)
