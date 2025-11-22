@@ -26,7 +26,10 @@ class WorkflowSchemaField(SanitizedUnicode):
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the field with a workflow validator."""
-        super().__init__(validate=[lambda code: code in current_oarepo_workflows.workflow_by_code], **kwargs)
+        super().__init__(
+            validate=[lambda code: code in current_oarepo_workflows.workflow_by_code],
+            **kwargs,
+        )
 
 
 class WorkflowCF(KeywordCF):
