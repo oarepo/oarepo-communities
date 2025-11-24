@@ -63,7 +63,7 @@ DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
 
-NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}}
+NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": lambda key, notification: CommunityRoleEmailRecipient(key)}  # noqa ARG005
 
 
 COMMUNITIES_RECORDS_SEARCH_ALL = False

@@ -10,31 +10,36 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from invenio_accounts.models import User
 from invenio_communities.members import MemberModel
-from invenio_notifications.models import Recipient
-from oarepo_requests.notifications.generators import SpecificEntityRecipient, _extract_entity_email_data
+from invenio_notifications.models import Notification, Recipient
+from invenio_notifications.services.generators import RecipientGenerator
+from invenio_records.dictutils import dict_lookup
+from oarepo_requests.notifications.generators.recipients import _extract_user_email_data
 
 
-class CommunityRoleEmailRecipient(SpecificEntityRecipient):
+class CommunityRoleEmailRecipient(RecipientGenerator):
     """Community role recipient generator for notifications."""
 
-    # TODO: can member be a group? emails method suggested so
-    def _get_recipients(self, entity: Any) -> dict[str, Recipient]:
-        community_id = entity.community.id
-        role = entity.role
+    def __init__(self, key: str):
+        """Ctor."""
+        self.key = key
 
-        return {
-            user.email: Recipient(data=_extract_entity_email_data(user))
-            for user in (
-                User.query.join(MemberModel)
-                .filter(
-                    MemberModel.role == role,
-                    MemberModel.community_id == str(community_id),
-                    MemberModel.active,
-                )
-                .all()
+    def __call__(self, notification: Notification, recipients: dict[str, Recipient]):
+        """Update required recipient information and add backend id."""
+        community_role = dict_lookup(notification.context, self.key)
+        id_ = community_role["community"]["id"]
+        role = community_role["role"]
+
+        # TODO: add group support as in .emails method in rdm-12?
+        users = (
+            User.query.join(MemberModel)
+            .filter(
+                MemberModel.role == role,
+                MemberModel.community_id == str(id_),
+                MemberModel.active,
             )
-        }
+            .all()
+        )
+        for user in users:
+            recipients[str(user.id)] = Recipient(data=_extract_user_email_data(user))
