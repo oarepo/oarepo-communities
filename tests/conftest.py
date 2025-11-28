@@ -11,7 +11,6 @@ from __future__ import annotations
 import os
 
 import pytest
-from flask import Blueprint
 from invenio_app.factory import create_api
 from invenio_i18n import lazy_gettext as _
 from invenio_rdm_records.services.generators import RecordOwners
@@ -59,19 +58,6 @@ pytest_plugins = [
     "pytest_oarepo.users",
     "pytest_oarepo.files",
 ]
-
-
-@pytest.fixture(scope="module")
-def app(app):
-    bp = Blueprint("invenio_app_rdm_communities", __name__)
-
-    @bp.route("/invenio_app_rdm_communities/communities_home", methods=["GET"])
-    def communities_home(pid_value: str) -> str:
-        return "communities_home ok"
-
-    app.register_blueprint(bp)
-
-    return app
 
 
 @pytest.fixture(autouse=True)
