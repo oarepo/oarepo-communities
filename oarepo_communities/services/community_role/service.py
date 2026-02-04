@@ -71,7 +71,7 @@ class CommunityRoleService(RecordService):
         action: str = "read",
         **kwargs: Any,
     ) -> RecordItem:
-        community_id = id_.split(":")[0].strip()
+        community_id = id_.split(":", maxsplit=1)[0].strip()
         role = id_.split(":")[1].strip()
         community = current_communities.service.read(identity, community_id, **kwargs)
         result = {
