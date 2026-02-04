@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from invenio_access.models import Role, User
 from invenio_communities.members.records.models import MemberModel
 from invenio_db import db
-from oarepo_requests.notifications.generators import _extract_entity_email_data
+from oarepo_requests.notifications.generators.recipients import _extract_user_email_data
 
 log = logging.getLogger(__name__)
 
@@ -54,10 +54,10 @@ class CommunityRoleRecord:
             try:
                 if member.user_id:
                     user = User.query.get(member.user_id)
-                    member_emails.append(_extract_entity_email_data(user))
+                    member_emails.append(_extract_user_email_data(user))
                 if member.group_id:
                     group = Role.query.get(member.group_id)
-                    member_emails.extend(_extract_entity_email_data(user) for user in group.users)
+                    member_emails.extend(_extract_user_email_data(user) for user in group.users)
             except Exception:
                 log.exception(
                     "Error retrieving user %s, group %s for community members",
