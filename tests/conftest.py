@@ -23,9 +23,6 @@ from oarepo_rdm import rdm_minimal_preset
 from oarepo_requests.model.presets.requests import requests_preset
 from oarepo_requests.receiver import default_workflow_receiver_function
 from oarepo_requests.services.permissions.generators import RequestActive
-from oarepo_requests.services.permissions.workflow_policies import (
-    CreatorsFromWorkflowRequestsPermissionPolicy,
-)
 from oarepo_workflows import (
     AutoApprove,
     IfInState,
@@ -35,8 +32,10 @@ from oarepo_workflows import (
     WorkflowTransitions,
 )
 from oarepo_workflows.model.presets import workflows_preset
+from oarepo_workflows.requests.generators.conditionals import IfRequestType
 
 from oarepo_communities.model.presets import communities_preset
+from oarepo_communities.requests.community_submission import CommunitySubmission
 from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
     CommunityRole,
@@ -48,6 +47,7 @@ from oarepo_communities.services.permissions.generators import (
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
+from invenio_rdm_records.services.permissions import RDMRecordPermissionPolicy, RDMRequestsPermissionPolicy
 
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
@@ -413,6 +413,13 @@ def create_app(instance_path, entry_points):
     return create_api
 
 
+from oarepo_requests.services.permissions.workflow_policies import (
+    CreatorsFromWorkflowRequestsPermissionPolicy as OriginalCreatorsFromWorkflowRequestsPermissionPolicy
+)
+
+class CreatorsFromWorkflowRequestsPermissionPolicy(OriginalCreatorsFromWorkflowRequestsPermissionPolicy):
+    can_create = (*OriginalCreatorsFromWorkflowRequestsPermissionPolicy.can_create, IfRequestType(CommunitySubmission, RDMRequestsPermissionPolicy.can_create))
+
 @pytest.fixture(scope="module")
 def app_config(app_config):
     """Mimic an instance's configuration."""
@@ -452,8 +459,6 @@ def app_config(app_config):
         ("cs", _("Czech")),
     ]
 
-    app_config["REQUESTS_PERMISSION_POLICY"] = CreatorsFromWorkflowRequestsPermissionPolicy
-
     """
     app_config["NOTIFICATIONS_BACKENDS"] = {
         EmailNotificationBackend.id: EmailNotificationBackend(),
@@ -486,6 +491,10 @@ def app_config(app_config):
             "draft_cls": "thesis.records.api.ThesisDraft",
         },
     )
+
+
+    app_config["RDM_COMMUNITY_SUBMISSION_REQUEST_CLS"] = CommunitySubmission
+    app_config["REQUESTS_PERMISSION_POLICY"] = CreatorsFromWorkflowRequestsPermissionPolicy
 
     return app_config
 

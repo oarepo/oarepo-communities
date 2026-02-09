@@ -34,6 +34,9 @@ if TYPE_CHECKING:
 
 def community_default_workflow(**kwargs: Any) -> Workflow:
     """Get default workflow for the community."""
+    # this is called from DepositionWorkflowPermission handling submit_record permission on community
+    if "community_id" in kwargs:
+        return get_workflow_from_community_custom_fields(Community.pid.resolve(kwargs["community_id"]))
     # optimization: if community metadata is passed, use it
     if "community_metadata" in kwargs:
         community_metadata = kwargs["community_metadata"]

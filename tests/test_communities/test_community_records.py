@@ -406,3 +406,30 @@ def test_search_ui_serialization(
     assert "access" in search_model.json["hits"]["hits"][0]
     assert "access" in search_user_global.json["hits"]["hits"][0]
     assert "access" in search_user_model.json["hits"]["hits"][0]
+
+def test_community_on_review(
+    logged_client,
+    community_owner,
+    users,
+    community,
+    communities_model,
+    invite,
+    urls,
+    search_clear,
+):
+    community_id = str(community.id)
+    community_reader = users[0]
+    invite(community_reader, community_id, "reader")
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
+
+    resp = reader_client.post(f"/records", json={
+        '$schema': 'local://communities_test-v1.0.0.json', 'files': {'enabled': False},
+        'metadata': {'contributors': ['Contributor 1'], 'creators': ['Creator 1', 'Creator 2'], 'title': 'blabla'},
+        "parent": {"communities": {"default": str(community.id)}}} # must be here if communities are to customize who can create records
+                              )
+    id_ = resp.json["id"]
+    review = reader_client.put(f"/records/{id_}/draft/review", json={"receiver":{"community": community_id}, "type":"community-submission"})
+    submit_review = reader_client.post(f"/records/{id_}/draft/actions/submit-review")
+    accept_review = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
+    print()
