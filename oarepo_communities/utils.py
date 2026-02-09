@@ -17,12 +17,12 @@ from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities, current_identities_cache
 from invenio_communities.utils import identity_cache_key
 
-from oarepo_communities.services.permissions.generators import UserInCommunityNeed
+from oarepo_communities.services.permissions.needs import UserInCommunityNeed
 
 if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_communities.members.records import Member as MemberRecord
-    from invenio_drafts_resources.records import Record
+    from invenio_drafts_resources.records import Record, Record as RecordWithParent
 
 
 def get_community_needs_for_identity(
@@ -90,3 +90,26 @@ def community_to_dict(community: Community) -> dict:
         },
         **(community.metadata or {}),
     }
+
+
+def get_default_community_id_from_record(record: RecordWithParent) -> str:
+    try:
+        return str(record.parent.communities.default.id)
+    except AttributeError:
+        try:
+            return record.parent.review.receiver._parse_ref_dict_id()
+        # test if this happens anywhere
+        except AttributeError:
+            return str(record["parent"]["communities"]["default"])
+
+def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
+    try:
+        communities = record.parent.communities.ids
+    except AttributeError:
+        try:
+            return record.parent.review.receiver._parse_ref_dict_id()
+        except AttributeError:
+            return record["parent"]["communities"]["ids"]
+    if not communities:
+        return [record.parent.review.receiver._parse_ref_dict_id()]
+    return communities

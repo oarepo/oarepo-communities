@@ -33,7 +33,7 @@ from oarepo_requests.utils import (
     open_request_exists,
 )
 
-from oarepo_communities.utils import community_to_dict
+from oarepo_communities.utils import community_to_dict, get_default_community_id_from_record
 
 from ..errors import (
     CommunityAlreadyIncludedError,
@@ -164,7 +164,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
             return False
         # check if the user has a community to migrate the record to
         for community in get_allowed_communities(identity, "create"):
-            if str(community.id) != str(topic.parent.communities.default.id):
+            if str(community.id) != get_default_community_id_from_record(topic):
                 break
         else:
             return False

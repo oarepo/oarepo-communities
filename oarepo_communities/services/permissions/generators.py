@@ -13,7 +13,7 @@ from __future__ import annotations
 import abc
 import uuid
 from functools import reduce, wraps
-from typing import TYPE_CHECKING, NamedTuple, Protocol, cast, override
+from typing import TYPE_CHECKING, Protocol, cast, override
 
 from flask_principal import Need
 from invenio_communities.communities.records.api import Community
@@ -34,6 +34,9 @@ from oarepo_communities.errors import (
     TargetCommunityNotProvidedError,
 )
 from oarepo_communities.proxies import current_oarepo_communities
+from oarepo_communities.services.permissions.needs import UserInCommunityNeed
+from oarepo_communities.utils import get_community_ids_from_record, \
+    get_default_community_id_from_record
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -56,20 +59,6 @@ def require_draft_record(fn: Callable) -> Callable:
         return fn(*args, **kwargs)
 
     return wrapper
-
-
-class UserInCommunityNeed(NamedTuple):
-    """Need for user in community."""
-
-    method: str
-    value: str
-    user: str | int
-    community: str
-
-    @classmethod
-    def from_user_community(cls, user: str | int, community: str) -> UserInCommunityNeed:
-        """Create need from user and community."""
-        return cls("user_in_community", f"{user}:{community}", user, community)
 
 
 class InAnyCommunity(Generator):
@@ -158,7 +147,7 @@ class CommunityRoleMixin(CommunityRoleMixinProtocol):
         if not isinstance(record, RecordWithParent):
             raise TypeError("Record must contain a parent! Did you forget to use drafts?")
         try:
-            return cast("list[str]", record.parent.communities.ids)
+            return get_community_ids_from_record(record)
         except AttributeError as e:
             raise MissingCommunitiesError(f"Communities missing on record {record}.") from e
 
@@ -182,12 +171,11 @@ class DefaultCommunityRoleMixin(CommunityRoleMixinProtocol):
         if not isinstance(record, RecordWithParent):
             raise TypeError("Record must contain a parent! Did you forget to use drafts?")
         try:
-            return [str(record.parent.communities.default.id)]
-        except (AttributeError, TypeError):
-            try:
-                return [str(record["parent"]["communities"]["default"])]
-            except KeyError as e:
-                raise MissingDefaultCommunityError(f"Default community missing on record {record}.") from e
+            return [get_default_community_id_from_record(record)]
+        except Exception as e:
+            raise MissingDefaultCommunityError(f"Default community missing on record {record}.") from e
+
+
 
     @override
     def _get_data_communities(self, data: dict | None = None, **kwargs: Any) -> list[str]:
@@ -226,10 +214,11 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
         """Set of Needs granting permission."""
         _needs = set[Need]()
 
-        # if called on community, returns the required roles bound to the community id
-        if record and isinstance(record, Community):
+        # if called on community, returns the required roles bound to the community id; community_id comes from submit_record permissions
+        if record and isinstance(record, Community) or "community_id" in kwargs:
+            id_ = str(record.id) if "community_id" not in kwargs else kwargs["community_id"]
             for role in self.roles(**kwargs):
-                _needs.add(CommunityRoleNeed(str(record.id), role))  # type: ignore[reportArgumentType]
+                _needs.add(CommunityRoleNeed(id_, role))  # type: ignore[reportArgumentType]
             return list(_needs)
 
         community_ids = self._get_record_communities(record) if record is not None else self._get_data_communities(data)
