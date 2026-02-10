@@ -32,7 +32,7 @@ from oarepo_workflows import (
     WorkflowTransitions,
 )
 from oarepo_workflows.model.presets import workflows_preset
-from oarepo_workflows.requests.generators.conditionals import IfRequestType
+from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
 
 from oarepo_communities.model.presets import communities_preset
 from oarepo_communities.requests.community_submission import CommunitySubmission
@@ -47,7 +47,6 @@ from oarepo_communities.services.permissions.generators import (
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
 )
-from invenio_rdm_records.services.permissions import RDMRecordPermissionPolicy, RDMRequestsPermissionPolicy
 
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
@@ -361,6 +360,21 @@ class MultipleRecipientsRequests(DefaultRequests):
     )
 
 
+class IndividualDepositionWorkflowPermissions(DefaultWorkflowPermissions):
+    """Individual deposition workflow permissions."""
+
+    can_create = (AuthenticatedUser(),)
+
+
+class IndividualDepositionWorkflowRequestsPermissions(WorkflowRequestPolicy):
+    """Individual deposition workflow requests permissions."""
+
+    community_submission = WorkflowRequest(
+        requesters=[AuthenticatedUser()],
+        recipients=[],
+    )
+
+
 WORKFLOWS = [
     Workflow(
         code="default",
@@ -404,6 +418,12 @@ WORKFLOWS = [
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=MultipleRecipientsRequests,
     ),
+    Workflow(
+        code="individual",
+        label=_("Individual deposition workflow"),
+        permission_policy_cls=IndividualDepositionWorkflowPermissions,
+        request_policy_cls=IndividualDepositionWorkflowRequestsPermissions,
+    ),
 ]
 
 
@@ -412,13 +432,6 @@ def create_app(instance_path, entry_points):
     """Application factory fixture."""
     return create_api
 
-
-from oarepo_requests.services.permissions.workflow_policies import (
-    CreatorsFromWorkflowRequestsPermissionPolicy as OriginalCreatorsFromWorkflowRequestsPermissionPolicy
-)
-
-class CreatorsFromWorkflowRequestsPermissionPolicy(OriginalCreatorsFromWorkflowRequestsPermissionPolicy):
-    can_create = (*OriginalCreatorsFromWorkflowRequestsPermissionPolicy.can_create, IfRequestType(CommunitySubmission, RDMRequestsPermissionPolicy.can_create))
 
 @pytest.fixture(scope="module")
 def app_config(app_config):
@@ -492,9 +505,7 @@ def app_config(app_config):
         },
     )
 
-
     app_config["RDM_COMMUNITY_SUBMISSION_REQUEST_CLS"] = CommunitySubmission
-    app_config["REQUESTS_PERMISSION_POLICY"] = CreatorsFromWorkflowRequestsPermissionPolicy
 
     return app_config
 

@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from flask_principal import Identity
 
 
+# TODO: left for backward compatibility, discuss potential deprecation
 class CommunityDefaultWorkflowComponent(WorkflowSetupComponent):
     """Component setting default workflow from a community when a record is created."""
 
@@ -33,6 +34,6 @@ class CommunityDefaultWorkflowComponent(WorkflowSetupComponent):
         if data is None:
             raise ValueError("data is required when creating a record")  # pragma: no cover
 
-        if not data.get("parent", {}).get("workflow"):
+        if not data.get("parent", {}).get("workflow") and data.get("parent", {}).get("communities", {}).get("default"):
             workflow = current_oarepo_communities.get_community_default_workflow(data=data)
             data.setdefault("parent", {})["workflow"] = workflow.code

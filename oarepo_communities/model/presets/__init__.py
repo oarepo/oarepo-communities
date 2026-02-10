@@ -29,7 +29,7 @@ from oarepo_communities.model.presets.communities.services.records.service_confi
 )
 
 communities_preset = [
-    # CommunitiesServiceConfigPreset,
+    CommunitiesServiceConfigPreset,
     CommunitiesParentRecordSchemaPreset,
     ParentCommunityMetadataPreset,
     CommunitiesParentRecordPreset,

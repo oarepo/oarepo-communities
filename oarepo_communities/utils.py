@@ -22,7 +22,8 @@ from oarepo_communities.services.permissions.needs import UserInCommunityNeed
 if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_communities.members.records import Member as MemberRecord
-    from invenio_drafts_resources.records import Record, Record as RecordWithParent
+    from invenio_drafts_resources.records import Record
+    from invenio_drafts_resources.records import Record as RecordWithParent
 
 
 def get_community_needs_for_identity(
@@ -93,23 +94,58 @@ def community_to_dict(community: Community) -> dict:
 
 
 def get_default_community_id_from_record(record: RecordWithParent) -> str:
+    """Retrieve the default community ID from the given record.
+
+    This function attempts to extract the default community ID associated with the
+    parent of the provided record. If the expected attributes are not present, it
+    falls back to alternative lookup paths. The method handles potential attribute
+    access errors during these lookups and returns the default community ID as a
+    string.
+
+    Arguments:
+        record (RecordWithParent): The record object from which the default community
+            ID is to be retrieved.
+
+    Returns:
+        str: The default community ID as a string.
+
+    """
     try:
         return str(record.parent.communities.default.id)
     except AttributeError:
         try:
-            return record.parent.review.receiver._parse_ref_dict_id()
+            return str(record.parent.review.receiver._parse_ref_dict_id())  # noqa: SLF001
         # test if this happens anywhere
         except AttributeError:
             return str(record["parent"]["communities"]["default"])
 
+
 def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
+    """Extract the list of community IDs associated with a given record.
+
+    The function retrieves community IDs based on the hierarchical structure
+    of the input record. It first attempts to extract the IDs from the
+    `communities` attribute of the parent object. If unsuccessful, it follows
+    a fallback mechanism to try obtaining the IDs from alternative fields.
+
+    Parameters
+    ----------
+    record: RecordWithParent
+        The input record object with a parent and associated attributes.
+
+    Returns
+    -------
+    list[str]
+        A list of community IDs derived from the input record.
+
+    """
     try:
         communities = record.parent.communities.ids
     except AttributeError:
         try:
-            return record.parent.review.receiver._parse_ref_dict_id()
+            return [str(record.parent.review.receiver._parse_ref_dict_id())]  # noqa: SLF001
         except AttributeError:
-            return record["parent"]["communities"]["ids"]
+            return list(record["parent"]["communities"]["ids"])
     if not communities:
-        return [record.parent.review.receiver._parse_ref_dict_id()]
-    return communities
+        return [str(record.parent.review.receiver._parse_ref_dict_id())]  # noqa: SLF001
+    return list(communities)
