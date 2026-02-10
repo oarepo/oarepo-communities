@@ -68,7 +68,6 @@ confirm-community-migration = "oarepo_communities.requests.migration:ConfirmComm
 initiate-community-migration = "oarepo_communities.requests.migration:InitiateCommunityMigrationRequestType"
 remove-secondary-community = "oarepo_communities.requests.remove_secondary:RemoveSecondaryCommunityRequestType"
 secondary-community-submission = "oarepo_communities.requests.submission_secondary:SecondaryCommunitySubmissionRequestType"
-community_submission = "invenio_rdm_records.requests.community_submission:get_request_type"
 
 [project.entry-points."oarepo.fixtures"]
 oarepo_communities = "oarepo_communities.fixtures"
