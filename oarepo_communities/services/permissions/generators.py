@@ -24,7 +24,7 @@ from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_search.engine import dsl
 from oarepo_runtime.services.generators import Generator
-from oarepo_workflows.errors import MissingWorkflowError
+from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
 from oarepo_workflows.services.permissions import FromRecordWorkflow
 
@@ -35,8 +35,7 @@ from oarepo_communities.errors import (
 )
 from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.services.permissions.needs import UserInCommunityNeed
-from oarepo_communities.utils import get_community_ids_from_record, \
-    get_default_community_id_from_record
+from oarepo_communities.utils import get_community_ids_from_record, get_default_community_id_from_record
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -100,15 +99,10 @@ class CommunityWorkflowPermission(FromRecordWorkflow):
     @override
     @require_draft_record  # we are expecting a draft allowed framework to be always used with communities
     def _get_workflow(self, record: Record | None = None, **context: Any) -> Workflow:
-        try:
-            return super()._get_workflow(record=record, **context)
-        except MissingWorkflowError as e:
-            if not record:
-                workflow_id = current_oarepo_communities.get_community_default_workflow(**context)
-                if not workflow_id:
-                    raise MissingWorkflowError("Workflow not defined in input.") from e
-                return workflow_id
-            raise
+        workflow = super()._get_workflow(record=record, **context)
+        if workflow == current_oarepo_workflows.default_workflow and not record:
+            return current_oarepo_communities.get_community_default_workflow(**context)
+        return workflow
 
 
 def convert_community_ids_to_uuid(community_id_or_slug: str) -> str:
@@ -172,10 +166,8 @@ class DefaultCommunityRoleMixin(CommunityRoleMixinProtocol):
             raise TypeError("Record must contain a parent! Did you forget to use drafts?")
         try:
             return [get_default_community_id_from_record(record)]
-        except Exception as e:
+        except (AttributeError, TypeError) as e:
             raise MissingDefaultCommunityError(f"Default community missing on record {record}.") from e
-
-
 
     @override
     def _get_data_communities(self, data: dict | None = None, **kwargs: Any) -> list[str]:
@@ -214,11 +206,10 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
         """Set of Needs granting permission."""
         _needs = set[Need]()
 
-        # if called on community, returns the required roles bound to the community id; community_id comes from submit_record permissions
-        if record and isinstance(record, Community) or "community_id" in kwargs:
-            id_ = str(record.id) if "community_id" not in kwargs else kwargs["community_id"]
+        # if called on community, returns the required roles bound to the community id
+        if record and isinstance(record, Community):
             for role in self.roles(**kwargs):
-                _needs.add(CommunityRoleNeed(id_, role))  # type: ignore[reportArgumentType]
+                _needs.add(CommunityRoleNeed(str(record.id), role))  # type: ignore[reportArgumentType]
             return list(_needs)
 
         community_ids = self._get_record_communities(record) if record is not None else self._get_data_communities(data)

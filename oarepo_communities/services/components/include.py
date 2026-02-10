@@ -16,8 +16,6 @@ from typing import TYPE_CHECKING, override
 from invenio_records_resources.services.records.components.base import ServiceComponent
 from oarepo_runtime.typing import require_kwargs
 
-from oarepo_communities.errors import MissingDefaultCommunityError
-
 from ..permissions.generators import convert_community_ids_to_uuid
 
 if TYPE_CHECKING:
@@ -31,6 +29,7 @@ from invenio_drafts_resources.services.records.components.base import (
 )
 
 
+# TODO: left for backward compatibility, discuss potential deprecation
 class CommunityInclusionComponent(ServiceComponent):
     """Community inclusion component."""
 
@@ -47,7 +46,7 @@ class CommunityInclusionComponent(ServiceComponent):
     ) -> None:
         try:
             community_id = data["parent"]["communities"]["default"]["id"]
-        except KeyError as exc:
-            raise MissingDefaultCommunityError("Default community not defined in input.") from exc
+        except KeyError:
+            return
 
         record.parent.communities.add(convert_community_ids_to_uuid(community_id), default=True)
