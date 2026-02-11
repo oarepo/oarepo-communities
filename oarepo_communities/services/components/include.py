@@ -29,7 +29,7 @@ from invenio_drafts_resources.services.records.components.base import (
 )
 
 
-# TODO: left for backward compatibility, discuss potential deprecation
+# TODO: left for backward compatibility, discuss whether to deprecate or split different presets
 class CommunityInclusionComponent(ServiceComponent):
     """Community inclusion component."""
 
