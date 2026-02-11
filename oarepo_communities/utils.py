@@ -22,7 +22,6 @@ from oarepo_communities.services.permissions.needs import UserInCommunityNeed
 if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_communities.members.records import Member as MemberRecord
-    from invenio_drafts_resources.records import Record
     from invenio_drafts_resources.records import Record as RecordWithParent
 
 
@@ -66,7 +65,7 @@ def load_community_user_needs(identity: Identity) -> None:
     identity.provides |= needs  # type: ignore[arg-type]
 
 
-def community_id_from_record(record: Record) -> str | None:
+def community_id_from_record(record: RecordWithParent) -> str | None:
     """Get community ID from record or its parent community."""
     community_id: str
     if isinstance(record, Community):

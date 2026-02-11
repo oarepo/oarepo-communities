@@ -24,11 +24,13 @@ from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_search.engine import dsl
 from oarepo_runtime.services.generators import Generator
+from oarepo_workflows.errors import InvalidWorkflowError
 from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
 from oarepo_workflows.services.permissions import FromRecordWorkflow
 
 from oarepo_communities.errors import (
+    CommunityDoesntExistError,
     MissingCommunitiesError,
     MissingDefaultCommunityError,
     TargetCommunityNotProvidedError,
@@ -101,7 +103,11 @@ class CommunityWorkflowPermission(FromRecordWorkflow):
     def _get_workflow(self, record: Record | None = None, **context: Any) -> Workflow:
         workflow = super()._get_workflow(record=record, **context)
         if workflow == current_oarepo_workflows.default_workflow and not record:
-            return current_oarepo_communities.get_community_default_workflow(**context)
+            try:
+                return current_oarepo_communities.get_community_default_workflow(**context)
+            # TODO: should the error be catched here or handled at the level get_community_default_workflow
+            except (MissingDefaultCommunityError, CommunityDoesntExistError, InvalidWorkflowError):
+                return workflow
         return workflow
 
 

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from flask_principal import Identity
 
 
-# TODO: left for backward compatibility, discuss potential deprecation
+# TODO: left for backward compatibility, discuss whether to deprecate or split into different presets
 class CommunityDefaultWorkflowComponent(WorkflowSetupComponent):
     """Component setting default workflow from a community when a record is created."""
 
