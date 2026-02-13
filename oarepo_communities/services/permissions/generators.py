@@ -24,6 +24,7 @@ from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_search.engine import dsl
 from oarepo_runtime.services.generators import Generator
+from oarepo_runtime.typing import require_kwargs
 from oarepo_workflows.errors import InvalidWorkflowError
 from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
@@ -87,6 +88,28 @@ class InAnyCommunity(Generator):
                 )
             )
         return list(needs)
+
+
+class InAnyCommunityWorkflow(Generator):
+    """Generator that returns workflow permission for all allowed community workflows."""
+
+    def __init__(self, action: str, **kwargs: Any) -> None:
+        """Create InAnyCommunityWorkflow generator."""
+        self._action = action
+        super().__init__(**kwargs)
+
+    @override
+    @require_kwargs("community")
+    def needs(self, community: dict | Community, **kwargs: Any) -> list[Need]:
+        workflows = community["custom_fields"]["allowed_workflows"]
+        ret = set()
+        for workflow_id in workflows:
+            ret |= set(
+                current_oarepo_workflows.workflow_by_code[workflow_id]
+                .permissions(self._action, **kwargs | {"community": community})
+                .needs
+            )
+        return list(ret)
 
 
 class CommunityWorkflowPermission(FromRecordWorkflow):

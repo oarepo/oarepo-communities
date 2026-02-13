@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+from invenio_communities.permissions import CommunityPermissionPolicy as InvenioCommunityPermissionPolicy
 from invenio_records_permissions.generators import (
     SystemProcess,
 )
@@ -22,6 +23,7 @@ from oarepo_communities.services.permissions.generators import (
     CommunityWorkflowPermission,
     DefaultCommunityMembers,
     InAnyCommunity,
+    InAnyCommunityWorkflow,
 )
 
 
@@ -60,3 +62,9 @@ class CommunityWorkflowPermissionPolicy(WorkflowRecordPermissionPolicy):
 
     can_create = (CommunityWorkflowPermission("create"),)
     can_view_deposit_page = (InAnyCommunity(CommunityWorkflowPermission("create")),)
+
+
+class CommunityPermissionPolicy(InvenioCommunityPermissionPolicy):
+    """Community permission policy."""
+
+    can_submit_request = InAnyCommunityWorkflow("submit_record")
