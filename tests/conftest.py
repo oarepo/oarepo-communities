@@ -33,6 +33,7 @@ from oarepo_workflows import (
 )
 from oarepo_workflows.model.presets import workflows_preset
 from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
+from pytest_oarepo.requests.classes import UserGenerator
 
 from oarepo_communities.model.presets import communities_preset
 from oarepo_communities.requests.community_submission import CommunitySubmission
@@ -46,6 +47,7 @@ from oarepo_communities.services.permissions.generators import (
 )
 from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
+    CommunityPermissionPolicy,
 )
 
 pytest_plugins = [
@@ -171,6 +173,8 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
         IfInState("deleting", [RequestActive()]),
     )
 
+    can_submit_record = (AuthenticatedUser(),)
+
 
 class TestWithCuratorCommunityWorkflowPermissions(TestCommunityWorkflowPermissions):
     """Like TestCommunityWorkflowPermissions but curator can read all records."""
@@ -257,6 +261,10 @@ class DefaultRequests(WorkflowRequestPolicy):
         requesters=[SystemProcess()],
         recipients=[TargetCommunityRole("owner")],
         transitions=WorkflowTransitions(),
+    )
+    community_submission = WorkflowRequest(
+        requesters=[AuthenticatedUser()],
+        recipients=[],
     )
 
 
@@ -424,6 +432,16 @@ WORKFLOWS = [
         permission_policy_cls=IndividualDepositionWorkflowPermissions,
         request_policy_cls=IndividualDepositionWorkflowRequestsPermissions,
     ),
+    Workflow(
+        code="different_submit",
+        label=_("Workflow for testing different can_submit_record (into community) policy"),
+        permission_policy_cls=type(
+            "DifferentSubmitWorkflowPermissions",
+            (TestCommunityWorkflowPermissions,),
+            {"can_submit_record": [UserGenerator("user1@example.org")]},
+        ),
+        request_policy_cls=DefaultRequests,
+    ),
 ]
 
 
@@ -506,6 +524,7 @@ def app_config(app_config):
     )
 
     app_config["RDM_COMMUNITY_SUBMISSION_REQUEST_CLS"] = CommunitySubmission
+    app_config["COMMUNITIES_PERMISSION_POLICY"] = CommunityPermissionPolicy
 
     return app_config
 

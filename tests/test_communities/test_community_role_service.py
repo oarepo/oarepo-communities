@@ -24,7 +24,7 @@ def _serialized_community_role(id_) -> dict:
                 "visibility": "public",
             },
             "children": {"allow": False},
-            "custom_fields": {"workflow": "default"},
+            "custom_fields": {"allowed_workflows": ["default"], "workflow": "default"},
             "deletion_status": {"is_deleted": False, "status": "P"},
             "id": id_,
             "links": {},

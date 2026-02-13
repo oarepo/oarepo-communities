@@ -408,7 +408,6 @@ def test_search_ui_serialization(
     assert "access" in search_user_model.json["hits"]["hits"][0]
 
 
-@pytest.mark.skip(reason="Requires invenio-rdm-records feature branch.")
 def test_community_on_review(
     logged_client,
     community_owner,
@@ -417,8 +416,11 @@ def test_community_on_review(
     communities_model,
     invite,
     urls,
+    upload_file,
     search_clear,
 ):
+    from invenio_rdm_records.proxies import current_rdm_records_service
+
     community_id = str(community.id)
     community_reader = users[0]
     invite(community_reader, community_id, "reader")
@@ -434,8 +436,16 @@ def test_community_on_review(
         },  # must be here if communities are to customize who can create records
     )
     id_ = resp.json["id"]
+    upload_file(
+        identity=community_reader.identity, record_id=id_, files_service=current_rdm_records_service.draft_files
+    )
     review = reader_client.put(
         f"/records/{id_}/draft/review", json={"receiver": {"community": community_id}, "type": "community-submission"}
     )
-    reader_client.post(f"/records/{id_}/draft/actions/submit-review")
-    owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
+
+    submit = reader_client.post(f"/records/{id_}/draft/actions/submit-review")
+    accept = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
+
+    assert review.status_code == 200
+    assert submit.status_code == 202
+    assert accept.status_code == 200

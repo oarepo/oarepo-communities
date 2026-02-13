@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import pytest
+from flask_principal import Need
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.proxies import current_communities
@@ -16,6 +17,8 @@ from invenio_records_resources.services.errors import PermissionDeniedError
 from oarepo_rdm.oai.percolator import init_percolators
 from oarepo_runtime.typing import record_from_result
 from pytest_oarepo.communities.functions import set_community_workflow
+
+from oarepo_communities.services.permissions.generators import InAnyCommunityWorkflow
 
 
 def test_disabled_endpoints(
@@ -224,3 +227,16 @@ def test_record_owners_in_default_record_community_needs(
         urls=urls,
         results=(200, 200, 403, 403),
     )
+
+
+def test_can_submit_record_in_any_community_workflow(urls, users, logged_client, community_get_or_create):
+    user = users[0]
+    community_1 = community_get_or_create(user, "comm1", allowed_workflows=["default", "different_submit"])
+
+    g = InAnyCommunityWorkflow("submit_record")
+    needs = g.needs(community=community_1)
+    assert set(needs) == {
+        Need(method="id", value=user.user.id),
+        Need(method="system_role", value="authenticated_user"),
+        Need(method="system_role", value="system_process"),
+    }
