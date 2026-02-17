@@ -24,6 +24,7 @@ def test_communities_ui(community_service, logged_client, users, fake_manifest, 
             "slug": "test-community",
             "metadata": {"title": "Test Community"},
             "access": {"visibility": "public"},
+            "custom_fields": {"workflow": "default", "allowed_workflows": ["default"]}
         },
     ).to_dict()
     pid_value = test_community["slug"]
