@@ -9,16 +9,15 @@
 from __future__ import annotations
 
 import pytest
-from flask_principal import Need
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
-from invenio_communities.proxies import current_communities
+from invenio_communities.generators import CommunityRoleNeed
 from invenio_records_resources.services.errors import PermissionDeniedError
 from oarepo_rdm.oai.percolator import init_percolators
 from oarepo_runtime.typing import record_from_result
 from pytest_oarepo.communities.functions import set_community_workflow
 
-from oarepo_communities.services.permissions.generators import InAnyCommunityWorkflow
+from oarepo_communities.services.permissions.generators import DefaultCommunityRole, InAnyCommunity
 
 
 def test_disabled_endpoints(
@@ -93,40 +92,6 @@ def test_default_community_workflow_changed(
     record5 = draft_with_community_factory(community_owner.identity, str(community_1.id))
     with pytest.raises(PermissionDeniedError):
         create_request_on_draft(community_owner.identity, record5["id"], "publish_draft")
-
-
-def test_can_possibly_create_in_community(
-    community_owner,
-    users,
-    community_get_or_create,
-    record_service,
-    invite,
-    search_clear,
-):
-    # tries to .. in with one community with default workflow allowing reader and owner, than adds another community
-    # allowing curator, which should allow curator to deposit too
-    community_curator = users[0]
-    rando_user = users[1]
-    community_1 = community_get_or_create(community_owner, "comm1")
-    invite(community_curator, str(community_1.id), "curator")
-    record_service.require_permission(community_owner.identity, "view_deposit_page")
-    with pytest.raises(PermissionDeniedError):
-        record_service.require_permission(community_curator.identity, "view_deposit_page")
-    with pytest.raises(PermissionDeniedError):
-        record_service.require_permission(rando_user.identity, "view_deposit_page")
-
-    community_2 = community_get_or_create(community_owner, "comm2")
-    set_community_workflow(str(community_2.id), "custom")
-    invite(community_curator, str(community_2.id), "curator")
-    community2read = current_communities.service.read(community_curator.identity, str(community_2.id))
-    assert community2read.data["custom_fields"]["workflow"] == "custom"
-    Community.index.refresh()
-
-    # test goes over all workflows and communities; curator can now create in community 2 that allows create for cura
-    record_service.require_permission(community_owner.identity, "view_deposit_page")
-    record_service.require_permission(community_curator.identity, "view_deposit_page")
-    with pytest.raises(PermissionDeniedError):
-        record_service.require_permission(rando_user.identity, "view_deposit_page")
 
 
 def _record_owners_in_record_community_test(
@@ -229,14 +194,19 @@ def test_record_owners_in_default_record_community_needs(
     )
 
 
-def test_can_submit_record_in_any_community_workflow(urls, users, logged_client, community_get_or_create):
-    user = users[0]
-    community_1 = community_get_or_create(user, "comm1", allowed_workflows=["default", "different_submit"])
+def test_in_any_community(
+    community_owner,
+    community_get_or_create,
+    search_clear,
+):
+    community_1 = community_get_or_create(community_owner, "comm1")
+    community_2 = community_get_or_create(community_owner, "comm2")
 
-    g = InAnyCommunityWorkflow("submit_record")
-    needs = g.needs(community=community_1)
-    assert set(needs) == {
-        Need(method="id", value=user.user.id),
-        Need(method="system_role", value="authenticated_user"),
-        Need(method="system_role", value="system_process"),
+    generator = InAnyCommunity(DefaultCommunityRole("owner"))
+    needs = generator.needs()
+
+    expected = {
+        CommunityRoleNeed(str(community_1.id), "owner"),
+        CommunityRoleNeed(str(community_2.id), "owner"),
     }
+    assert expected.issubset(set(needs))

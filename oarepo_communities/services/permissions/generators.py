@@ -25,18 +25,14 @@ from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_search.engine import dsl
 from oarepo_runtime.services.generators import Generator
 from oarepo_runtime.typing import require_kwargs
-from oarepo_workflows.errors import InvalidWorkflowError
 from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
-from oarepo_workflows.services.permissions import FromRecordWorkflow
 
 from oarepo_communities.errors import (
-    CommunityDoesntExistError,
     MissingCommunitiesError,
     MissingDefaultCommunityError,
     TargetCommunityNotProvidedError,
 )
-from oarepo_communities.proxies import current_oarepo_communities
 from oarepo_communities.services.permissions.needs import UserInCommunityNeed
 from oarepo_communities.utils import get_community_ids_from_record, get_default_community_id_from_record
 
@@ -48,7 +44,6 @@ if TYPE_CHECKING:
     from invenio_communities.generators import _Need as CommunityRoleNeedType
     from invenio_drafts_resources.records import Record
     from invenio_requests.customizations import RequestType
-    from oarepo_workflows import Workflow
 
 
 def require_draft_record(fn: Callable) -> Callable:
@@ -90,48 +85,26 @@ class InAnyCommunity(Generator):
         return list(needs)
 
 
-class InAnyCommunityWorkflow(Generator):
-    """Generator that returns workflow permission for all allowed community workflows."""
+class CanSubmitRecordInCommunity(Generator):
+    """Generator that checks if the user can submit a record in a community."""
 
-    def __init__(self, action: str, **kwargs: Any) -> None:
-        """Create InAnyCommunityWorkflow generator."""
-        self._action = action
-        super().__init__(**kwargs)
-
+    # serialized dict comes for ui
     @override
-    @require_kwargs("community")
-    def needs(self, community: dict | Community, **kwargs: Any) -> list[Need]:
-        workflows = community["custom_fields"]["allowed_workflows"]
+    @require_kwargs("record")
+    def needs(self, record: Community | dict, **kwargs: Any) -> list[Need]:
         ret = set()
-        for workflow_id in workflows:
-            ret |= set(
-                current_oarepo_workflows.workflow_by_code[workflow_id]
-                .permissions(self._action, **kwargs | {"community": community})
-                .needs
-            )
+        wfs = (
+            record.custom_fields["allowed_workflows"]
+            if isinstance(record, Community)
+            else record["custom_fields"]["allowed_workflows"]
+        )
+        for workflow_code in wfs:
+            workflow = current_oarepo_workflows.workflow_by_code[workflow_code]
+            requests = workflow.requests().requests_by_id
+            if "community-submission" not in requests:
+                continue
+            ret |= set(requests["community-submission"].requester_generator.needs(**kwargs | {"record": record}))
         return list(ret)
-
-
-class CommunityWorkflowPermission(FromRecordWorkflow):
-    """Permission generator wrapper that sets up workflow before calling the real generator.
-
-    Permission generator that takes primarily the workflow from record's workflow.
-    If it is not set, then it will look up the record's community and get the workflow
-    id from the community's default workflow. If the record has no community, it will
-    raise an exception.
-    """
-
-    @override
-    @require_draft_record  # we are expecting a draft allowed framework to be always used with communities
-    def _get_workflow(self, record: Record | None = None, **context: Any) -> Workflow:
-        workflow = super()._get_workflow(record=record, **context)
-        if workflow == current_oarepo_workflows.default_workflow and not record:
-            try:
-                return current_oarepo_communities.get_community_default_workflow(**context)
-            # TODO: should the error be catched here or handled at the level get_community_default_workflow
-            except (MissingDefaultCommunityError, CommunityDoesntExistError, InvalidWorkflowError):
-                return workflow
-        return workflow
 
 
 def convert_community_ids_to_uuid(community_id_or_slug: str) -> str:

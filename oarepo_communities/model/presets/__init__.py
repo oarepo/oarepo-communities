@@ -21,9 +21,6 @@ from oarepo_communities.model.presets.communities.records.parent_record import (
 from oarepo_communities.model.presets.communities.services.records.parent_record_schema import (
     CommunitiesParentRecordSchemaPreset,
 )
-from oarepo_communities.model.presets.communities.services.records.permission_policy import (
-    CommunitiesPermissionPolicyPreset,
-)
 from oarepo_communities.model.presets.communities.services.records.service_config import (
     CommunitiesServiceConfigPreset,
 )
@@ -33,6 +30,5 @@ communities_preset = [
     CommunitiesParentRecordSchemaPreset,
     ParentCommunityMetadataPreset,
     CommunitiesParentRecordPreset,
-    CommunitiesPermissionPolicyPreset,
     ReviewMappingPreset,
 ]
