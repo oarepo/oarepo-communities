@@ -17,14 +17,8 @@ from invenio_records_permissions.generators import (
 from oarepo_requests.services.permissions.workflow_policies import (
     RequestBasedWorkflowPermissions,
 )
-from oarepo_workflows import WorkflowRecordPermissionPolicy
 
-from oarepo_communities.services.permissions.generators import (
-    CommunityWorkflowPermission,
-    DefaultCommunityMembers,
-    InAnyCommunity,
-    InAnyCommunityWorkflow,
-)
+from oarepo_communities.services.permissions.generators import CanSubmitRecordInCommunity
 
 
 class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
@@ -42,8 +36,6 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
 
     """
 
-    can_create = (DefaultCommunityMembers(),)
-
     can_add_community = (SystemProcess(),)
     """Can add community to record"""
 
@@ -54,17 +46,8 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
     """Can remove record from community"""
 
 
-class CommunityWorkflowPermissionPolicy(WorkflowRecordPermissionPolicy):
-    """Workflow permission policy for communities.
-
-    It redefines the can_create permission to allow
-    """
-
-    can_create = (CommunityWorkflowPermission("create"),)
-    can_view_deposit_page = (InAnyCommunity(CommunityWorkflowPermission("create")),)
-
-
+# TODO: here or oarepo?
 class CommunityPermissionPolicy(InvenioCommunityPermissionPolicy):
     """Community permission policy."""
 
-    can_submit_request = InAnyCommunityWorkflow("submit_record")
+    can_submit_record = (CanSubmitRecordInCommunity(),)

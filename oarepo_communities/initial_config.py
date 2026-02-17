@@ -9,8 +9,10 @@
 
 from __future__ import annotations
 
+from oarepo_communities.requests.community_submission import CommunitySubmission
 from oarepo_communities.services.community_records.service import (
     CommunityRecordsService,
 )
 
 RDM_RECORDS_COMMUNITY_RECORDS_SERVICE_CLASS = CommunityRecordsService
+RDM_COMMUNITY_SUBMISSION_REQUEST_CLS = CommunitySubmission

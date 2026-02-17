@@ -68,10 +68,9 @@ def community_default_workflow(**kwargs: Any) -> Workflow:
 
 def get_workflow_from_community_custom_fields(custom_fields: dict) -> Workflow:
     """Get workflow from community custom fields."""
-    # TODO: is this the individual deposition or do we share different default community workflow too
     workflow_id = custom_fields.get(
         "workflow",
-        current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"],
+        current_app.config["WORKFLOWS_DEFAULT_WORKFLOW"],
     )
     try:
         return current_oarepo_workflows.workflow_by_code[workflow_id]

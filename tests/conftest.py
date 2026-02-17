@@ -33,10 +33,10 @@ from oarepo_workflows import (
 )
 from oarepo_workflows.model.presets import workflows_preset
 from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
+from oarepo_workflows.services.permissions.generators import SameAs
 from pytest_oarepo.requests.classes import UserGenerator
 
 from oarepo_communities.model.presets import communities_preset
-from oarepo_communities.requests.community_submission import CommunitySubmission
 from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
     CommunityRole,
@@ -155,11 +155,7 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
         CommunityRole("curator"),
     )
 
-    can_create = (
-        DefaultCommunityRole("owner"),
-        DefaultCommunityRole("reader"),
-    )
-    can_manage_files = can_create
+    can_manage_files = (SameAs("can_create"),)
 
     can_update = (
         IfInState("draft", [RecordOwners()]),
@@ -181,11 +177,6 @@ class TestWithCuratorCommunityWorkflowPermissions(TestCommunityWorkflowPermissio
 
     can_read = (
         *TestCommunityWorkflowPermissions.can_read,
-        DefaultCommunityRole("curator"),
-    )
-
-    can_create = (
-        *TestCommunityWorkflowPermissions.can_create,
         DefaultCommunityRole("curator"),
     )
 
@@ -523,7 +514,6 @@ def app_config(app_config):
         },
     )
 
-    app_config["RDM_COMMUNITY_SUBMISSION_REQUEST_CLS"] = CommunitySubmission
     app_config["COMMUNITIES_PERMISSION_POLICY"] = CommunityPermissionPolicy
 
     return app_config

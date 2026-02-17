@@ -109,14 +109,9 @@ def get_default_community_id_from_record(record: RecordWithParent) -> str:
         str: The default community ID as a string.
 
     """
-    try:
+    if record.parent.communities.default:
         return str(record.parent.communities.default.id)
-    except AttributeError:
-        try:
-            return str(record.parent.review.receiver._parse_ref_dict_id())  # noqa: SLF001
-        # test if this happens anywhere
-        except AttributeError:
-            return str(record["parent"]["communities"]["default"])
+    return str(record.parent.review.receiver._parse_ref_dict_id())  # noqa: SLF001
 
 
 def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
@@ -138,13 +133,7 @@ def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
         A list of community IDs derived from the input record.
 
     """
-    try:
-        communities = record.parent.communities.ids
-    except AttributeError:
-        try:
-            return [str(record.parent.review.receiver._parse_ref_dict_id())]  # noqa: SLF001
-        except AttributeError:
-            return list(record["parent"]["communities"]["ids"])
+    communities = record.parent.communities.ids
     if not communities:
         return [str(record.parent.review.receiver._parse_ref_dict_id())]  # noqa: SLF001
     return list(communities)
