@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from invenio_requests import RequestAction
 
 
+# TODO: move directly to invenio/oarepo service
 class AcceptAction(InvenioAcceptAction):
     """Accept action that grants request_active permission during execution."""
 

@@ -91,7 +91,7 @@ class CanSubmitRecordInCommunity(Generator):
     # serialized dict comes for ui
     @override
     @require_kwargs("record")
-    def needs(self, record: Community | dict, **kwargs: Any) -> list[Need]:
+    def needs(self, record: Community | dict[str, Any], **kwargs: Any) -> list[Need]:
         ret = set()
         wfs = (
             record.custom_fields["allowed_workflows"]
