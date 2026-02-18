@@ -10,18 +10,21 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, cast
 
 from flask_principal import identity_loaded
+from invenio_communities.communities.records.api import Community
+from invenio_pidstore.errors import PIDDoesNotExistError
 
 import oarepo_communities.cli
 import oarepo_communities.config
 
+from .errors import CommunityDoesntExistError
 from .resolvers.communities import CommunityRoleResolver
 from .services.community_role.config import CommunityRoleServiceConfig
 from .services.community_role.service import CommunityRoleService
 from .utils import load_community_user_needs
-from .workflow import community_default_workflow
+from .workflow import get_workflow_from_community_custom_fields
 
 if TYPE_CHECKING:
     from flask import Flask
@@ -82,14 +85,19 @@ class OARepoCommunities:
             config.COMMUNITIES_RECORDS_SEARCH_ALL,
         )
 
-    def get_community_default_workflow(self, **kwargs: Any) -> Workflow:
+    def get_community_default_workflow(self, community_id: str) -> Workflow:
         """Get default workflow for the community.
 
         It will have a look if the kwargs contain 'community_metadata' or 'record' or 'data'
         and will try to get the community from there. If no community is found, it will
         raise an exception.
         """
-        return community_default_workflow(**kwargs)
+        try:
+            community = cast("Community", Community.pid.resolve(community_id))
+        except PIDDoesNotExistError as e:
+            raise CommunityDoesntExistError(community_id) from e
+
+        return get_workflow_from_community_custom_fields(community.custom_fields)
 
     def init_services(self, _app: Flask) -> None:
         """Initialize communities service."""
