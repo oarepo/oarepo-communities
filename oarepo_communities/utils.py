@@ -96,18 +96,7 @@ def get_default_community_id_from_record(record: RecordWithParent) -> str:
     """Retrieve the default community ID from the given record.
 
     This function attempts to extract the default community ID associated with the
-    parent of the provided record. If the expected attributes are not present, it
-    falls back to alternative lookup paths. The method handles potential attribute
-    access errors during these lookups and returns the default community ID as a
-    string.
-
-    Arguments:
-        record (RecordWithParent): The record object from which the default community
-            ID is to be retrieved.
-
-    Returns:
-        str: The default community ID as a string.
-
+    parent of the provided record. If it isn't present, it looks at the review associated with the record.
     """
     if record.parent.communities.default:
         return str(record.parent.communities.default.id)
@@ -117,21 +106,8 @@ def get_default_community_id_from_record(record: RecordWithParent) -> str:
 def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
     """Extract the list of community IDs associated with a given record.
 
-    The function retrieves community IDs based on the hierarchical structure
-    of the input record. It first attempts to extract the IDs from the
-    `communities` attribute of the parent object. If unsuccessful, it follows
-    a fallback mechanism to try obtaining the IDs from alternative fields.
-
-    Parameters
-    ----------
-    record: RecordWithParent
-        The input record object with a parent and associated attributes.
-
-    Returns
-    -------
-    list[str]
-        A list of community IDs derived from the input record.
-
+    This function attempts to extract the community IDs associated with the
+    parent of the provided record. If it isn't present, it looks at the review associated with the record.
     """
     communities = record.parent.communities.ids
     if not communities:

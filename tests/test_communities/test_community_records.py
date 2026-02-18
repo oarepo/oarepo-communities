@@ -408,7 +408,7 @@ def test_search_ui_serialization(
     assert "access" in search_user_model.json["hits"]["hits"][0]
 
 
-def test_community_on_review(
+def test_review_process_and_community_submission(
     logged_client,
     community_owner,
     users,
@@ -439,13 +439,20 @@ def test_community_on_review(
     upload_file(
         identity=community_reader.identity, record_id=id_, files_service=current_rdm_records_service.draft_files
     )
+    assert resp.json["parent"]["workflow"] is None
+    assert not resp.json["parent"]["communities"]
     review = reader_client.put(
         f"/records/{id_}/draft/review", json={"receiver": {"community": community_id}, "type": "community-submission"}
     )
-
+    draft_read_after_review_create = reader_client.get(f"/records/{id_}/draft")
+    assert draft_read_after_review_create.json["parent"]["workflow"] == "default"
+    assert not resp.json["parent"]["communities"]
     submit = reader_client.post(f"/records/{id_}/draft/actions/submit-review")
     accept = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
 
     assert review.status_code == 200
     assert submit.status_code == 202
     assert accept.status_code == 200
+
+    record = reader_client.get(f"/records/{id_}")
+    assert record.status_code == 200
