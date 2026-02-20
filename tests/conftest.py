@@ -363,6 +363,7 @@ class IndividualDepositionWorkflowPermissions(DefaultWorkflowPermissions):
     """Individual deposition workflow permissions."""
 
     can_create = (AuthenticatedUser(),)
+    can_review = (AuthenticatedUser(),)
 
 
 class IndividualDepositionWorkflowRequestsPermissions(WorkflowRequestPolicy):

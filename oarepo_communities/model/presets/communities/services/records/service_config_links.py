@@ -23,10 +23,7 @@ from oarepo_model.customizations import (
     Customization,
 )
 from oarepo_model.presets import Preset
-from oarepo_runtime.services.config import (
-    has_permission,
-    is_published_record,
-)
+from oarepo_runtime.services.config import has_permission, is_draft
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -52,7 +49,7 @@ class CommunitiesServiceConfigLinks(Preset):
             {
                 "review": RecordEndpointLink(
                     "records.review_read",
-                    when=not is_published_record() & has_permission("review"),
+                    when=is_draft() & has_permission("review"),
                 ),
                 "submit-review": RecordEndpointLink(
                     "records.review_submit",
