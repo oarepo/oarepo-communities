@@ -24,11 +24,15 @@ from oarepo_communities.model.presets.communities.services.records.parent_record
 from oarepo_communities.model.presets.communities.services.records.service_config import (
     CommunitiesServiceConfigPreset,
 )
+from oarepo_communities.model.presets.communities.services.records.service_config_links import (
+    CommunitiesServiceConfigLinks,
+)
 
 communities_preset = [
     CommunitiesServiceConfigPreset,
     CommunitiesParentRecordSchemaPreset,
     ParentCommunityMetadataPreset,
     CommunitiesParentRecordPreset,
+    CommunitiesServiceConfigLinks,
     ReviewMappingPreset,
 ]
