@@ -29,6 +29,109 @@ def _community_data(community) -> dict[str, Any]:
     }
 
 
+def test_review_process_and_community_submission(
+    logged_client,
+    community_owner,
+    users,
+    community,
+    communities_model,
+    invite,
+    urls,
+    upload_file,
+    search_clear,
+):
+    community_id = str(community.id)
+    community_reader = users[0]
+    invite(community_reader, community_id, "reader")
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
+
+    resp = reader_client.post(
+        "/records",
+        json={
+            "$schema": "local://communities_test-v1.0.0.json",
+            "files": {"enabled": False},
+            "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
+        },  # must be here if communities are to customize who can create records
+    )
+    id_ = resp.json["id"]
+    assert resp.json["parent"]["workflow"] is None
+    assert not resp.json["parent"]["communities"]
+    upload_file(
+        identity=community_reader.identity,
+        record_id=id_,
+        files_service=communities_model.proxies.current_service.draft_files,
+    )
+    review = reader_client.put(
+        f"/records/{id_}/draft/review", json={"receiver": {"community": community_id}, "type": "community-submission"}
+    )
+    draft_read_after_review_create = reader_client.get(f"/records/{id_}/draft")
+    assert draft_read_after_review_create.json["parent"]["workflow"] == "default"
+    assert not resp.json["parent"]["communities"]
+
+    assert "review" in draft_read_after_review_create.json["parent"]
+
+    submit = reader_client.post(f"/records/{id_}/draft/actions/submit-review")
+    accept = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
+
+    assert review.status_code == 200
+    assert submit.status_code == 202
+    assert accept.status_code == 200
+
+    record = reader_client.get(f"/records/{id_}")
+    assert record.status_code == 200
+    assert record.json["parent"]["communities"]["default"] == community_id
+
+
+def test_links(
+    logged_client,
+    community_owner,
+    users,
+    community,
+    communities_model,
+    invite,
+    urls,
+    upload_file,
+    link2testclient,
+    search_clear,
+):
+
+    community_id = str(community.id)
+    community_reader = users[0]
+    invite(community_reader, community_id, "reader")
+    reader_client = logged_client(community_reader)
+
+    resp = reader_client.post(
+        "/records",
+        json={
+            "$schema": "local://communities_test-v1.0.0.json",
+            "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
+        },  # must be here if communities are to customize who can create records
+    ).json
+    id_ = resp["id"]
+    reader_client.put(
+        f"/records/{id_}/draft/review", json={"receiver": {"community": community_id}, "type": "community-submission"}
+    )
+    upload_file(
+        identity=community_reader.identity,
+        record_id=id_,
+        files_service=communities_model.proxies.current_service.draft_files,
+    )
+    record_after_review_create = reader_client.get(f"/records/{id_}/draft").json
+
+    assert "review" in resp["links"]
+    assert "submit-review" not in resp["links"]
+
+    assert "review" in record_after_review_create["links"]
+    assert "submit-review" in record_after_review_create["links"]
+
+    assert link2testclient(record_after_review_create["links"]["review"]) == f"/records/{id_}/draft/review"
+    assert (
+        link2testclient(record_after_review_create["links"]["submit-review"])
+        == f"/records/{id_}/draft/actions/submit-review"
+    )
+
+
 def test_create_record_in_community(logged_client, communities_model, community_owner, community, urls, search_clear):
     owner_client = logged_client(community_owner)
     response = owner_client.post(urls["BASE_URL"], json=_community_data(community))
@@ -406,53 +509,3 @@ def test_search_ui_serialization(
     assert "access" in search_model.json["hits"]["hits"][0]
     assert "access" in search_user_global.json["hits"]["hits"][0]
     assert "access" in search_user_model.json["hits"]["hits"][0]
-
-
-def test_review_process_and_community_submission(
-    logged_client,
-    community_owner,
-    users,
-    community,
-    communities_model,
-    invite,
-    urls,
-    upload_file,
-    search_clear,
-):
-    from invenio_rdm_records.proxies import current_rdm_records_service
-
-    community_id = str(community.id)
-    community_reader = users[0]
-    invite(community_reader, community_id, "reader")
-    reader_client = logged_client(community_reader)
-    owner_client = logged_client(community_owner)
-
-    resp = reader_client.post(
-        "/records",
-        json={
-            "$schema": "local://communities_test-v1.0.0.json",
-            "files": {"enabled": False},
-            "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
-        },  # must be here if communities are to customize who can create records
-    )
-    id_ = resp.json["id"]
-    upload_file(
-        identity=community_reader.identity, record_id=id_, files_service=current_rdm_records_service.draft_files
-    )
-    assert resp.json["parent"]["workflow"] is None
-    assert not resp.json["parent"]["communities"]
-    review = reader_client.put(
-        f"/records/{id_}/draft/review", json={"receiver": {"community": community_id}, "type": "community-submission"}
-    )
-    draft_read_after_review_create = reader_client.get(f"/records/{id_}/draft")
-    assert draft_read_after_review_create.json["parent"]["workflow"] == "default"
-    assert not resp.json["parent"]["communities"]
-    submit = reader_client.post(f"/records/{id_}/draft/actions/submit-review")
-    accept = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
-
-    assert review.status_code == 200
-    assert submit.status_code == 202
-    assert accept.status_code == 200
-
-    record = reader_client.get(f"/records/{id_}")
-    assert record.status_code == 200

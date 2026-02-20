@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from invenio_communities.permissions import CommunityPermissionPolicy as InvenioCommunityPermissionPolicy
 from invenio_records_permissions.generators import (
+    AuthenticatedUser,
     SystemProcess,
 )
 from oarepo_requests.services.permissions.workflow_policies import (
@@ -44,6 +45,8 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
 
     can_remove_record = (SystemProcess(),)
     """Can remove record from community"""
+
+    can_review = (SystemProcess(), AuthenticatedUser())
 
 
 # TODO: here or oarepo?
