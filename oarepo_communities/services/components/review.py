@@ -30,5 +30,10 @@ class SetWorkflowInReviewComponent(ServiceComponent):
         """Set workflow for the record in the review process if it is not set yet."""
         if record.parent.workflow is not None:
             return
-        workflow = current_oarepo_communities.get_community_default_workflow(community_id=data["receiver"]["community"])
+        community_id = (
+            data["receiver"]["community_role"].split(":")[0]
+            if "community_role" in data["receiver"]
+            else data["receiver"]["community"]
+        )
+        workflow = current_oarepo_communities.get_community_default_workflow(community_id=community_id)
         record.parent.workflow = workflow.code

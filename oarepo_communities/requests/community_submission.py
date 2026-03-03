@@ -47,6 +47,7 @@ class CommunitySubmission(InvenioCommunitySubmission):
     """Community submission request type using dynamic model-based topic ref types and custom accept action."""
 
     allowed_topic_ref_types = ModelRefTypes()  # type: ignore[reportAssignmentType]
+    allowed_receiver_ref_types = (*InvenioCommunitySubmission.allowed_receiver_ref_types, "community_role")
 
     @classproperty
     @override

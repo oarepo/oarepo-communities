@@ -103,7 +103,7 @@ class CommunityRoleService(RecordService):
 
         community_ids = {x[0] for x in community_and_role_split_inputs}
 
-        query = dsl.Q("terms", id=community_ids)
+        query = dsl.Q("terms", id=list(community_ids))
 
         communities_search_results = current_communities.service._read_many(  # noqa: SLF001
             identity, query, fields, len(community_ids), **kwargs

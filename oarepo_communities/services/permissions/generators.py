@@ -33,6 +33,7 @@ from oarepo_communities.errors import (
     MissingDefaultCommunityError,
     TargetCommunityNotProvidedError,
 )
+from oarepo_communities.records.api import CommunityRoleRecord
 from oarepo_communities.services.permissions.needs import UserInCommunityNeed
 from oarepo_communities.utils import get_community_ids_from_record, get_default_community_id_from_record
 
@@ -91,7 +92,7 @@ class CanSubmitRecordInCommunity(Generator):
     # serialized dict comes for ui
     @override
     @require_kwargs("record")
-    def needs(self, record: Community | dict[str, Any], **kwargs: Any) -> list[Need]:
+    def needs(self, record: Community | CommunityRoleRecord | dict[str, Any], **kwargs: Any) -> list[Need]:
         ret = set()
         wfs = (
             record.custom_fields["allowed_workflows"]

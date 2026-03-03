@@ -74,7 +74,7 @@ class CommunityRoleResolver(EntityResolver):
     @override
     def _reference_entity(self, entity: Any) -> dict[str, str]:
         """Create a reference dict for the given record."""
-        return {"community_role": f"{entity.community_id}:{entity.role}"}
+        return {"community_role": entity.id}
 
     @override
     def matches_entity(self, entity: Any) -> bool:

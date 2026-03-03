@@ -32,6 +32,15 @@ class CommunityRoleRecord:
     community: Community
     role: str
 
+    def __getattr__(self, name: str):
+        """Delegate attribute access to the underlying community record."""
+        if name.startswith("_"):
+            raise AttributeError(name)
+        return getattr(self.community, name)
+
+    def __getitem__(self, item):
+        return self.community[item]
+
     @property
     def id(self) -> str:
         """Return the ID of the community role."""

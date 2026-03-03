@@ -16,6 +16,8 @@ from invenio_communities.records.records.systemfields import CommunitiesField
 from oarepo_model.customizations import Customization, PrependMixin
 from oarepo_model.presets import Preset
 
+from oarepo_communities.records.systemfields.manager import CommunitiesRelationManager
+
 if TYPE_CHECKING:
     from collections.abc import Generator
 
@@ -37,6 +39,8 @@ class CommunitiesParentRecordPreset(Preset):
         dependencies: dict[str, Any],
     ) -> Generator[Customization]:
         class CommunitiesParentRecordMixin:
-            communities = CommunitiesField(dependencies["ParentCommunityMetadata"])
+            communities = CommunitiesField(
+                dependencies["ParentCommunityMetadata"], manager_cls=CommunitiesRelationManager
+            )
 
         yield PrependMixin("ParentRecord", CommunitiesParentRecordMixin)
