@@ -42,7 +42,9 @@ def test_review_process_and_community_submission(
 ):
     community_id = str(community.id)
     community_reader = users[0]
+    community_curator = users[1]
     invite(community_reader, community_id, "reader")
+    invite(community_curator, community_id, "curator")
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
@@ -72,6 +74,13 @@ def test_review_process_and_community_submission(
     assert "review" in draft_read_after_review_create.json["parent"]
 
     submit = reader_client.post(f"/records/{id_}/draft/actions/submit-review")
+
+    curator_read = logged_client(community_curator).get(f"/requests/{review.json['id']}")
+    owner_read = owner_client.get(f"/requests/{review.json['id']}")
+    assert curator_read.status_code == 200
+    assert owner_read.status_code == 200
+
+
     accept = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
 
     assert review.status_code == 200
@@ -96,7 +105,9 @@ def test_community_role_receiver(
 ):
     community_id = str(community.id)
     community_reader = users[0]
+    community_curator = users[1]
     invite(community_reader, community_id, "reader")
+    invite(community_curator, community_id, "curator")
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
@@ -127,6 +138,12 @@ def test_community_role_receiver(
     assert "review" in draft_read_after_review_create.json["parent"]
 
     submit = reader_client.post(f"/records/{id_}/draft/actions/submit-review")
+
+    curator_read = logged_client(community_curator).get(f"/requests/{review.json['id']}")
+    owner_read = owner_client.get(f"/requests/{review.json['id']}")
+    assert curator_read.status_code == 403
+    assert owner_read.status_code == 200
+
     accept = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
 
     assert review.status_code == 200

@@ -141,8 +141,8 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
 
     can_read = (
         RecordOwners(),
-        AuthenticatedUser(),  # need for request receivers - temporary
-        CommunityRole("owner"),
+        # AuthenticatedUser(),  # need for request receivers - temporary
+        # CommunityRole("owner"),
         IfInState(
             "published",
             [AnyUser()],

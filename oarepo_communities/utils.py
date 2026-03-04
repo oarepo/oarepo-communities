@@ -91,6 +91,12 @@ def community_to_dict(community: Community) -> dict:
         **(community.metadata or {}),
     }
 
+def get_receiver_community_id_from_review(record: RecordWithParent) -> str:
+    """Get the community ID of the receiver of the record's review."""
+    type = record.parent.review.receiver._parse_ref_dict_type() # noqa: SLF001
+    id = str(record.parent.review.receiver._parse_ref_dict_id()) # noqa: SLF001
+    return id.split(":")[0] if type == "community_role" else id
+
 
 def get_default_community_id_from_record(record: RecordWithParent) -> str:
     """Retrieve the default community ID from the given record.
@@ -100,7 +106,7 @@ def get_default_community_id_from_record(record: RecordWithParent) -> str:
     """
     if record.parent.communities.default:
         return str(record.parent.communities.default.id)
-    return str(record.parent.review.receiver._parse_ref_dict_id())  # noqa: SLF001
+    return get_receiver_community_id_from_review(record)
 
 
 def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
@@ -111,5 +117,5 @@ def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
     """
     communities = record.parent.communities.ids
     if not communities:
-        return [str(record.parent.review.receiver._parse_ref_dict_id())]  # noqa: SLF001
+        return get_receiver_community_id_from_review(record)
     return list(communities)
