@@ -49,6 +49,7 @@ from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
     CommunityPermissionPolicy,
 )
+from invenio_communities.config import COMMUNITIES_ROLES
 
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
@@ -156,6 +157,7 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     )
 
     can_manage_files = (SameAs("can_create"),)
+    can_manage = (AuthenticatedUser(),)
 
     can_update = (
         IfInState("draft", [RecordOwners()]),
@@ -286,6 +288,14 @@ class PublishRequestsRecordOwnerInDefaultRecordCommunity(DefaultRequests):
             declined="draft",
             cancelled="draft",
         ),
+    )
+
+class CommunitySubmissionOnlyBySubmitterRequests(DefaultRequests):
+    """Like DefaultRequests but record owner in default community can submit publish request."""
+
+    community_submission = WorkflowRequest(
+        requesters=[CommunityRole("submitter"),],
+        recipients=[],
     )
 
 
@@ -434,6 +444,12 @@ WORKFLOWS = [
         ),
         request_policy_cls=DefaultRequests,
     ),
+    Workflow(
+        code="community_submission_only_by_submitter",
+        label=_("Workflow for testing different can_submit_record (into community) policy"),
+        permission_policy_cls=TestCommunityWorkflowPermissions,
+        request_policy_cls=CommunitySubmissionOnlyBySubmitterRequests,
+    )
 ]
 
 
@@ -482,18 +498,6 @@ def app_config(app_config):
         ("cs", _("Czech")),
     ]
 
-    """
-    app_config["NOTIFICATIONS_BACKENDS"] = {
-        EmailNotificationBackend.id: EmailNotificationBackend(),
-    }
-
-    app_config["NOTIFICATIONS_BUILDERS"] = {
-        PublishDraftRequestAcceptNotificationBuilder.type: PublishDraftRequestAcceptNotificationBuilder,
-        PublishDraftRequestSubmitNotificationBuilder.type: PublishDraftRequestSubmitNotificationBuilder,
-    }
-    always_merger.merge(app_config, VOCABULARIES_TEST_CONFIG)
-    """
-
     app_config["MAIL_DEFAULT_SENDER"] = "test@invenio-rdm-records.org"
 
     app_config["INVENIO_RDM_ENABLED"] = True
@@ -516,6 +520,13 @@ def app_config(app_config):
     )
 
     app_config["COMMUNITIES_PERMISSION_POLICY"] = CommunityPermissionPolicy
+
+    app_config["COMMUNITIES_ROLES"] = COMMUNITIES_ROLES + [dict(
+        name="submitter",
+        title=_("Submitter"),
+        description=_("Can submit records into the community."),
+        can_view=True,
+    )]
 
     return app_config
 

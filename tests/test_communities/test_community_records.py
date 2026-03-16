@@ -115,7 +115,6 @@ def test_community_role_receiver(
         "/records",
         json={
             "$schema": "local://communities_test-v1.0.0.json",
-            "files": {"enabled": False},
             "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
         },  # must be here if communities are to customize who can create records
     )
@@ -153,6 +152,55 @@ def test_community_role_receiver(
     record = reader_client.get(f"/records/{id_}")
     assert record.status_code == 200
     assert record.json["parent"]["communities"]["default"] == community_id
+
+
+def test_only_submitter_can_submit(
+    logged_client,
+    community_owner,
+    users,
+    community,
+    communities_model,
+    invite,
+    urls,
+    upload_file,
+    search_clear,
+):
+    community_id = str(community.id)
+    community_reader = users[0]
+    community_submitter = users[1]
+    invite(community_reader, community_id, "reader")
+    invite(community_submitter, community_id, "submitter")
+    reader_client = logged_client(community_reader)
+    submitter_client = logged_client(community_submitter)
+
+    resp = reader_client.post(
+        "/records",
+        json={
+            "$schema": "local://communities_test-v1.0.0.json",
+            "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
+            "parent": {"workflow": "community_submission_only_by_submitter"}
+        },  # must be here if communities are to customize who can create records
+    )
+    id_ = resp.json["id"]
+    assert resp.json["parent"]["workflow"] == "community_submission_only_by_submitter"
+    assert not resp.json["parent"]["communities"]
+    upload_file(
+        identity=community_reader.identity,
+        record_id=id_,
+        files_service=communities_model.proxies.current_service.draft_files,
+    )
+    reader_review = reader_client.put(
+        f"/records/{id_}/draft/review",
+        json={"receiver": {"community_role": f"{community_id}:submitter"}, "type": "community-submission"},
+    )
+
+    submitter_review = submitter_client.put(
+        f"/records/{id_}/draft/review",
+        json={"receiver": {"community_role": f"{community_id}:submitter"}, "type": "community-submission"},
+    )
+    assert reader_review.status_code == 403
+    assert submitter_review.status_code == 200
+
 
 
 def test_links(

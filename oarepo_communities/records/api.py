@@ -41,6 +41,10 @@ class CommunityRoleRecord:
     def __getitem__(self, item):
         return self.community[item]
 
+    @staticmethod
+    def get_community_id(id_):
+        return id_.split(":")[0]
+
     @property
     def id(self) -> str:
         """Return the ID of the community role."""
