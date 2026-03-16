@@ -80,7 +80,6 @@ def test_review_process_and_community_submission(
     assert curator_read.status_code == 200
     assert owner_read.status_code == 200
 
-
     accept = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
 
     assert review.status_code == 200
@@ -178,7 +177,7 @@ def test_only_submitter_can_submit(
         json={
             "$schema": "local://communities_test-v1.0.0.json",
             "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
-            "parent": {"workflow": "community_submission_only_by_submitter"}
+            "parent": {"workflow": "community_submission_only_by_submitter"},
         },  # must be here if communities are to customize who can create records
     )
     id_ = resp.json["id"]
@@ -200,7 +199,6 @@ def test_only_submitter_can_submit(
     )
     assert reader_review.status_code == 403
     assert submitter_review.status_code == 200
-
 
 
 def test_links(

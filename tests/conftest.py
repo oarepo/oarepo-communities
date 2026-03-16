@@ -12,6 +12,7 @@ import os
 
 import pytest
 from invenio_app.factory import create_api
+from invenio_communities.config import COMMUNITIES_ROLES
 from invenio_i18n import lazy_gettext as _
 from invenio_rdm_records.services.generators import RecordOwners
 from invenio_records_permissions.generators import (
@@ -49,7 +50,6 @@ from oarepo_communities.services.permissions.policy import (
     CommunityDefaultWorkflowPermissions,
     CommunityPermissionPolicy,
 )
-from invenio_communities.config import COMMUNITIES_ROLES
 
 pytest_plugins = [
     "pytest_oarepo.communities.fixtures",
@@ -142,8 +142,6 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
 
     can_read = (
         RecordOwners(),
-        # AuthenticatedUser(),  # need for request receivers - temporary
-        # CommunityRole("owner"),
         IfInState(
             "published",
             [AnyUser()],
@@ -290,11 +288,14 @@ class PublishRequestsRecordOwnerInDefaultRecordCommunity(DefaultRequests):
         ),
     )
 
+
 class CommunitySubmissionOnlyBySubmitterRequests(DefaultRequests):
     """Like DefaultRequests but record owner in default community can submit publish request."""
 
     community_submission = WorkflowRequest(
-        requesters=[CommunityRole("submitter"),],
+        requesters=[
+            CommunityRole("submitter"),
+        ],
         recipients=[],
     )
 
@@ -449,7 +450,7 @@ WORKFLOWS = [
         label=_("Workflow for testing different can_submit_record (into community) policy"),
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=CommunitySubmissionOnlyBySubmitterRequests,
-    )
+    ),
 ]
 
 
@@ -521,12 +522,15 @@ def app_config(app_config):
 
     app_config["COMMUNITIES_PERMISSION_POLICY"] = CommunityPermissionPolicy
 
-    app_config["COMMUNITIES_ROLES"] = COMMUNITIES_ROLES + [dict(
-        name="submitter",
-        title=_("Submitter"),
-        description=_("Can submit records into the community."),
-        can_view=True,
-    )]
+    app_config["COMMUNITIES_ROLES"] = [
+        *COMMUNITIES_ROLES,
+        {
+            "name": "submitter",
+            "title": _("Submitter"),
+            "description": _("Can submit records into the community."),
+            "can_view": True,
+        },
+    ]
 
     return app_config
 

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from invenio_access.models import Role, User
 from invenio_communities.members.records.models import MemberModel
@@ -38,12 +38,14 @@ class CommunityRoleRecord:
             raise AttributeError(name)
         return getattr(self.community, name)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Any):
+        """Delegate item access to the underlying community record."""
         return self.community[item]
 
     @staticmethod
-    def get_community_id(id_):
-        return id_.split(":")[0]
+    def get_community_id(id_: str) -> str:
+        """Return the community ID from the given ID."""
+        return id_.split(":", maxsplit=1)[0]
 
     @property
     def id(self) -> str:
