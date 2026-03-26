@@ -40,7 +40,8 @@ class CommunitiesParentRecordPreset(Preset):
     ) -> Generator[Customization]:
         class CommunitiesParentRecordMixin:
             communities = CommunitiesField(
-                dependencies["ParentCommunityMetadata"], manager_cls=CommunitiesRelationManager
+                dependencies["ParentCommunityMetadata"],
+                manager_cls=CommunitiesRelationManager,
             )
 
         yield PrependMixin("ParentRecord", CommunitiesParentRecordMixin)

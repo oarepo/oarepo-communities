@@ -24,7 +24,7 @@ from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_rdm_records.requests import CommunitySubmission
 from invenio_search.engine import dsl
-from oarepo_runtime.services.generators import Generator
+from oarepo_runtime.services.generators import ConditionalGenerator, Generator
 from oarepo_runtime.typing import require_kwargs
 from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
@@ -36,15 +36,19 @@ from oarepo_communities.errors import (
 )
 from oarepo_communities.records.api import CommunityRoleRecord
 from oarepo_communities.services.permissions.needs import UserInCommunityNeed
-from oarepo_communities.utils import get_community_ids_from_record, get_default_community_id_from_record
+from oarepo_communities.utils import (
+    get_community_ids_from_record,
+    get_default_community_id_from_record,
+)
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Callable, Mapping, Sequence
     from typing import Any
 
     from flask_principal import Identity
     from invenio_communities.generators import _Need as CommunityRoleNeedType
     from invenio_drafts_resources.records import Record
+    from invenio_records_permissions.generators import Generator as InvenioGenerator
     from invenio_requests.customizations import RequestType
 
 
@@ -94,6 +98,8 @@ class CanSubmitRecordInCommunity(Generator):
     @override
     @require_kwargs("record")
     def needs(self, record: Community | CommunityRoleRecord | dict[str, Any], **kwargs: Any) -> list[Need]:
+        if not isinstance(record, Community) or not isinstance(record, CommunityRoleRecord):
+            return [Need(method="system_role", value="any_user")]
         ret = set()
         wfs = (
             record.custom_fields["allowed_workflows"]
@@ -435,3 +441,37 @@ class RecordOwnerInRecordCommunity(CommunityRoleMixin, RecordOwnerInRecordCommun
     """Generator that allows access to owners of the record in any of its communities, primary or secondary."""
 
     default_or_ids = "ids"
+
+
+class IfCommunityRole(ConditionalGenerator, RecipientGeneratorMixin):
+    """Generator that allows access to records with primary or secondary communities within which user has role."""
+
+    def __init__(
+        self,
+        role: str,
+        then_: Sequence[InvenioGenerator],
+        else_: Sequence[InvenioGenerator],
+    ) -> None:
+        self._role = role
+        super().__init__(then_=then_, else_=else_)
+
+    def _condition(self, **kwargs: Any) -> bool:
+        id_ = str(kwargs["receiver"].id)
+        for need in kwargs["creator"].provides:
+            if need.method == "community" and need.value == id_ and need.role == self._role:
+                return True
+        return False
+
+    def _query_instate(self, **context: Any) -> dsl.query.Query:
+        pass
+
+    def reference_receivers(
+        self,
+        record: Record | None = None,
+        request_type: RequestType | None = None,
+        **context: Any,
+    ) -> list[Mapping[str, str]]:
+        ret = []
+        for g in self._generators(record, **context):
+            ret += g.reference_receivers(record, request_type, **context)
+        return ret

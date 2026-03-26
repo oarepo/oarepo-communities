@@ -13,10 +13,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, override
 
-from invenio_rdm_records.requests.community_submission import AcceptAction as InvenioAcceptAction
-from invenio_rdm_records.requests.community_submission import CommunitySubmission as InvenioCommunitySubmission
+from invenio_rdm_records.requests.community_submission import (
+    AcceptAction as InvenioAcceptAction,
+)
+from invenio_rdm_records.requests.community_submission import (
+    CommunitySubmission as InvenioCommunitySubmission,
+)
 from oarepo_requests.services.permissions.identity import request_active
-from oarepo_requests.types.ref_types import ModelRefTypes
 from oarepo_requests.utils import classproperty
 
 if TYPE_CHECKING:
@@ -46,8 +49,12 @@ class AcceptAction(InvenioAcceptAction):
 class CommunitySubmission(InvenioCommunitySubmission):
     """Community submission request type using dynamic model-based topic ref types and custom accept action."""
 
-    allowed_topic_ref_types = ModelRefTypes()  # type: ignore[reportAssignmentType]
-    allowed_receiver_ref_types = (*InvenioCommunitySubmission.allowed_receiver_ref_types, "community_role")
+    allowed_topic_ref_types = ["record"]  # type: ignore[reportAssignmentType]
+    allowed_receiver_ref_types = (
+        *InvenioCommunitySubmission.allowed_receiver_ref_types,
+        "community_role",
+        "auto_approve",
+    )
 
     @classproperty
     @override

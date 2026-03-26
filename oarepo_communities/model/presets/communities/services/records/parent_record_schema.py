@@ -25,7 +25,9 @@ from oarepo_model.presets import Preset
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from invenio_rdm_records.services.schemas.parent import RDMParentSchema as InvenioRDMParentSchema
+    from invenio_rdm_records.services.schemas.parent import (
+        RDMParentSchema as InvenioRDMParentSchema,
+    )
     from oarepo_model.builder import InvenioModelBuilder
     from oarepo_model.model import InvenioModel
 else:

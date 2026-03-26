@@ -17,7 +17,10 @@ from oarepo_rdm.oai.percolator import init_percolators
 from oarepo_runtime.typing import record_from_result
 from pytest_oarepo.communities.functions import set_community_workflow
 
-from oarepo_communities.services.permissions.generators import DefaultCommunityRole, InAnyCommunity
+from oarepo_communities.services.permissions.generators import (
+    DefaultCommunityRole,
+    InAnyCommunity,
+)
 
 
 def test_disabled_endpoints(

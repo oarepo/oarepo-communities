@@ -19,6 +19,7 @@ def test_community_members_needs(app, db, sample_record_with_community_data, com
         CommunityRoleNeed(str(communities["aaa"].id), "owner"),
         CommunityRoleNeed(str(communities["aaa"].id), "manager"),
         CommunityRoleNeed(str(communities["aaa"].id), "curator"),
+        CommunityRoleNeed(str(communities["aaa"].id), "submitter"),
         CommunityRoleNeed(str(communities["aaa"].id), "reader"),
     }
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 
 import pytest
+from flask import Blueprint
 from invenio_app.factory import create_api
 from invenio_communities.config import COMMUNITIES_ROLES
 from invenio_i18n import lazy_gettext as _
@@ -42,6 +43,7 @@ from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
     CommunityRole,
     DefaultCommunityRole,
+    IfCommunityRole,
     RecordOwnerInDefaultRecordCommunity,
     RecordOwnerInRecordCommunity,
     TargetCommunityRole,
@@ -60,6 +62,18 @@ pytest_plugins = [
     "pytest_oarepo.users",
     "pytest_oarepo.files",
 ]
+
+
+@pytest.fixture(scope="module")
+def app(app):
+    bp = Blueprint("invenio_app_rdm_requests", __name__)
+
+    @bp.route("/user_dashboard_request_view")
+    def user_dashboard_request_view(request_pid_value) -> str:
+        return "user_dashboard_request_view ok"
+
+    app.register_blueprint(bp)
+    return app
 
 
 @pytest.fixture(autouse=True)
@@ -142,6 +156,8 @@ class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
 
     can_read = (
         RecordOwners(),
+        # CommunityRole("owner"),
+        AuthenticatedUser(),
         IfInState(
             "published",
             [AnyUser()],
@@ -386,6 +402,15 @@ class IndividualDepositionWorkflowRequestsPermissions(WorkflowRequestPolicy):
     )
 
 
+class CuratorAutoAcceptRequests(WorkflowRequestPolicy):
+    """Individual deposition workflow requests permissions."""
+
+    community_submission = WorkflowRequest(
+        requesters=[AuthenticatedUser()],
+        recipients=[IfCommunityRole("curator", [AutoApprove()], [DefaultCommunityRole("owner")])],
+    )
+
+
 WORKFLOWS = [
     Workflow(
         code="default",
@@ -450,6 +475,12 @@ WORKFLOWS = [
         label=_("Workflow for testing different can_submit_record (into community) policy"),
         permission_policy_cls=TestCommunityWorkflowPermissions,
         request_policy_cls=CommunitySubmissionOnlyBySubmitterRequests,
+    ),
+    Workflow(
+        code="curator_auto_accept",
+        label=_("Workflow for testing auto accepting requests conditioned by community role"),
+        permission_policy_cls=TestCommunityWorkflowPermissions,
+        request_policy_cls=CuratorAutoAcceptRequests,
     ),
 ]
 
