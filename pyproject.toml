@@ -41,7 +41,6 @@ oarepo_communities_records_ui_theme = "oarepo_communities.ui.oarepo_communities.
 oarepo_communities = "oarepo_communities.ext:OARepoCommunities"
 
 [project.entry-points."invenio_base.blueprints"]
-invenio_app_rdm_communities = "invenio_app_rdm.communities_ui.views:create_ui_blueprint"
 oarepo_communities_ui = "oarepo_communities.ui.oarepo_communities:create_blueprint"
 
 [project.entry-points."invenio_base.api_finalize_app"]
@@ -80,9 +79,6 @@ community-default-workflow = "oarepo_communities.workflow:community_default_work
 
 [project.entry-points."invenio_config.module"]
 oarepo_communities = "oarepo_communities.initial_config"
-
-[project.entry-points."invenio_base.api_blueprints"]
-invenio_rdm_records_community_records = "invenio_rdm_records.views:create_community_records_bp"
 
 [build-system]
 requires = ["hatchling"]
