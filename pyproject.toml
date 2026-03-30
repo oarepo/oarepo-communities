@@ -41,7 +41,7 @@ oarepo_communities_records_ui_theme = "oarepo_communities.ui.oarepo_communities.
 oarepo_communities = "oarepo_communities.ext:OARepoCommunities"
 
 [project.entry-points."invenio_base.blueprints"]
-invenio_app_rdm_communities = "invenio_app_rdm.communities_ui.views:create_ui_blueprint"
+# invenio_app_rdm_communities is now registered directly via invenio_app_rdm
 oarepo_communities_ui = "oarepo_communities.ui.oarepo_communities:create_blueprint"
 
 [project.entry-points."invenio_base.api_finalize_app"]
