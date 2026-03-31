@@ -33,7 +33,10 @@ from oarepo_requests.utils import (
     open_request_exists,
 )
 
-from oarepo_communities.utils import community_to_dict, get_default_community_id_from_record
+from oarepo_communities.utils import (
+    community_to_dict,
+    get_default_community_id_from_record,
+)
 
 from ..errors import (
     CommunityAlreadyIncludedError,

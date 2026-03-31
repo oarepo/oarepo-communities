@@ -13,10 +13,8 @@ from __future__ import annotations
 import shutil
 import sys
 from pathlib import Path
-from typing import Any
 
 import pytest
-from flask import Blueprint, Flask
 from invenio_access.permissions import system_identity
 from invenio_app.factory import create_app as _create_app
 from invenio_communities.proxies import current_communities
@@ -26,13 +24,7 @@ from invenio_vocabularies.proxies import current_service as vocabulary_service
 @pytest.fixture(scope="module")
 def create_app(instance_path, entry_points):
     """Application factory fixture."""
-
-    def factory(**config: Any) -> Flask:
-        app = _create_app(**config)
-        app.register_blueprint(fake_rdm_users_bp)
-        return app
-
-    return factory
+    return _create_app
 
 
 @pytest.fixture(scope="module")
@@ -56,9 +48,7 @@ def vocabularies_service(app):
 @pytest.fixture(scope="module")
 def community_type_type(system_identity_fixture, vocabularies_service):
     """Create and retrieve a language vocabulary type."""
-    return vocabularies_service.create_type(
-        system_identity_fixture, "communitytypes", "comtyp"
-    )
+    return vocabularies_service.create_type(system_identity_fixture, "communitytypes", "comtyp")
 
 
 @pytest.fixture
@@ -67,6 +57,4 @@ def fake_manifest(app):
     invenio_instance_path = python_path.parent.parent / "var" / "instance"
     manifest_path = invenio_instance_path / "static" / "dist"
     manifest_path.mkdir(parents=True, exist_ok=True)
-    shutil.copy(
-        Path(__file__).parent / "manifest.json", manifest_path / "manifest.json"
-    )
+    shutil.copy(Path(__file__).parent / "manifest.json", manifest_path / "manifest.json")
