@@ -26,7 +26,13 @@ if TYPE_CHECKING:
 class SetWorkflowInReviewComponent(ServiceComponent):
     """Component handling the workflow setup for a record in the review process."""
 
-    def create_review(self, identity: Identity, data: dict[str, Any], record: Record, **kwargs: Any) -> None:  # noqa: ARG002
+    def create_review(
+        self,
+        identity: Identity,  # noqa: ARG002
+        data: dict[str, Any],
+        record: Record,
+        **kwargs: Any,  # noqa: ARG002
+    ) -> None:
         """Set workflow for the record in the review process if it is not set yet."""
         if record.parent.workflow is not None:
             return

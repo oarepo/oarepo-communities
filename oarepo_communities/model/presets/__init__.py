@@ -14,7 +14,9 @@ from __future__ import annotations
 from oarepo_communities.model.presets.communities.records.parent_community import (
     ParentCommunityMetadataPreset,
 )
-from oarepo_communities.model.presets.communities.records.parent_mapping import ReviewMappingPreset
+from oarepo_communities.model.presets.communities.records.parent_mapping import (
+    ReviewMappingPreset,
+)
 from oarepo_communities.model.presets.communities.records.parent_record import (
     CommunitiesParentRecordPreset,
 )
