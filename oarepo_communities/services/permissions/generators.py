@@ -34,7 +34,10 @@ from oarepo_communities.errors import (
     TargetCommunityNotProvidedError,
 )
 from oarepo_communities.services.permissions.needs import UserInCommunityNeed
-from oarepo_communities.utils import get_community_ids_from_record, get_default_community_id_from_record
+from oarepo_communities.utils import (
+    get_community_ids_from_record,
+    get_default_community_id_from_record,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping

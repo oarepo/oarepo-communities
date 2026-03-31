@@ -13,8 +13,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, override
 
-from invenio_rdm_records.requests.community_submission import AcceptAction as InvenioAcceptAction
-from invenio_rdm_records.requests.community_submission import CommunitySubmission as InvenioCommunitySubmission
+from invenio_rdm_records.requests.community_submission import (
+    AcceptAction as InvenioAcceptAction,
+)
+from invenio_rdm_records.requests.community_submission import (
+    CommunitySubmission as InvenioCommunitySubmission,
+)
 from oarepo_requests.services.permissions.identity import request_active
 from oarepo_requests.types.ref_types import ModelRefTypes
 from oarepo_requests.utils import classproperty
