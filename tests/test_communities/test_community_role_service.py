@@ -17,7 +17,7 @@ def _serialized_community_role(id_) -> dict:
     return {
         "community": {
             "access": {
-                "member_policy": "open",
+                "member_policy": "closed",
                 "members_visibility": "public",
                 "record_submission_policy": "open",
                 "review_policy": "closed",
