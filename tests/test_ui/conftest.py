@@ -22,15 +22,6 @@ from invenio_app.factory import create_app as _create_app
 from invenio_communities.proxies import current_communities
 from invenio_vocabularies.proxies import current_service as vocabulary_service
 
-# Fake blueprint to provide missing endpoints during tests
-fake_rdm_users_bp = Blueprint("invenio_app_rdm_users", __name__)
-
-
-@fake_rdm_users_bp.route("/me/communities")
-def communities():
-    """Fake endpoint for user communities."""
-    return ""
-
 
 @pytest.fixture(scope="module")
 def create_app(instance_path, entry_points):
@@ -65,7 +56,9 @@ def vocabularies_service(app):
 @pytest.fixture(scope="module")
 def community_type_type(system_identity_fixture, vocabularies_service):
     """Create and retrieve a language vocabulary type."""
-    return vocabularies_service.create_type(system_identity_fixture, "communitytypes", "comtyp")
+    return vocabularies_service.create_type(
+        system_identity_fixture, "communitytypes", "comtyp"
+    )
 
 
 @pytest.fixture
@@ -74,4 +67,6 @@ def fake_manifest(app):
     invenio_instance_path = python_path.parent.parent / "var" / "instance"
     manifest_path = invenio_instance_path / "static" / "dist"
     manifest_path.mkdir(parents=True, exist_ok=True)
-    shutil.copy(Path(__file__).parent / "manifest.json", manifest_path / "manifest.json")
+    shutil.copy(
+        Path(__file__).parent / "manifest.json", manifest_path / "manifest.json"
+    )
