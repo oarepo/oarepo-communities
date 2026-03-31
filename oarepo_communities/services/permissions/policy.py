@@ -10,7 +10,9 @@
 
 from __future__ import annotations
 
-from invenio_communities.permissions import CommunityPermissionPolicy as InvenioCommunityPermissionPolicy
+from invenio_communities.permissions import (
+    CommunityPermissionPolicy as InvenioCommunityPermissionPolicy,
+)
 from invenio_records_permissions.generators import (
     AuthenticatedUser,
     SystemProcess,
@@ -19,7 +21,9 @@ from oarepo_requests.services.permissions.workflow_policies import (
     RequestBasedWorkflowPermissions,
 )
 
-from oarepo_communities.services.permissions.generators import CanSubmitRecordInCommunity
+from oarepo_communities.services.permissions.generators import (
+    CanSubmitRecordInCommunity,
+)
 
 
 class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):

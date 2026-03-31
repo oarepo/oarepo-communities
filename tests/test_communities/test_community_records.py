@@ -51,7 +51,11 @@ def test_review_process_and_community_submission(
         json={
             "$schema": "local://communities_test-v1.0.0.json",
             "files": {"enabled": False},
-            "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
+            "metadata": {
+                "contributors": ["Contributor 1"],
+                "creators": ["Creator 1", "Creator 2"],
+                "title": "blabla",
+            },
         },  # must be here if communities are to customize who can create records
     )
     id_ = resp.json["id"]
@@ -63,7 +67,8 @@ def test_review_process_and_community_submission(
         files_service=communities_model.proxies.current_service.draft_files,
     )
     review = reader_client.put(
-        f"/records/{id_}/draft/review", json={"receiver": {"community": community_id}, "type": "community-submission"}
+        f"/records/{id_}/draft/review",
+        json={"receiver": {"community": community_id}, "type": "community-submission"},
     )
     draft_read_after_review_create = reader_client.get(f"/records/{id_}/draft")
     assert draft_read_after_review_create.json["parent"]["workflow"] == "default"
@@ -105,12 +110,17 @@ def test_links(
         "/records",
         json={
             "$schema": "local://communities_test-v1.0.0.json",
-            "metadata": {"contributors": ["Contributor 1"], "creators": ["Creator 1", "Creator 2"], "title": "blabla"},
+            "metadata": {
+                "contributors": ["Contributor 1"],
+                "creators": ["Creator 1", "Creator 2"],
+                "title": "blabla",
+            },
         },  # must be here if communities are to customize who can create records
     ).json
     id_ = resp["id"]
     reader_client.put(
-        f"/records/{id_}/draft/review", json={"receiver": {"community": community_id}, "type": "community-submission"}
+        f"/records/{id_}/draft/review",
+        json={"receiver": {"community": community_id}, "type": "community-submission"},
     )
     upload_file(
         identity=community_reader.identity,
