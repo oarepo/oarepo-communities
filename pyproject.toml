@@ -25,7 +25,7 @@ tests = [
     "pytest-invenio",
     "pytest-oarepo",
     "oarepo-rdm>=1.0.0.dev4",
-    "oarepo-ui>=6.0.0dev1", # remove once dev versions aren't used
+    # "oarepo-ui>=6.0.0dev1",
 ]
 
 oarepo14 = [
