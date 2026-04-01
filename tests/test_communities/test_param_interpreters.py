@@ -14,7 +14,7 @@ def test_community_role_param_interpreter(
     community_owner,
     users,
     record_service,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     draft_with_community_factory,
     create_request_on_draft,
     submit_request_on_draft,
@@ -25,9 +25,9 @@ def test_community_role_param_interpreter(
     community_curator = users[1]
     owner_client = logged_client(community_owner)
 
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
-    community_3 = community_get_or_create(community_curator, "comm3")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
+    community_3 = community_get_or_create_in_default_workflow(community_curator, "comm3")
     invite(community_reader, str(community_1.id), "reader")
     invite(community_reader, str(community_2.id), "reader")
     invite(community_reader, str(community_3.id), "reader")
