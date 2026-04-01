@@ -156,7 +156,7 @@ def test_record_owners_in_record_community_needs(
     urls,
     users,
     logged_client,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     draft_with_community_factory,
     record_service,
     search_clear,
@@ -167,7 +167,7 @@ def test_record_owners_in_record_community_needs(
         logged_client,
         draft_with_community_factory,
         record_service,
-        community_get_or_create,
+        community_get_or_create_in_default_workflow,
         workflow="record_owner_in_record_community",
         urls=urls,
         results=(200, 200, 200, 403),
@@ -179,7 +179,7 @@ def test_record_owners_in_default_record_community_needs(
     urls,
     users,
     logged_client,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     draft_with_community_factory,
     record_service,
     search_clear,
@@ -190,7 +190,7 @@ def test_record_owners_in_default_record_community_needs(
         logged_client,
         draft_with_community_factory,
         record_service,
-        community_get_or_create,
+        community_get_or_create_in_default_workflow,
         workflow="record_owner_in_default_record_community",
         urls=urls,
         results=(200, 200, 403, 403),
@@ -199,11 +199,11 @@ def test_record_owners_in_default_record_community_needs(
 
 def test_in_any_community(
     community_owner,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     search_clear,
 ):
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
 
     generator = InAnyCommunity(DefaultCommunityRole("owner"))
     needs = generator.needs()
