@@ -50,7 +50,7 @@ def accept_request(urls, link2testclient):
 def env(
     logged_client,
     users,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     community_owner,
     invite,
 ) -> tuple:
@@ -58,8 +58,8 @@ def env(
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
     invite(community_reader, str(community_1.id), "reader")
     invite(community_reader, str(community_2.id), "reader")
 

@@ -29,7 +29,7 @@ def test_disabled_endpoints(
     draft_with_community_factory,
     published_record_with_community_factory,
     default_record_with_workflow_json,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     record_service,
     urls,
     search_clear,
@@ -38,7 +38,7 @@ def test_disabled_endpoints(
     # create should work only through community
     create = owner_client.post(urls["BASE_URL"], json=default_record_with_workflow_json)
     assert create.status_code == 400
-    community_1 = community_get_or_create(community_owner, "comm1")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
     draft = draft_with_community_factory(community_owner.identity, str(community_1.id))
     published_record = published_record_with_community_factory(community_owner.identity, str(community_1.id))
     publish = owner_client.post(f"{urls['BASE_URL']}/{draft['id']}/draft/actions/publish")
@@ -51,7 +51,7 @@ def test_default_community_workflow_changed(
     logged_client,
     community_owner,
     users,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     draft_with_community_factory,
     create_request_on_draft,
     link2testclient,
@@ -64,8 +64,8 @@ def test_default_community_workflow_changed(
     owner_client = logged_client(community_owner)
     reader_client = logged_client(community_reader)
 
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
     invite(community_reader, str(community_1.id), "reader")
     invite(community_reader, str(community_2.id), "reader")
 

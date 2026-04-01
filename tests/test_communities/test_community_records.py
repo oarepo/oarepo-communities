@@ -176,15 +176,15 @@ def test_search(
     communities_model,
     community_owner,
     published_record_with_community_factory,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     record_service,
     link2testclient,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
 
     record1 = published_record_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = published_record_with_community_factory(community_owner.identity, str(community_2.id))
@@ -218,15 +218,15 @@ def test_search_community_records(
     communities_model,
     community_owner,
     published_record_with_community_factory,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     record_service,
     link2testclient,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
     community1_item = current_communities.service.read(community_owner.identity, community_1.id)
     community2_item = current_communities.service.read(community_owner.identity, community_2.id)
 
@@ -309,14 +309,14 @@ def test_search_model(
     communities_model,
     community_owner,
     published_record_with_community_factory,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     record_service,
     search_clear,
 ):
     owner_client = logged_client(community_owner)
 
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
 
     record1 = published_record_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = published_record_with_community_factory(community_owner.identity, str(community_2.id))
@@ -346,15 +346,15 @@ def test_user_search(
     community_owner,
     users,
     draft_with_community_factory,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     invite,
     search_clear,
 ):
     community_reader = users[0]
     owner_client = logged_client(community_owner)
 
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
     invite(community_reader, community_1.id, "reader")
 
     record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
@@ -388,7 +388,7 @@ def test_user_search_model(
     community_owner,
     users,
     draft_with_community_factory,
-    community_get_or_create,
+    community_get_or_create_in_default_workflow,
     record_service,
     invite,
     search_clear,
@@ -396,8 +396,8 @@ def test_user_search_model(
     community_reader = users[0]
     owner_client = logged_client(community_owner)
 
-    community_1 = community_get_or_create(community_owner, "comm1")
-    community_2 = community_get_or_create(community_owner, "comm2")
+    community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
+    community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
     invite(community_reader, community_1.id, "reader")
 
     record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
