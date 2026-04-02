@@ -34,7 +34,7 @@ from oarepo_workflows import (
 from oarepo_workflows.model.presets import workflows_preset
 from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
 from oarepo_workflows.services.permissions.generators import SameAs
-from pytest_oarepo.requests.classes import UserGenerator
+from pytest_oarepo.permission_generators import UserGenerator
 
 from oarepo_communities.model.presets import communities_preset
 from oarepo_communities.services.permissions.generators import (
