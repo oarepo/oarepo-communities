@@ -23,7 +23,7 @@ pip install oarepo-communities
 
 ### Requirements
 
-- Python 3.13+
+- Python 3.14
 - Invenio 14.x
 - oarepo-runtime>=2.0.0dev23
 - oarepo-workflows>=2.0.0dev3
