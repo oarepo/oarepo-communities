@@ -22,6 +22,7 @@ from invenio_communities.generators import CommunityRoleNeed
 from invenio_communities.proxies import current_roles
 from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
+from invenio_rdm_records.requests import CommunitySubmission
 from invenio_search.engine import dsl
 from oarepo_runtime.services.generators import Generator
 from oarepo_runtime.typing import require_kwargs
@@ -33,6 +34,7 @@ from oarepo_communities.errors import (
     MissingDefaultCommunityError,
     TargetCommunityNotProvidedError,
 )
+from oarepo_communities.records.api import CommunityRoleRecord
 from oarepo_communities.services.permissions.needs import UserInCommunityNeed
 from oarepo_communities.utils import (
     get_community_ids_from_record,
@@ -94,7 +96,7 @@ class CanSubmitRecordInCommunity(Generator):
     # serialized dict comes for ui
     @override
     @require_kwargs("record")
-    def needs(self, record: Community | dict[str, Any], **kwargs: Any) -> list[Need]:
+    def needs(self, record: Community | CommunityRoleRecord | dict[str, Any], **kwargs: Any) -> list[Need]:
         ret = set()
         wfs = (
             record.custom_fields["allowed_workflows"]
@@ -211,10 +213,17 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
         """Set of Needs granting permission."""
         _needs = set[Need]()
 
+        if "request_type" in kwargs and isinstance(kwargs["request_type"], CommunitySubmission):
+            record = kwargs["receiver"]
+
         # if called on community, returns the required roles bound to the community id
         if record and isinstance(record, Community):
             for role in self.roles(**kwargs):
                 _needs.add(CommunityRoleNeed(str(record.id), role))  # type: ignore[reportArgumentType]
+            return list(_needs)
+        if record and isinstance(record, CommunityRoleRecord):
+            for role in self.roles(**kwargs):
+                _needs.add(CommunityRoleNeed(CommunityRoleRecord.get_community_id(record.id), role))  # type: ignore[reportArgumentType]
             return list(_needs)
 
         community_ids = self._get_record_communities(record) if record is not None else self._get_data_communities(data)
