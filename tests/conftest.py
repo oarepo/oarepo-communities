@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 
 import pytest
+from flask import Blueprint
 from invenio_app.factory import create_api
 from invenio_i18n import lazy_gettext as _
 from invenio_rdm_records.services.generators import RecordOwners
@@ -69,6 +70,18 @@ def init_communities_custom_fields(app, init_communities_cf):
 @pytest.fixture(scope="module", autouse=True)
 def location(location):
     return location
+
+
+@pytest.fixture(scope="module")
+def app(app):
+    bp = Blueprint("invenio_app_rdm_requests", __name__)
+
+    @bp.route("/user_dashboard_request_view")
+    def user_dashboard_request_view(request_pid_value) -> str:
+        return "user_dashboard_request_view ok"
+
+    app.register_blueprint(bp)
+    return app
 
 
 @pytest.fixture
