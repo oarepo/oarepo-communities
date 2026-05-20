@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 import uuid
 from functools import reduce, wraps
 from typing import TYPE_CHECKING, Protocol, cast, override
@@ -77,10 +78,23 @@ class InAnyCommunity(Generator):
         # won't be easy to do as we go from community -> workflow id -> can_create/deposit
         # permission which might need a community id and currently can not process bulk
         # ids. Then we'd need a fallback to iteration if bulk fails.
+
+        # the data might have been passed, for example during can_create = [InAnyCommunity(...)]
+        # if so, we need to shallow copy the data to avoid modifying the original
+        data = kwargs.pop("data", None)
+        data = {**data} if data is not None else {}
+
+        # and if parent is present, we deepcopy it as we will change the communities dict inside
+        if "parent" in data:
+            data["parent"] = copy.deepcopy(data["parent"])
+        else:
+            data["parent"] = {}
+
         for community in communities:
+            data["parent"]["communities"] = {"default": str(community.id)}
             needs |= set(
                 self.permission_generator.needs(
-                    data={"parent": {"communities": {"default": str(community.id)}}},
+                    data=data,
                     community_metadata=community,  # optimization
                     **kwargs,
                 )
