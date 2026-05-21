@@ -10,7 +10,10 @@ from __future__ import annotations
 
 from invenio_communities.generators import CommunityRoleNeed
 
-from oarepo_communities.services.permissions.generators import CommunityRole
+from oarepo_communities.services.permissions.generators import (
+    CommunityRole,
+    PrimaryCommunityRole,
+)
 
 
 def test_community_role_needs(app, db, sample_record_with_community_data, communities):
@@ -45,3 +48,18 @@ def test_community_role_query_filter(
             }
         }
     )
+
+
+def test_community_role_returns_empty_list_if_no_community_id(communities_model):
+    role = CommunityRole("owner")
+    primary_role = PrimaryCommunityRole("owner")
+
+    assert role.needs(data={"parent": {}}) == []
+    assert role.excludes(data={"parent": {}}) == []
+    assert primary_role.needs(data={"parent": {}}) == []
+    assert primary_role.excludes(data={"parent": {}}) == []
+
+    assert role.needs(record=communities_model.Record({})) == []
+    assert role.excludes(record=communities_model.Record({})) == []
+    assert primary_role.needs(record=communities_model.Record({})) == []
+    assert primary_role.excludes(record=communities_model.Record({})) == []

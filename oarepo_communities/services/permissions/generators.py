@@ -231,8 +231,12 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
                 _needs.add(CommunityRoleNeed(str(record.id), role))  # type: ignore[reportArgumentType]
             return list(_needs)
 
-        community_ids = self._get_record_communities(record) if record is not None else self._get_data_communities(data)
-
+        try:
+            community_ids = (
+                self._get_record_communities(record) if record is not None else self._get_data_communities(data)
+            )
+        except MissingCommunitiesError, MissingDefaultCommunityError:
+            return []
         # create a need for each community and required roles. Will match if user
         # provides any of them
         for c in community_ids:

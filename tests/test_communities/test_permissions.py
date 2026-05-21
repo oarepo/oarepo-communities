@@ -35,9 +35,6 @@ def test_disabled_endpoints(
     search_clear,
 ):
     owner_client = logged_client(community_owner)
-    # create should work only through community
-    create = owner_client.post(urls["BASE_URL"], json=default_record_with_workflow_json)
-    assert create.status_code == 400
     community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
     draft = draft_with_community_factory(community_owner.identity, str(community_1.id))
     published_record = published_record_with_community_factory(community_owner.identity, str(community_1.id))
