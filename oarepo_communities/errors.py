@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import cast
+import warnings
+from typing import Any, cast
 
 from flask_resources import (
     create_error_handler,
@@ -41,6 +42,36 @@ class PrimaryCommunityError(Exception):
     """The record is already in the community."""
 
     description = _("Primary community can't be removed, can only be migrated to another.")
+
+
+class MissingDefaultCommunityError(ValidationError):
+    """Error raised when default community is missing."""
+
+    description = _("Default community is not present in the input.")
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialise error."""
+        warnings.warn(
+            "MissingDefaultCommunityError is deprecated and will no longer be supported by oarepo-communities.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
+
+class MissingCommunitiesError(ValidationError):
+    """Error raised when communities are missing in the input data."""
+
+    description = _("Communities are not present in the input.")
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialise error."""
+        warnings.warn(
+            "MissingCommunitiesError is deprecated and will no longer be supported by oarepo-communities.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class CommunityDoesntExistError(ValidationError):
