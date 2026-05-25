@@ -29,11 +29,6 @@ from oarepo_runtime.typing import require_kwargs
 from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
 
-from oarepo_communities.errors import (
-    MissingCommunitiesError,
-    MissingDefaultCommunityError,
-    TargetCommunityNotProvidedError,
-)
 from oarepo_communities.services.permissions.needs import UserInCommunityNeed
 from oarepo_communities.utils import (
     get_community_ids_from_record,
@@ -161,15 +156,15 @@ class CommunityRoleMixin(CommunityRoleMixinProtocol):
             raise TypeError("Record must contain a parent! Did you forget to use drafts?")
         try:
             return get_community_ids_from_record(record)
-        except AttributeError as e:
-            raise MissingCommunitiesError(f"Communities missing on record {record}.") from e
+        except AttributeError:
+            return []
 
     @override
     def _get_data_communities(self, data: dict | None = None, **kwargs: Any) -> list[str]:
         """Get community ids from input data."""
         community_ids = (data or {}).get("parent", {}).get("communities", {}).get("ids")
         if not community_ids:
-            raise MissingCommunitiesError("Communities not defined in input data.")
+            return []
         return [convert_community_ids_to_uuid(x) for x in community_ids]
 
 
@@ -185,14 +180,14 @@ class DefaultCommunityRoleMixin(CommunityRoleMixinProtocol):
             raise TypeError("Record must contain a parent! Did you forget to use drafts?")
         try:
             return [get_default_community_id_from_record(record)]
-        except (AttributeError, TypeError) as e:
-            raise MissingDefaultCommunityError(f"Default community missing on record {record}.") from e
+        except AttributeError, TypeError:
+            return []
 
     @override
     def _get_data_communities(self, data: dict | None = None, **kwargs: Any) -> list[str]:
         community_id = (data or {}).get("parent", {}).get("communities", {}).get("default", {})
         if not community_id:
-            raise MissingDefaultCommunityError("Default community not defined in input data.")
+            return []
         return [convert_community_ids_to_uuid(community_id)]
 
 
@@ -231,12 +226,8 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
                 _needs.add(CommunityRoleNeed(str(record.id), role))  # type: ignore[reportArgumentType]
             return list(_needs)
 
-        try:
-            community_ids = (
-                self._get_record_communities(record) if record is not None else self._get_data_communities(data)
-            )
-        except MissingCommunitiesError, MissingDefaultCommunityError:
-            return []
+        community_ids = self._get_record_communities(record) if record else self._get_data_communities(data)
+
         # create a need for each community and required roles. Will match if user
         # provides any of them
         for c in community_ids:
@@ -303,8 +294,8 @@ class DefaultCommunityRole(DefaultCommunityRoleMixin, RecipientGeneratorMixin, O
         request_type: RequestType | None = None,
         **context: Any,
     ) -> list[Mapping[str, str]]:
-        community_id = self._get_record_communities(record=record, **context)[0]
-        return [{"community_role": f"{community_id}:{self._role}"}]
+        community_ids = self._get_record_communities(record=record, **context)
+        return [{"community_role": f"{community_ids[0]}:{self._role}"}] if community_ids else []
 
     @override
     def query_filter_field(self) -> str:
@@ -324,11 +315,11 @@ class TargetCommunityRole(DefaultCommunityRole):
     @override
     def _get_data_communities(self, data: dict | None = None, **kwargs: Any) -> list[str]:
         if data is None:
-            raise TargetCommunityNotProvidedError("Request data not provided.")
+            return []
         try:
             community_id = data["payload"]["community"]
-        except KeyError as e:
-            raise TargetCommunityNotProvidedError("Community not defined in request payload.") from e
+        except KeyError:
+            return []
         return [community_id]
 
     @override
@@ -338,8 +329,8 @@ class TargetCommunityRole(DefaultCommunityRole):
         request_type: RequestType | None = None,
         **context: Any,
     ) -> list[Mapping[str, str]]:
-        community_id = self._get_data_communities(record=record, **context)[0]
-        return [{"community_role": f"{community_id}:{self._role}"}]
+        community_ids = self._get_data_communities(record=record, **context)
+        return [{"community_role": f"{community_ids[0]}:{self._role}"}] if community_ids else []
 
 
 class CommunityMembers(CommunityRoleMixin, OARepoCommunityRoles):

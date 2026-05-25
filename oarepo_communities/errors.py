@@ -43,18 +43,6 @@ class PrimaryCommunityError(Exception):
     description = _("Primary community can't be removed, can only be migrated to another.")
 
 
-class MissingDefaultCommunityError(ValidationError):
-    """Error raised when default community is missing."""
-
-    description = _("Default community is not present in the input.")
-
-
-class MissingCommunitiesError(ValidationError):
-    """Error raised when communities are missing in the input data."""
-
-    description = _("Communities are not present in the input.")
-
-
 class CommunityDoesntExistError(ValidationError):
     """Error raised when the community specified in input data does not exist."""
 

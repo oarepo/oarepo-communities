@@ -13,6 +13,7 @@ from invenio_communities.generators import CommunityRoleNeed
 from oarepo_communities.services.permissions.generators import (
     CommunityRole,
     PrimaryCommunityRole,
+    TargetCommunityRole,
 )
 
 
@@ -63,3 +64,14 @@ def test_community_role_returns_empty_list_if_no_community_id(communities_model)
     assert role.excludes(record=communities_model.Record({})) == []
     assert primary_role.needs(record=communities_model.Record({})) == []
     assert primary_role.excludes(record=communities_model.Record({})) == []
+
+
+def test_reference_receivers_returns_empty_list_if_no_community_id(communities_model):
+    primary_role = PrimaryCommunityRole("owner")
+    target_role = TargetCommunityRole("owner")
+
+    assert primary_role.reference_receivers(record=communities_model.Record({})) == []
+
+    assert target_role.reference_receivers(data={}) == []
+    assert target_role.reference_receivers(data={"payload": {}}) == []
+    assert target_role.reference_receivers() == []
