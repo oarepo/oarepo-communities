@@ -84,6 +84,9 @@ community-default-workflow = "oarepo_communities.workflow:community_default_work
 [project.entry-points."invenio_config.module"]
 oarepo_communities = "oarepo_communities.initial_config"
 
+[project.entry-points."flask.commands"]
+communities = "oarepo_communities.cli:communities"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
