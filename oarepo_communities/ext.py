@@ -16,7 +16,6 @@ from flask_principal import identity_loaded
 from invenio_communities.communities.records.api import Community
 from invenio_pidstore.errors import PIDDoesNotExistError
 
-import oarepo_communities.cli
 import oarepo_communities.config
 
 from .errors import CommunityDoesntExistError
