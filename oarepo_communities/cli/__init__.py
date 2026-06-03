@@ -82,7 +82,7 @@ def add_community_member(community: str, email: str, role: str) -> None:
             "members": [
                 {
                     "type": "user",
-                    "id": user_id,
+                    "id": str(user_id),
                 }
             ],
             "role": role,
