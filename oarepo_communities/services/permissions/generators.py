@@ -16,6 +16,7 @@ import uuid
 from functools import reduce, wraps
 from typing import TYPE_CHECKING, Protocol, cast, override
 
+from flask import current_app
 from flask_principal import Need
 from invenio_communities.communities.records.api import Community
 from invenio_communities.communities.records.models import CommunityMetadata
@@ -104,18 +105,18 @@ class CanSubmitRecordInCommunity(Generator):
     @override
     @require_kwargs("record")
     def needs(self, record: Community | dict[str, Any], **kwargs: Any) -> list[Need]:
-        ret = set()
-        wfs = (
-            record.custom_fields["allowed_workflows"]
-            if isinstance(record, Community)
-            else record["custom_fields"]["allowed_workflows"]
-        )
+        ret: set[Need] = set()
+        custom_fields_dict: dict[str, str | list[str]] = (
+            record.custom_fields if isinstance(record, Community) else record.get("custom_fields", {})
+        ) or {}
+        wfs: list[str] = cast("list[str]", custom_fields_dict.get("allowed_workflows", []))
         for workflow_code in wfs:
             workflow = current_oarepo_workflows.workflow_by_code[workflow_code]
             requests = workflow.requests().requests_by_id
             if "community-submission" not in requests:
+                current_app.logger.error(f"Workflow {workflow_code} does not have community-submission request")  # noqa: G004
                 continue
-            ret |= set(requests["community-submission"].requester_generator.needs(**kwargs | {"record": record}))
+            ret |= set(requests["community-submission"].requester_generator.needs(**kwargs | {"community": record}))
         return list(ret)
 
 
@@ -185,7 +186,7 @@ class DefaultCommunityRoleMixin(CommunityRoleMixinProtocol):
 
     @override
     def _get_data_communities(self, data: dict | None = None, **kwargs: Any) -> list[str]:
-        community_id = (data or {}).get("parent", {}).get("communities", {}).get("default", {})
+        community_id = (data or {}).get("parent", {}).get("communities", {}).get("default", None)
         if not community_id:
             return []
         return [convert_community_ids_to_uuid(community_id)]
