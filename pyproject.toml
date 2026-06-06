@@ -1,19 +1,19 @@
 [project]
 name = "oarepo-communities"
-version = "9.0.2"
+version = "10.0.0"
 description = ""
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.14,<3.15"
 dependencies = [
-    "oarepo-requests>=7.0.0,<8.0.0",
+    "oarepo-requests>=8.0.0,<9.0.0",
     "oarepo[rdm,tests]>=14.0.0dev0,<15.0.0",
-    "oarepo-runtime>=5.0.0,<6.0.0",
-    "oarepo-workflows>=5.0.0,<6.0.0",
+    "oarepo-runtime>=6.0.0,<7.0.0",
+    "oarepo-workflows>=6.0.0,<7.0.0",
 
     # invenio dependencies
     "invenio-app-rdm>=14.0.0b10.dev5,<15.0.0",
-    "invenio-rdm-records>=29.0.0,<30.0.0",
+    "invenio-rdm-records>=31.0.0,<32.0.0",
     "invenio-search>=3.1.2,<4.0.0",
 ]
 
@@ -28,8 +28,8 @@ dev = [
 ]
 tests = [
     "pytest-invenio>=4.0.0,<5.0.0",
-    "pytest-oarepo>=5.0.0,<6.0.0",
-    "oarepo-rdm>=6.0.0,<7.0.0",
+    "pytest-oarepo>=6.0.0,<7.0.0",
+    "oarepo-rdm>=7.0.0,<8.0.0",
 ]
 
 oarepo14 = [
