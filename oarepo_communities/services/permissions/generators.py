@@ -24,8 +24,8 @@ from invenio_communities.generators import CommunityRoleNeed
 from invenio_communities.proxies import current_roles
 from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
+from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
-from oarepo_runtime.services.generators import Generator
 from oarepo_runtime.typing import require_kwargs
 from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
