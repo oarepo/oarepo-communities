@@ -17,6 +17,7 @@ from invenio_rdm_records.services.generators import RecordOwners
 from invenio_records_permissions.generators import (
     AnyUser,
     AuthenticatedUser,
+    SameAs,
     SystemProcess,
 )
 from oarepo_rdm import rdm_minimal_preset
@@ -33,7 +34,6 @@ from oarepo_workflows import (
 )
 from oarepo_workflows.model.presets import workflows_preset
 from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
-from oarepo_workflows.services.permissions.generators import SameAs
 from pytest_oarepo.permission_generators import UserGenerator
 
 from oarepo_communities.model.presets import communities_preset
