@@ -116,7 +116,9 @@ class CanSubmitRecordInCommunity(Generator):
             if "community-submission" not in requests:
                 current_app.logger.error(f"Workflow {workflow_code} does not have community-submission request")  # noqa: G004
                 continue
-            ret |= set(requests["community-submission"].requester_generator.needs(**kwargs | {"community": record}))
+            ret |= set(
+                requests["community-submission"].requester_generator.needs(record=record, community=record, **kwargs)
+            )
         return list(ret)
 
 
@@ -228,6 +230,8 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
             return list(_needs)
 
         community_ids = self._get_record_communities(record) if record else self._get_data_communities(data)
+        if not community_ids and "community" in kwargs and kwargs["community"]:
+            community_ids = [str(kwargs["community"].id)]
 
         # create a need for each community and required roles. Will match if user
         # provides any of them
