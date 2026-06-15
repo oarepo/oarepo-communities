@@ -229,9 +229,18 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
                 _needs.add(CommunityRoleNeed(str(record.id), role))  # type: ignore[reportArgumentType]
             return list(_needs)
 
-        community_ids = self._get_record_communities(record) if record else self._get_data_communities(data)
+        community_ids = []
+        try:
+            community_ids = self._get_record_communities(record) if record else self._get_data_communities(data)
+        except TypeError:
+            # the record does not have a parent, if there is community passed in kwargs, use it,
+            # otherwise raise the original error
+            if not (kwargs.get("community")):
+                raise
+
         if not community_ids and "community" in kwargs and kwargs["community"]:
-            community_ids = [str(kwargs["community"].id)]
+            community = kwargs["community"]
+            community_ids = [str(community.id)] if isinstance(community, Community) else [str(community["id"])]
 
         # create a need for each community and required roles. Will match if user
         # provides any of them
