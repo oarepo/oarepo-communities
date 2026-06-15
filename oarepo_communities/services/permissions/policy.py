@@ -20,6 +20,7 @@ from invenio_records_permissions.generators import (
 from oarepo_requests.services.permissions.workflow_policies import (
     RequestBasedWorkflowPermissions,
 )
+from oarepo_workflows.services.permissions.composite import BooleanPermissionPolicyMixin
 
 from oarepo_communities.services.permissions.generators import (
     CanSubmitRecordInCommunity,
@@ -54,7 +55,7 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
 
 
 # TODO: here or oarepo?
-class CommunityPermissionPolicy(InvenioCommunityPermissionPolicy):
+class CommunityPermissionPolicy(BooleanPermissionPolicyMixin, InvenioCommunityPermissionPolicy):  # type: ignore[reportIncompatibleMethodOverride]
     """Community permission policy."""
 
     can_submit_record = (CanSubmitRecordInCommunity(),)
