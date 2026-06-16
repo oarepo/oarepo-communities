@@ -15,7 +15,7 @@ dependencies = [
     "invenio-app-rdm>=14.0.0b10.dev5,<15.0.0",
     "invenio-rdm-records>=32.0.1,<33.0.0",
     "invenio-search>=3.1.2,<4.0.0",
-    "invenio-communities>=8.1.0,<9.0.0",
+    "invenio-communities>=28.1.0,<29.0.0",
 ]
 
 [project.urls]
