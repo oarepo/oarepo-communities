@@ -35,6 +35,7 @@ from oarepo_communities.utils import (
     get_community_ids_from_record,
     get_default_community_id_from_record,
 )
+from oarepo_communities.workflow import get_allowed_workflows
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -109,7 +110,7 @@ class CanSubmitRecordInCommunity(Generator):
         custom_fields_dict: dict[str, str | list[str]] = (
             record.custom_fields if isinstance(record, Community) else record.get("custom_fields", {})
         ) or {}
-        wfs: list[str] = cast("list[str]", custom_fields_dict.get("allowed_workflows", []))
+        wfs: list[str] = get_allowed_workflows(custom_fields_dict)  # type: ignore[arg-type]
         for workflow_code in wfs:
             workflow = current_oarepo_workflows.workflow_by_code[workflow_code]
             requests = workflow.requests().requests_by_id
