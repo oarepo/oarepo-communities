@@ -37,7 +37,7 @@ def get_workflow_from_community_custom_fields(custom_fields: dict) -> Workflow:
 
 def get_allowed_workflows(custom_fields: dict) -> list[str]:
     """Get allowed workflows for the given community."""
-    allowed_workflows = custom_fields.get("allowed_workflows", [])
+    allowed_workflows = cast("list[str]", custom_fields.get("allowed_workflows", []))
     if allowed_workflows:
         return allowed_workflows
     if current_app.config.get("OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"):
