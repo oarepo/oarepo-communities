@@ -23,12 +23,12 @@ from oarepo_workflows.errors import InvalidWorkflowError
 
 def get_workflow_from_community_custom_fields(custom_fields: dict) -> Workflow:
     """Get workflow from community custom fields."""
-    workflow_id = custom_fields.get(
-        "workflow",
-        current_app.config["WORKFLOWS_DEFAULT_WORKFLOW"],
-    )
-    if not workflow_id and current_app.config.get("OAREPO_COMMUNITIES_DEFAULT_WORKFLOW", None):
-        workflow_id = current_app.config["OAREPO_COMMUNITIES_DEFAULT_WORKFLOW"]
+    workflow_id = custom_fields.get("workflow")
+    if not workflow_id:
+        if communities_default_workflow_id := current_app.config.get("OAREPO_COMMUNITIES_DEFAULT_WORKFLOW", None):
+            workflow_id = communities_default_workflow_id
+        else:
+            workflow_id = current_app.config["WORKFLOWS_DEFAULT_WORKFLOW"]
     try:
         return current_oarepo_workflows.workflow_by_code[workflow_id]
     except KeyError:

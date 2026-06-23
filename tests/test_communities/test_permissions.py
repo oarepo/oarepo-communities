@@ -12,6 +12,7 @@ import pytest
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.generators import CommunityRoleNeed
+from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.errors import PermissionDeniedError
 from oarepo_rdm.oai.percolator import init_percolators
 from oarepo_runtime.typing import record_from_result
@@ -210,3 +211,11 @@ def test_in_any_community(
         CommunityRoleNeed(str(community_2.id), "owner"),
     }
     assert expected.issubset(set(needs))
+
+
+def test_can_submit_in_community_without_explicit_allowed_workflows(
+    communities_model, community_owner, minimal_community
+):
+    communities_service = current_communities.service
+    community = record_from_result(communities_service.create(community_owner.identity, minimal_community))
+    assert communities_service.check_permission(community_owner.identity, "submit_record", record=community)
