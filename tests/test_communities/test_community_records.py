@@ -29,6 +29,49 @@ def _community_data(community) -> dict[str, Any]:
     }
 
 
+def _test_review_process(community_id, communities_model, submitter_client, reviewer_client, upload_file) -> None:
+    resp = submitter_client.post(
+        "/records",
+        json={
+            "$schema": "local://communities_test-v1.0.0.json",
+            "files": {"enabled": False},
+            "metadata": {
+                "contributors": ["Contributor 1"],
+                "creators": ["Creator 1", "Creator 2"],
+                "title": "blabla",
+            },
+        },  # must be here if communities are to customize who can create records
+    )
+    id_ = resp.json["id"]
+    assert resp.json["parent"]["workflow"] is None
+    assert not resp.json["parent"]["communities"]
+    upload_file(
+        identity=submitter_client.user_fixture.identity,
+        record_id=id_,
+        files_service=communities_model.proxies.current_service.draft_files,
+    )
+    review = submitter_client.put(
+        f"/records/{id_}/draft/review",
+        json={"receiver": {"community": community_id}, "type": "community-submission"},
+    )
+    draft_read_after_review_create = submitter_client.get(f"/records/{id_}/draft")
+    assert draft_read_after_review_create.json["parent"]["workflow"] == "default"
+    assert not resp.json["parent"]["communities"]
+
+    assert "review" in draft_read_after_review_create.json["parent"]
+
+    submit = submitter_client.post(f"/records/{id_}/draft/actions/submit-review")
+    accept = reviewer_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
+
+    assert review.status_code == 200
+    assert submit.status_code == 202
+    assert accept.status_code == 200
+
+    record = submitter_client.get(f"/records/{id_}")
+    assert record.status_code == 200
+    assert record.json["parent"]["communities"]["default"] == community_id
+
+
 def test_review_process_and_community_submission(
     logged_client,
     community_owner,
@@ -46,46 +89,28 @@ def test_review_process_and_community_submission(
     reader_client = logged_client(community_reader)
     owner_client = logged_client(community_owner)
 
-    resp = reader_client.post(
-        "/records",
-        json={
-            "$schema": "local://communities_test-v1.0.0.json",
-            "files": {"enabled": False},
-            "metadata": {
-                "contributors": ["Contributor 1"],
-                "creators": ["Creator 1", "Creator 2"],
-                "title": "blabla",
-            },
-        },  # must be here if communities are to customize who can create records
-    )
-    id_ = resp.json["id"]
-    assert resp.json["parent"]["workflow"] is None
-    assert not resp.json["parent"]["communities"]
-    upload_file(
-        identity=community_reader.identity,
-        record_id=id_,
-        files_service=communities_model.proxies.current_service.draft_files,
-    )
-    review = reader_client.put(
-        f"/records/{id_}/draft/review",
-        json={"receiver": {"community": community_id}, "type": "community-submission"},
-    )
-    draft_read_after_review_create = reader_client.get(f"/records/{id_}/draft")
-    assert draft_read_after_review_create.json["parent"]["workflow"] == "default"
-    assert not resp.json["parent"]["communities"]
+    _test_review_process(community_id, communities_model, reader_client, owner_client, upload_file)
 
-    assert "review" in draft_read_after_review_create.json["parent"]
 
-    submit = reader_client.post(f"/records/{id_}/draft/actions/submit-review")
-    accept = owner_client.post(f"/requests/{review.json['id']}/actions/accept?expand=1")
+def test_review_process_community_without_explicit_allowed_workflows(
+    logged_client,
+    community_owner,
+    users,
+    communities_model,
+    minimal_community,
+    invite,
+    urls,
+    upload_file,
+    search_clear,
+):
+    communities_service = current_communities.service
+    community_id = communities_service.create(community_owner.identity, minimal_community).id
+    community_reader = users[0]
+    invite(community_reader, community_id, "reader")
+    reader_client = logged_client(community_reader)
+    owner_client = logged_client(community_owner)
 
-    assert review.status_code == 200
-    assert submit.status_code == 202
-    assert accept.status_code == 200
-
-    record = reader_client.get(f"/records/{id_}")
-    assert record.status_code == 200
-    assert record.json["parent"]["communities"]["default"] == community_id
+    _test_review_process(community_id, communities_model, reader_client, owner_client, upload_file)
 
 
 def test_links(
