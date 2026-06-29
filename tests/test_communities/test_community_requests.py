@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
+from invenio_requests import current_requests_service
 from pytest_oarepo.requests.functions import get_request_type
 
 from oarepo_communities.errors import CommunityAlreadyIncludedError
@@ -86,7 +87,11 @@ def test_community_publish(
 
     record = draft_with_community_factory(community_reader.identity, str(community.id))
     record_id = record["id"]
-    submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
+    submitted_request = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
+    requests = current_requests_service.search_user_requests(community_reader.identity)
+    request_ids = [request["id"] for request in requests.hits]
+    assert submitted_request["id"] in request_ids
+
     accept_request(
         reader_client,
         type_="publish_draft",
