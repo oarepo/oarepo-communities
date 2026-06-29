@@ -145,3 +145,17 @@ def finalize_app(app: Flask) -> None:
 
     requests = app.extensions["invenio-requests"]
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())
+
+    # replace SharedOrMyRequestsParam with CommunitiesSharedOrMyRequestsParam
+    from invenio_requests.services.requests.config import SharedOrMyRequestsParam, UserRequestSearchOptions
+
+    from oarepo_communities.services.params import CommunitiesSharedOrMyRequestsParam
+
+    param_interpreter_classes = [
+        param for param in UserRequestSearchOptions.params_interpreters_cls if param != SharedOrMyRequestsParam
+    ]
+
+    if not any(isinstance(param, CommunitiesSharedOrMyRequestsParam) for param in param_interpreter_classes):
+        param_interpreter_classes.append(CommunitiesSharedOrMyRequestsParam)
+
+    UserRequestSearchOptions.params_interpreters_cls = tuple(param_interpreter_classes)
