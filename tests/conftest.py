@@ -438,6 +438,24 @@ WORKFLOWS = [
 
 
 @pytest.fixture(scope="module")
+def extra_entry_points(communities_model):
+    """Force ``communities_model.register()`` to run before ``entry_points``.
+
+    ``entry_points`` (module scope, from pytest-invenio) feeds ``create_app``.
+    Without this dependency edge, pytest can build the app before
+    ``communities_model`` (session scope) has run — the ``ModelImporter`` is
+    not yet on ``sys.meta_path``, the model's Flask extension entry point is
+    invisible when the app scans entry points, and ``app.extensions[base_name]``
+    is never set. Any later test that touches ``record_service`` /
+    ``published_record_with_community_factory`` then blows up in
+    ``oarepo_model/presets/records_resources/proxy.py`` with
+    ``KeyError: 'communities_test'``. The empty dict is fine — the only thing
+    that matters is the ordering constraint.
+    """
+    return {}
+
+
+@pytest.fixture(scope="module")
 def create_app(instance_path, entry_points):
     """Application factory fixture."""
     return create_api

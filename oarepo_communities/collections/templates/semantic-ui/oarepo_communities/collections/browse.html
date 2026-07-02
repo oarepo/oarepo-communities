@@ -19,17 +19,14 @@
         <div class="ui relaxed grid stackable link cards collections-cards">
           {%- for _wrapper in _tree.collections %}
             {%- set _c = _wrapper[_wrapper.root] %}
-            {%- set _logo = collection_logo_url(_c.slug) %}
             <a class="ui card collection-card"
                href="{{ url_for('oarepo_communities_collections.collection_detail', tree_slug=_tree.slug, col_slug=_c.slug) }}">
               <div class="content">
                 <div class="header flex align-items-center">
-                  {%- if _logo %}
                   <img class="collection-logo rel-mr-1"
-                       src="{{ _logo }}"
+                       src="{{ url_for('static', filename='images/collections/' ~ _c.slug ~ '.jpg') }}"
                        alt=""
                        width="40" height="40" />
-                  {%- endif %}
                   <span>{{ _c.title }}</span>
                 </div>
                 {%- if _c.num_records is not none %}
@@ -43,7 +40,9 @@
                       {%- set _child = _wrapper[_child_id] %}
                       <div>
                         <span class="theme-primary-text">{{ _child.title }}</span>
+                        {%- if _child.num_records is not none %}
                         <span class="ui tiny text-muted">({{ "{:,}".format(_child.num_records) }})</span>
+                        {%- endif %}
                       </div>
                     {%- endfor %}
                   </div>
