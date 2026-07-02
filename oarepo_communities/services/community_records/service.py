@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from flask import current_app
 from invenio_rdm_records.proxies import current_rdm_records_service
 from invenio_records_resources.services.base.service import Service
 from invenio_search.engine import dsl
@@ -49,15 +50,28 @@ class CommunityRecordsService(Service):
 
         params = params or {}
 
-        community_filter = dsl.Q("term", **{"parent.communities.ids": str(community.id)})
+        # A single community may be designated as the "collections community" — a
+        # holder for cross-repository (non-community-scoped) collection trees. When
+        # searching through that community we skip the community_filter so a
+        # collection's own search_query resolves against every published record,
+        # not only records tagged with the holder community. Compare against the
+        # resolved community's slug — the caller may pass either slug or UUID as
+        # community_id.
+        collections_community_slug = current_app.config.get("INVENIO_COLLECTIONS_COMMUNITY_SLUG")
+        is_collections_community = (
+            collections_community_slug is not None and community.slug == collections_community_slug  # pyright: ignore[reportAttributeAccessIssue]
+        )
 
-        if extra_filter is not None:
-            community_filter = community_filter & extra_filter
+        if is_collections_community:
+            search_filter = extra_filter
+        else:
+            community_filter = dsl.Q("term", **{"parent.communities.ids": str(community.id)})
+            search_filter = community_filter & extra_filter if extra_filter is not None else community_filter
 
         return current_rdm_records_service.search(
             identity,
             params=params,
             search_preference=search_preference,
-            extra_filter=community_filter,
+            extra_filter=search_filter,
             **kwargs,
         )
