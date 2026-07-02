@@ -13,10 +13,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, override
 
-from invenio_rdm_records.checks.requests import (
-    SubmissionCancelAction,
-    SubmissionCreateAction,
-)
 from invenio_rdm_records.requests.community_submission import (
     AcceptAction as InvenioAcceptAction,
 )
@@ -58,9 +54,7 @@ class CommunitySubmission(InvenioCommunitySubmission):
     def available_actions(  # type: ignore[override]
         cls,  # noqa: N805
     ) -> dict[str, type[RequestAction]]:
-        return {  # pyright: ignore[reportReturnType]
+        return {
             **super().available_actions,
             "accept": AcceptAction,
-            "create": SubmissionCreateAction,
-            "cancel": SubmissionCancelAction,
         }
