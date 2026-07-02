@@ -47,6 +47,7 @@ oarepo_communities = "oarepo_communities.ext:OARepoCommunities"
 
 [project.entry-points."invenio_base.blueprints"]
 oarepo_communities_ui = "oarepo_communities.ui.oarepo_communities:create_blueprint"
+oarepo_communities_collections = "oarepo_communities.collections.views:create_blueprint"
 
 [project.entry-points."invenio_base.api_finalize_app"]
 oarepo_communities = "oarepo_communities.ext:api_finalize_app"
@@ -57,6 +58,7 @@ oarepo_communities = "oarepo_communities.ext:OARepoCommunities"
 [project.entry-points."invenio_base.finalize_app"]
 oarepo_communities = "oarepo_communities.ext:finalize_app"
 oarepo_communities_ui = "oarepo_communities.ui.oarepo_communities:finalize_app"
+oarepo_communities_collections = "oarepo_communities.collections.views:finalize_app"
 
 [project.entry-points."invenio_i18n.translations"]
 oarepo_communities_messages = "oarepo_communities.i18n"
