@@ -1,0 +1,58 @@
+{#-
+    Collections browse page — grid of every tree on the "collections" community.
+    Cards link into the per-collection search page.
+-#}
+{%- extends config.BASE_TEMPLATE %}
+{%- set title = _("Collections") %}
+
+{%- block page_body %}
+<div class="ui container rel-mt-3 rel-mb-3">
+  <h1 class="ui header">{{ _("Collections") }}</h1>
+
+  {%- if not trees %}
+    <p class="ui text text-muted">{{ _("No collections available.") }}</p>
+  {%- else %}
+    {%- for _tree in trees.values() %}
+      {%- if _tree.collections %}
+        <h2 class="ui medium header rel-mt-2">{{ _tree.title }}</h2>
+        <div class="ui divider mt-0"></div>
+        <div class="ui relaxed grid stackable link cards collections-cards">
+          {%- for _wrapper in _tree.collections %}
+            {%- set _c = _wrapper[_wrapper.root] %}
+            <a class="ui card collection-card"
+               href="{{ url_for('oarepo_communities_collections.collection_detail', tree_slug=_tree.slug, col_slug=_c.slug) }}">
+              <div class="content">
+                <div class="header flex align-items-center">
+                  <img class="collection-logo rel-mr-1"
+                       src="{{ url_for('static', filename='images/collections/' ~ _c.slug ~ '.jpg') }}"
+                       alt=""
+                       width="40" height="40" />
+                  <span>{{ _c.title }}</span>
+                </div>
+                {%- if _c.num_records is not none %}
+                  <div class="meta rel-mt-1">
+                    <span class="ui small label">{{ "{:,}".format(_c.num_records) }} {{ _('records') }}</span>
+                  </div>
+                {%- endif %}
+                {%- if _c.children %}
+                  <div class="description rel-mt-1">
+                    {%- for _child_id in _c.children %}
+                      {%- set _child = _wrapper[_child_id] %}
+                      <div>
+                        <span class="theme-primary-text">{{ _child.title }}</span>
+                        {%- if _child.num_records is not none %}
+                        <span class="ui tiny text-muted">({{ "{:,}".format(_child.num_records) }})</span>
+                        {%- endif %}
+                      </div>
+                    {%- endfor %}
+                  </div>
+                {%- endif %}
+              </div>
+            </a>
+          {%- endfor %}
+        </div>
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
+</div>
+{%- endblock page_body %}

@@ -1,0 +1,57 @@
+{#-
+    Per-collection search page.
+
+    Reuses the main ``invenio-app-rdm-search.js`` bundle (same as ``/search``)
+    with the ``searchApi`` URL swapped to the collection's records endpoint.
+    ``oarepo_ui/templates/oarepo_ui/javascript.html`` auto-loads the
+    per-endpoint overrides bundle
+    ``overrides-oarepo_communities_collections.collection_detail.js``, populated
+    by ``ui_overrides`` in ``oarepo_communities.collections.views``.
+-#}
+{%- extends config.BASE_TEMPLATE %}
+{%- set root_collection = collection[collection.root] %}
+{%- set title = root_collection.title %}
+
+{%- block javascript %}
+{{ super() }}
+{{ webpack['invenio-app-rdm-search.js'] }}
+{%- endblock %}
+
+{%- block page_body %}
+<div class="ui container fluid page-subheader rel p-10 mr-0-mobile ml-0-mobile">
+  <div class="collection-header ui container">
+    <h1 class="ui medium header">
+      <img src="{{ url_for('static', filename='images/collections/' ~ root_collection.slug ~ '.jpg') }}"
+           width="45" height="45" alt="" />
+      <div class="content">{{ root_collection.title }}</div>
+    </h1>
+  </div>
+</div>
+
+<div class="ui container mb-0">
+  <div class="ui breadcrumb">
+    <a class="section" href="{{ url_for('oarepo_communities_collections.browse_collections') }}">
+      {{ _("Collections") }}
+    </a>
+    <i class="angle right icon divider mr-0" aria-hidden="true"></i>
+    {%- if root_collection.breadcrumbs %}
+      {%- for breadcrumb in root_collection.breadcrumbs %}
+        {%- if loop.last %}
+          <span class="section active">{{ breadcrumb.title }}</span>
+        {%- else %}
+          <span class="section">{{ breadcrumb.title }}</span>
+          <i class="angle right icon divider mr-0" aria-hidden="true"></i>
+        {%- endif %}
+      {%- endfor %}
+    {%- else %}
+      <span class="section active">{{ root_collection.title }}</span>
+    {%- endif %}
+  </div>
+</div>
+
+<div class="ui divider mt-10 mb-0" aria-hidden="true"></div>
+
+<div class="ui container">
+  <div data-invenio-search-config='{{ search_app_config | tojson }}'></div>
+</div>
+{%- endblock page_body %}
