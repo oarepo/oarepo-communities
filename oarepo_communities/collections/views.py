@@ -19,16 +19,12 @@ Registers:
                                            endpoint.
 
 Also wires:
-
-* an app-template global ``collection_logo_url`` mirroring upstream's
-  ``read_logo`` static-file convention, and
 * per-endpoint UI overrides so the search page picks up the same result-list
   item / search-bar behavior as ``invenio_search_ui.search``.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from flask import (
@@ -37,15 +33,14 @@ from flask import (
     current_app,
     g,
     render_template,
-    url_for,
 )
 from flask_menu import current_menu
-from invenio_access.permissions import system_identity
 from invenio_i18n import lazy_gettext as _
 
 if TYPE_CHECKING:
     from flask import Flask
     from flask.typing import ResponseReturnValue
+    from invenio_communities.communities.records.api import Community
 
 
 BLUEPRINT_NAME = "oarepo_communities_collections"
@@ -56,9 +51,9 @@ DETAIL_TEMPLATE = "oarepo_communities/collections/collection.html"
 
 def create_blueprint(app: Flask) -> Blueprint:
     """Create the UI blueprint for the collections pages."""
-    app.config.setdefault("OAREPO_UI_RESULT_LIST_ITEM_REGISTRATION_CALLBACKS", []).append(
-        _register_collection_search_result_item
-    )
+    callbacks = app.config.setdefault("OAREPO_UI_RESULT_LIST_ITEM_REGISTRATION_CALLBACKS", [])
+    if _register_collection_search_result_item not in callbacks:
+        callbacks.append(_register_collection_search_result_item)
 
     blueprint = Blueprint(
         BLUEPRINT_NAME,
@@ -68,7 +63,6 @@ def create_blueprint(app: Flask) -> Blueprint:
     )
     blueprint.add_url_rule("", view_func=browse_collections)
     blueprint.add_url_rule("/<tree_slug>/<col_slug>", view_func=collection_detail)
-    blueprint.add_app_template_global(collection_logo_url, name="collection_logo_url")
     return blueprint
 
 
@@ -86,14 +80,10 @@ def finalize_app(app: Flask) -> None:
 def _init_menu(app: Flask) -> None:
     """Register the top-level ``Collections`` menu item, visible conditionally.
 
-    Hidden unless every gate below passes at request-render time:
-
-    1. ``COMMUNITIES_COLLECTIONS_ENABLED`` is truthy (defaults to True upstream).
-    2. ``INVENIO_COLLECTIONS_COMMUNITY_SLUG`` resolves to a real community.
-    3. That community actually has at least one collection.
-
-    Uses ``system_identity`` for the visibility probe so anonymous visitors
-    still see the menu item when public collections exist.
+    The item is shown whenever ``COMMUNITIES_COLLECTIONS_ENABLED`` is truthy
+    (see :func:`_collections_menu_visible`). Visibility is not gated on the
+    holder community existing or having any collections; if those are missing
+    the tab simply leads to an empty browse page.
     """
     with app.app_context():
         current_menu.submenu("main.collections").register(
@@ -106,22 +96,7 @@ def _init_menu(app: Flask) -> None:
 
 def _collections_menu_visible() -> bool:
     """Return True if the Collections menu item should render."""
-    from invenio_rdm_records.proxies import (
-        current_community_collections_service,  # pyright: ignore[reportAttributeAccessIssue]
-    )
-
-    if not current_app.config.get("COMMUNITIES_COLLECTIONS_ENABLED", True):
-        return False
-    community = _resolve_collections_community()
-    if community is None:
-        return False
-    try:
-        trees = current_community_collections_service.list_trees(
-            system_identity, namespace_id=community.id, depth=1
-        ).to_dict()
-    except Exception:  # noqa: BLE001
-        return False
-    return any(bool(tree.get("collections")) for tree in trees.values())
+    return bool(current_app.config.get("COMMUNITIES_COLLECTIONS_ENABLED", False))
 
 
 def ui_overrides(_app: Flask) -> None:
@@ -186,31 +161,16 @@ def _register_collection_search_result_item(ui_overrides: Any, schema: str, comp
         ui_overrides.add(override)
 
 
-def collection_logo_url(slug: str) -> str | None:
-    """Return the static URL for a collection logo if the file exists, else None.
-
-    Mirrors upstream's ``CollectionsService.read_logo`` check so callers can
-    avoid rendering broken ``<img>`` tags when a collection has no logo file.
-    """
-    static_folder = current_app.static_folder
-    if static_folder is None:
-        return None
-    logo_path = f"images/collections/{slug}.jpg"
-    if (Path(static_folder) / logo_path).exists():
-        return cast("str", url_for("static", filename=logo_path))
-    return None
-
-
-def _resolve_collections_community() -> Any:
+def _resolve_collections_community() -> Community | None:
     """Return the community record acting as the collections namespace or None."""
-    from invenio_communities.proxies import current_communities
+    from invenio_communities.communities.records.api import Community
     from invenio_pidstore.errors import PIDDoesNotExistError
 
     slug = current_app.config.get("INVENIO_COLLECTIONS_COMMUNITY_SLUG")
     if not slug:
         return None
     try:
-        return current_communities.service.record_cls.pid.resolve(slug)
+        return cast("Community", Community.pid.resolve(slug))
     except PIDDoesNotExistError:
         return None
 
@@ -243,6 +203,7 @@ def collection_detail(tree_slug: str, col_slug: str) -> ResponseReturnValue:
     ``/search``, so every override registered against that endpoint (via
     our own ``ui_overrides``) applies without any additional wiring.
     """
+    from invenio_collections.errors import CollectionNotFound, CollectionTreeNotFound
     from invenio_rdm_records.proxies import (
         current_community_collections_service,  # pyright: ignore[reportAttributeAccessIssue]
     )
@@ -252,14 +213,18 @@ def collection_detail(tree_slug: str, col_slug: str) -> ResponseReturnValue:
 
     community = _resolve_collections_community()
     if community is None:
-        abort(404)
+        return abort(404)
 
-    collection = current_community_collections_service.read(
-        g.identity,
-        slug=col_slug,
-        tree_slug=tree_slug,
-        namespace_id=community.id,
-    ).to_dict()
+    # An unknown tree_slug / col_slug should render 404, not bubble up as 500.
+    try:
+        collection = current_community_collections_service.read(
+            g.identity,
+            slug=col_slug,
+            tree_slug=tree_slug,
+            namespace_id=community.id,
+        ).to_dict()
+    except CollectionNotFound, CollectionTreeNotFound:
+        abort(404)
 
     root_collection = collection[collection["root"]]
     endpoint_url = root_collection["links"]["search"]

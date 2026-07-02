@@ -12,11 +12,7 @@ from __future__ import annotations
 from invenio_rdm_records.requests.subcommunities import RDMSubCommunityRequest
 
 from oarepo_communities.requests.community_submission import CommunitySubmission
-from oarepo_communities.services.community_records.service import (
-    CommunityRecordsService,
-)
 
-RDM_RECORDS_COMMUNITY_RECORDS_SERVICE_CLASS = CommunityRecordsService
 RDM_COMMUNITY_SUBMISSION_REQUEST_CLS = CommunitySubmission
 
 # Use the RDM subcommunity request type (adds the self_html link that the
@@ -25,10 +21,10 @@ COMMUNITIES_SUB_REQUEST_CLS = RDMSubCommunityRequest
 INVENIO_COLLECTIONS_COMMUNITY_SLUG = "global"
 """Slug of the community that holds cross-repository ("global") collection trees.
 
-When ``CommunityRecordsService.search`` is invoked for this community it omits
-the ``parent.communities.ids`` filter, so a collection's own ``search_query``
-resolves against every published record instead of only records tagged with the
-holder community. Set to ``None`` in deployment config to disable this behavior.
+Collections on this community search across every published record instead of
+only records tagged with the holder community (the ``parent.communities.ids``
+filter is skipped). The behavior is implemented by the collections records
+service in oarepo-rdm. Set to ``None`` in deployment config to disable it.
 """
 
 INVENIO_COLLECTIONS_UI_URL_PREFIX = "/collections"
