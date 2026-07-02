@@ -28,16 +28,13 @@ Also wires:
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from flask import (
     Blueprint,
-    abort,
     current_app,
     g,
     render_template,
-    url_for,
 )
 from flask_menu import current_menu
 from invenio_access.permissions import system_identity
@@ -56,9 +53,11 @@ DETAIL_TEMPLATE = "oarepo_communities/collections/collection.html"
 
 def create_blueprint(app: Flask) -> Blueprint:
     """Create the UI blueprint for the collections pages."""
-    app.config.setdefault("OAREPO_UI_RESULT_LIST_ITEM_REGISTRATION_CALLBACKS", []).append(
-        _register_collection_search_result_item
-    )
+    from invenio_collections.errors import CollectionNotFound, CollectionTreeNotFound
+
+    callbacks = app.config.setdefault("OAREPO_UI_RESULT_LIST_ITEM_REGISTRATION_CALLBACKS", [])
+    if _register_collection_search_result_item not in callbacks:
+        callbacks.append(_register_collection_search_result_item)
 
     blueprint = Blueprint(
         BLUEPRINT_NAME,
@@ -68,8 +67,20 @@ def create_blueprint(app: Flask) -> Blueprint:
     )
     blueprint.add_url_rule("", view_func=browse_collections)
     blueprint.add_url_rule("/<tree_slug>/<col_slug>", view_func=collection_detail)
-    blueprint.add_app_template_global(collection_logo_url, name="collection_logo_url")
+    # An unknown tree_slug / col_slug should render 404, not bubble up as 500.
+    blueprint.register_error_handler(CollectionNotFound, _collection_not_found)
+    blueprint.register_error_handler(CollectionTreeNotFound, _collection_not_found)
     return blueprint
+
+
+def _collection_not_found(_error: Exception) -> ResponseReturnValue:
+    """Convert missing tree/collection errors from the service into a 404.
+
+    Returns a response tuple rather than calling ``abort(404)`` because
+    ``PROPAGATE_EXCEPTIONS`` is on in tests — ``abort`` would raise
+    ``NotFound`` through the test client instead of yielding a 404 response.
+    """
+    return "Collection not found", 404
 
 
 def finalize_app(app: Flask) -> None:
@@ -186,21 +197,6 @@ def _register_collection_search_result_item(ui_overrides: Any, schema: str, comp
         ui_overrides.add(override)
 
 
-def collection_logo_url(slug: str) -> str | None:
-    """Return the static URL for a collection logo if the file exists, else None.
-
-    Mirrors upstream's ``CollectionsService.read_logo`` check so callers can
-    avoid rendering broken ``<img>`` tags when a collection has no logo file.
-    """
-    static_folder = current_app.static_folder
-    if static_folder is None:
-        return None
-    logo_path = f"images/collections/{slug}.jpg"
-    if (Path(static_folder) / logo_path).exists():
-        return cast("str", url_for("static", filename=logo_path))
-    return None
-
-
 def _resolve_collections_community() -> Any:
     """Return the community record acting as the collections namespace or None."""
     from invenio_communities.proxies import current_communities
@@ -252,7 +248,7 @@ def collection_detail(tree_slug: str, col_slug: str) -> ResponseReturnValue:
 
     community = _resolve_collections_community()
     if community is None:
-        abort(404)
+        return "Collection not found", 404
 
     collection = current_community_collections_service.read(
         g.identity,

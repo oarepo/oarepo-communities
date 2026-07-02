@@ -11,7 +11,6 @@
 {%- extends config.BASE_TEMPLATE %}
 {%- set root_collection = collection[collection.root] %}
 {%- set title = root_collection.title %}
-{%- set logo_url = collection_logo_url(root_collection.slug) %}
 
 {%- block javascript %}
 {{ super() }}
@@ -22,9 +21,8 @@
 <div class="ui container fluid page-subheader rel p-10 mr-0-mobile ml-0-mobile">
   <div class="collection-header ui container">
     <h1 class="ui medium header">
-      {%- if logo_url %}
-      <img src="{{ logo_url }}" width="45" height="45" alt="" />
-      {%- endif %}
+      <img src="{{ url_for('static', filename='images/collections/' ~ root_collection.slug ~ '.jpg') }}"
+           width="45" height="45" alt="" />
       <div class="content">{{ root_collection.title }}</div>
     </h1>
   </div>
