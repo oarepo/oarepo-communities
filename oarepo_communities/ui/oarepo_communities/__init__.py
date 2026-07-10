@@ -13,9 +13,10 @@ from __future__ import annotations
 from gettext import gettext as _
 from typing import TYPE_CHECKING
 
-from flask import request
+from flask import g, request
 from flask_menu import current_menu
 from invenio_app_rdm.ext import _is_branded_community, _show_browse_page
+from invenio_communities.proxies import current_communities
 from oarepo_ui.overrides import (
     UIComponent,
     UIComponentOverride,
@@ -177,7 +178,28 @@ def init_menu(app: Flask) -> None:  # NOQA: ARG001
     )
 
 
+def register_template_globals(app: Flask) -> None:
+    """Expose helpers used by the overridden community header template."""
+
+    @app.context_processor
+    def _inject_community_create_permission() -> dict:
+        """Inject the (global) community-create permission into templates.
+
+        The community header's ``permissions`` object is community-scoped
+        (``has_permissions_to(HEADER_PERMISSIONS)``) and therefore does not carry
+        the ``create`` permission, which is a service-level check. The
+        ``communities_new_subcommunity`` view guards the create page with exactly
+        this check, so the "Add sub-community" button mirrors it.
+        """
+
+        def can_create_community() -> bool:
+            return bool(current_communities.service.check_permission(g.identity, "create"))  # pragma: no cover
+
+        return {"can_create_community": can_create_community}
+
+
 def finalize_app(app: Flask) -> None:
     """Finalize app."""
     init_menu(app)
     ui_overrides(app)
+    register_template_globals(app)

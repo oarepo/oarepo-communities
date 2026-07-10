@@ -9,6 +9,8 @@
 
 from __future__ import annotations
 
+from invenio_rdm_records.requests.subcommunities import RDMSubCommunityRequest
+
 from oarepo_communities.requests.community_submission import CommunitySubmission
 from oarepo_communities.services.community_records.service import (
     CommunityRecordsService,
@@ -16,3 +18,7 @@ from oarepo_communities.services.community_records.service import (
 
 RDM_RECORDS_COMMUNITY_RECORDS_SERVICE_CLASS = CommunityRecordsService
 RDM_COMMUNITY_SUBMISSION_REQUEST_CLS = CommunitySubmission
+
+# Use the RDM subcommunity request type (adds the self_html link that the
+# request timeline UI needs); the bare invenio_communities class has links_item={}.
+COMMUNITIES_SUB_REQUEST_CLS = RDMSubCommunityRequest
