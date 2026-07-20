@@ -168,8 +168,6 @@ def test_comment_notifications(
     draft_with_community_factory,
     community,
     submit_request_on_draft,
-    add_user_in_role,
-    role,
     events_service,
     link2testclient,
     invite,
