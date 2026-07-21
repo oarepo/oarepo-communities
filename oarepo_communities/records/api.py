@@ -49,16 +49,15 @@ class CommunityRoleRecord:
         """Return the ID of the community role."""
         return f"{self.community.id}:{self.role}"
 
-    # TODO: necessary?
-    @property
-    def emails(self) -> list[str]:
+    @staticmethod
+    def user_emails(community_id: str, role: str) -> dict[str, dict[str, Any]]:
         """Return the emails of the community members."""
-        member_emails = []
+        member_emails = {}
         members: list[MemberModel] = (
             db.session.query(MemberModel)
             .filter_by(
-                community_id=self.community.id,
-                role=self.role,
+                community_id=community_id,
+                role=role,
                 active=True,
             )
             .all()
@@ -67,10 +66,10 @@ class CommunityRoleRecord:
             try:
                 if member.user_id:
                     user = User.query.get(member.user_id)
-                    member_emails.append(_extract_user_email_data(user))
+                    member_emails[user.id] = _extract_user_email_data(user)
                 if member.group_id:
                     group = Role.query.get(member.group_id)
-                    member_emails.extend(_extract_user_email_data(user) for user in group.users)
+                    member_emails.update({user.id: (_extract_user_email_data(user)) for user in group.users})
             except Exception:
                 log.exception(
                     "Error retrieving user %s, group %s for community members",
@@ -78,3 +77,9 @@ class CommunityRoleRecord:
                     member.group_id,
                 )
         return member_emails
+
+    # TODO: necessary?
+    @property
+    def emails(self) -> list[str]:
+        """Return the emails of the community members."""
+        return [email_data["email"] for email_data in self.user_emails(str(self.community.id), self.role).values()]
