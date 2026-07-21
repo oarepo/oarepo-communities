@@ -10,12 +10,11 @@
 
 from __future__ import annotations
 
-from invenio_accounts.models import User
-from invenio_communities.members import MemberModel
 from invenio_notifications.models import Notification, Recipient
 from invenio_notifications.services.generators import RecipientGenerator
 from invenio_records.dictutils import dict_lookup
-from oarepo_requests.notifications.generators.recipients import _extract_user_email_data
+
+from oarepo_communities.records.api import CommunityRoleRecord
 
 
 class CommunityRoleEmailRecipient(RecipientGenerator):
@@ -30,16 +29,6 @@ class CommunityRoleEmailRecipient(RecipientGenerator):
         community_role = dict_lookup(notification.context, self.key)
         id_ = community_role["community"]["id"]
         role = community_role["role"]
-
-        # TODO: add group support as in .emails method in rdm-12?
-        users = (
-            User.query.join(MemberModel)
-            .filter(
-                MemberModel.role == role,
-                MemberModel.community_id == str(id_),
-                MemberModel.active,
-            )
-            .all()
-        )
-        for user in users:
-            recipients[str(user.id)] = Recipient(data=_extract_user_email_data(user))
+        user_emails = CommunityRoleRecord.user_emails(id_, role)
+        for user, email_data in user_emails.items():
+            recipients[user] = Recipient(data=email_data)

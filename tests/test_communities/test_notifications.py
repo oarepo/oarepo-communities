@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import pytest
 from invenio_access.models import User
+from invenio_access.permissions import system_identity
 from invenio_communities.members.records.models import MemberModel
+from invenio_communities.proxies import current_communities
 from invenio_requests.customizations.event_types import CommentEventType
 
 
@@ -49,6 +51,97 @@ def test_publish_notification_community_role(
         assert len(outbox) == 2  # both curators should get a mail
         recipients = outbox[0].send_to | outbox[1].send_to
         assert recipients == {"user2@example.org", "user3@example.org"}
+
+
+def test_publish_notification_community_role_group(
+    app,
+    roles,
+    add_user_in_role,
+    community,
+    users,
+    draft_with_community_factory,
+    submit_request_on_draft,
+    invite,
+    search_clear,
+):
+    """Test notification recipients when a community role is held by a group.
+
+    The curator role is assigned to a user group rather than to individual
+    members, so every user belonging to that group should get a mail.
+    """
+    mail = app.extensions.get("mail")
+    assert mail
+
+    group = roles[0]
+    add_user_in_role(users[1], group)
+    add_user_in_role(users[2], group)
+
+    invite(users[0], str(community.id), "reader")
+    current_communities.service.members.add(
+        system_identity,
+        str(community.id),
+        {
+            "members": [{"type": "group", "id": group.id}],
+            "role": "curator",
+            "visible": True,
+        },
+    )
+    creator = users[0]
+
+    draft1 = draft_with_community_factory(creator.identity, str(community.id), custom_workflow="curator_publish")
+    with mail.record_messages() as outbox:
+        submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
+        # check notification is built on submit
+        assert len(outbox) == 2  # both members of the curator group should get a mail
+        recipients = outbox[0].send_to | outbox[1].send_to
+        assert recipients == {users[1].email, users[2].email}
+
+
+def test_publish_notification_community_role_user_and_group(
+    app,
+    roles,
+    add_user_in_role,
+    community,
+    users,
+    draft_with_community_factory,
+    submit_request_on_draft,
+    invite,
+    search_clear,
+):
+    """Test notification recipients when a role is held by both a user and a group.
+
+    The curator role is assigned to an individual member as well as to a user
+    group, so the direct member and every user of the group should get a mail.
+    """
+    mail = app.extensions.get("mail")
+    assert mail
+
+    # Create a group and put two users into it.
+    group = roles[0]
+    add_user_in_role(users[2], group)
+    add_user_in_role(users[3], group)
+
+    invite(users[0], str(community.id), "reader")
+    invite(users[1], str(community.id), "curator")
+
+    current_communities.service.members.add(
+        system_identity,
+        str(community.id),
+        {
+            "members": [{"type": "group", "id": group.id}],
+            "role": "curator",
+            "visible": True,
+        },
+    )
+    creator = users[0]
+
+    draft1 = draft_with_community_factory(creator.identity, str(community.id), custom_workflow="curator_publish")
+    with mail.record_messages() as outbox:
+        submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
+        # check notification is built on submit
+        assert len(outbox) == 3  # direct curator + both members of the curator group
+        recipients = outbox[0].send_to | outbox[1].send_to | outbox[2].send_to
+        assert recipients == {users[1].email, users[2].email, users[3].email}
 
 
 def test_locales(
