@@ -12,17 +12,28 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from invenio_access.models import Role, User
 from invenio_communities.members.records.models import MemberModel
 from invenio_db import db
-from oarepo_requests.notifications.generators.recipients import _extract_user_email_data
 
 log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from invenio_communities.communities.records.api import Community
+
+
+def _extract_user_email_data(user: User) -> dict[str, Any]:
+    """Extract user email data from a User model.
+
+    Note: should probably be replaced with invenio_users_resources' UserAggregate and schema.
+    """
+    return {
+        "id": user.id,
+        "preferences": dict(user.preferences) if user.preferences else user.preferences,
+        "email": user.email,
+    }
 
 
 @dataclasses.dataclass
@@ -38,7 +49,7 @@ class CommunityRoleRecord:
         return f"{self.community.id}:{self.role}"
 
     @property
-    def emails(self) -> list[str]:
+    def emails(self) -> list[dict[str, Any]]:
         """Return the emails of the community members."""
         member_emails = []
         members: list[MemberModel] = (
