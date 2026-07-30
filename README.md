@@ -43,15 +43,17 @@ Each community can have its own default workflow, allowing different communities
 from oarepo_workflows import Workflow
 from oarepo_communities.services.permissions.policy import CommunityDefaultWorkflowPermissions
 
+
 class MyWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     can_read = [AnyUser()]
     can_create = [DefaultCommunityRole("owner"), DefaultCommunityRole("reader")]
 
+
 # In invenio.cfg
 WORKFLOWS = {
-    'default': Workflow(
-        code='default',
-        label='Default Workflow',
+    "default": Workflow(
+        code="default",
+        label="Default Workflow",
         permission_policy_cls=MyWorkflowPermissions,
     )
 }
@@ -70,11 +72,8 @@ current_communities.service.create(
     {
         "slug": "my-community",
         "metadata": {"title": "My Community"},
-        "custom_fields": {
-            "workflow": "default",
-            "allowed_workflows": ["default", "strict_review"]
-        }
-    }
+        "custom_fields": {"workflow": "default", "allowed_workflows": ["default", "strict_review"]},
+    },
 )
 ```
 
@@ -161,18 +160,19 @@ from oarepo_communities.services.permissions.generators import (
 from invenio_records_permissions.generators import AnyUser
 from oarepo_workflows import IfInState
 
+
 class MyWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     can_read = [
         RecordOwnerInDefaultRecordCommunity(),
         DefaultCommunityRole("curator"),
         IfInState("published", [AnyUser()]),
     ]
-    
+
     can_create = [
         DefaultCommunityRole("owner"),
         DefaultCommunityRole("curator"),
     ]
-    
+
     can_update = [
         IfInState("draft", [RecordOwnerInDefaultRecordCommunity()]),
         IfInState("published", [DefaultCommunityRole("owner")]),
@@ -192,6 +192,7 @@ Automatically adds records to their specified community on creation:
 ```python
 from oarepo_communities.services.components.include import CommunityInclusionComponent
 
+
 class MyServiceConfig(RecordServiceConfig):
     components = [
         CommunityInclusionComponent,
@@ -208,6 +209,7 @@ from oarepo_communities.services.components.default_workflow import (
     CommunityDefaultWorkflowComponent,
 )
 
+
 class MyServiceConfig(RecordServiceConfig):
     components = [
         CommunityDefaultWorkflowComponent,
@@ -223,6 +225,7 @@ Enforces access restrictions based on community visibility:
 from oarepo_communities.services.components.access import (
     CommunityRecordAccessComponent,
 )
+
 
 class MyServiceConfig(RecordServiceConfig):
     components = [
@@ -249,9 +252,7 @@ from oarepo_communities.requests.submission_secondary import (
 # Submit request
 request = requests_service.create(
     identity,
-    data={
-        "payload": {"community": "target-community-id"}
-    },
+    data={"payload": {"community": "target-community-id"}},
     request_type="secondary_community_submission",
     topic=record,
 )
@@ -269,9 +270,7 @@ from oarepo_communities.requests.remove_secondary import (
 # Submit request
 request = requests_service.create(
     identity,
-    data={
-        "payload": {"community": "community-to-remove"}
-    },
+    data={"payload": {"community": "community-to-remove"}},
     request_type="remove_secondary_community",
     topic=record,
 )
@@ -290,9 +289,7 @@ from oarepo_communities.requests.migration import (
 # Phase 1: Current community owner approves migration
 request = requests_service.create(
     identity,
-    data={
-        "payload": {"community": "new-primary-community"}
-    },
+    data={"payload": {"community": "new-primary-community"}},
     request_type="initiate_community_migration",
     topic=record,
 )
@@ -311,15 +308,11 @@ Pseudo-service for managing community roles as entities in the request system:
 from oarepo_communities.proxies import current_oarepo_communities
 
 # Read a community role entity
-role = current_oarepo_communities.community_role_service.read(
-    identity,
-    id_="community-id:owner"
-)
+role = current_oarepo_communities.community_role_service.read(identity, id_="community-id:owner")
 
 # Read multiple community roles
 roles = current_oarepo_communities.community_role_service.read_many(
-    identity,
-    ids=["community-1:owner", "community-2:curator"]
+    identity, ids=["community-1:owner", "community-2:curator"]
 )
 ```
 
@@ -426,9 +419,7 @@ Entity resolver for community roles in the request system:
 
 ```python
 # Automatically registered, allows referencing community roles in requests
-{
-    "receiver": {"community_role": "community-id:owner"}
-}
+{"receiver": {"community_role": "community-id:owner"}}
 ```
 
 ## Development
