@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from deepmerge import conservative_merger
 from flask_principal import identity_loaded
 from invenio_communities.communities.records.api import Community
 from invenio_pidstore.errors import PIDDoesNotExistError
@@ -67,12 +68,10 @@ class OARepoCommunities:
             **app.config.get("COMMUNITIES_ROUTES", {}),
         }
 
-        app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
-        """
+        app_registered_event_types = app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
         app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
             app_registered_event_types, config.NOTIFICATION_RECIPIENTS_RESOLVERS
         )
-        """
 
         app.config.setdefault(
             "OAREPO_COMMUNITIES_DEFAULT_WORKFLOW",
