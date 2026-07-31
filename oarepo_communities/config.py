@@ -10,12 +10,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
+from invenio_communities.notifications.generators import CommunityMembersRecipient
 from invenio_i18n import lazy_gettext as _
 
 from .services.custom_fields.workflow import WorkflowCF, lazy_workflow_options
 
-# from .notifications.generators import CommunityRoleEmailRecipient # noqa
+if TYPE_CHECKING:
+    from invenio_notifications.models import Notification
 
 OAREPO_REQUESTS_DEFAULT_RECEIVER = "oarepo_requests.receiver.default_workflow_receiver_function"
 REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
@@ -62,11 +66,18 @@ DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
 
-# NOTIFICATION_RECIPIENTS_RESOLVERS = {"community_role": {"email": CommunityRoleEmailRecipient}} # noqa
-
-
 COMMUNITIES_RECORDS_SEARCH_ALL = False
 
 # name of the default workflow for communities. It is used when a community does not have
 # an explicit workflow set
 OAREPO_COMMUNITIES_DEFAULT_WORKFLOW = "default"
+
+
+def community_members_recipient(key: str, _notification: Notification) -> CommunityMembersRecipient:
+    """Resolve community members as recipients."""
+    return CommunityMembersRecipient(key)
+
+
+NOTIFICATION_RECIPIENTS_RESOLVERS = {
+    "community": community_members_recipient,
+}
