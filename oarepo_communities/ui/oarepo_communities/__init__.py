@@ -89,35 +89,6 @@ overrides_list.append(
         DisabledComponent,
     )
 )
-community_invitation_modal = UIComponent(
-    "CommunityInvitationsModal",
-    "@js/oarepo_communities/components/CommunityInvitationsModal",
-    UIComponentImportMode.NAMED,
-)
-
-for overriden_component in (
-    "InvenioCommunities.CommunityMembersSearch.InvitationsEmptyResults.InvitationsModal.container",
-    "InvenioCommunities.CommunityMembersSearch.InvitationsResultsContainer.InvitationsModal.container",
-    "InvenioCommunities.CommunityMembersSearch.InvitationsSearchLayout.InvitationsModal.container",
-    "InvenioCommunities.CommunityMembersSearch.ManagerEmptyResults.InvitationsModal.container",
-    "InvenioCommunities.CommunityMembersSearch.ManagerMembersResultsContainer.InvitationsModal.container",
-    "InvenioCommunities.CommunityMembersSearch.ManagerSearchLayout.InvitationsModal.container",
-):
-    overrides_list.append(
-        UIComponentOverride(
-            "invenio_communities.members",
-            overriden_component,
-            community_invitation_modal,
-        )
-    )
-
-    overrides_list.append(
-        UIComponentOverride(
-            "invenio_communities.invitations",
-            overriden_component,
-            community_invitation_modal,
-        )
-    )
 
 
 def ui_overrides(app: Flask) -> None:  # NOQA: ARG001
