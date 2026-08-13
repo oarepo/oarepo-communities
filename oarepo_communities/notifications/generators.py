@@ -10,11 +10,14 @@
 
 from __future__ import annotations
 
-from invenio_notifications.models import Notification, Recipient
+from typing import TYPE_CHECKING
+
+from invenio_communities.notifications.generators import CommunityMembersRecipient
 from invenio_notifications.services.generators import RecipientGenerator
 from invenio_records.dictutils import dict_lookup
 
-from oarepo_communities.records.api import CommunityRoleRecord
+if TYPE_CHECKING:
+    from invenio_notifications.models import Notification, Recipient
 
 
 class CommunityRoleEmailRecipient(RecipientGenerator):
@@ -27,8 +30,7 @@ class CommunityRoleEmailRecipient(RecipientGenerator):
     def __call__(self, notification: Notification, recipients: dict[str, Recipient]):
         """Update required recipient information and add backend id."""
         community_role = dict_lookup(notification.context, self.key)
-        id_ = community_role["community"]["id"]
         role = community_role["role"]
-        user_emails = CommunityRoleRecord.user_emails(id_, role)
-        for user, email_data in user_emails.items():
-            recipients[user] = Recipient(data=email_data)
+
+        invenio_generator = CommunityMembersRecipient(f"{self.key}.community", [role])
+        return invenio_generator(notification, recipients)
