@@ -85,6 +85,10 @@ communities = "oarepo_communities.errors:RESOURCE_ERROR_HANDLERS"
 [project.entry-points."oarepo_workflows.default_workflow_getters"]
 community-default-workflow = "oarepo_communities.workflow:community_default_workflow"
 
+[project.entry-points."oarepo.explainers"]
+400_in_any_community = "oarepo_communities.services.permissions.explainers:InAnyCommunityPermissionExplainer"
+410_community_role = "oarepo_communities.services.permissions.explainers:CommunityRolePermissionExplainer"
+
 [project.entry-points."invenio_config.module"]
 oarepo_communities = "oarepo_communities.initial_config"
 
