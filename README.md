@@ -411,6 +411,28 @@ emails = role_record.emails
 # Returns: ["curator1@example.com", "curator2@example.com", ...]
 ```
 
+#### Recipients of notifications
+
+Recipients of a notification are generated per entity type from the `NOTIFICATION_RECIPIENTS_RESOLVERS`
+configuration. This library provides generators for the community entity types that can be a receiver
+of a request:
+
+```python
+NOTIFICATION_RECIPIENTS_RESOLVERS = {
+    # the members holding the role in the community, e.g. {"community_role": "<community-id>:curator"}
+    "community_role": lambda key, notification: CommunityRoleEmailRecipient(key),
+    # only the members that can act on the request, not all of them
+    "community": lambda key, notification: CommunityRecipient(key),
+}
+```
+
+Invenio's `CommunityMembersRecipient` notifies **all** members of a community when it is not given any
+roles. As the receiver of a request decides about it, that would leak the request, and every comment on
+it, to members without any rights on it, e.g. a comment on a community membership request would be sent
+to every reader of the community. `CommunityRecipient` therefore notifies only the roles a community
+receiver is mapped to by the request type, ie. its `needs_context["community_roles"]`. If the request
+type does not declare any, the roles configured with `can_manage` are notified.
+
 ### 10. Entity Resolvers
 
 **Source:** [`oarepo_communities/resolvers/communities.py`](oarepo_communities/resolvers/communities.py)
