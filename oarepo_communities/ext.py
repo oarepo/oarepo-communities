@@ -158,3 +158,112 @@ def finalize_app(app: Flask) -> None:
         param_interpreter_classes.append(CommunitiesSharedOrMyRequestsParam)
 
     UserRequestSearchOptions.params_interpreters_cls = tuple(param_interpreter_classes)
+
+    fix_hardcoded_roles(app)
+
+
+def _replace_stock_roles(roles: list[str], replacements: dict[str, set[str]]) -> list[str]:
+    """Return `roles` with stock role names substituted per `replacements`, deduplicated.
+
+    Each role in `roles` that has an entry in `replacements` is expanded into the
+    corresponding set of configured role names; any role without an entry is kept as-is.
+    The result is a plain union of sets, so it is naturally deduplicated regardless of
+    whether the duplicates were already present (e.g. "owner") or introduced by expanding
+    two different stock names to overlapping configured roles.
+    """
+    result: set[str] = set()
+    for role in roles:
+        if role in replacements:
+            result |= replacements[role]
+        else:
+            result.add(role)
+    return sorted(result)
+
+
+def _fix_recipient_roles(recipients: list | None, replacements: dict[str, set[str]]) -> None:
+    """Recursively patch `CommunityMembersRecipient.roles` in a notification recipients list.
+
+    Recipients can be nested inside conditional generators (e.g. `IfUserRecipient`'s
+    `then_`/`else_` branches), so those are walked into as well.
+    """
+    from invenio_communities.notifications.generators import CommunityMembersRecipient
+    from invenio_notifications.services.generators import ConditionalRecipientGenerator
+
+    for recipient in recipients or []:
+        if isinstance(recipient, CommunityMembersRecipient) and recipient.roles:
+            recipient.roles = _replace_stock_roles(recipient.roles, replacements)
+        elif isinstance(recipient, ConditionalRecipientGenerator):
+            _fix_recipient_roles(recipient.then_, replacements)
+            _fix_recipient_roles(recipient.else_, replacements)
+
+
+def fix_hardcoded_roles(app: Flask) -> None:
+    """Replace hardcoded community roles with configurable roles.
+
+    Invenio in some places has hard-coded community role names. On the other hand, it provides
+    a possibility to define custom roles that might be in conflict with the hard-coded ones.
+    This patch replaces the hard-coded roles with the configurable ones.
+
+    Concretely, several ``invenio_communities``/``invenio_rdm_records`` request types and
+    notification builders hard-code the stock ``"manager"`` and ``"curator"`` role names (in
+    ``needs_context["community_roles"]`` and in ``CommunityMembersRecipient(roles=[...])``)
+    instead of reading the roles actually configured via ``COMMUNITIES_ROLES``. If a
+    deployment does not define roles with those exact names (relying on differently-named
+    roles for the manage-level / curate-level permission), members holding the differently
+    named role are silently unable to act on / be notified about these requests.
+
+    This function replaces ``"manager"``/``"curator"`` in those hard-coded role lists with
+    the roles that are actually configured to have manage/curate permissions
+    (``can_manage=True``/``can_curate=True`` in ``COMMUNITIES_ROLES``), keeping any other
+    roles already listed (e.g. ``"owner"``, or anything Invenio might add there in the
+    future) untouched.
+    It is idempotent - it can be called repeatedly (e.g. once per app factory invocation)
+    without accumulating changes.
+    """
+    from invenio_communities.members.services.request import (
+        CommunityInvitation,
+        MembershipRequestRequestType,
+    )
+    from invenio_communities.notifications import builders as community_notification_builders
+    from invenio_communities.subcommunities.services.request import (
+        SubCommunityInvitationRequest,
+        SubCommunityRequest,
+    )
+    from invenio_rdm_records.notifications import builders as rdm_notification_builders
+    from invenio_rdm_records.requests.community_inclusion import CommunityInclusion
+    from invenio_rdm_records.requests.community_submission import CommunitySubmission
+
+    communities_roles = app.config.get("COMMUNITIES_ROLES", [])
+    manage_roles = {role["name"] for role in communities_roles if role.get("can_manage")}
+    curate_roles = {role["name"] for role in communities_roles if role.get("can_curate")}
+
+    replacements: dict[str, set[str]] = {}
+    if manage_roles:
+        replacements["manager"] = manage_roles
+    if curate_roles:
+        replacements["curator"] = curate_roles
+    if not replacements:
+        # roles are not configured (yet) - nothing to fix
+        return
+
+    # A. permission checks - requests that require the "manage"/"curate" community-level permission
+    for request_type in (
+        CommunityInvitation,
+        MembershipRequestRequestType,
+        SubCommunityRequest,
+        SubCommunityInvitationRequest,
+        CommunityInclusion,
+        CommunitySubmission,
+    ):
+        # some invenio_communities/invenio_rdm_records request types are stubbed as
+        # `needs_context: Optional[str]`/`Any`, even though it is always a dict at runtime
+        needs_context = dict(cast("dict[str, object]", request_type.needs_context))
+        community_roles = cast("list[str]", needs_context.get("community_roles", []))
+        needs_context["community_roles"] = _replace_stock_roles(community_roles, replacements)
+        request_type.needs_context = needs_context  # pyright: ignore[reportAttributeAccessIssue]
+
+    # C. notification recipients - members that should be notified about the above requests
+    for notification_builders in (community_notification_builders, rdm_notification_builders):
+        for builder in vars(notification_builders).values():
+            if isinstance(builder, type):
+                _fix_recipient_roles(getattr(builder, "recipients", None), replacements)
