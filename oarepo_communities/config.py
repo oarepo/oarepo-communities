@@ -11,10 +11,9 @@
 from __future__ import annotations
 
 from invenio_communities.config import COMMUNITIES_ROUTES as INVENIO_COMMUNITIES_ROUTES
-from invenio_communities.notifications.generators import CommunityMembersRecipient
 from invenio_i18n import lazy_gettext as _
 
-from .notifications.generators import CommunityRoleEmailRecipient
+from .notifications.generators import CommunityRecipient, CommunityRoleEmailRecipient
 from .services.custom_fields.workflow import WorkflowCF, lazy_workflow_options
 
 OAREPO_REQUESTS_DEFAULT_RECEIVER = "oarepo_requests.receiver.default_workflow_receiver_function"
@@ -70,5 +69,8 @@ OAREPO_COMMUNITIES_DEFAULT_WORKFLOW = "default"
 
 NOTIFICATION_RECIPIENTS_RESOLVERS = {
     "community_role": lambda key, notification: CommunityRoleEmailRecipient(key),  # noqa ARG005
-    "community": lambda key, notification: CommunityMembersRecipient(key),  # noqa ARG005
+    # unlike Invenio's CommunityMembersRecipient, CommunityRecipient notifies only the members that
+    # can act on the request
+    "community": lambda key, notification: CommunityRecipient(key),  # noqa ARG005
 }
+"""Recipient generators of the entity types that can be a receiver of a request."""
