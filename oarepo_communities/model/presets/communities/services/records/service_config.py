@@ -46,6 +46,5 @@ class CommunitiesServiceConfigPreset(Preset):
         dependencies: dict[str, Any],
     ) -> Generator[Customization]:
         yield AddToList("record_service_components", CommunityDefaultWorkflowComponent)
-        yield AddToList("record_service_components", CommunityInclusionComponent)
         yield AddToList("record_service_components", CommunityRecordAccessComponent)
         yield AddToList("record_service_components", SetWorkflowInReviewComponent)
