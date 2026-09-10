@@ -29,7 +29,8 @@ from invenio_drafts_resources.services.records.components.base import (
 )
 
 
-# TODO: left for backward compatibility, discuss whether to deprecate or split different presets
+# TODO: left for backward compatibility, should not be used in newer projects
+# that use the simplified workflows / inveniordm review process
 class CommunityInclusionComponent(ServiceComponent):
     """Community inclusion component."""
 
