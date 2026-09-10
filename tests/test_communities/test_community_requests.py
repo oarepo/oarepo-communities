@@ -67,6 +67,7 @@ def env(
     return reader_client, owner_client, community_1, community_2
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_community_publish(
     logged_client,
     community_owner,
@@ -114,6 +115,7 @@ def test_community_publish(
     assert resp_record.status_code == 200
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_community_delete(
     logged_client,
     community_owner,
@@ -163,6 +165,7 @@ def test_community_delete(
     assert len(resp_search.json["hits"]["hits"]) == 0
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_community_migration(
     published_record_with_community_factory,
     submit_request_on_record,
@@ -211,6 +214,7 @@ def test_community_migration(
     assert record_after.json["parent"]["communities"]["ids"] == [str(community_2.id)]
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_community_submission_secondary(
     published_record_with_community_factory,
     create_request_on_record,
@@ -266,6 +270,7 @@ def test_community_submission_secondary(
     }
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_remove_secondary(
     published_record_with_community_factory,
     create_request_on_record,

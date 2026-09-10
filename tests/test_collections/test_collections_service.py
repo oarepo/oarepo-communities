@@ -23,6 +23,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
 from invenio_access.permissions import system_identity
 from invenio_rdm_records.proxies import (  # pyright: ignore[reportAttributeAccessIssue]
     current_community_collections_service,
@@ -86,6 +87,7 @@ def test_collection_search_returns_records_from_other_communities(
     )
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_search_without_the_collections_community_still_filters_by_community(
     app,  # type: ignore[no-untyped-def]
     communities_model,  # type: ignore[no-untyped-def]

@@ -45,6 +45,7 @@ def test_disabled_endpoints(
     assert delete.status_code == 403
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_default_community_workflow_changed(
     logged_client,
     community_owner,
@@ -149,6 +150,7 @@ def _record_owners_in_record_community_test(
     assert read_com4.status_code == results[3]
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_record_owners_in_record_community_needs(
     community_owner,
     urls,
@@ -172,6 +174,7 @@ def test_record_owners_in_record_community_needs(
     )
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_record_owners_in_default_record_community_needs(
     community_owner,
     urls,

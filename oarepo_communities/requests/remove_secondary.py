@@ -77,7 +77,7 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRecordRequestType):
     @classproperty[dict[str, type[RequestAction]]]
     @override
     def available_actions(  # type: ignore[override] # TODO: fix in requests
-        cls,  # noqa: N805
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,

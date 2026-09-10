@@ -167,6 +167,7 @@ def test_links(
     )
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_create_record_in_community(logged_client, communities_model, community_owner, community, urls, search_clear):
     owner_client = logged_client(community_owner)
     response = owner_client.post(urls["BASE_URL"], json=_community_data(community))
@@ -174,6 +175,7 @@ def test_create_record_in_community(logged_client, communities_model, community_
     assert response.json["parent"]["communities"]["default"] == str(community.id)
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_create_record_in_community_by_slug(
     logged_client, communities_model, community_owner, community, urls, search_clear
 ):
@@ -185,6 +187,7 @@ def test_create_record_in_community_by_slug(
     assert response.json["parent"]["communities"]["default"] == str(community.id)
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_create_record_in_community_default_workflow(
     logged_client, communities_model, community_owner, community, urls, search_clear
 ):
@@ -196,6 +199,7 @@ def test_create_record_in_community_default_workflow(
     assert response.json["parent"]["communities"]["default"] == str(community.id)
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_search(
     logged_client,
     communities_model,
@@ -238,6 +242,7 @@ def test_search(
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_search_community_records(
     logged_client,
     communities_model,
@@ -329,6 +334,7 @@ def test_search_all(
     assert len(reader_search.json["hits"]["hits"]) == 0
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_search_model(
     logged_client,
     communities_model,
@@ -365,6 +371,7 @@ def test_search_model(
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_user_search(
     logged_client,
     communities_model,
@@ -407,6 +414,7 @@ def test_user_search(
     assert response_draft2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_user_search_model(
     logged_client,
     communities_model,

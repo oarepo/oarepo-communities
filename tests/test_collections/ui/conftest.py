@@ -43,7 +43,7 @@ class _MockManifest(JinjaManifest):
 class _MockManifestLoader(JinjaManifestLoader):
     """Hand back the mock manifest so tests skip a real webpack build."""
 
-    def load(self, _filepath: str):  # type: ignore[override]  # noqa: ANN202
+    def load(self, _filepath: str) -> _MockManifest:  # type: ignore[override]
         """Load the mock manifest."""
         return _MockManifest()
 
