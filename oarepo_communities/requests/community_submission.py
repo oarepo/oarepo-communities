@@ -110,7 +110,7 @@ def _reopen_review(closed_request: Request, draft: Record, uow: UnitOfWork) -> N
     # the systemfield needs the actual Request record (not just its id) so the
     # optimistic-concurrency version can be dumped without a lazy re-fetch during
     # commit, and ``RequestItem`` exposes no public accessor for it.
-    draft.parent.review = request_item._request  # noqa: SLF001  # pyright: ignore[reportAttributeAccessIssue]
+    draft.parent.review = request_item._request  # noqa SLF001 # pyright: ignore[reportAttributeAccessIssue]
 
     # Resolve the model-specific service (datarepo records are a custom model, not
     # vanilla RDM) so the parent commit reindexes the draft and its siblings with
@@ -167,7 +167,7 @@ class CommunitySubmission(InvenioCommunitySubmission):
     @classproperty
     @override
     def available_actions(  # type: ignore[override]
-        cls,  # noqa: N805
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         # The check-integration and reopen actions have dynamically-computed base
         # classes that type checkers cannot trace back to RequestAction, so the

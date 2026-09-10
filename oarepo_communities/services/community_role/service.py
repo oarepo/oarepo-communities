@@ -49,10 +49,10 @@ def minimal_service[T](kept_methods: list[str]) -> Callable[[type[T]], type[T]]:
             method = getattr(cls, method_name)
             if callable(method) and method_name not in kept_methods:
                 # unimplement the method
-                def unimplemented_method(self, *args, **kwargs) -> Any:  # type: ignore[] # noqa: ANN001, ANN003, ANN002
+                def _unimplemented_method(self: Any, *args: Any, **kwargs: Any) -> Any:
                     raise NotImplementedError(f"Please do not use this method on {cls.__name__}")
 
-                setattr(cls, method_name, unimplemented_method)
+                setattr(cls, method_name, _unimplemented_method)
         return cls
 
     return wrapper
