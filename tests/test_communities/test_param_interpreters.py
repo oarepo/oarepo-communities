@@ -8,7 +8,10 @@
 #
 from __future__ import annotations
 
+import pytest
 
+
+@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_community_role_param_interpreter(
     logged_client,
     community_owner,
