@@ -938,7 +938,7 @@ msgstr "❌ Pozvání člena komunity pro {user_name} bylo zrušeno"
 #: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/collection.html:34
 #: /home/ron/prace/oarepo-communities/oarepo_communities/collections/views.py:91
 msgid "Collections"
-msgstr ""
+msgstr "Kolekce"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/browse.html:13
 msgid "No collections available."
@@ -952,14 +952,14 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:24
 #, python-brace-format
 msgid "💬 New comment on '{request_title}'"
-msgstr ""
+msgstr "💬 Nový komentář k '{request_title}'"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:39
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:65
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:36
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:62
 msgid "Check out the request"
-msgstr ""
+msgstr "Zkontrolujte žádost"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:45
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:42
@@ -984,6 +984,7 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:63
 msgid "This is an auto-generated message. To manage notifications, visit your"
 msgstr ""
+"Toto je automaticky generovaná zpráva. Pro správu notifikací navštivte své"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:45
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:42
@@ -1007,13 +1008,13 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:42
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:63
 msgid "account settings"
-msgstr ""
+msgstr "Nastavení účtu"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:55
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:52
 #, python-brace-format
 msgid "Check out the request: {request_link}"
-msgstr ""
+msgstr "Zkontrolujte žádost: {request_link}"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:27
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:26
@@ -1024,7 +1025,7 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:34
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:33
 msgid " with the following message:"
-msgstr ""
+msgstr "s následující  zprávou:"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:37
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:69
@@ -1035,7 +1036,7 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:31
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:52
 msgid "Check out the invitation"
-msgstr ""
+msgstr "Zkontrolujte pozvánku"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:52
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:64
@@ -1051,14 +1052,14 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:58
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:72
 msgid "with the following message:"
-msgstr ""
+msgstr "s následující  zprávou:"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:56
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:55
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:55
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:45
 msgid "Check out the invitation:"
-msgstr ""
+msgstr "Zkontrolujte pozvánku:"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:28
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:43
@@ -1070,7 +1071,7 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:51
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:62
 msgid "Check out the membership request"
-msgstr ""
+msgstr "Zkontrolujte žádost o členství"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:45
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:61
@@ -1085,6 +1086,8 @@ msgid ""
 "This is an auto-generated message. To manage notifications, visit your "
 "account settings"
 msgstr ""
+"Toto je automaticky generovaná zpráva. Pro správu notifikací navštivte "
+"nastavení svého účtu."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:55
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:64
@@ -1093,18 +1096,20 @@ msgid ""
 "This is an auto-generated message. To manage notifications, visit your [account\n"
 "settings]({account_settings_link})"
 msgstr ""
+"Toto je automaticky generovaná zpráva. Pro správu notifikací, navštivte "
+"[accountsettings]({account_settings_link})"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:22
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:33
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:54
 #, python-brace-format
 msgid "Your request to join the community '{community_title}' expired"
-msgstr ""
+msgstr "Vaše žádost o přijetí do komunity '{community_title}' vypršela"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:68
 #, python-brace-format
 msgid "Your request to join the community *{community_title}* expired"
-msgstr ""
+msgstr "Vaše žádost o přijetí do komunity *{community_title}* vypršela"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:75
 #, python-brace-format
@@ -1112,17 +1117,13 @@ msgid ""
 "This is an auto-generated message. To manage notifications, visit your "
 "[account settings]({account_settings_link})"
 msgstr ""
-
-#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:18
-#, python-brace-format
-msgid ""
-"New request from '@{user_name}' to join the community '{community_title}'"
-msgstr ""
+"Toto je automaticky generovaná zpráva. Pro správu notifikací, navštivte "
+"[account settings] ({account_settings_link}) "
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:27
 #, python-brace-format
 msgid "✅ Community inclusion accepted for '{record_title}'"
-msgstr ""
+msgstr "✅ Přijetí zařazení do komunity pro '{record_title}'"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:45
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:64
@@ -1132,18 +1133,18 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:44
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:77
 msgid "Check out the submission request"
-msgstr ""
+msgstr "Zkontrolujte žádost o odeslání"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:26
 #, python-brace-format
 msgid "❌ Community inclusion cancelled for '{record_title}'"
-msgstr ""
+msgstr "❌ Zrušeno zařazení do komunity pro '{record_title}'."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:49
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:63
 #, python-brace-format
 msgid "Check out the submission request: {request_link}"
-msgstr ""
+msgstr "Zkontrolujte žádost o odeslání: {request_link}"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:54
 #, python-brace-format
@@ -1151,22 +1152,24 @@ msgid ""
 "The record submission for your community *'{community_title}'* was cancelled"
 " by *'{cancel_name}'*."
 msgstr ""
+"Odeslání záznamu pro vaši komunitu *'{community_title}'* bylo zrušeno "
+"uživatelem *'{cancel_name}'*."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:26
 #, python-brace-format
 msgid "⛔️ Community inclusion declined for '{record_title}'"
-msgstr ""
+msgstr "⛔️ Zamítnutí začlenění do komunity pro '{record_title}'"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:25
 #, python-brace-format
 msgid "📥 New record submission to your community '{community_title}'"
-msgstr ""
+msgstr "📥 Nový záznam byl odeslán do vaší komunity '{community_title}'"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:43
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:62
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:76
 msgid "Review the submission request"
-msgstr ""
+msgstr "Zkontrolujte žádost o odeslání."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:26
 #, python-brace-format
@@ -1174,6 +1177,8 @@ msgid ""
 "✅ Invitation accepted for {community_title} to join the "
 "{parent_community_title} community"
 msgstr ""
+"✅ Přijato pozvání pro {community_title} do nadřazené komunity  "
+"{parent_community_title} "
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:36
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:60
@@ -1184,14 +1189,14 @@ msgstr ""
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:36
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:60
 msgid "View the request"
-msgstr ""
+msgstr "Zobrazit žádost"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:50
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:50
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:50
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:50
 msgid "View the request at:"
-msgstr ""
+msgstr "Zobrazit žádost na:"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:53
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:53
@@ -1201,6 +1206,8 @@ msgid ""
 "This is an auto-generated message. To manage notifications, visit your "
 "account settings at: "
 msgstr ""
+"Toto je automaticky generovaná zpráva. Pro správu notifikací, navštivte "
+"nastavení svého účtu na: "
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:26
 #, python-brace-format
@@ -1208,6 +1215,8 @@ msgid ""
 "⛔️ Subcommunity invitation declined for {community_title} to join the "
 "{parent_community_title} community"
 msgstr ""
+"⛔️ Pozvání k připojení komunity {community_title} jako podkomunity k "
+"{parent_community_title} bylo odmítnuto"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:26
 #, python-brace-format
@@ -1215,6 +1224,8 @@ msgid ""
 "✅ Subcommunity request accepted for \"{community_title}\" to join "
 "\"{parent_community_title}\""
 msgstr ""
+"✅ Žádost podkomunity \"{community_title}\" k připojení se k "
+"\"{parent_community_title}\" přijata"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:26
 #, python-brace-format
@@ -1222,18 +1233,20 @@ msgid ""
 "⛔️ Subcommunity request declined for \"{community_title}\" to join "
 "\"{parent_community_title}\""
 msgstr ""
+"⛔️ Žádost podkomunity \"{community_title}\" k připojení se k "
+"\"{parent_community_title}\" odmítnuta. "
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:114
 msgid "Home"
-msgstr ""
+msgstr "Hlavní stránka"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:123
 msgid "Browse"
-msgstr ""
+msgstr "Procházet"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:140
 msgid "Submit"
-msgstr ""
+msgstr "Odeslat"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/oarepo/invenio_communities/details/header.html:16
 msgid "Add sub-community"
@@ -1241,13 +1254,14 @@ msgstr ""
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/oarepo/invenio_communities/details/header.html:21
 msgid "Submission to this community is only allowed to community members."
-msgstr ""
+msgstr "Zařazení záznamu do této komunity je povoleno pouze členům komunity."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/oarepo/invenio_communities/details/header.html:36
 msgid "Manage community"
-msgstr ""
+msgstr "Spravovat komunitu"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:18
 #, python-brace-format
-msgid "New request from '{user_name}' to join the community '{community_title}'"
+msgid ""
+"New request from '{user_name}' to join the community '{community_title}'"
 msgstr "Nová žádost '{user_name}' o přijetí do komunity '{community_title}'"
