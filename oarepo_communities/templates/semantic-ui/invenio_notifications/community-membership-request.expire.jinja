@@ -21,7 +21,7 @@
 {%- if recipient_is_requester -%}
 ⌛️ {{ _("Your request to join the community '{community_title}' expired").format(community_title=community_title) }}
 {%- else -%}
-⌛️ {{ _("The request from '@{user_name}' to join the community '{community_title}' expired").format(user_name=requester_name, community_title=community_title) }}
+⌛️ {{ _("The request from '{user_name}' to join the community '{community_title}' expired").format(user_name=requester_name, community_title=community_title) }}
 {%- endif -%}
 {%- endblock subject -%}
 
@@ -32,7 +32,7 @@
       {%- if recipient_is_requester -%}
       {{ _("Your request to join the community '{community_title}' expired").format(community_title=community_title) }}.
       {%- else -%}
-      {{ _("The request from '@{user_name}' to join the community '{community_title}' expired").format(user_name=requester_name, community_title=community_title) }}.
+      {{ _("The request from '{user_name}' to join the community '{community_title}' expired").format(user_name=requester_name, community_title=community_title) }}.
       {%- endif -%}
     </td>
   </tr>
@@ -53,7 +53,7 @@
 {%- if recipient_is_requester -%}
 {{ _("Your request to join the community '{community_title}' expired").format(community_title=community_title) }}.
 {%- else -%}
-{{ _("The request from '@{user_name}' to join the community '{community_title}' expired").format(user_name=requester_name, community_title=community_title) }}.
+{{ _("The request from '{user_name}' to join the community '{community_title}' expired").format(user_name=requester_name, community_title=community_title) }}.
 {%- endif %}
 
 {{ _("Check out the membership request") }}: {{ request_link }} .
@@ -67,7 +67,7 @@
 {%- if recipient_is_requester -%}
 {{ _("Your request to join the community *{community_title}* expired").format(community_title=community_title) }}.
 {%- else -%}
-{{ _("The request from *@{user_name}* to join the community *{community_title}* expired").format(user_name=requester_name, community_title=community_title) }}.
+{{ _("The request from *{user_name}* to join the community *{community_title}* expired").format(user_name=requester_name, community_title=community_title) }}.
 {%- endif %}
 
 [{{ _("Check out the membership request") }}]({{ request_link }})

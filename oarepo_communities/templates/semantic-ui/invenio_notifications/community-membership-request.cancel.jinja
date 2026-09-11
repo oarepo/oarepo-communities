@@ -15,14 +15,14 @@
 
 
 {%- block subject -%}
-❌ {{ _("The request from '@{requester_name}' to join the community '{community_title}' was cancelled").format(requester_name=requester_name, community_title=community_title) }}
+❌ {{ _("The request from '{requester_name}' to join the community '{community_title}' was cancelled").format(requester_name=requester_name, community_title=community_title) }}
 {%- endblock subject -%}
 
 
 {%- block html_body -%}
 <table style="font-family:'Lato',Helvetica,Arial,sans-serif;border-spacing:15px">
   <tr>
-    <td>{{ _("The membership request from '@{requester_name}' to join the community '{community_title}' was cancelled").format(requester_name=requester_name, community_title=community_title) }}.</td>
+    <td>{{ _("The membership request from '{requester_name}' to join the community '{community_title}' was cancelled").format(requester_name=requester_name, community_title=community_title) }}.</td>
   </tr>
   <tr>
     <td><a href="{{ request_link }}" class="button">{{ _("Check out the membership request")}}</a></td>
@@ -38,7 +38,7 @@
 
 
 {%- block plain_body -%}
-{{ _("The membership request from '@{requester_name}' to join the community '{community_title}' was cancelled").format(requester_name=requester_name, community_title=community_title) }}.
+{{ _("The membership request from '{requester_name}' to join the community '{community_title}' was cancelled").format(requester_name=requester_name, community_title=community_title) }}.
 
 {{ _("Check out the membership request") }}: {{ request_link }} .
 
@@ -48,7 +48,7 @@
 
 {# Markdown for Slack/Mattermost/chat #}
 {%- block md_body -%}
-{{ _("The membership request from *@{requester_name}* to join the community *{community_title}* was cancelled").format(requester_name=requester_name, community_title=community_title) }}.
+{{ _("The membership request from *{requester_name}* to join the community *{community_title}* was cancelled").format(requester_name=requester_name, community_title=community_title) }}.
 
 [{{ _("Check out the membership request") }}]({{ request_link }})
 

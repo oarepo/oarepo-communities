@@ -16,13 +16,13 @@
 
 
 {%- block subject -%}
-   {{ _("✅ @{user_name} accepted the invitation to join community '{community_title}'.").format(user_name=receiver_name, community_title=community_title) }}
+   {{ _("✅ {user_name} accepted the invitation to join community '{community_title}'.").format(user_name=receiver_name, community_title=community_title) }}
 {%- endblock subject -%}
 
 {%- block html_body -%}
 <table style="font-family:'Lato',Helvetica,Arial,sans-serif;border-spacing:15px">
     <tr>
-        <td>{{ _("'@{user_name}' accepted the invitation to join your community '{community_title}'").format(user_name=receiver_name,community_title=community_title) }}
+        <td>{{ _("'{user_name}' accepted the invitation to join your community '{community_title}'").format(user_name=receiver_name,community_title=community_title) }}
         {% if message %}
         {{ _(" with the following message:")}}
         {% endif %}
@@ -46,7 +46,7 @@
 {%- endblock html_body %}
 
 {%- block plain_body -%}
-{{ _("@{user_name} accepted the invitation to join your community '{community_title}'").format(user_name=receiver_name,community_title=community_title) }}
+{{ _("{user_name} accepted the invitation to join your community '{community_title}'").format(user_name=receiver_name,community_title=community_title) }}
 
 {% if message %}
 {{ _("with the following message:")}}
@@ -58,7 +58,7 @@
 
 {# Markdown for Slack/Mattermost/chat #}
 {%- block md_body -%}
-{{ _("*@{user_name}* accepted the invitation to join your community *{community_title}*").format(user_name=receiver_name,community_title=community_title) }}
+{{ _("*{user_name}* accepted the invitation to join your community *{community_title}*").format(user_name=receiver_name,community_title=community_title) }}
 
 {% if message %}
 {{ _("with the following message:")}}
