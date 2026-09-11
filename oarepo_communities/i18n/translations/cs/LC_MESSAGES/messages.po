@@ -605,3 +605,649 @@ msgid ""
 "This is a preview feature and not all functionalities are available yet."
 msgstr ""
 "Toto je ukázková funkce a ne všechny funkcionality jsou zatím dostupné."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:25
+#, python-brace-format
+msgid ""
+"'{user_name}' accepted the invitation to join your community "
+"'{community_title}'"
+msgstr "'{user_name}' přijal pozvání do Vaší komunity '{community_title}'"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:33
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:30
+#, python-brace-format
+msgid "'{user_name}' commented on '{request_title}':"
+msgstr "'{user_name}' komentoval(a) '{request_title}':"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:24
+#, python-brace-format
+msgid ""
+"'{user_name}' declined the invitation to join your community "
+"'{community_title}'"
+msgstr "{user_name}  odmítl pozvání do Vaší komunity '{community_title}'."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:25
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:48
+#, python-brace-format
+msgid "'{user_name}' wants to join the community '{community_title}'"
+msgstr "'{user_name}' se chce přidat ke komunitě '{community_title}'"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:61
+#, python-brace-format
+msgid ""
+"*{user_name}* accepted the invitation to join your community "
+"*{community_title}*"
+msgstr "*{user_name}* přijal pozvání do Vaší komunity *{community_title}*"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:61
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:58
+#, python-brace-format
+msgid "*{user_name}* commented on *{request_title}*"
+msgstr "*{user_name}* komentoval(a) *{request_title}*"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:60
+#, python-brace-format
+msgid ""
+"*{user_name}* declined the invitation to join your community "
+"*{community_title}*"
+msgstr "*{user_name}* odmítl pozvání do Vaší komunity *{community_title}*."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:59
+#, python-brace-format
+msgid "*{user_name}* wants to join the community *{community_title}*"
+msgstr "*{user_name}* se chce přidat ke komunitě *{community_title}*"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:33
+#, python-brace-format
+msgid ""
+"The community curator '{curator_name}' accepted the record '{record_title}' "
+"into the community '{community_title}'"
+msgstr ""
+"Komunitní kurátor '{curator_name}' přijal záznam '{record_title}' do "
+"komunity '{community_title}'"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:32
+#, python-brace-format
+msgid ""
+"The community curator '{curator_name}' declined the record '{record_title}' "
+"into the community '{community_title}'"
+msgstr ""
+"Kurátor komunity '{curator_name}' zamítl záznam '{record_title}' do komunity"
+" '{community_title}'"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:71
+#, python-brace-format
+msgid ""
+"The community curator *{curator_name}* accepted the record *{record_title}* "
+"into the community *{community_title}*"
+msgstr ""
+"Kurátor komunity *{curator_name}* přijal záznam *{record_title}* do komunity"
+"  *{community_title}*."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:70
+#, python-brace-format
+msgid ""
+"The community curator *{curator_name}* declined the record *{record_title}* "
+"into the community *{community_title}*"
+msgstr ""
+"Kurátor komunity *{curator_name}* zamítl záznam *{record_title}* do komunity"
+"  *{community_title}*"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:57
+#, python-brace-format
+msgid ""
+"The community curator {curator_name} accepted the record '{record_title}' "
+"into the community '{community_title}'"
+msgstr ""
+"Kurátor komunity {curator_name} přijal záznam '{record_title}' do komunity "
+"'{community_title}'"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:56
+#, python-brace-format
+msgid ""
+"The community curator {curator_name} declined the record '{record_title}' "
+"into the community '{community_title}'"
+msgstr ""
+"Kurátor komunity {curator_name} zamítl záznam '{record_title}' do komunity "
+"'{community_title}'"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:32
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:48
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:58
+#, python-brace-format
+msgid ""
+"The community manager {username} accepted the request for "
+"\"{community_title}\" to join as a subcommunity of "
+"\"{parent_community_title}\"."
+msgstr ""
+"Manažer komunity {username} přijal žádost \"{community_title}\" k připojení "
+"se jako podkomunity k \"{parent_community_title}\"."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:32
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:48
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:58
+#, python-brace-format
+msgid ""
+"The community manager {username} declined the request for "
+"\"{community_title}\" to join as a subcommunity of "
+"\"{parent_community_title}\"."
+msgstr ""
+"Manažer komunity {username} odmítl žádost \"{community_title}\" k připojení "
+"se jako podkomunity k \"{parent_community_title}\"."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:28
+#, python-brace-format
+msgid ""
+"The invitation for '{user_name}' to join community '{community_title}' "
+"expired"
+msgstr "Pozvání pro '{user_name}' do komunity '{community_title}' vypršelo"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:43
+#, python-brace-format
+msgid ""
+"The invitation for '{user_name}' to join community '{community_title}' "
+"expired."
+msgstr "Pozvání pro '{user_name}' do komunity '{community_title}' vypršelo."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:24
+#, python-brace-format
+msgid ""
+"The invitation for '{user_name}' to join community '{community_title}' was "
+"cancelled"
+msgstr "Pozvání '{user_name}' do komunity '{community_title}' bylo zrušeno"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:50
+#, python-brace-format
+msgid ""
+"The invitation for *{user_name}* to join community *{community_title}* "
+"expired."
+msgstr "Pozvání pro *{user_name}* do komunity *{community_title}* vypršelo."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:60
+#, python-brace-format
+msgid ""
+"The invitation for *{user_name}* to join your community "
+"*'{community_title}'* was cancelled"
+msgstr ""
+"Pozvání *{user_name}* do Vaší komunity *'{community_title}'* bylo zrušeno"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:48
+#, python-brace-format
+msgid ""
+"The invitation for {user_name} to join your community '{community_title}' "
+"was cancelled"
+msgstr "Pozvání {user_name} do Vaší komunity '{community_title}' bylo zrušeno"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:25
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:41
+#, python-brace-format
+msgid ""
+"The membership request from '{requester_name}' to join the community "
+"'{community_title}' was cancelled"
+msgstr ""
+"Žádost o členství '{requester_name}' v komunitě '{community_title}' byla "
+"zrušena"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:51
+#, python-brace-format
+msgid ""
+"The membership request from *{requester_name}* to join the community "
+"*{community_title}* was cancelled"
+msgstr ""
+" Žádost o členství *{requester_name}* v komunitě *{community_title}* byla "
+"zrušena"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:31
+#, python-brace-format
+msgid ""
+"The record '{record_title}' was submitted to your community "
+"'{community_title}' by '{creator_name}'"
+msgstr ""
+"Záznam '{record_title}' byl odeslán do vaší komunity '{community_title}' "
+"uživatelem '{creator_name}'."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:55
+#, python-brace-format
+msgid ""
+"The record '{record_title}' was submitted to your community "
+"'{community_title}' by '{creator_name}'."
+msgstr ""
+"Záznam '{record_title}' byl odeslán do vaší komunity '{community_title}' "
+"uživatelem  '{creator_name}'."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:69
+#, python-brace-format
+msgid ""
+"The record *'{record_title}'* was submitted to your community "
+"*'{community_title}'* by *'{creator_name}'*."
+msgstr ""
+"Záznam *'{record_title}'* byl odeslán do vaší komunity *'{community_title}'*"
+" uživatelem *'{creator_name}'*."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:32
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:47
+#, python-brace-format
+msgid ""
+"The record submission for your community '{community_title}' was cancelled "
+"by '{cancel_name}'."
+msgstr ""
+"Odeslání záznamu pro vaši komunitu '{community_title}' bylo zrušeno "
+"uživatelem '{cancel_name}'."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:18
+#, python-brace-format
+msgid ""
+"The request from '{requester_name}' to join the community "
+"'{community_title}' was cancelled"
+msgstr ""
+"Žádost '{requester_name}' o přijetí do komunity '{community_title}' byla "
+"zrušena"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:24
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:35
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:56
+#, python-brace-format
+msgid ""
+"The request from '{user_name}' to join the community '{community_title}' "
+"expired"
+msgstr ""
+"Žádost '{user_name}' o přijetí do komunity '{community_title}' vypršela"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:70
+#, python-brace-format
+msgid ""
+"The request from *{user_name}* to join the community *{community_title}* "
+"expired"
+msgstr ""
+"Žádost *{user_name}* o přijetí do komunity *{community_title}* vypršela"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:49
+#, python-brace-format
+msgid ""
+"{user_name} accepted the invitation to join your community "
+"'{community_title}'"
+msgstr "{user_name} přijal pozvání do Vaší komunity '{community_title}'"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:51
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:48
+#, python-brace-format
+msgid "{user_name} commented on '{request_title}'"
+msgstr "{user_name} komentoval(a) '{request_title}'"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:48
+#, python-brace-format
+msgid ""
+"{user_name} declined the invitation to join your community {community_title}"
+msgstr "{user_name}  odmítl pozvání do Vaší komunity {community_title}."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:32
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:48
+#, python-brace-format
+msgid ""
+"{username} accepted the invitation for \"{community_title}\" to join as a "
+"subcommunity of \"{parent_community_title}\"."
+msgstr ""
+"{username} přijal pozvání do komunity \"{community_title}\" jako podkomunity"
+" \"{parent_community_title}\"."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:58
+#, python-brace-format
+msgid ""
+"{username} accepted the invitation the request for \"{community_title}\" to "
+"join as a subcommunity of \"{parent_community_title}\"."
+msgstr ""
+"{username} přijal žádost o pozvání, aby se komunita \"{community_title}\" "
+"připojila jako podkomunita \"{parent_community_title}\"."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:32
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:48
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:58
+#, python-brace-format
+msgid ""
+"{username} declined the invitation for \"{community_title}\" to join as a "
+"subcommunity of \"{parent_community_title}\"."
+msgstr ""
+"{username} odmítl pozvání  \"{community_title}\" do "
+"\"{parent_community_title}\" jako podkomunity."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:22
+#, python-brace-format
+msgid ""
+"⌛️ The invitation for '{user_name}' to join community '{community_title}' "
+"expired"
+msgstr "⌛️ Pozvání pro '{user_name}' do komunity '{community_title}' vypršelo"
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:18
+#, python-brace-format
+msgid "⛔️ {user_name} declined the invitation to join '{community_title}'"
+msgstr "⛔️ {user_name} odmítl pozvání do komunity '{community_title}'."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:19
+#, python-brace-format
+msgid ""
+"✅ {user_name} accepted the invitation to join community '{community_title}'."
+msgstr "{user_name}  přijal pozvání do komunity '{community_title}'."
+
+#: oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:18
+#, python-brace-format
+msgid "❌ Community member invitation cancelled for {user_name}"
+msgstr "❌ Pozvání člena komunity pro {user_name} bylo zrušeno"
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/browse.html:6
+#: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/browse.html:10
+#: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/collection.html:34
+#: /home/ron/prace/oarepo-communities/oarepo_communities/collections/views.py:91
+msgid "Collections"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/browse.html:13
+msgid "No collections available."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/browse.html:34
+msgid "records"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:27
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:24
+#, python-brace-format
+msgid "💬 New comment on '{request_title}'"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:39
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:65
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:36
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:62
+msgid "Check out the request"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:45
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:43
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:37
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:34
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:46
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:41
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:51
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:41
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:50
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:49
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:63
+msgid "This is an auto-generated message. To manage notifications, visit your"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:45
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:43
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:37
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:34
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:46
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:41
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:51
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:41
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:50
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:49
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:42
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:63
+msgid "account settings"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:55
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:52
+#, python-brace-format
+msgid "Check out the request: {request_link}"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:27
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:26
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:26
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:26
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:49
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:35
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:34
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:33
+msgid " with the following message:"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:37
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:69
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:36
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:67
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:36
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:67
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:31
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:52
+msgid "Check out the invitation"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:52
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:64
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:51
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:51
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:63
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:60
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:60
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:74
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:59
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:73
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:58
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:72
+msgid "with the following message:"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.accept.jinja:56
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.cancel.jinja:55
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.decline.jinja:55
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-invitation.expire.jinja:45
+msgid "Check out the invitation:"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:28
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:43
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:53
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:40
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:59
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:73
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:35
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:51
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:62
+msgid "Check out the membership request"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:45
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:61
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:53
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:66
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:80
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:65
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:79
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:64
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:78
+msgid ""
+"This is an auto-generated message. To manage notifications, visit your "
+"account settings"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.cancel.jinja:55
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:64
+#, python-brace-format
+msgid ""
+"This is an auto-generated message. To manage notifications, visit your [account\n"
+"settings]({account_settings_link})"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:22
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:33
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:54
+#, python-brace-format
+msgid "Your request to join the community '{community_title}' expired"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:68
+#, python-brace-format
+msgid "Your request to join the community *{community_title}* expired"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.expire.jinja:75
+#, python-brace-format
+msgid ""
+"This is an auto-generated message. To manage notifications, visit your "
+"[account settings]({account_settings_link})"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:18
+#, python-brace-format
+msgid ""
+"New request from '@{user_name}' to join the community '{community_title}'"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:27
+#, python-brace-format
+msgid "✅ Community inclusion accepted for '{record_title}'"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:45
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:64
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.accept.jinja:78
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:35
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:56
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:44
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:77
+msgid "Check out the submission request"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:26
+#, python-brace-format
+msgid "❌ Community inclusion cancelled for '{record_title}'"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:49
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:63
+#, python-brace-format
+msgid "Check out the submission request: {request_link}"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.cancel.jinja:54
+#, python-brace-format
+msgid ""
+"The record submission for your community *'{community_title}'* was cancelled"
+" by *'{cancel_name}'*."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.decline.jinja:26
+#, python-brace-format
+msgid "⛔️ Community inclusion declined for '{record_title}'"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:25
+#, python-brace-format
+msgid "📥 New record submission to your community '{community_title}'"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:43
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:62
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-submission.submit.jinja:76
+msgid "Review the submission request"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:26
+#, python-brace-format
+msgid ""
+"✅ Invitation accepted for {community_title} to join the "
+"{parent_community_title} community"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:36
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:60
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:36
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:60
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:36
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:60
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:36
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:60
+msgid "View the request"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:50
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:50
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:50
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:50
+msgid "View the request at:"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.accept.jinja:53
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:53
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:53
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:53
+msgid ""
+"This is an auto-generated message. To manage notifications, visit your "
+"account settings at: "
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-invitation-request.decline.jinja:26
+#, python-brace-format
+msgid ""
+"⛔️ Subcommunity invitation declined for {community_title} to join the "
+"{parent_community_title} community"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.accept.jinja:26
+#, python-brace-format
+msgid ""
+"✅ Subcommunity request accepted for \"{community_title}\" to join "
+"\"{parent_community_title}\""
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/subcommunity-request.decline.jinja:26
+#, python-brace-format
+msgid ""
+"⛔️ Subcommunity request declined for \"{community_title}\" to join "
+"\"{parent_community_title}\""
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:114
+msgid "Home"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:123
+msgid "Browse"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/__init__.py:140
+msgid "Submit"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/oarepo/invenio_communities/details/header.html:16
+msgid "Add sub-community"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/oarepo/invenio_communities/details/header.html:21
+msgid "Submission to this community is only allowed to community members."
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/ui/oarepo_communities/templates/oarepo/invenio_communities/details/header.html:36
+msgid "Manage community"
+msgstr ""
+
+#: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/community-membership-request.submit.jinja:18
+#, python-brace-format
+msgid "New request from '{user_name}' to join the community '{community_title}'"
+msgstr "Nová žádost '{user_name}' o přijetí do komunity '{community_title}'"
