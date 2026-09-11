@@ -942,11 +942,11 @@ msgstr "Kolekce"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/browse.html:13
 msgid "No collections available."
-msgstr ""
+msgstr "Žádné dostupné kolekce."
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/collections/templates/semantic-ui/oarepo_communities/collections/browse.html:34
 msgid "records"
-msgstr ""
+msgstr "záznamy"
 
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-invitation-request.create.jinja:27
 #: /home/ron/prace/oarepo-communities/oarepo_communities/templates/semantic-ui/invenio_notifications/comment-subcommunity-request.create.jinja:24
