@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from invenio_records_resources.services.records.components import ServiceComponent
 
@@ -26,12 +26,13 @@ if TYPE_CHECKING:
 class SetWorkflowInReviewComponent(ServiceComponent):
     """Component handling the workflow setup for a record in the review process."""
 
-    def create_review(
+    @override
+    def create_review(  # type: ignore[reportGeneralTypeIssues]
         self,
-        identity: Identity,  # noqa: ARG002
+        identity: Identity,
         data: dict[str, Any],
         record: Record,
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,
     ) -> None:
         """Set workflow for the record in the review process if it is not set yet."""
         if record.parent.workflow is not None:

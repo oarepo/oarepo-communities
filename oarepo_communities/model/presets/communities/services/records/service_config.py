@@ -23,7 +23,6 @@ from oarepo_communities.services.components.access import CommunityRecordAccessC
 from oarepo_communities.services.components.default_workflow import (
     CommunityDefaultWorkflowComponent,
 )
-from oarepo_communities.services.components.include import CommunityInclusionComponent
 from oarepo_communities.services.components.review import SetWorkflowInReviewComponent
 
 if TYPE_CHECKING:
@@ -46,6 +45,5 @@ class CommunitiesServiceConfigPreset(Preset):
         dependencies: dict[str, Any],
     ) -> Generator[Customization]:
         yield AddToList("record_service_components", CommunityDefaultWorkflowComponent)
-        yield AddToList("record_service_components", CommunityInclusionComponent)
         yield AddToList("record_service_components", CommunityRecordAccessComponent)
         yield AddToList("record_service_components", SetWorkflowInReviewComponent)

@@ -40,7 +40,9 @@ def _registry() -> dict:
     The registry is owned by oarepo-requests, but it is filled in from the merged
     ``NOTIFICATION_RECIPIENTS_RESOLVERS`` configuration.
     """
-    from oarepo_requests.proxies import current_notification_recipient_generators_registry
+    from oarepo_requests.proxies import (
+        current_notification_recipient_generators_registry,
+    )
 
     return dict(current_notification_recipient_generators_registry)
 

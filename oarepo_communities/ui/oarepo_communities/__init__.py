@@ -91,7 +91,7 @@ overrides_list.append(
 )
 
 
-def ui_overrides(app: Flask) -> None:  # NOQA: ARG001
+def ui_overrides(app: Flask) -> None:  # noqa: ARG001
     """Define overrides that this library will register."""
     for override in overrides_list:
         if override not in current_ui_overrides:
@@ -106,7 +106,7 @@ def create_blueprint(app: Flask) -> Blueprint:
     return TemplatePageUIResource(ComponentsResourceConfig()).as_blueprint()  # type: ignore[reportArgumentType]
 
 
-def init_menu(app: Flask) -> None:  # NOQA: ARG001
+def init_menu(app: Flask) -> None:  # noqa: ARG001
     """Initialize menu."""
     communities = current_menu.submenu("communities")
     communities.submenu("home").register(

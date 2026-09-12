@@ -88,7 +88,7 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
     @classproperty
     @override
     def available_actions(  # type: ignore[override]
-        cls,  # noqa: N805
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,

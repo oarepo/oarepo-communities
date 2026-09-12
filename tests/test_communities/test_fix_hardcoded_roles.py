@@ -26,7 +26,9 @@ from invenio_communities.members.services.request import (
     CommunityInvitation,
     MembershipRequestRequestType,
 )
-from invenio_communities.notifications import builders as community_notification_builders
+from invenio_communities.notifications import (
+    builders as community_notification_builders,
+)
 from invenio_communities.notifications.generators import CommunityMembersRecipient
 from invenio_communities.subcommunities.services.request import (
     SubCommunityInvitationRequest,
@@ -63,7 +65,9 @@ CUSTOM_ROLES = [
 """A role set that, unlike Invenio's stock roles, has no role literally named "manager"."""
 
 
-def _iter_community_members_recipients(recipients: list | None) -> Iterator[CommunityMembersRecipient]:
+def _iter_community_members_recipients(
+    recipients: list | None,
+) -> Iterator[CommunityMembersRecipient]:
     """Recursively yield `CommunityMembersRecipient` instances, including nested ones."""
     for recipient in recipients or []:
         if isinstance(recipient, CommunityMembersRecipient):
