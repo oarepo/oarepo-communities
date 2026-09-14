@@ -10,7 +10,11 @@ from __future__ import annotations
 
 import pytest
 from invenio_access.permissions import system_identity
+from invenio_communities.notifications.builders import (
+    CommunityMembershipRequestSubmittedNotificationBuilder,
+)
 from invenio_communities.proxies import current_communities
+from invenio_notifications.proxies import current_notifications_manager
 from invenio_requests.customizations.event_types import CommentEventType
 
 
@@ -42,6 +46,35 @@ def membership_request(requests_service, community, users):
 def _recipients(outbox: list) -> set[str]:
     """Return all recipients of the mails sent in the given outbox."""
     return {recipient for mail in outbox for recipient in mail.recipients}
+
+
+def test_membership_request_notification_uses_local_template(
+    app,
+    membership_request,
+    community_owner,
+    requests_service,
+    search_clear,
+    users,
+):
+    """Render the local membership-request template through the live mail backend."""
+    notification = CommunityMembershipRequestSubmittedNotificationBuilder.build(
+        request=requests_service.record_cls.get_record(membership_request["id"]),
+        role="reader",
+        message="I would like to join.",
+    )
+    mail = app.extensions["mail"]
+
+    with mail.record_messages() as outbox:
+        current_notifications_manager.handle_broadcast(notification)
+
+    assert len(outbox) == 1
+    sent_mail = outbox[0]
+    requester_name = f"User {users[0].id}"
+    assert sent_mail.recipients == [community_owner.email]
+    assert sent_mail.subject == f"📬 New request from '{requester_name}' to join the community 'My Community'"
+    assert f"'{requester_name}' wants to join the community 'My Community'" in sent_mail.body
+    assert "I would like to join." in sent_mail.body
+    assert f"@{requester_name}" not in sent_mail.body
 
 
 def test_publish_notification_community_role(

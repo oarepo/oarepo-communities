@@ -535,6 +535,7 @@ def app_config(app_config):
     )
 
     app_config["COMMUNITIES_PERMISSION_POLICY"] = CommunityPermissionPolicy
+    app_config["APP_THEME"] = ["oarepo", "semantic-ui"]
 
     return app_config
 
