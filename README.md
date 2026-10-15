@@ -41,9 +41,7 @@ Each community can have its own default workflow, allowing different communities
 
 ```python
 from oarepo_workflows import Workflow
-from oarepo_communities.services.permissions.policy import (
-    CommunityDefaultWorkflowPermissions,
-)
+from oarepo_communities.services.permissions.policy import CommunityDefaultWorkflowPermissions
 
 
 class MyWorkflowPermissions(CommunityDefaultWorkflowPermissions):
@@ -74,10 +72,7 @@ current_communities.service.create(
     {
         "slug": "my-community",
         "metadata": {"title": "My Community"},
-        "custom_fields": {
-            "workflow": "default",
-            "allowed_workflows": ["default", "strict_review"],
-        },
+        "custom_fields": {"workflow": "default", "allowed_workflows": ["default", "strict_review"]},
     },
 )
 ```
@@ -146,9 +141,7 @@ RecordOwnerInRecordCommunity()
 #### Workflow-based Permission Wrapper
 
 ```python
-from oarepo_communities.services.permissions.generators import (
-    CommunityWorkflowPermission,
-)
+from oarepo_communities.services.permissions.generators import CommunityWorkflowPermission
 
 # Automatically resolves workflow from community and applies permissions
 CommunityWorkflowPermission("create")  # Uses community's default workflow

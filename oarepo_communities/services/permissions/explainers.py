@@ -21,10 +21,7 @@ from oarepo_runtime.services.permission_explainer import (
     explain,
 )
 
-from oarepo_communities.services.permissions.generators import (
-    InAnyCommunity,
-    OARepoCommunityRoles,
-)
+from oarepo_communities.services.permissions.generators import InAnyCommunity, OARepoCommunityRoles
 
 if TYPE_CHECKING:
     from flask_principal import Identity

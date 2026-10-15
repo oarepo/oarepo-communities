@@ -70,8 +70,7 @@ class OARepoCommunities:
 
         app_notification_recipients_resolvers = app.config.setdefault("NOTIFICATION_RECIPIENTS_RESOLVERS", {})
         app.config["NOTIFICATION_RECIPIENTS_RESOLVERS"] = conservative_merger.merge(
-            app_notification_recipients_resolvers,
-            config.NOTIFICATION_RECIPIENTS_RESOLVERS,
+            app_notification_recipients_resolvers, config.NOTIFICATION_RECIPIENTS_RESOLVERS
         )
 
         app.config.setdefault(
@@ -147,10 +146,7 @@ def finalize_app(app: Flask) -> None:
     requests.entity_resolvers_registry.register_type(CommunityRoleResolver())
 
     # replace SharedOrMyRequestsParam with CommunitiesSharedOrMyRequestsParam
-    from invenio_requests.services.requests.config import (
-        SharedOrMyRequestsParam,
-        UserRequestSearchOptions,
-    )
+    from invenio_requests.services.requests.config import SharedOrMyRequestsParam, UserRequestSearchOptions
 
     from oarepo_communities.services.params import CommunitiesSharedOrMyRequestsParam
 
@@ -228,9 +224,7 @@ def fix_hardcoded_roles(app: Flask) -> None:
         CommunityInvitation,
         MembershipRequestRequestType,
     )
-    from invenio_communities.notifications import (
-        builders as community_notification_builders,
-    )
+    from invenio_communities.notifications import builders as community_notification_builders
     from invenio_communities.subcommunities.services.request import (
         SubCommunityInvitationRequest,
         SubCommunityRequest,
@@ -269,10 +263,7 @@ def fix_hardcoded_roles(app: Flask) -> None:
         request_type.needs_context = needs_context  # pyright: ignore[reportAttributeAccessIssue]
 
     # C. notification recipients - members that should be notified about the above requests
-    for notification_builders in (
-        community_notification_builders,
-        rdm_notification_builders,
-    ):
+    for notification_builders in (community_notification_builders, rdm_notification_builders):
         for builder in vars(notification_builders).values():
             if isinstance(builder, type):
                 _fix_recipient_roles(getattr(builder, "recipients", None), replacements)
