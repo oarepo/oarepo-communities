@@ -10,13 +10,13 @@
 
 from __future__ import annotations
 
-from gettext import gettext as _
 from typing import TYPE_CHECKING
 
 from flask import g, request
 from flask_menu import current_menu
 from invenio_app_rdm.ext import _is_branded_community, _show_browse_page
 from invenio_communities.proxies import current_communities
+from invenio_i18n import lazy_gettext as _
 from oarepo_ui.overrides import (
     UIComponent,
     UIComponentOverride,
