@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2026 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2026 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Tests for the reopen-on-close behaviour of community-submission requests.
 
 When a community-submission review is declined, cancelled or expired, the custom

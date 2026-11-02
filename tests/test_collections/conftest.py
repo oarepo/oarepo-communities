@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Fixtures for the collections tests.
 
 Everything real — no mocks. The top-level conftest already gives us the API
