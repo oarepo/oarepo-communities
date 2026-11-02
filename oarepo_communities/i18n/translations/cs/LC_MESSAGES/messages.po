@@ -38,7 +38,7 @@ msgstr "Nejstarší"
 
 #: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:231
 msgid "Records"
-msgstr "Nahráno"
+msgstr "Záznamy"
 
 #: /home/dusanst/Projects/oarepo-dashboard/oarepo_dashboard/ui/__init__.py:237
 msgid "Communities"
