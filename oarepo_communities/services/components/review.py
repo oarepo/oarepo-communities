@@ -23,12 +23,13 @@ class SetWorkflowInReviewComponent(ServiceComponent):
 
     def create_review(
         self,
-        identity: Identity,  # noqa: ARG002
+        identity: Identity,
         data: dict[str, Any],
         record: Record,
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,
     ) -> None:
         """Set workflow for the record in the review process if it is not set yet."""
+        del identity, kwargs
         if record.parent.workflow is not None:
             return
         workflow = current_oarepo_communities.get_community_default_workflow(community_id=data["receiver"]["community"])

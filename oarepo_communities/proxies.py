@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from flask import current_app
 from werkzeug.local import LocalProxy
@@ -13,8 +13,6 @@ from werkzeug.local import LocalProxy
 if TYPE_CHECKING:
     from .ext import OARepoCommunities
 
-    current_oarepo_communities: OARepoCommunities
-
-current_oarepo_communities = LocalProxy(  # type: ignore[assignment]
-    lambda: current_app.extensions["oarepo-communities"]
+current_oarepo_communities: OARepoCommunities = cast(
+    "OARepoCommunities", LocalProxy(lambda: current_app.extensions["oarepo-communities"])
 )

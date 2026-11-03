@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from invenio_access.permissions import system_identity
-from invenio_rdm_records.proxies import (  # pyright: ignore[reportAttributeAccessIssue]
+from invenio_rdm_records.proxies import (
     current_community_collections_service,
 )
 
@@ -32,13 +32,13 @@ if TYPE_CHECKING:
 
 
 def test_collection_search_returns_records_from_other_communities(
-    app,  # type: ignore[no-untyped-def]
-    communities_model,  # type: ignore[no-untyped-def]
-    community_owner,  # type: ignore[no-untyped-def]
+    app,
+    communities_model,
+    community_owner,
     other_community: Community,
     collection_with_query: dict[str, Any],
     published_record_with_community_factory: CreateCommunityRecordFn,
-    search_clear,  # type: ignore[no-untyped-def]
+    search_clear,
 ) -> None:
     """Records live in another community; the collection still finds them.
 
@@ -84,13 +84,13 @@ def test_collection_search_returns_records_from_other_communities(
 
 @pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_search_without_the_collections_community_still_filters_by_community(
-    app,  # type: ignore[no-untyped-def]
-    communities_model,  # type: ignore[no-untyped-def]
-    community_owner,  # type: ignore[no-untyped-def]
+    app,
+    communities_model,
+    community_owner,
     other_community: Community,
-    community_get_or_create_in_default_workflow,  # type: ignore[no-untyped-def]
+    community_get_or_create_in_default_workflow,
     published_record_with_community_factory: CreateCommunityRecordFn,
-    search_clear,  # type: ignore[no-untyped-def]
+    search_clear,
 ) -> None:
     """Negative control: the skip must be scoped to the collections community.
 

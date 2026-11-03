@@ -255,7 +255,7 @@ def fix_hardcoded_roles(app: Flask) -> None:
         needs_context = dict(cast("dict[str, object]", request_type.needs_context))
         community_roles = cast("list[str]", needs_context.get("community_roles", []))
         needs_context["community_roles"] = _replace_stock_roles(community_roles, replacements)
-        request_type.needs_context = needs_context  # pyright: ignore[reportAttributeAccessIssue]
+        request_type.needs_context = needs_context
 
     # C. notification recipients - members that should be notified about the above requests
     for notification_builders in (community_notification_builders, rdm_notification_builders):

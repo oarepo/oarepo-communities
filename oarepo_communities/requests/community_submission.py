@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast, override
+from typing import TYPE_CHECKING, cast
 
 from invenio_access.permissions import system_identity
 from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_db.uow import UnitOfWork
     from invenio_drafts_resources.records import Record
+    from invenio_drafts_resources.services import RecordService as DraftRecordService
     from invenio_requests import RequestAction
     from invenio_requests.records.api import Request
 
@@ -104,19 +105,19 @@ def _reopen_review(closed_request: Request, draft: Record, uow: UnitOfWork) -> N
     # the systemfield needs the actual Request record (not just its id) so the
     # optimistic-concurrency version can be dumped without a lazy re-fetch during
     # commit, and ``RequestItem`` exposes no public accessor for it.
-    draft.parent.review = request_item._request  # noqa: SLF001  # pyright: ignore[reportAttributeAccessIssue]
+    draft.parent.review = request_item._obj  # noqa SLF001
 
     # Resolve the model-specific service (datarepo records are a custom model, not
     # vanilla RDM) so the parent commit reindexes the draft and its siblings with
     # the correct record/draft classes and indexers -- as requests/utils.py does.
-    record_service = current_runtime.get_record_service_for_record(draft)
+    record_service = cast("DraftRecordService", current_runtime.get_record_service_for_record(draft))
     uow.register(ParentRecordCommitOp(draft.parent, indexer_context={"service": record_service}))
     # index_refresh mirrors the request-flow indexing in requests/utils.py so the
     # reopened review is immediately visible to the deposit form reload.
     uow.register(
         RecordIndexOp(
             draft,
-            indexer=record_service.draft_indexer,  # pyright: ignore[reportAttributeAccessIssue]
+            indexer=record_service.draft_indexer,
             index_refresh=True,
         )
     )
@@ -159,21 +160,15 @@ class CommunitySubmission(InvenioCommunitySubmission):
     """Community submission request type using dynamic model-based topic ref types and custom accept action."""
 
     @classproperty
-    @override
-    def available_actions(  # type: ignore[override]
-        cls,  # noqa: N805
+    def available_actions(  # ty: ignore[invalid-mutable-override]
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
-        # The check-integration and reopen actions have dynamically-computed base
-        # classes that type checkers cannot trace back to RequestAction, so the
-        # dict is cast to the declared return type.
-        return cast(
-            "dict[str, type[RequestAction]]",
-            {
-                **super().available_actions,
-                "accept": AcceptAction,
-                "create": SubmissionCreateAction,
-                "cancel": CancelAction,
-                "decline": DeclineAction,
-                "expire": ExpireAction,
-            },
-        )
+        """Return available actions for the request type."""
+        return {
+            **super().available_actions,
+            "accept": AcceptAction,
+            "create": SubmissionCreateAction,
+            "cancel": CancelAction,
+            "decline": DeclineAction,
+            "expire": ExpireAction,
+        }
