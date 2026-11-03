@@ -76,14 +76,14 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
     editable = False
 
     topic_can_be_none = False
-    payload_schema: Mapping[str, ma.fields.Field] = {  # type: ignore[assignment]
+    payload_schema: Mapping[str, ma.fields.Field] | None = {
         "community": ma.fields.String(required=True),
     }
 
     @classproperty
     @override
-    def available_actions(  # type: ignore[override]
-        cls,  # noqa: N805
+    def available_actions(
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,
@@ -107,7 +107,7 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
         self,
         identity: Identity,
         *,
-        topic: Record,
+        topic: Record | None,
         request: Request | None = None,
         **kwargs: Any,
     ) -> str | LazyString:
@@ -137,7 +137,7 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
         self,
         identity: Identity,
         *,
-        topic: Record,
+        topic: Record | None,
         request: Request | None = None,
         **kwargs: Any,
     ) -> str | LazyString:

@@ -57,7 +57,8 @@ def load_community_user_needs(identity: Identity) -> None:
         return
     communities = {community_role[0] for community_role in community_roles}
     needs = {UserInCommunityNeed.from_user_community(identity.id, community) for community in communities}
-    identity.provides |= needs  # type: ignore[arg-type]
+    # this is only solvable by having supertype for needs if we don't want to type identity.provides as set[NamedTuple]
+    identity.provides |= needs  # ty: ignore[unsupported-operator]
 
 
 def community_id_from_record(record: RecordWithParent) -> str | None:
@@ -95,7 +96,7 @@ def get_default_community_id_from_record(record: RecordWithParent) -> str:
     """
     if record.parent.communities.default:
         return str(record.parent.communities.default.id)
-    return str(record.parent.review.receiver._parse_ref_dict_id())  # noqa: SLF001
+    return str(record.parent.review.receiver._parse_ref_dict_id())  # noqa SLF001
 
 
 def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
@@ -106,5 +107,5 @@ def get_community_ids_from_record(record: RecordWithParent) -> list[str]:
     """
     communities = record.parent.communities.ids
     if not communities:
-        return [str(record.parent.review.receiver._parse_ref_dict_id())]  # noqa: SLF001
+        return [str(record.parent.review.receiver._parse_ref_dict_id())]  # noqa SLF001
     return list(communities)

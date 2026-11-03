@@ -38,13 +38,13 @@ class _MockManifest(JinjaManifest):
 class _MockManifestLoader(JinjaManifestLoader):
     """Hand back the mock manifest so tests skip a real webpack build."""
 
-    def load(self, _filepath: str):  # type: ignore[override]  # noqa: ANN202
+    def load(self, _filepath: str):
         """Load the mock manifest."""
         return _MockManifest()
 
 
 @pytest.fixture(scope="module")
-def create_app(instance_path, entry_points):  # type: ignore[no-untyped-def]
+def create_app(instance_path, entry_points):
     """Use the UI factory so the collections blueprint is actually registered."""
     return _create_app
 

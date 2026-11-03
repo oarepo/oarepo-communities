@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from invenio_access.permissions import system_identity
-from invenio_rdm_records.proxies import (  # pyright: ignore[reportAttributeAccessIssue]
+from invenio_rdm_records.proxies import (
     current_community_collections_service,
 )
 

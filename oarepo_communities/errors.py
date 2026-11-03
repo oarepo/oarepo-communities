@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Any, cast
+from typing import Any
 
 from flask_resources import (
     create_error_handler,
@@ -106,7 +106,7 @@ class OpenInclusionRequestAlreadyExistsError(Exception):
     @property
     def description(self) -> str:
         """Exception's description."""
-        return cast("str", _("There is already an open inclusion request for this community."))  # mypy bug
+        return _("There is already an open inclusion request for this community.")  # mypy bug
 
 
 RESOURCE_ERROR_HANDLERS = {
