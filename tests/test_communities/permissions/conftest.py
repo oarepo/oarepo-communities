@@ -28,7 +28,7 @@ def as_comparable_dict():
         if isinstance(d, dict):
             return {k: _as_comparable(v) for k, v in sorted(d.items())}
         if isinstance(d, (list, tuple)):
-            return {_as_comparable(v) for v in d}  # type: ignore[reportUnhashable]
+            return {_as_comparable(v) for v in d}
         return d
 
     return _as_comparable

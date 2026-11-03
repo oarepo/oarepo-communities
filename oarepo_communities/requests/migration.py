@@ -104,7 +104,7 @@ class ConfirmCommunityMigrationAcceptAction(OARepoAcceptAction):
             raise TargetCommunityNotProvidedError("Target community not provided.")
         community = cast("Community", Community.pid.resolve(community_id))
 
-        if not is_access_restriction_valid(self.topic, community):  # type: ignore[reportArgumentType]
+        if not is_access_restriction_valid(self.topic, community):
             raise InvalidAccessRestrictions("Invalid access restrictions between target community and record.")
 
         change_primary_community(cast("RecordWithParent", self.topic), community, self.request, uow)
@@ -131,7 +131,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
     type_id = "initiate_community_migration"
     name = _("Inititiate Community migration")
 
-    description = _("Move record to another primary community.")  # type: ignore[reportAssignmentType]
+    description = _("Move record to another primary community.")
 
     editable = False
     topic_can_be_none = False
@@ -142,8 +142,8 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
 
     @classproperty
     @override
-    def available_actions(  # type: ignore[override]
-        cls,  # noqa: N805
+    def available_actions(
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,
@@ -167,7 +167,7 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
         else:
             return False
 
-        return super().is_applicable_to(identity, topic, *args, **kwargs)  # type: ignore[no-any-return]
+        return super().is_applicable_to(identity, topic, *args, **kwargs)
 
     @override
     def can_create(
@@ -194,12 +194,12 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
     @auto_approved_message(_("Inititiate record community migration"))
     @no_request_message(_("Inititiate record community migration"))
     @on_request_submitted(_("Record community migration initiated"))
-    def stateful_name(  # type: ignore[override]
+    def stateful_name(
         self,
         identity: Identity,
         *,
-        topic: Record,
-        request: Request,
+        topic: Record | None,
+        request: Request | None = None,
         **kwargs: Any,
     ) -> str | LazyString:
         """Return the stateful name of the request."""
@@ -230,12 +230,12 @@ class InitiateCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType
     )
     @on_request_submitted(_("Record community migration request has been submitted."))
     @on_request_creator(_("Submit to initiate record community migration. "))
-    def stateful_description(  # type: ignore[override]
+    def stateful_description(
         self,
         identity: Identity,
         *,
-        topic: Record,
-        request: Request,
+        topic: Record | None,
+        request: Request | None = None,
         **kwargs: Any,
     ) -> str | LazyString:
         """Return the stateful description of the request."""
@@ -272,8 +272,8 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType)
 
     @classproperty[dict[str, type[RequestAction]]]
     @override
-    def available_actions(  # type: ignore[override] # TODO: fix in requests
-        cls,  # noqa: N805
+    def available_actions(
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,
@@ -299,7 +299,7 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType)
         self,
         identity: Identity,
         *,
-        topic: Record,
+        topic: Record | None,
         request: Request | None = None,
         **kwargs: Any,
     ) -> str | LazyString:
@@ -331,7 +331,7 @@ class ConfirmCommunityMigrationRequestType(NonDuplicableOARepoRecordRequestType)
         self,
         identity: Identity,
         *,
-        topic: Record,
+        topic: Record | None,
         request: Request | None = None,
         **kwargs: Any,
     ) -> str | LazyString:

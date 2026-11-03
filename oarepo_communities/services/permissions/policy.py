@@ -50,7 +50,7 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
 
 
 # TODO: here or oarepo?
-class CommunityPermissionPolicy(BooleanPermissionPolicyMixin, InvenioCommunityPermissionPolicy):  # type: ignore[reportIncompatibleMethodOverride]
+class CommunityPermissionPolicy(BooleanPermissionPolicyMixin, InvenioCommunityPermissionPolicy):
     """Community permission policy."""
 
     can_submit_record = (CanSubmitRecordInCommunity(),)

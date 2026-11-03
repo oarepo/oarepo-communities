@@ -182,4 +182,4 @@ def user_has_permission(identity: Identity, community: Community, action: str) -
     """Check if the user has permission to perform the action in the community."""
     wf = get_workflow_from_community_custom_fields(community.custom_fields)
     permissions = wf.permissions(action, data={"parent": {"communities": {"default": str(community.id)}}})
-    return cast("bool", permissions.allows(identity))
+    return permissions.allows(identity)
