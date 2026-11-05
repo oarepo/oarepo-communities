@@ -83,14 +83,13 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRecordRequestType):
     def can_create(
         self,
         identity: Identity,
-        data: dict,
-        receiver: dict[str, str],
+        data: dict[str, Any],
+        receiver: dict[str, str] | Any | None,
         topic: Record,
-        creator: dict[str, str],
-        *args: Any,
+        creator: dict[str, str] | Any | None,
         **kwargs: Any,
     ) -> None:
-        super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
+        super().can_create(identity, data, receiver, topic, creator, **kwargs)
         target_community_id = data["payload"]["community"]
         if not isinstance(topic, RecordWithParent):
             raise CommunityNotIncludedError("Record has no parent.")

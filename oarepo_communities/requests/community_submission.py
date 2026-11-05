@@ -28,9 +28,15 @@ from invenio_rdm_records.requests.community_submission import (
 from invenio_rdm_records.requests.community_submission import (
     ExpireAction as InvenioExpireAction,
 )
+from invenio_rdm_records.requests.community_submission import SubmitAction as InvenioSubmitAction
 from invenio_records_resources.services.uow import RecordIndexOp
 from invenio_requests.proxies import current_requests_service
-from oarepo_requests.services.permissions.identity import request_active
+from oarepo_requests.actions.generic import (
+    OARepoAcceptActionMixin,
+    OARepoCancelActionMixin,
+    OARepoDeclineActionMixin,
+    OARepoSubmitActionMixin,
+)
 from oarepo_requests.utils import classproperty
 from oarepo_runtime import current_runtime
 
@@ -45,20 +51,8 @@ if TYPE_CHECKING:
     from invenio_requests.records.api import Request
 
 
-# TODO: move directly to invenio/oarepo service
-class AcceptAction(InvenioAcceptAction):
+class AcceptAction(OARepoAcceptActionMixin, InvenioAcceptAction):
     """Accept action that grants request_active permission during execution."""
-
-    def execute(self, identity: Identity, uow: UnitOfWork, **kwargs: Any) -> None:
-        """Execute the accept action with request_active added to identity.
-
-        This is needed because publishing through workflows is done by requests.
-        """
-        identity.provides.add(request_active)
-        try:
-            super().execute(identity, uow, **kwargs)
-        finally:
-            identity.provides.remove(request_active)
 
 
 def _reopen_review(closed_request: Request, draft: Record, uow: UnitOfWork) -> None:
@@ -123,7 +117,7 @@ def _reopen_review(closed_request: Request, draft: Record, uow: UnitOfWork) -> N
     )
 
 
-class DeclineAction(InvenioDeclineAction):
+class DeclineAction(OARepoDeclineActionMixin, InvenioDeclineAction):
     """Decline action that reopens a fresh review so the record can be resubmitted."""
 
     def execute(self, identity: Identity, uow: UnitOfWork, **kwargs: Any) -> None:
@@ -146,7 +140,7 @@ class ExpireAction(InvenioExpireAction):
 # InvenioCancelAction (the dynamic base of SubmissionCancelAction) is listed
 # explicitly so type checkers can resolve ``self.request`` on this action; it is
 # already the runtime base, so the MRO is unchanged.
-class CancelAction(SubmissionCancelAction, InvenioCancelAction):
+class CancelAction(OARepoCancelActionMixin, SubmissionCancelAction, InvenioCancelAction):
     """Cancel action that reopens a fresh review so the record can be resubmitted."""
 
     def execute(self, identity: Identity, uow: UnitOfWork, **kwargs: Any) -> None:
@@ -156,11 +150,15 @@ class CancelAction(SubmissionCancelAction, InvenioCancelAction):
         _reopen_review(self.request, draft, uow)
 
 
+class SubmitAction(OARepoSubmitActionMixin, InvenioSubmitAction):
+    """Submit action."""
+
+
 class CommunitySubmission(InvenioCommunitySubmission):
     """Community submission request type using dynamic model-based topic ref types and custom accept action."""
 
     @classproperty
-    def available_actions(  # ty: ignore[invalid-mutable-override]
+    def available_actions(  # ty: ignore[incompatible-mutable-override]
         cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         """Return available actions for the request type."""
@@ -168,6 +166,7 @@ class CommunitySubmission(InvenioCommunitySubmission):
             **super().available_actions,
             "accept": AcceptAction,
             "create": SubmissionCreateAction,
+            "submit": SubmitAction,
             "cancel": CancelAction,
             "decline": DeclineAction,
             "expire": ExpireAction,

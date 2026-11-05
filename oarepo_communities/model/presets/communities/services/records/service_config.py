@@ -13,10 +13,6 @@ from oarepo_model.customizations import (
 )
 from oarepo_model.presets import Preset
 
-from oarepo_communities.services.components.access import CommunityRecordAccessComponent
-from oarepo_communities.services.components.default_workflow import (
-    CommunityDefaultWorkflowComponent,
-)
 from oarepo_communities.services.components.review import SetWorkflowInReviewComponent
 
 if TYPE_CHECKING:
@@ -38,6 +34,4 @@ class CommunitiesServiceConfigPreset(Preset):
         model: InvenioModel,
         dependencies: dict[str, Any],
     ) -> Generator[Customization]:
-        yield AddToList("record_service_components", CommunityDefaultWorkflowComponent)
-        yield AddToList("record_service_components", CommunityRecordAccessComponent)
         yield AddToList("record_service_components", SetWorkflowInReviewComponent)

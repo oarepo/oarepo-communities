@@ -8,7 +8,7 @@ from __future__ import annotations
 import abc
 import copy
 import uuid
-from functools import reduce, wraps
+from functools import wraps
 from typing import TYPE_CHECKING, Protocol, cast, override
 
 from flask import current_app
@@ -19,13 +19,14 @@ from invenio_communities.generators import CommunityRoleNeed
 from invenio_communities.proxies import current_roles
 from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
+from invenio_rdm_records.services.generators import RecordOwners
 from invenio_records_permissions.generators import Generator
 from invenio_search.engine import dsl
 from oarepo_runtime.typing import require_kwargs
 from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
+from oarepo_workflows.services.permissions.composite import RequireAll
 
-from oarepo_communities.services.permissions.needs import UserInCommunityNeed
 from oarepo_communities.utils import (
     get_community_ids_from_record,
     get_default_community_id_from_record,
@@ -109,8 +110,8 @@ class CanSubmitRecordInCommunity(Generator):
         for workflow_code in wfs:
             workflow = current_oarepo_workflows.workflow_by_code[workflow_code]
             requests = workflow.requests().requests_by_id
-            if "community-submission" not in requests:
-                current_app.logger.error("Workflow %s does not have community-submission request")
+            if "community-submission" not in requests:  # REVIEW: not sure about the hardcoding here
+                current_app.logger.error("Workflow %s does not have community-submission request", workflow_code)
                 continue
             ret |= set(
                 requests["community-submission"].requester_generator.needs(record=record, community=record, **kwargs)
@@ -234,6 +235,8 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
             if not (kwargs.get("community")):
                 raise
 
+        # (back up to permission policy class) that passes the community into **over at instanciating
+        # the policy class
         if not community_ids and "community" in kwargs and kwargs["community"]:
             community = kwargs["community"]
             community_ids = [str(community.id)] if isinstance(community, Community) else [str(community["id"])]
@@ -332,9 +335,9 @@ class TargetCommunityRole(DefaultCommunityRole):
             return []
         return [community_id]
 
-    # issue is draft supporting record, requires structural fix
     @override
-    def reference_receivers(  # ty: ignore[invalid-method-override]
+    @require_draft_record
+    def reference_receivers(
         self,
         record: Record | None = None,
         request_type: RequestType | None = None,
@@ -373,79 +376,27 @@ class DefaultCommunityMembers(DefaultCommunityRoleMixin, OARepoCommunityRoles):
 PrimaryCommunityMembers = DefaultCommunityMembers
 
 
-class RecordOwnerInRecordCommunityBase(CommunityRoleMixinProtocol, Generator):
-    """Base class for generators that allow access to record owners only if they are members of the community."""
+class RecordOwnerInRecordCommunity(RequireAll):
+    """Allows record owners only while they are members of any of the record's communities.
 
-    default_or_ids: str
-
-    @override
-    @require_draft_record
-    def needs(self, *, record: Record, data: dict | None = None, **kwargs: Any) -> list[Need]:
-        record_communities = set(self._get_record_communities(record, **kwargs))
-        return cast(
-            "list[Need]", self._needs(record_communities, record=record)
-        )  # there isn't a common ancestor for Need
-
-    def _needs(self, record_communities: set[str], record: Record) -> list[UserInCommunityNeed]:
-        needs: list[UserInCommunityNeed] = []
-        owner_ids: list[int] = []
-
-        if not isinstance(record, RecordWithParent):
-            return []
-
-        owners = getattr(record.parent.access, "owned_by", None)
-        if owners is not None:
-            owners = owners if isinstance(owners, list) else [owners]
-            owner_ids = [owner.owner_id for owner in owners]
-
-        for owner_id in owner_ids:
-            needs += [UserInCommunityNeed.from_user_community(owner_id, community) for community in record_communities]
-        return needs
-
-    @override
-    def query_filter(self, identity: Identity | None = None, **kwargs: Any) -> dsl.query.Query:
-        """Create filters for current identity as owner."""
-        if identity is None:
-            return dsl.Q("match_none")
-
-        user_in_communities = {
-            (n.user, n.community)
-            # not nice, but mypy can't infer the type otherwise and the if n.method guarantees
-            # that it is of the right type
-            for n in cast("list[UserInCommunityNeed]", identity.provides)
-            if n.method == "user_in_community"
-        }
-        terms: list[Any] = [
-            dsl.Q("term", **{"parent.owners.user": element[0]})
-            & dsl.Q("term", **{f"parent.communities.{self.default_or_ids}": element[1]})
-            for element in user_in_communities
-        ]
-        if not terms:
-            return dsl.Q("match_none")
-
-        return reduce(lambda f1, f2: f1 | f2, terms)
-
-
-class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, RecordOwnerInRecordCommunityBase):
-    """Generator that allows access to owners of the record in its default community.
-
-    The access is limited only when user is a member of the record's default community.
-    When they stop being members, the access is removed.
-
-    Note: this is different from invenio's RecordOwners generator, which allows access
-    to all owners regardless of their community membership.
-
-    Note: this generator needs that Identity.provides are loaded with UserInCommunityNeed.
-    This is done by oarepo_communities.utils.load_community_user_needs
+    Unlike invenio's RecordOwners, the access is lost when the owner leaves the communities.
+    The hosting permission policy must inherit from BooleanPermissionPolicyMixin.
     """
 
-    default_or_ids = "default"
+    def __init__(self) -> None:
+        """Create the generator."""
+        super().__init__(RecordOwners(), CommunityMembers())
+
+
+class RecordOwnerInDefaultRecordCommunity(RequireAll):
+    """Allows record owners only while they are members of the record's default community.
+
+    The hosting permission policy must inherit from BooleanPermissionPolicyMixin.
+    """
+
+    def __init__(self) -> None:
+        """Create the generator."""
+        super().__init__(RecordOwners(), DefaultCommunityMembers())
 
 
 RecordOwnerInPrimaryRecordCommunity = RecordOwnerInDefaultRecordCommunity
-
-
-class RecordOwnerInRecordCommunity(CommunityRoleMixin, RecordOwnerInRecordCommunityBase):
-    """Generator that allows access to owners of the record in any of its communities, primary or secondary."""
-
-    default_or_ids = "ids"

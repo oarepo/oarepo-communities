@@ -6,7 +6,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from invenio_requests import current_requests_service
 from pytest_oarepo.requests.functions import get_request_type
 
 from oarepo_communities.errors import CommunityAlreadyIncludedError
@@ -62,55 +61,6 @@ def env(
     return reader_client, owner_client, community_1, community_2
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
-def test_community_publish(
-    logged_client,
-    community_owner,
-    users,
-    community,
-    draft_with_community_factory,
-    submit_request_on_draft,
-    communities_model,
-    accept_request,
-    invite,
-    urls,
-    search_clear,
-):
-    community_reader = users[0]
-    invite(community_reader, str(community.id), "reader")
-    reader_client = logged_client(community_reader)
-    owner_client = logged_client(community_owner)
-
-    record = draft_with_community_factory(community_reader.identity, str(community.id))
-    record_id = record["id"]
-    submitted_request = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")
-    requests = current_requests_service.search_user_requests(community_reader.identity)
-    request_ids = [request["id"] for request in requests.hits]
-    assert submitted_request["id"] in request_ids
-
-    accept_request(
-        reader_client,
-        type_="publish_draft",
-        record_id=record_id,
-        is_draft=True,
-        no_accept_link=True,
-    )  # reader can accept the request
-    accept_request(
-        owner_client,
-        type_="publish_draft",
-        record_id=record_id,
-        is_draft=True,
-    )  # owner can
-
-    resp_draft = owner_client.get(f"{urls['BASE_URL']}/{record_id}/draft")
-    resp_record = owner_client.get(f"{urls['BASE_URL']}/{record_id}")
-
-    # record was published
-    assert resp_draft.status_code == 404
-    assert resp_record.status_code == 200
-
-
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_community_delete(
     logged_client,
     community_owner,
@@ -160,7 +110,6 @@ def test_community_delete(
     assert len(resp_search.json["hits"]["hits"]) == 0
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_community_migration(
     published_record_with_community_factory,
     submit_request_on_record,
@@ -209,7 +158,6 @@ def test_community_migration(
     assert record_after.json["parent"]["communities"]["ids"] == [str(community_2.id)]
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_community_submission_secondary(
     published_record_with_community_factory,
     create_request_on_record,
@@ -265,7 +213,6 @@ def test_community_submission_secondary(
     }
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_remove_secondary(
     published_record_with_community_factory,
     create_request_on_record,
@@ -351,7 +298,7 @@ def test_community_role_ui_serialization(
     community_owner,
     users,
     community,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     submit_request_on_draft,
     ui_serialized_community_role,
     invite,
@@ -360,7 +307,7 @@ def test_community_role_ui_serialization(
     community_reader = users[0]
     owner_client = logged_client(community_owner)
     invite(community_reader, str(community.id), "reader")
-    record = draft_with_community_factory(community_reader.identity, str(community.id))
+    record = draft_with_community_submission_factory(community_reader.identity, str(community.id))
     record_id = record["id"]
 
     submit = submit_request_on_draft(community_reader.identity, record_id, "publish_draft")

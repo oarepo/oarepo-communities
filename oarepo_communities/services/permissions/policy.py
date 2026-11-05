@@ -22,7 +22,7 @@ from oarepo_communities.services.permissions.generators import (
 )
 
 
-class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
+class CommunityDefaultWorkflowPermissions(BooleanPermissionPolicyMixin, RequestBasedWorkflowPermissions):
     """Base class for community workflow permissions, subclass from it and put the result to Workflow constructor.
 
     Example:
@@ -49,7 +49,7 @@ class CommunityDefaultWorkflowPermissions(RequestBasedWorkflowPermissions):
     can_review = (SystemProcess(), AuthenticatedUser())
 
 
-# TODO: here or oarepo?
+# TODO: here or oarepo-config?
 class CommunityPermissionPolicy(BooleanPermissionPolicyMixin, InvenioCommunityPermissionPolicy):
     """Community permission policy."""
 

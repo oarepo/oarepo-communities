@@ -61,7 +61,7 @@ def test_expand_community_role(
     community_owner,
     users,
     community,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     submit_request_on_draft,
     ui_serialized_community_role,
     link2testclient,
@@ -72,7 +72,7 @@ def test_expand_community_role(
     invite(reader, str(community.id), "reader")
     owner_client = logged_client(community_owner)
 
-    record_id = draft_with_community_factory(reader.identity, str(community.id))["id"]
+    record_id = draft_with_community_submission_factory(reader.identity, str(community.id))["id"]
     submit = submit_request_on_draft(reader.identity, record_id, "publish_draft")
 
     owner_client.get(link2testclient(submit["links"]["self"]))

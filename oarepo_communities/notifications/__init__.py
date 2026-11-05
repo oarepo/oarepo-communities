@@ -14,4 +14,4 @@ def community_role_notification_resolver() -> ServiceResultResolver:
 
 
 # due to how invenio notifications resolves this as entrypoint
-community_role_notification_resolver.type_key = "community_role"  # ty: ignore[unresolved-attribute]
+community_role_notification_resolver.type_key = "community_role"  # ty: ignore[missing-attribute]

@@ -148,14 +148,13 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
     def can_create(
         self,
         identity: Identity,
-        data: dict,
-        receiver: dict[str, str],
+        data: dict[str, Any],
+        receiver: dict[str, str] | Any | None,
         topic: Record,
-        creator: dict[str, str],
-        *args: Any,
+        creator: dict[str, str] | Any | None,
         **kwargs: Any,
     ) -> None:
-        super().can_create(identity, data, receiver, topic, creator, *args, **kwargs)
+        super().can_create(identity, data, receiver, topic, creator, **kwargs)
         target_community_id = data.get("payload", {}).get("community", None)
         if not target_community_id:
             raise TargetCommunityNotProvidedError("Target community not provided.")
