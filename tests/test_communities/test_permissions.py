@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import pytest
+from flask_principal import Identity, UserNeed
 from invenio_access.permissions import system_identity
 from invenio_communities.communities.records.api import Community
 from invenio_communities.generators import CommunityRoleNeed
 from invenio_communities.proxies import current_communities
 from invenio_records_resources.services.errors import PermissionDeniedError
+from invenio_search.engine import dsl
 from oarepo_rdm.oai.percolator import init_percolators
 from oarepo_runtime.typing import record_from_result
 from pytest_oarepo.communities.functions import set_community_workflow
@@ -16,13 +18,14 @@ from pytest_oarepo.communities.functions import set_community_workflow
 from oarepo_communities.services.permissions.generators import (
     DefaultCommunityRole,
     InAnyCommunity,
+    RecordOwnerInRecordCommunity,
 )
 
 
 def test_disabled_endpoints(
     logged_client,
     community_owner,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     published_record_with_community_factory,
     default_record_with_workflow_json,
     community_get_or_create_in_default_workflow,
@@ -32,7 +35,7 @@ def test_disabled_endpoints(
 ):
     owner_client = logged_client(community_owner)
     community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
-    draft = draft_with_community_factory(community_owner.identity, str(community_1.id))
+    draft = draft_with_community_submission_factory(community_owner.identity, str(community_1.id))
     published_record = published_record_with_community_factory(community_owner.identity, str(community_1.id))
     publish = owner_client.post(f"{urls['BASE_URL']}/{draft['id']}/draft/actions/publish")
     delete = owner_client.delete(f"{urls['BASE_URL']}/{published_record['id']}")
@@ -40,62 +43,44 @@ def test_disabled_endpoints(
     assert delete.status_code == 403
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_default_community_workflow_changed(
-    logged_client,
     community_owner,
     users,
     community_get_or_create_in_default_workflow,
-    draft_with_community_factory,
-    create_request_on_draft,
-    link2testclient,
+    draft_with_community_submission_factory,
+    submit_review,
     invite,
-    urls,
     search_clear,
 ):
     init_percolators()
     community_reader = users[0]
-    owner_client = logged_client(community_owner)
-    reader_client = logged_client(community_reader)
-
     community_1 = community_get_or_create_in_default_workflow(community_owner, "comm1")
     community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
     invite(community_reader, str(community_1.id), "reader")
     invite(community_reader, str(community_2.id), "reader")
 
-    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
-    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
-    record4 = draft_with_community_factory(community_reader.identity, str(community_1.id))
-
-    request_should_be_allowed = create_request_on_draft(community_owner.identity, record1["id"], "publish_draft")
-    submit = owner_client.post(link2testclient(request_should_be_allowed.links["actions"]["submit"]))
-    accept_should_be_denied = reader_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
-    assert accept_should_be_denied.status_code == 403
-
-    owner_client.post(link2testclient(submit.json["links"]["actions"]["accept"]))
-
-    # old permissions should not allow this for reader, but reader is in editors so it should be fine with new ones
-    update_draft = reader_client.put(
-        f"{urls['BASE_URL']}/{record4['id']}/draft",
-        json=record4 | {"metadata": {"title": "should do"}},
-    )
-    assert update_draft.status_code == 200
-    assert update_draft.json["metadata"]["title"] == "should do"
+    draft_before_change = draft_with_community_submission_factory(community_reader.identity, str(community_1.id))
 
     set_community_workflow(str(community_1.id), "no")
-    record = Community.get_record(str(community_1.id))
-    assert record.custom_fields["workflow"] == "no"
-    create_request_on_draft(community_owner.identity, record2["id"], "publish_draft")
-    record5 = draft_with_community_factory(community_owner.identity, str(community_1.id))
+    assert Community.get_record(str(community_1.id)).custom_fields["workflow"] == "no"
+
+    # the review takes the new workflow of the community, which does not allow community submissions
     with pytest.raises(PermissionDeniedError):
-        create_request_on_draft(community_owner.identity, record5["id"], "publish_draft")
+        draft_with_community_submission_factory(community_reader.identity, str(community_1.id))
+
+    draft_other_community = draft_with_community_submission_factory(community_reader.identity, str(community_2.id))
+
+    assert draft_before_change["parent"]["workflow"] == "default"
+    assert draft_other_community["parent"]["workflow"] == "default"
+    submit_review(community_reader.identity, draft_before_change["id"])
+    submit_review(community_reader.identity, draft_other_community["id"])
 
 
 def _record_owners_in_record_community_test(
     community_owner,
     users,
     logged_client,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     record_service,
     community_get_or_create,
     workflow,
@@ -111,12 +96,18 @@ def _record_owners_in_record_community_test(
 
     owner_client = logged_client(community_owner)
 
-    record = draft_with_community_factory(
+    record = draft_with_community_submission_factory(
         community_owner.identity,
         str(community_1.id),
         custom_workflow=workflow,
     )
     record_id = record["id"]
+
+    # the draft enters its community only when its review is accepted, which also publishes it,
+    # so the draft communities are set directly
+    record = record_from_result(record_service.read_draft(system_identity, record_id))
+    record.parent.communities.add(community_1, default=True)
+    record.parent.commit()
 
     read_com1 = owner_client.get(f"{urls['BASE_URL']}/{record_id}/draft?expand=true")
 
@@ -145,14 +136,13 @@ def _record_owners_in_record_community_test(
     assert read_com4.status_code == results[3]
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_record_owners_in_record_community_needs(
     community_owner,
     urls,
     users,
     logged_client,
     community_get_or_create_in_default_workflow,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     record_service,
     search_clear,
 ) -> None:
@@ -160,7 +150,7 @@ def test_record_owners_in_record_community_needs(
         community_owner,
         users,
         logged_client,
-        draft_with_community_factory,
+        draft_with_community_submission_factory,
         record_service,
         community_get_or_create_in_default_workflow,
         workflow="record_owner_in_record_community",
@@ -169,14 +159,13 @@ def test_record_owners_in_record_community_needs(
     )
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_record_owners_in_default_record_community_needs(
     community_owner,
     urls,
     users,
     logged_client,
     community_get_or_create_in_default_workflow,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     record_service,
     search_clear,
 ) -> None:
@@ -184,7 +173,7 @@ def test_record_owners_in_default_record_community_needs(
         community_owner,
         users,
         logged_client,
-        draft_with_community_factory,
+        draft_with_community_submission_factory,
         record_service,
         community_get_or_create_in_default_workflow,
         workflow="record_owner_in_default_record_community",
@@ -217,3 +206,21 @@ def test_can_submit_in_community_without_explicit_allowed_workflows(
     communities_service = current_communities.service
     community = record_from_result(communities_service.create(community_owner.identity, minimal_community))
     assert communities_service.check_permission(community_owner.identity, "submit_record", record=community)
+
+
+def test_record_owner_in_record_community_searches_owned_records_in_member_communities(app):
+    identity = Identity(1)
+    identity.provides |= {UserNeed(1), CommunityRoleNeed("comm-id", "reader")}
+
+    query = RecordOwnerInRecordCommunity().query_filter(identity=identity)
+
+    assert query == dsl.Q("terms", **{"parent.access.owned_by.user": [1]}) & dsl.Q(
+        "terms", **{"parent.communities.ids": ["comm-id"]}
+    )
+
+
+def test_record_owner_in_record_community_searches_nothing_without_membership(app):
+    identity = Identity(1)
+    identity.provides.add(UserNeed(1))
+
+    assert RecordOwnerInRecordCommunity().query_filter(identity=identity) == dsl.Q("match_none")

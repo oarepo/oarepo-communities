@@ -7,9 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast, override
 
-from invenio_rdm_records.services.schemas.parent.communities import CommunitiesSchema
 from marshmallow import post_dump
-from marshmallow_utils.fields import NestedAttribute
 from oarepo_model.customizations import (
     Customization,
     PrependMixin,
@@ -31,12 +29,8 @@ else:
 class CommunitiesParentRecordSchemaMixin(InvenioRDMParentSchema):
     """Mixin for parent record schema."""
 
-    # side effect of default = fields.String(attribute="default.id", allow_none=True) is that we need different
-    # data loading in permissions (called before validation) and in schema (called after validation)
-    # also iirc NestedAttribute caused issues in ui serialization
-    communities = NestedAttribute(CommunitiesSchema)
-
-    # RDMParentRecord already has this but it's called after the permission check
+    # CleanReviewMixin post_dump in the parent is called after FieldPermissionsMixin's post_dump
+    # it doesn't crash now but still prevents unnecessary permission checks
     @post_dump
     def _permissions_filter_dump(self, data: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
         # Remove review before permission check

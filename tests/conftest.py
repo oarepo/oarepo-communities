@@ -8,7 +8,7 @@ import os
 import pytest
 from invenio_app.factory import create_api
 from invenio_i18n import lazy_gettext as _
-from invenio_rdm_records.services.generators import RecordOwners
+from invenio_rdm_records.services.generators import IfNewRecord, RecordOwners
 from invenio_records_permissions.generators import (
     AnyUser,
     AuthenticatedUser,
@@ -28,7 +28,8 @@ from oarepo_workflows import (
     WorkflowTransitions,
 )
 from oarepo_workflows.model.presets import workflows_preset
-from oarepo_workflows.services.permissions import DefaultWorkflowPermissions
+from oarepo_workflows.services.permissions import DefaultWorkflowPermissions, IfRDMRecordPassed
+from oarepo_workflows.services.permissions.composite import RequireAll
 from pytest_oarepo.permission_generators import UserGenerator
 
 from oarepo_communities.model.presets import communities_preset
@@ -36,6 +37,7 @@ from oarepo_communities.services.permissions.generators import (
     CommunityMembers,
     CommunityRole,
     DefaultCommunityRole,
+    PrimaryCommunityRole,
     RecordOwnerInDefaultRecordCommunity,
     RecordOwnerInRecordCommunity,
     TargetCommunityRole,
@@ -250,7 +252,27 @@ class DefaultRequests(WorkflowRequestPolicy):
         transitions=WorkflowTransitions(),
     )
     community_submission = WorkflowRequest(
-        requesters=[AuthenticatedUser()],
+        requesters=[
+            IfNewRecord(
+                then_=CommunityDefaultWorkflowPermissions.can_create,
+                else_=[
+                    # Note: this permission check can be called from /review url, that is
+                    # inside review service's create method. The problem is that review
+                    # service does not pass the original record - it fills the "record"
+                    # parameter with a community. That's why we can not use IfInState
+                    # and similar permission generators that depend on the record.
+                    *[
+                        IfRDMRecordPassed(
+                            # the user has called the requests' create method directly
+                            then_=[RequireAll(RecordOwners(), PrimaryCommunityRole(role))],
+                            # the user went through the review flow which did not pass the record
+                            else_=[PrimaryCommunityRole(role)],
+                        )
+                        for role in ["reader", "curator", "owner"]
+                    ],
+                ],
+            )
+        ],
         recipients=[],
     )
 
@@ -325,32 +347,20 @@ class NoRequests(WorkflowRequestPolicy):
     )
 
 
-class CuratorPublishRequests(DefaultRequests):
-    """Workflow requests with curator as the only recipient."""
+class ReviewTransitionsRequests(DefaultRequests):
+    """Like DefaultRequests but the community submission review has workflow transitions.
 
-    publish_draft = WorkflowRequest(
-        requesters=[IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])],
-        recipients=[DefaultCommunityRole("curator")],
+    The target states are not reachable otherwise, so a test can tell an applied transition apart.
+    """
+
+    community_submission = WorkflowRequest(
+        requesters=[AuthenticatedUser()],
+        recipients=[],
         transitions=WorkflowTransitions(
-            submitted="publishing",
-            accepted="published",
-            declined="draft",
-            cancelled="draft",
-        ),
-    )
-
-
-class MultipleRecipientsRequests(DefaultRequests):
-    """Workflow requests with multiple recipients."""
-
-    publish_draft = WorkflowRequest(
-        requesters=[IfInState("draft", [CommunityRole("owner"), CommunityRole("reader")])],
-        recipients=[DefaultCommunityRole("curator"), DefaultCommunityRole("owner")],
-        transitions=WorkflowTransitions(
-            submitted="publishing",
-            accepted="published",
-            declined="draft",
-            cancelled="draft",
+            submitted="submitted",
+            accepted="accepted",
+            declined="declined",
+            cancelled="cancelled",
         ),
     )
 
@@ -403,16 +413,10 @@ WORKFLOWS = [
         request_policy_cls=NoRequests,
     ),
     Workflow(
-        code="curator_publish",
-        label=_("For testing assigned param filter."),
+        code="review_transitions",
+        label=_("For testing workflow state transitions in the review process."),
         permission_policy_cls=TestCommunityWorkflowPermissions,
-        request_policy_cls=CuratorPublishRequests,
-    ),
-    Workflow(
-        code="multiple_recipients",
-        label=_("For testing multiple recipient requests.."),
-        permission_policy_cls=TestCommunityWorkflowPermissions,
-        request_policy_cls=MultipleRecipientsRequests,
+        request_policy_cls=ReviewTransitionsRequests,
     ),
     Workflow(
         code="individual",

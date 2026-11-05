@@ -51,7 +51,7 @@ class LazyChoices[T](list[T]):
         return iter(self._func())
 
     @override
-    def __getitem__(self, item: int) -> T:  # ty: ignore[invalid-method-override]
+    def __getitem__(self, item: int) -> T:  # ty: ignore[incompatible-method-override]
         return self._func()[item]
 
     @override

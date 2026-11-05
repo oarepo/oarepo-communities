@@ -72,54 +72,46 @@ def test_membership_request_notification_uses_local_template(
     assert f"@{requester_name}" not in sent_mail.body
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
-def test_publish_notification_community_role(
+def test_submit_review_notification_community_role(
     app,
     community,
     community_owner,
     users,
-    logged_client,
-    draft_with_community_factory,
-    submit_request_on_draft,
-    link2testclient,
+    draft_with_community_submission_factory,
+    submit_review,
     invite,
     search_clear,
 ):
-    """Test notification being built on review submit."""
+    """The members that can curate the community get a mail on review submit, the submitter does not."""
     mail = app.extensions.get("mail")
     assert mail
 
     invite(users[0], str(community.id), "reader")
     invite(users[1], str(community.id), "curator")
     invite(users[2], str(community.id), "curator")
-    creator = users[0]
+    invite(users[3], str(community.id), "reader")
+    submitter = users[0]
 
-    draft1 = draft_with_community_factory(creator.identity, str(community.id), custom_workflow="curator_publish")
+    draft = draft_with_community_submission_factory(submitter.identity, str(community.id))
     with mail.record_messages() as outbox:
-        submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
-        # check notification is build on submit
-        assert len(outbox) == 2  # both curators should get a mail
-        recipients = outbox[0].send_to | outbox[1].send_to
-        assert recipients == {"user2@example.org", "user3@example.org"}
+        submit_review(submitter.identity, draft["id"])
+
+    assert _recipients(outbox) == {community_owner.email, users[1].email, users[2].email}
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
-def test_publish_notification_community_role_group(
+def test_submit_review_notification_community_role_group(
     app,
     roles,
     add_user_in_role,
     community,
+    community_owner,
     users,
-    draft_with_community_factory,
-    submit_request_on_draft,
+    draft_with_community_submission_factory,
+    submit_review,
     invite,
     search_clear,
 ):
-    """Test notification recipients when a community role is held by a group.
-
-    The curator role is assigned to a user group rather than to individual
-    members, so every user belonging to that group should get a mail.
-    """
+    """Every user of a group holding the curator role gets a mail on review submit."""
     mail = app.extensions.get("mail")
     assert mail
 
@@ -137,45 +129,37 @@ def test_publish_notification_community_role_group(
             "visible": True,
         },
     )
-    creator = users[0]
+    submitter = users[0]
 
-    draft1 = draft_with_community_factory(creator.identity, str(community.id), custom_workflow="curator_publish")
+    draft = draft_with_community_submission_factory(submitter.identity, str(community.id))
     with mail.record_messages() as outbox:
-        submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
-        # check notification is built on submit
-        assert len(outbox) == 2  # both members of the curator group should get a mail
-        recipients = outbox[0].send_to | outbox[1].send_to
-        assert recipients == {users[1].email, users[2].email}
+        submit_review(submitter.identity, draft["id"])
+
+    assert _recipients(outbox) == {community_owner.email, users[1].email, users[2].email}
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
-def test_publish_notification_community_role_user_and_group(
+def test_submit_review_notification_community_role_user_and_group(
     app,
     roles,
     add_user_in_role,
     community,
+    community_owner,
     users,
-    draft_with_community_factory,
-    submit_request_on_draft,
+    draft_with_community_submission_factory,
+    submit_review,
     invite,
     search_clear,
 ):
-    """Test notification recipients when a role is held by both a user and a group.
-
-    The curator role is assigned to an individual member as well as to a user
-    group, so the direct member and every user of the group should get a mail.
-    """
+    """Both the direct curator and the users of a group holding the curator role get a mail on review submit."""
     mail = app.extensions.get("mail")
     assert mail
 
-    # Create a group and put two users into it.
     group = roles[0]
     add_user_in_role(users[2], group)
     add_user_in_role(users[3], group)
 
     invite(users[0], str(community.id), "reader")
     invite(users[1], str(community.id), "curator")
-
     current_communities.service.members.add(
         system_identity,
         str(community.id),
@@ -185,83 +169,45 @@ def test_publish_notification_community_role_user_and_group(
             "visible": True,
         },
     )
-    creator = users[0]
+    submitter = users[0]
 
-    draft1 = draft_with_community_factory(creator.identity, str(community.id), custom_workflow="curator_publish")
+    draft = draft_with_community_submission_factory(submitter.identity, str(community.id))
     with mail.record_messages() as outbox:
-        submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
-        # check notification is built on submit
-        assert len(outbox) == 3  # direct curator + both members of the curator group
-        recipients = outbox[0].send_to | outbox[1].send_to | outbox[2].send_to
-        assert recipients == {users[1].email, users[2].email, users[3].email}
+        submit_review(submitter.identity, draft["id"])
+
+    assert _recipients(outbox) == {community_owner.email, users[1].email, users[2].email, users[3].email}
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_locales(
     app,
     community,
+    community_owner,
     users,
     user_with_cs_locale,
-    logged_client,
-    draft_with_community_factory,
-    submit_request_on_draft,
-    link2testclient,
-    urls,
+    draft_with_community_submission_factory,
+    submit_review,
     invite,
     search_clear,
 ):
-    """Test notification being built on review submit."""
+    """The review submit mail is rendered in the locale of each recipient."""
     mail = app.extensions.get("mail")
     assert mail
 
     invite(users[0], str(community.id), "reader")
     invite(users[1], str(community.id), "curator")
     invite(user_with_cs_locale, str(community.id), "curator")
-    creator = users[0]
-    draft1 = draft_with_community_factory(creator.identity, str(community.id), custom_workflow="curator_publish")
+    submitter = users[0]
+    draft = draft_with_community_submission_factory(submitter.identity, str(community.id))
 
     with mail.record_messages() as outbox:
-        submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
-        assert len(outbox) == 2
-        sent_mail_cz = [mail for mail in outbox if mail.recipients[0] == user_with_cs_locale.user.email]
-        sent_mail_en = [mail for mail in outbox if mail.recipients[0] == users[1].user.email]
-        assert len(sent_mail_cz) == len(sent_mail_en) == 1
-        assert sent_mail_cz[0].subject == "Žádost o publikování záznamu blabla"
-        assert sent_mail_en[0].subject == "Request to publish record blabla"
+        submit_review(submitter.identity, draft["id"])
 
-
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
-def test_locales_multiple_recipients(
-    app,
-    community,
-    community_owner,
-    users,
-    user_with_cs_locale,
-    logged_client,
-    draft_with_community_factory,
-    submit_request_on_draft,
-    link2testclient,
-    urls,
-    invite,
-    search_clear,
-):
-    """Test notification being built on review submit."""
-    mail = app.extensions.get("mail")
-    assert mail
-
-    invite(users[0], str(community.id), "reader")
-    invite(user_with_cs_locale, str(community.id), "curator")
-    creator = users[0]
-    draft1 = draft_with_community_factory(creator.identity, str(community.id), custom_workflow="multiple_recipients")
-
-    with mail.record_messages() as outbox:
-        submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
-        assert len(outbox) == 2
-        sent_mail_cz = [mail for mail in outbox if mail.recipients[0] == user_with_cs_locale.user.email]
-        sent_mail_en = [mail for mail in outbox if mail.recipients[0] == community_owner.user.email]
-        assert len(sent_mail_cz) == len(sent_mail_en) == 1
-        assert sent_mail_cz[0].subject == "Žádost o publikování záznamu blabla"
-        assert sent_mail_en[0].subject == "Request to publish record blabla"
+    subjects = {sent_mail.recipients[0]: sent_mail.subject for sent_mail in outbox}
+    assert subjects == {
+        user_with_cs_locale.email: "📥 Nový záznam byl odeslán do vaší komunity 'My Community'",
+        users[1].email: "📥 New record submission to your community 'My Community'",
+        community_owner.email: "📥 New record submission to your community 'My Community'",
+    }
 
 
 def test_membership_request_comment_notifies_only_members_that_can_manage(
@@ -322,39 +268,35 @@ def test_membership_request_comment_by_manager_notifies_requester(
     assert _recipients(outbox) == {users[0].email, community_owner.email}
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_comment_notifications(
     app,
     users,
-    logged_client,
-    draft_with_community_factory,
     community,
-    submit_request_on_draft,
+    community_owner,
+    draft_with_community_submission_factory,
+    submit_review,
     events_service,
-    link2testclient,
     invite,
-    urls,
+    search_clear,
 ):
-    """Test notification being built on review submit."""
+    """A comment on a review is sent to the community members that can curate it, not to its author."""
     mail = app.extensions.get("mail")
-    creator = users[0]
-    receiver = users[1]
-    invite(users[0], str(community.id), "reader")
-    invite(receiver, str(community.id), "curator")
-    draft1 = draft_with_community_factory(
-        creator.identity, str(community.id), custom_workflow="curator_publish"
-    )  # so i don't have to create a new workflow
-    submit = submit_request_on_draft(creator.identity, draft1["id"], "publish_draft")
+    assert mail
+    submitter = users[0]
+    curator = users[1]
+    invite(submitter, str(community.id), "reader")
+    invite(curator, str(community.id), "curator")
+    draft = draft_with_community_submission_factory(submitter.identity, str(community.id))
+    review = submit_review(submitter.identity, draft["id"])
 
+    content = "ceci nes pa une comment"
     with mail.record_messages() as outbox:
-        content = "ceci nes pa une comment"
         events_service.create(
-            creator.identity,
-            submit["id"],
+            submitter.identity,
+            review["id"],
             {"payload": {"content": content}},
             CommentEventType,
         )
-        assert len(outbox) == 1  # recipient of the request should get
-        receivers = outbox[0].recipients
-        assert set(receivers) == {receiver.email}
-        assert content in outbox[0].body
+
+    assert _recipients(outbox) == {curator.email, community_owner.email}
+    assert all(content in sent_mail.body for sent_mail in outbox)

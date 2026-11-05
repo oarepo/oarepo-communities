@@ -3,25 +3,10 @@
 
 from __future__ import annotations
 
-from typing import Any
 from urllib.parse import urlencode
 
 import pytest
 from invenio_communities import current_communities
-
-
-def _community_data(community) -> dict[str, Any]:
-    return {
-        "metadata": {
-            "contributors": ["Contributor 1"],
-            "creators": ["Creator 1", "Creator 2"],
-            "title": "blabla",
-        },
-        "parent": {
-            "communities": {"default": str(community.id)},
-            "workflow": "default",
-        },
-    }
 
 
 def _test_review_process(community_id, communities_model, submitter_client, reviewer_client, upload_file) -> None:
@@ -162,39 +147,6 @@ def test_links(
     )
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
-def test_create_record_in_community(logged_client, communities_model, community_owner, community, urls, search_clear):
-    owner_client = logged_client(community_owner)
-    response = owner_client.post(urls["BASE_URL"], json=_community_data(community))
-    assert response.status_code == 201
-    assert response.json["parent"]["communities"]["default"] == str(community.id)
-
-
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
-def test_create_record_in_community_by_slug(
-    logged_client, communities_model, community_owner, community, urls, search_clear
-):
-    owner_client = logged_client(community_owner)
-    data = _community_data(community)
-    data["parent"]["communities"]["default"] = community.slug
-    response = owner_client.post(urls["BASE_URL"], json=data)
-    assert response.status_code == 201
-    assert response.json["parent"]["communities"]["default"] == str(community.id)
-
-
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
-def test_create_record_in_community_default_workflow(
-    logged_client, communities_model, community_owner, community, urls, search_clear
-):
-    owner_client = logged_client(community_owner)
-    data = _community_data(community)
-    del data["parent"]["workflow"]
-    response = owner_client.post(urls["BASE_URL"], json=data)
-    assert response.status_code == 201
-    assert response.json["parent"]["communities"]["default"] == str(community.id)
-
-
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_search(
     logged_client,
     communities_model,
@@ -237,7 +189,6 @@ def test_search(
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_search_community_records(
     logged_client,
     communities_model,
@@ -277,7 +228,7 @@ def test_search_all(
     communities_model,
     community_owner,
     published_record_with_community_factory,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     community_get_or_create,
     record_service,
     invite,
@@ -300,8 +251,8 @@ def test_search_all(
     record1 = published_record_with_community_factory(community_owner.identity, str(community_1.id))
     record2 = published_record_with_community_factory(community_owner.identity, str(community_2.id))
 
-    draft1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
-    draft2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
+    draft1 = draft_with_community_submission_factory(community_owner.identity, str(community_1.id))
+    draft2 = draft_with_community_submission_factory(community_owner.identity, str(community_2.id))
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
@@ -329,7 +280,6 @@ def test_search_all(
     assert len(reader_search.json["hits"]["hits"]) == 0
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_search_model(
     logged_client,
     communities_model,
@@ -366,13 +316,12 @@ def test_search_model(
     assert response_record2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_user_search(
     logged_client,
     communities_model,
     community_owner,
     users,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     community_get_or_create_in_default_workflow,
     invite,
     search_clear,
@@ -384,20 +333,20 @@ def test_user_search(
     community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
     invite(community_reader, community_1.id, "reader")
 
-    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
-    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
+    record1 = draft_with_community_submission_factory(community_owner.identity, str(community_1.id))
+    record2 = draft_with_community_submission_factory(community_owner.identity, str(community_2.id))
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
 
-    query1_url = urlencode({"q": f"parent.communities.default:{community_1.id} AND record_status:published"})
-    query2_url = urlencode({"q": f"parent.communities.default:{community_2.id} AND record_status:published"})
+    query1_url = urlencode({"q": f"parent.review.receiver.community:{community_1.id} AND record_status:published"})
+    query2_url = urlencode({"q": f"parent.review.receiver.community:{community_2.id} AND record_status:published"})
 
     response_record1 = owner_client.get(f"/user/records?{query1_url}")
     response_record2 = owner_client.get(f"/user/records?{query2_url}")
 
-    response_draft1 = owner_client.get(f"/user/records?q=parent.communities.default:{community_1.id}")
-    response_draft2 = owner_client.get(f"/user/records?q=parent.communities.default:{community_2.id}")
+    response_draft1 = owner_client.get(f"/user/records?q=parent.review.receiver.community:{community_1.id}")
+    response_draft2 = owner_client.get(f"/user/records?q=parent.review.receiver.community:{community_2.id}")
 
     assert len(response_record1.json["hits"]["hits"]) == 0
     assert len(response_record2.json["hits"]["hits"]) == 0
@@ -409,13 +358,12 @@ def test_user_search(
     assert response_draft2.json["hits"]["hits"][0]["id"] == record2["id"]
 
 
-@pytest.mark.xfail(reason="Needs the switch to the inveniordm review process.", strict=False)
 def test_user_search_model(
     logged_client,
     communities_model,
     community_owner,
     users,
-    draft_with_community_factory,
+    draft_with_community_submission_factory,
     community_get_or_create_in_default_workflow,
     record_service,
     invite,
@@ -428,16 +376,16 @@ def test_user_search_model(
     community_2 = community_get_or_create_in_default_workflow(community_owner, "comm2")
     invite(community_reader, community_1.id, "reader")
 
-    record1 = draft_with_community_factory(community_owner.identity, str(community_1.id))
-    record2 = draft_with_community_factory(community_owner.identity, str(community_2.id))
+    record1 = draft_with_community_submission_factory(community_owner.identity, str(community_1.id))
+    record2 = draft_with_community_submission_factory(community_owner.identity, str(community_2.id))
 
     communities_model.Record.index.refresh()
     communities_model.Draft.index.refresh()
     query1_url = urlencode(
-        {"q": f'parent.communities.default:{community_1.id} AND $schema:"local://communities_test-v1.0.0.json"'}
+        {"q": f'parent.review.receiver.community:{community_1.id} AND $schema:"local://communities_test-v1.0.0.json"'}
     )
     query2_url = urlencode(
-        {"q": f'parent.communities.default:{community_2.id} AND $schema:"local://communities_test-v1.0.0.json"'}
+        {"q": f'parent.review.receiver.community:{community_2.id} AND $schema:"local://communities_test-v1.0.0.json"'}
     )
     response_record1 = owner_client.get(f"/user/records?{query1_url}")
     response_record2 = owner_client.get(f"/user/records?{query2_url}")

@@ -11,7 +11,6 @@ from invenio_i18n import lazy_gettext as _
 from .notifications.generators import CommunityRecipient, CommunityRoleEmailRecipient
 from .services.custom_fields.workflow import WorkflowCF, lazy_workflow_options
 
-OAREPO_REQUESTS_DEFAULT_RECEIVER = "oarepo_requests.receiver.default_workflow_receiver_function"
 REQUESTS_ALLOWED_RECEIVERS = ["community_role"]
 
 
@@ -55,8 +54,6 @@ COMMUNITIES_ROUTES = {**INVENIO_COMMUNITIES_ROUTES, "my_communities": "/me/commu
 DISPLAY_USER_COMMUNITIES = True
 
 DISPLAY_NEW_COMMUNITIES = True
-
-COMMUNITIES_RECORDS_SEARCH_ALL = False
 
 # name of the default workflow for communities. It is used when a community does not have
 # an explicit workflow set

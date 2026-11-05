@@ -123,7 +123,9 @@ TargetCommunityRole("owner")  # Owner of the community being joined
 
 #### Record Owner in Community Generators
 
-These generators combine record ownership with community membership:
+These generators combine record ownership with community membership. They are `RequireAll`
+composites from oarepo-workflows, so the permission policy hosting them must inherit from
+`BooleanPermissionPolicyMixin` (`CommunityDefaultWorkflowPermissions` already does):
 
 ```python
 from oarepo_communities.services.permissions.generators import (
@@ -374,7 +376,6 @@ Helper functions for working with communities:
 ```python
 from oarepo_communities.utils import (
     get_community_needs_for_identity,
-    load_community_user_needs,
     community_id_from_record,
     community_to_dict,
 )
@@ -382,9 +383,6 @@ from oarepo_communities.utils import (
 # Get all community roles for a user
 community_roles = get_community_needs_for_identity(identity)
 # Returns: [("community-id-1", "owner"), ("community-id-2", "reader"), ...]
-
-# Load community needs into identity
-load_community_user_needs(identity)
 
 # Extract community ID from record
 community_id = community_id_from_record(record)
