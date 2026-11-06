@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Real UI tests for the collections blueprint.
 
 Fires actual HTTP requests through the Flask test client at the UI app the
@@ -86,7 +81,7 @@ def test_collection_detail_breadcrumb_links_back_to_browse(
 
 def test_unknown_collection_returns_404(
     client: FlaskClient,
-    collections_community,  # type: ignore[no-untyped-def]
+    collections_community,
 ) -> None:
     """A slug that does not resolve returns 404 through ``abort(404)``."""
     resp = client.get("/collections/no-such-tree/no-such-collection")
@@ -113,7 +108,7 @@ def test_menu_item_is_visible_when_flag_enabled(
 def test_menu_item_is_hidden_when_flag_disabled(
     app: Flask,
     collection_with_query: dict[str, Any],
-    set_app_config_fn_scoped,  # type: ignore[no-untyped-def]
+    set_app_config_fn_scoped,
 ) -> None:
     """Toggling ``COMMUNITIES_COLLECTIONS_ENABLED`` off hides the menu item."""
     set_app_config_fn_scoped({"COMMUNITIES_COLLECTIONS_ENABLED": False})

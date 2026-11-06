@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Permissions generators for communities service."""
 
 from __future__ import annotations
@@ -110,12 +105,12 @@ class CanSubmitRecordInCommunity(Generator):
         custom_fields_dict: dict[str, str | list[str]] = (
             record.custom_fields if isinstance(record, Community) else record.get("custom_fields", {})
         ) or {}
-        wfs: list[str] = get_allowed_workflows(custom_fields_dict)  # type: ignore[arg-type]
+        wfs: list[str] = get_allowed_workflows(custom_fields_dict)
         for workflow_code in wfs:
             workflow = current_oarepo_workflows.workflow_by_code[workflow_code]
             requests = workflow.requests().requests_by_id
             if "community-submission" not in requests:
-                current_app.logger.error(f"Workflow {workflow_code} does not have community-submission request")  # noqa: G004
+                current_app.logger.error("Workflow %s does not have community-submission request")
                 continue
             ret |= set(
                 requests["community-submission"].requester_generator.needs(record=record, community=record, **kwargs)
@@ -227,7 +222,7 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
         # if called on community, returns the required roles bound to the community id
         if record and isinstance(record, Community):
             for role in self.roles(**kwargs):
-                _needs.add(CommunityRoleNeed(str(record.id), role))  # type: ignore[reportArgumentType]
+                _needs.add(CommunityRoleNeed(str(record.id), role))
             return list(_needs)
 
         community_ids = []
@@ -248,7 +243,7 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
         for c in community_ids:
             for role in self.roles(**kwargs):
                 # "invenio_communities.generators.Need" is not assignable to "flask_principal.Need"
-                _needs.add(CommunityRoleNeed(c, role))  # type: ignore[reportArgumentType]
+                _needs.add(CommunityRoleNeed(c, role))
         return list(_needs)
 
     @abc.abstractmethod
@@ -263,12 +258,12 @@ class OARepoCommunityRoles(CommunityRoleMixinProtocol, Generator, abc.ABC):
     def query_filter(self, identity: Identity | None = None, **kwargs: Any) -> dsl.query.Query:
         """Filter for current identity."""
         if identity is None:
-            return dsl.Q("match_none")  # type: ignore[no-any-return]
+            return dsl.Q("match_none")
 
         community_ids = self._get_identity_communities(identity)
         if not community_ids:
-            return dsl.Q("match_none")  # type: ignore[no-any-return]
-        return dsl.Q("terms", **{self.query_filter_field(): community_ids})  # type: ignore[no-any-return]
+            return dsl.Q("match_none")
+        return dsl.Q("terms", **{self.query_filter_field(): community_ids})
 
 
 class CommunityRole(CommunityRoleMixin, OARepoCommunityRoles):
@@ -337,8 +332,9 @@ class TargetCommunityRole(DefaultCommunityRole):
             return []
         return [community_id]
 
+    # issue is draft supporting record, requires structural fix
     @override
-    def reference_receivers(
+    def reference_receivers(  # ty: ignore[invalid-method-override]
         self,
         record: Record | None = None,
         request_type: RequestType | None = None,
@@ -410,7 +406,7 @@ class RecordOwnerInRecordCommunityBase(CommunityRoleMixinProtocol, Generator):
     def query_filter(self, identity: Identity | None = None, **kwargs: Any) -> dsl.query.Query:
         """Create filters for current identity as owner."""
         if identity is None:
-            return dsl.Q("match_none")  # type: ignore[no-any-return]
+            return dsl.Q("match_none")
 
         user_in_communities = {
             (n.user, n.community)
@@ -425,9 +421,9 @@ class RecordOwnerInRecordCommunityBase(CommunityRoleMixinProtocol, Generator):
             for element in user_in_communities
         ]
         if not terms:
-            return dsl.Q("match_none")  # type: ignore[no-any-return]
+            return dsl.Q("match_none")
 
-        return reduce(lambda f1, f2: f1 | f2, terms)  # type: ignore[no-any-return]
+        return reduce(lambda f1, f2: f1 | f2, terms)
 
 
 class RecordOwnerInDefaultRecordCommunity(DefaultCommunityRoleMixin, RecordOwnerInRecordCommunityBase):

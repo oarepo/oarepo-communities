@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """UI blueprint for the "global" collections pages.
 
 Registers:
@@ -178,7 +173,7 @@ def _resolve_collections_community() -> Community | None:
 def browse_collections() -> ResponseReturnValue:
     """Global collections browse page — grid of every tree on the holder community."""
     from invenio_rdm_records.proxies import (
-        current_community_collections_service,  # pyright: ignore[reportAttributeAccessIssue]
+        current_community_collections_service,
     )
 
     community = _resolve_collections_community()
@@ -205,7 +200,7 @@ def collection_detail(tree_slug: str, col_slug: str) -> ResponseReturnValue:
     """
     from invenio_collections.errors import CollectionNotFound, CollectionTreeNotFound
     from invenio_rdm_records.proxies import (
-        current_community_collections_service,  # pyright: ignore[reportAttributeAccessIssue]
+        current_community_collections_service,
     )
     from invenio_search_ui.searchconfig import (
         search_app_config as build_search_app_config,

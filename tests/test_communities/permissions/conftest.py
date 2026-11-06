@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 from __future__ import annotations
 
 from typing import Any
@@ -33,7 +28,7 @@ def as_comparable_dict():
         if isinstance(d, dict):
             return {k: _as_comparable(v) for k, v in sorted(d.items())}
         if isinstance(d, (list, tuple)):
-            return {_as_comparable(v) for v in d}  # type: ignore[reportUnhashable]
+            return {_as_comparable(v) for v in d}
         return d
 
     return _as_comparable

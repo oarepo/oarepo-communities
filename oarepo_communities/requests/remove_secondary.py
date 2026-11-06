@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Request type for removing a record from a secondary community."""
 
 from __future__ import annotations
@@ -76,8 +71,8 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRecordRequestType):
 
     @classproperty[dict[str, type[RequestAction]]]
     @override
-    def available_actions(  # type: ignore[override] # TODO: fix in requests
-        cls,  # noqa: N805
+    def available_actions(
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,
@@ -117,5 +112,5 @@ class RemoveSecondaryCommunityRequestType(NonDuplicableOARepoRecordRequestType):
         except AttributeError:
             return False
         if len(communities) > 1:
-            return cast("bool", super().is_applicable_to(identity, topic, *args, **kwargs))
+            return super().is_applicable_to(identity, topic, *args, **kwargs)
         return False

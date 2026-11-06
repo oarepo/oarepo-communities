@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Service for managing community-role pseudo records. Used in entity resolver."""
 
 from __future__ import annotations
@@ -49,7 +44,7 @@ def minimal_service[T](kept_methods: list[str]) -> Callable[[type[T]], type[T]]:
             method = getattr(cls, method_name)
             if callable(method) and method_name not in kept_methods:
                 # unimplement the method
-                def unimplemented_method(self, *args, **kwargs) -> Any:  # type: ignore[] # noqa: ANN001, ANN003, ANN002
+                def unimplemented_method(self: T, *args: Any, **kwargs: Any) -> Any:
                     raise NotImplementedError(f"Please do not use this method on {cls.__name__}")
 
                 setattr(cls, method_name, unimplemented_method)
@@ -105,14 +100,11 @@ class CommunityRoleService(RecordService):
 
         query = dsl.Q("terms", id=list(community_ids))
 
-        communities_search_results = current_communities.service._read_many(  # noqa: SLF001
+        communities_search_results = current_communities.service._read_many(  # noqa SLF001
             identity, query, fields, len(community_ids), **kwargs
         )
 
-        id_to_record = {
-            hit["id"]: Community.loads(hit.to_dict())  # type: ignore[call-arg]
-            for hit in communities_search_results
-        }
+        id_to_record = {hit["id"]: Community.loads(hit.to_dict()) for hit in communities_search_results}
 
         results = [
             {

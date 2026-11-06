@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Fixtures for the collections tests.
 
 Everything real — no mocks. The top-level conftest already gives us the API
@@ -21,7 +16,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from invenio_access.permissions import system_identity
-from invenio_rdm_records.proxies import (  # pyright: ignore[reportAttributeAccessIssue]
+from invenio_rdm_records.proxies import (
     current_community_collections_service,
 )
 

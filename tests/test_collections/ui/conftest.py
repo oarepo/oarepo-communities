@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Fixture overrides that swap the API app factory for the UI one.
 
 Scoped to this subdirectory so the sibling ``test_collections_service.py``
@@ -43,13 +38,13 @@ class _MockManifest(JinjaManifest):
 class _MockManifestLoader(JinjaManifestLoader):
     """Hand back the mock manifest so tests skip a real webpack build."""
 
-    def load(self, _filepath: str):  # type: ignore[override]  # noqa: ANN202
+    def load(self, _filepath: str):
         """Load the mock manifest."""
         return _MockManifest()
 
 
 @pytest.fixture(scope="module")
-def create_app(instance_path, entry_points):  # type: ignore[no-untyped-def]
+def create_app(instance_path, entry_points):
     """Use the UI factory so the collections blueprint is actually registered."""
     return _create_app
 

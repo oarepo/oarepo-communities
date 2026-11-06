@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """oarepo-communities ui package."""
 
 from __future__ import annotations
@@ -91,7 +86,7 @@ overrides_list.append(
 )
 
 
-def ui_overrides(app: Flask) -> None:  # NOQA: ARG001
+def ui_overrides() -> None:
     """Define overrides that this library will register."""
     for override in overrides_list:
         if override not in current_ui_overrides:
@@ -103,10 +98,10 @@ def create_blueprint(app: Flask) -> Blueprint:
     app.config.get("OAREPO_UI_RESULT_LIST_ITEM_REGISTRATION_CALLBACKS", []).append(
         _register_community_uploads_result_item
     )
-    return TemplatePageUIResource(ComponentsResourceConfig()).as_blueprint()  # type: ignore[reportArgumentType]
+    return TemplatePageUIResource(ComponentsResourceConfig()).as_blueprint()  # ty: ignore[invalid-argument-type]
 
 
-def init_menu(app: Flask) -> None:  # NOQA: ARG001
+def init_menu() -> None:
     """Initialize menu."""
     communities = current_menu.submenu("communities")
     communities.submenu("home").register(
@@ -171,6 +166,6 @@ def register_template_globals(app: Flask) -> None:
 
 def finalize_app(app: Flask) -> None:
     """Finalize app."""
-    init_menu(app)
-    ui_overrides(app)
+    init_menu()
+    ui_overrides()
     register_template_globals(app)

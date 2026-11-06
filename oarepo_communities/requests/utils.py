@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Utility functions for requests in communities."""
 
 from __future__ import annotations
@@ -187,4 +182,4 @@ def user_has_permission(identity: Identity, community: Community, action: str) -
     """Check if the user has permission to perform the action in the community."""
     wf = get_workflow_from_community_custom_fields(community.custom_fields)
     permissions = wf.permissions(action, data={"parent": {"communities": {"default": str(community.id)}}})
-    return cast("bool", permissions.allows(identity))
+    return permissions.allows(identity)

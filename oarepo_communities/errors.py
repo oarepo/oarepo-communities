@@ -1,16 +1,12 @@
-#
-# Copyright (C) 2024 CESNET z.s.p.o.
-#
-# oarepo-requests is free software; you can redistribute it and/or
-# modify it under the terms of the MIT License; see LICENSE file for more
-# details.
-#
+# SPDX-FileCopyrightText: 2024 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Configuration of the draft record requests resource."""
 
 from __future__ import annotations
 
 import warnings
-from typing import Any, cast
+from typing import Any
 
 from flask_resources import (
     create_error_handler,
@@ -110,7 +106,7 @@ class OpenInclusionRequestAlreadyExistsError(Exception):
     @property
     def description(self) -> str:
         """Exception's description."""
-        return cast("str", _("There is already an open inclusion request for this community."))  # mypy bug
+        return _("There is already an open inclusion request for this community.")  # mypy bug
 
 
 RESOURCE_ERROR_HANDLERS = {

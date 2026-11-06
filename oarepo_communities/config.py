@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Configuration for oarepo-communities."""
 
 from __future__ import annotations
@@ -68,9 +63,9 @@ COMMUNITIES_RECORDS_SEARCH_ALL = False
 OAREPO_COMMUNITIES_DEFAULT_WORKFLOW = "default"
 
 NOTIFICATION_RECIPIENTS_RESOLVERS = {
-    "community_role": lambda key, notification: CommunityRoleEmailRecipient(key),  # noqa ARG005
+    "community_role": lambda key, _notification: CommunityRoleEmailRecipient(key),
     # unlike Invenio's CommunityMembersRecipient, CommunityRecipient notifies only the members that
     # can act on the request
-    "community": lambda key, notification: CommunityRecipient(key),  # noqa ARG005
+    "community": lambda key, _notification: CommunityRecipient(key),
 }
 """Recipient generators of the entity types that can be a receiver of a request."""

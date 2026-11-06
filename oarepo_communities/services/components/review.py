@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Component for setting workflow in the review process."""
 
 from __future__ import annotations
@@ -28,12 +23,13 @@ class SetWorkflowInReviewComponent(ServiceComponent):
 
     def create_review(
         self,
-        identity: Identity,  # noqa: ARG002
+        identity: Identity,
         data: dict[str, Any],
         record: Record,
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,
     ) -> None:
         """Set workflow for the record in the review process if it is not set yet."""
+        del identity, kwargs
         if record.parent.workflow is not None:
             return
         workflow = current_oarepo_communities.get_community_default_workflow(community_id=data["receiver"]["community"])

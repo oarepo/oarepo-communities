@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """oarepo-communities extension."""
 
 from __future__ import annotations
@@ -260,7 +255,7 @@ def fix_hardcoded_roles(app: Flask) -> None:
         needs_context = dict(cast("dict[str, object]", request_type.needs_context))
         community_roles = cast("list[str]", needs_context.get("community_roles", []))
         needs_context["community_roles"] = _replace_stock_roles(community_roles, replacements)
-        request_type.needs_context = needs_context  # pyright: ignore[reportAttributeAccessIssue]
+        request_type.needs_context = needs_context
 
     # C. notification recipients - members that should be notified about the above requests
     for notification_builders in (community_notification_builders, rdm_notification_builders):

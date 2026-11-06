@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Request type for submitting a record to a secondary community."""
 
 from __future__ import annotations
@@ -81,14 +76,14 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
     editable = False
 
     topic_can_be_none = False
-    payload_schema: Mapping[str, ma.fields.Field] = {  # type: ignore[assignment]
+    payload_schema: Mapping[str, ma.fields.Field] | None = {
         "community": ma.fields.String(required=True),
     }
 
     @classproperty
     @override
-    def available_actions(  # type: ignore[override]
-        cls,  # noqa: N805
+    def available_actions(
+        cls,  # noqa N805
     ) -> dict[str, type[RequestAction]]:
         return {
             **super().available_actions,
@@ -112,7 +107,7 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
         self,
         identity: Identity,
         *,
-        topic: Record,
+        topic: Record | None,
         request: Request | None = None,
         **kwargs: Any,
     ) -> str | LazyString:
@@ -142,7 +137,7 @@ class SecondaryCommunitySubmissionRequestType(NonDuplicableOARepoRecordRequestTy
         self,
         identity: Identity,
         *,
-        topic: Record,
+        topic: Record | None,
         request: Request | None = None,
         **kwargs: Any,
     ) -> str | LazyString:

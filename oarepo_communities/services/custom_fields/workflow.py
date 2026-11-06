@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Workflow custom field for communities."""
 
 from __future__ import annotations
@@ -56,7 +51,7 @@ class LazyChoices[T](list[T]):
         return iter(self._func())
 
     @override
-    def __getitem__(self, item: int) -> T:  # type: ignore[override]
+    def __getitem__(self, item: int) -> T:  # ty: ignore[invalid-method-override]
         return self._func()[item]
 
     @override
