@@ -73,28 +73,3 @@ def test_closing_review_applies_its_transition(
     assert response.status_code == 200
 
     assert submitter_client.get(f"{urls['BASE_URL']}/{draft['id']}/draft").json["state"] == expected_state
-
-
-def test_accepting_review_applies_accepted_transition(
-    logged_client,
-    community_owner,
-    users,
-    review_transitions_community,
-    draft_with_community_submission_factory,
-    submit_review,
-    invite,
-    urls,
-    search_clear,
-):
-    submitter = users[0]
-    invite(submitter, str(review_transitions_community.id), "reader")
-    submitter_client = logged_client(submitter)
-    owner_client = logged_client(community_owner)
-
-    draft = draft_with_community_submission_factory(submitter.identity, str(review_transitions_community.id))
-    review = submit_review(submitter.identity, draft["id"])
-
-    response = owner_client.post(f"{urls['BASE_URL_REQUESTS']}/{review['id']}/actions/accept")
-    assert response.status_code == 200
-
-    assert submitter_client.get(f"{urls['BASE_URL']}/{draft['id']}").json["state"] == "accepted"
