@@ -49,7 +49,6 @@ class CommunityDefaultWorkflowPermissions(BooleanPermissionPolicyMixin, RequestB
     can_review = (SystemProcess(), AuthenticatedUser())
 
 
-# TODO: here or oarepo-config?
 class CommunityPermissionPolicy(BooleanPermissionPolicyMixin, InvenioCommunityPermissionPolicy):
     """Community permission policy."""
 

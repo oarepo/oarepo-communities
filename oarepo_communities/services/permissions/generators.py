@@ -110,7 +110,7 @@ class CanSubmitRecordInCommunity(Generator):
         for workflow_code in wfs:
             workflow = current_oarepo_workflows.workflow_by_code[workflow_code]
             requests = workflow.requests().requests_by_id
-            if "community-submission" not in requests:  # REVIEW: not sure about the hardcoding here
+            if "community-submission" not in requests:
                 current_app.logger.error("Workflow %s does not have community-submission request", workflow_code)
                 continue
             ret |= set(
