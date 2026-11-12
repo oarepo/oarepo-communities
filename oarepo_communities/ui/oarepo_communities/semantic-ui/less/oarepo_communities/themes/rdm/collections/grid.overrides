@@ -1,0 +1,3 @@
+.ui.grid > .row > .four.wide.column.collection-grid-column.collection-card, .ui.grid > .column.row > .four.wide.column.collection-grid-column.collection-card, .ui.grid > .four.wide.column.collection-grid-column.collection-card, .ui.column.grid > .four.wide.column.collection-grid-column.collection-card {
+    width: 100% !important;
+}
