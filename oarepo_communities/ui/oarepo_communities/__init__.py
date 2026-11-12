@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 
 
 communities_detail_endpoint = "invenio_app_rdm_communities.communities_detail"
+community_collection_endpoint = "invenio_app_rdm_communities.community_collection"
 
 
 class ComponentsResourceConfig(TemplatePageUIResourceConfig):
@@ -54,6 +55,19 @@ def _register_community_uploads_result_item(
     )
     if community_uploads_result_list_item not in ui_overrides:  # pragma: no cover
         ui_overrides.add(community_uploads_result_list_item)
+
+
+def _register_community_collection_result_item(
+    ui_overrides: set[UIComponentOverride], schema: str, component: UIComponent
+) -> None:
+    """Register a per-schema result list item for the community collection page."""
+    community_collection_result_list_item = UIComponentOverride(  # pragma: no cover
+        community_collection_endpoint,
+        f"InvenioAppRDM.CollectionsSearch.ResultsList.item.{schema}",
+        component,
+    )
+    if community_collection_result_list_item not in ui_overrides:  # pragma: no cover
+        ui_overrides.add(community_collection_result_list_item)
 
 
 overrides_list = []
@@ -84,6 +98,20 @@ overrides_list.append(
 )
 overrides_list.append(
     UIComponentOverride(
+        community_collection_endpoint,
+        "InvenioAppRDM.CollectionsSearch.ResultsList.item",
+        dynamic_result_list_item,
+    )
+)
+overrides_list.append(
+    UIComponentOverride(
+        community_collection_endpoint,
+        "InvenioAppRDM.CollectionsSearch.SearchBar.element",
+        search_bar,
+    )
+)
+overrides_list.append(
+    UIComponentOverride(
         "invenio_communities.communities_settings",
         "InvenioCommunities.CommunityProfileForm.GridRow.DangerZone",
         DisabledComponent,
@@ -100,9 +128,9 @@ def ui_overrides(app: Flask) -> None:  # NOQA: ARG001
 
 def create_blueprint(app: Flask) -> Blueprint:
     """Register blueprint for this resource."""
-    app.config.get("OAREPO_UI_RESULT_LIST_ITEM_REGISTRATION_CALLBACKS", []).append(
-        _register_community_uploads_result_item
-    )
+    callbacks = app.config.get("OAREPO_UI_RESULT_LIST_ITEM_REGISTRATION_CALLBACKS", [])
+    callbacks.append(_register_community_uploads_result_item)
+    callbacks.append(_register_community_collection_result_item)
     return TemplatePageUIResource(ComponentsResourceConfig()).as_blueprint()  # type: ignore[reportArgumentType]
 
 
