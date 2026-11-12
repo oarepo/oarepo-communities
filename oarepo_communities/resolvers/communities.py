@@ -68,7 +68,9 @@ class CommunityRoleResolver(EntityResolver):
 
     @override
     def _reference_entity(self, entity: Any) -> dict[str, str]:
-        """Create a reference dict for the given record."""
+        """Create a reference dict for the given CommunityRoleRecord object."""
+        if not isinstance(entity, CommunityRoleRecord):
+            raise TypeError("Entity is not community role.")
         return {"community_role": entity.id}
 
     @override
