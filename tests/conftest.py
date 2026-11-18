@@ -15,6 +15,7 @@ from invenio_records_permissions.generators import (
     SameAs,
     SystemProcess,
 )
+from oarepo_model.customizations import PrependMixin
 from oarepo_rdm import rdm_minimal_preset
 from oarepo_requests.model.presets.requests import requests_preset
 from oarepo_requests.receiver import default_workflow_receiver_function
@@ -34,9 +35,12 @@ from pytest_oarepo.permission_generators import UserGenerator
 
 from oarepo_communities.model.presets import communities_preset
 from oarepo_communities.services.permissions.generators import (
+    CommunitiesAwareInAnyWorkflow,
     CommunityMembers,
     CommunityRole,
     DefaultCommunityRole,
+    IfNoRecordOrData,
+    InAnyContextCommunity,
     PrimaryCommunityRole,
     RecordOwnerInDefaultRecordCommunity,
     RecordOwnerInRecordCommunity,
@@ -95,6 +99,12 @@ def model_types():
     }
 
 
+class CommunitiesAwareRecordPermissions:
+    """Record-service create check that passes each workflow the communities allowing it."""
+
+    can_create = (SystemProcess(), CommunitiesAwareInAnyWorkflow("create"))
+
+
 @pytest.fixture(scope="session")
 def communities_model(model_types):
     from oarepo_model.api import model
@@ -110,7 +120,8 @@ def communities_model(model_types):
         ],
         types=[model_types],
         metadata_type="Metadata",
-        customizations=[],
+        # applied after all presets, so it takes precedence over the presets' can_create
+        customizations=[PrependMixin("PermissionPolicy", CommunitiesAwareRecordPermissions)],
         configuration={},
     )
     model.register()
@@ -136,6 +147,15 @@ def base_model_schema():
 
 class TestCommunityWorkflowPermissions(CommunityDefaultWorkflowPermissions):
     """Test workflow permissions with community roles."""
+
+    # communities context exists only for the record-less create check; with a record
+    # (e.g. can_manage_files below) the role is resolved against the record's community
+    can_create = (
+        IfNoRecordOrData(
+            then_=[InAnyContextCommunity(DefaultCommunityRole("owner"))],
+            else_=[DefaultCommunityRole("owner")],
+        ),
+    )
 
     can_read = (
         RecordOwners(),
