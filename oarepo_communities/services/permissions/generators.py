@@ -8,6 +8,7 @@ from __future__ import annotations
 import abc
 import copy
 import uuid
+from collections import defaultdict
 from functools import wraps
 from typing import TYPE_CHECKING, Protocol, cast, override
 
@@ -20,12 +21,13 @@ from invenio_communities.proxies import current_roles
 from invenio_db import db
 from invenio_drafts_resources.records.api import Record as RecordWithParent
 from invenio_rdm_records.services.generators import RecordOwners
-from invenio_records_permissions.generators import Generator
+from invenio_records_permissions.generators import ConditionalGenerator, Generator
 from invenio_search.engine import dsl
 from oarepo_runtime.typing import require_kwargs
 from oarepo_workflows.proxies import current_oarepo_workflows
 from oarepo_workflows.requests import RecipientGeneratorMixin
 from oarepo_workflows.services.permissions.composite import RequireAll
+from oarepo_workflows.services.permissions.generators import InAnyWorkflow
 
 from oarepo_communities.utils import (
     get_community_ids_from_record,
@@ -34,7 +36,7 @@ from oarepo_communities.utils import (
 from oarepo_communities.workflow import get_allowed_workflows
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Callable, Mapping, Sequence
     from typing import Any
 
     from flask_principal import Identity
@@ -93,6 +95,80 @@ class InAnyCommunity(Generator):
                 )
             )
         return list(needs)
+
+
+def _workflow_code_to_communities() -> dict[str, set[str]]:
+    """Map workflow codes to ids of communities allowing them."""
+    mapping = defaultdict(set)
+    # only id + json are needed, so do not hydrate full ORM rows
+    for community_id, data in db.session.query(CommunityMetadata.id, CommunityMetadata.json).all():
+        for workflow_code in get_allowed_workflows((data or {}).get("custom_fields") or {}):
+            mapping[workflow_code].add(str(community_id))
+    return dict(mapping)
+
+
+class CommunitiesAwareInAnyWorkflow(InAnyWorkflow):
+    """Communities aware InAnyWorkflow generator.
+
+    InAnyWorkflow generator that sends set of communities in which this workflow is allowed to the context of the
+    downstream permission policy.
+    """
+
+    def _needs(self, method: str, **context: Any) -> Sequence[Need]:
+        workflow_code_to_communities = _workflow_code_to_communities()
+        ret = set()
+        for workflow in current_oarepo_workflows.record_workflows:
+            ctx_to_pass = {**context, "communities": workflow_code_to_communities.get(workflow.code, set())}
+            ret |= set(getattr(workflow.permissions(self._action, **ctx_to_pass), method))
+        return list(ret)
+
+    @override
+    def needs(self, **context: Any) -> Sequence[Need]:
+        return self._needs("needs", **context)
+
+    @override
+    def excludes(self, **context: Any) -> Sequence[Need]:
+        return self._needs("excludes", **context)
+
+
+class InAnyContextCommunity(Generator):
+    """Generator that calls the internal permission generator for all communities."""
+
+    def __init__(self, permission_generator: Generator, **kwargs: Any) -> None:
+        """Create InAnyCommunity generator."""
+        self.permission_generator = permission_generator
+        super().__init__(**kwargs)
+
+    def _create_needs(self, method: str, communities: set[str], **kwargs: Any) -> Sequence[Need]:
+        # outside CommunitiesAwareInAnyWorkflow (SameAs, FromRecordWorkflow, direct workflow checks)
+        # there is no communities context, so resolve against the record/data community as usual
+        needs = set()  # to avoid duplicates
+
+        # the data might have been passed, for example during can_create = [InAnyContextCommunity(...)]
+        # if so, we need to shallow copy the data to avoid modifying the original
+        data = kwargs.pop("data", None)
+        data = {**data} if data is not None else {}
+
+        # and if parent is present, we deepcopy it as we will change the communities dict inside
+        if "parent" in data:
+            data["parent"] = copy.deepcopy(data["parent"])
+        else:
+            data["parent"] = {}
+
+        for community_id in communities:
+            data["parent"]["communities"] = {"default": community_id}
+            needs |= set(getattr(self.permission_generator, method)(data=data, **kwargs))
+        return list(needs)
+
+    @require_kwargs("communities")
+    @override
+    def needs(self, communities: set[str], **kwargs: Any) -> Sequence[Need]:
+        return self._create_needs("needs", communities, **kwargs)
+
+    @require_kwargs("communities")
+    @override
+    def excludes(self, communities: set[str], **kwargs: Any) -> Sequence[Need]:
+        return self._create_needs("excludes", communities, **kwargs)
 
 
 class CanSubmitRecordInCommunity(Generator):
@@ -400,3 +476,28 @@ class RecordOwnerInDefaultRecordCommunity(RequireAll):
 
 
 RecordOwnerInPrimaryRecordCommunity = RecordOwnerInDefaultRecordCommunity
+
+
+class IfNoRecordOrData(ConditionalGenerator):
+    """Conditional generator checking whether record or data representing a record with communities are input."""
+
+    # TODO: the pattern of sending communities through data is based on sending comminity data on record creation
+    # which is deprecated
+    @override
+    def _condition(self, record: Record | None = None, data: dict[str, Any] | None = None, **kwargs: Any) -> bool:
+        """Check if there is a record."""
+        community_data = (data or {}).get("parent", {}).get("communities", {}).get("default", None)
+        return bool(not record and not community_data)
+
+
+class CommunitiesAwarePolicyMixin:
+    """Permission policy to be used in permission presets directly on RecordServiceConfig.permission_policy_cls.
+
+    Do not use this class in Workflow constructor.
+    """
+
+    can_create = (
+        IfNoRecordOrData(
+            then_=[InAnyContextCommunity(PrimaryCommunityRole("curator"))], else_=[PrimaryCommunityRole("curator")]
+        ),
+    )
