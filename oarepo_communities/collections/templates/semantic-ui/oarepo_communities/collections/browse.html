@@ -1,0 +1,74 @@
+{#-
+    Collections browse page — grid of every tree on the "global" community.
+    Cards link into the per-collection search page.
+-#}
+{%- extends config.BASE_TEMPLATE %}
+{%- set title = _("Collections") %}
+
+{%- block page_body %}
+<div class="ui container rel-mt-3 rel-mb-3">
+  <h1 class="ui header">{{ _("Collections") }}</h1>
+
+  {%- if not trees %}
+    <p class="ui text text-muted">{{ _("No collections available.") }}</p>
+  {%- else %}
+    {%- for _tree in trees.values() %}
+      {%- if _tree.collections %}
+        <h2 class="ui medium header rel-mt-2">{{ _tree.title }}</h2>
+        <div class="ui divider mt-0"></div>
+        <div class="ui relaxed grid stackable">
+          {%- for _wrapper in _tree.collections %}
+            <div class="four wide column">
+                {%- set _c = _wrapper[_wrapper.root] %}
+                <div class="ui mt-0 mb-0 rel-ml-1">
+                    <div class="content rel-mb-1">
+                        <div class="ui grid">
+                            <div class="twelve wide column middle aligned left floated">
+                                <div class="flex align-items-center">
+                                    <div class="collection-logo-wrapper computer only">
+                                        <img class="collection-logo"
+                                            src="{{ url_for('static', filename='images/collections/' ~ _c.slug ~ '.jpg') }}"
+                                            alt="{{ _c.title }}"
+                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
+                                        <div class="collection-logo-fallback" style="display:none;">
+                                            <i class="folder open outline icon"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="theme-primary-text mt-0">
+                                        <a
+                                            href="{{ url_for('oarepo_communities_collections.collection_detail', tree_slug=_tree.slug, collection_slug=_c.slug) }}">
+                                            {{ _c.title }}
+                                        </a>
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="four wide column collection-number middle aligned left floated">
+                                <label class="ui small label middle aligned">{{ "{:,}".format(_c.num_records) }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {%- if _c.children %}
+                <div class="content">
+                    {%- for _child_id in _c.children %}
+                    {%- set _child = _wrapper[_child_id] %}
+                    <div class="ui container mb-0 mt-0 rel-ml-1">
+                        <h5 class="theme-primary-text">
+                            <a href='{{ url_for("oarepo_communities_collections.collection_detail", collection_slug=_child.slug, tree_slug=_tree.slug )}}'>
+                                {{ _child.title }}
+                            </a>
+                            <label class="ui tiny text-muted">{{ "(" ~ "{:,}".format(_child.num_records) ~ ")"}}</label>
+                        </h5>
+                    </div>
+                    {%- endfor %}
+                </div>
+                {%- endif %}
+            </div>
+          {%- endfor %}
+        </div>
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
+</div>
+{%- endblock page_body %}
