@@ -9,7 +9,7 @@
 """Cross-repository ("global") collections built on a designated community.
 
 A single Invenio community — the one whose slug matches
-``INVENIO_COLLECTIONS_COMMUNITY_SLUG`` (expected to be ``"global"``) — is treated as a holder for
+``COLLECTIONS_COMMUNITY_SLUG`` (expected to be ``"global"``) — is treated as a holder for
 collection trees that should return records from every community, not only
 records tagged with the holder. The records-side behavior (skipping the
 community filter for this community) lives in ``services.py``; see

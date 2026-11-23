@@ -62,7 +62,7 @@ def create_blueprint(app: Flask) -> Blueprint:
     blueprint = Blueprint(
         BLUEPRINT_NAME,
         __name__,
-        url_prefix=app.config.get("INVENIO_COLLECTIONS_UI_URL_PREFIX", DEFAULT_URL_PREFIX),
+        url_prefix=app.config.get("COLLECTIONS_UI_URL_PREFIX", DEFAULT_URL_PREFIX),
         template_folder="templates",
     )
     blueprint.add_url_rule("", view_func=browse_collections)
@@ -85,7 +85,7 @@ def _init_menu(app: Flask) -> None:
     """Register the top-level ``Collections`` menu item, visible conditionally.
 
     The item is shown whenever ``COMMUNITIES_COLLECTIONS_ENABLED`` is truthy
-    and ``INVENIO_COLLECTIONS_COMMUNITY_SLUG`` equals ``"global"``
+    and ``COLLECTIONS_COMMUNITY_SLUG`` equals ``"global"``
     (see :func:`_collections_menu_visible`). Visibility is not gated on the
     holder community existing or having any collections; if those are missing
     the tab simply leads to an empty browse page.
@@ -103,12 +103,12 @@ def _collections_menu_visible() -> bool:
     """Return True if the Collections menu item should render.
 
     Requires ``COMMUNITIES_COLLECTIONS_ENABLED`` to be truthy and
-    ``INVENIO_COLLECTIONS_COMMUNITY_SLUG`` to equal ``"global"``.
+    ``COLLECTIONS_COMMUNITY_SLUG`` to equal ``"global"``.
     """
     config = current_app.config
     return bool(
         config.get("COMMUNITIES_COLLECTIONS_ENABLED", False)
-        and config.get("INVENIO_COLLECTIONS_COMMUNITY_SLUG") == "global"
+        and config.get("COLLECTIONS_COMMUNITY_SLUG") == "global"
     )
 
 
@@ -179,7 +179,7 @@ def _resolve_collections_community() -> Community | None:
     from invenio_communities.communities.records.api import Community
     from invenio_pidstore.errors import PIDDoesNotExistError
 
-    slug = current_app.config.get("INVENIO_COLLECTIONS_COMMUNITY_SLUG")
+    slug = current_app.config.get("COLLECTIONS_COMMUNITY_SLUG")
     if not slug:
         return None
     try:

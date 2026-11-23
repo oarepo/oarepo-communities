@@ -25,7 +25,7 @@ class GlobalCollectionsRecordsService(OARepoCommunityRecordsService):
     """Community records service used by collections.
 
     Behaves like the community-scoped multiplexed search, except for the
-    global-collections community (``INVENIO_COLLECTIONS_COMMUNITY_SLUG``),
+    global-collections community (``COLLECTIONS_COMMUNITY_SLUG``),
     whose collections search across every record instead of only records
     tagged with the holder community.
     """
@@ -43,7 +43,7 @@ class GlobalCollectionsRecordsService(OARepoCommunityRecordsService):
         **kwargs: Any,
     ) -> RecordList:
         """Search a community's records, unscoped for the global-collections community."""
-        slug = current_app.config.get("INVENIO_COLLECTIONS_COMMUNITY_SLUG")
+        slug = current_app.config.get("COLLECTIONS_COMMUNITY_SLUG")
         if slug is not None:
             community = self.community_cls.pid.resolve(community_id)
             if community.slug == slug:
