@@ -203,6 +203,15 @@ class TestWithRecordOwnerInDefaultRecordCommunityWorkflowPermissions(TestWithCur
     )
 
 
+class TestRestrictedReadWorkflowPermissions(TestCommunityWorkflowPermissions):
+    """Like TestCommunityWorkflowPermissions but published records are not public."""
+
+    can_read = (
+        RecordOwners(),
+        CommunityRole("owner"),
+    )
+
+
 class DefaultRequests(WorkflowRequestPolicy):
     """Default requests with record owner as the only requester."""
 
@@ -432,6 +441,12 @@ WORKFLOWS = [
             (TestCommunityWorkflowPermissions,),
             {"can_submit_record": [UserGenerator("user1@example.org")]},
         ),
+        request_policy_cls=DefaultRequests,
+    ),
+    Workflow(
+        code="restricted_read",
+        label=_("For testing that search respects read permissions."),
+        permission_policy_cls=TestRestrictedReadWorkflowPermissions,
         request_policy_cls=DefaultRequests,
     ),
 ]
