@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2026 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-communities (see https://github.com/oarepo/oarepo-communities).
-#
-# oarepo-communities is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """UI blueprint for the "global" collections pages.
 
 Registers:
@@ -107,8 +102,7 @@ def _collections_menu_visible() -> bool:
     """
     config = current_app.config
     return bool(
-        config.get("COMMUNITIES_COLLECTIONS_ENABLED", False)
-        and config.get("COLLECTIONS_COMMUNITY_SLUG") == "global"
+        config.get("COMMUNITIES_COLLECTIONS_ENABLED", False) and config.get("COLLECTIONS_COMMUNITY_SLUG") == "global"
     )
 
 
@@ -220,11 +214,12 @@ def collection_detail(tree_slug: str, collection_slug: str) -> ResponseReturnVal
     from invenio_rdm_records.proxies import (
         current_community_collections_service,  # pyright: ignore[reportAttributeAccessIssue]
     )
+
     community = _resolve_collections_community()
     if community is None:
         return abort(404)
 
-    g._menu_kwargs = {**(getattr(g, "_menu_kwargs", None) or {}), "pid_value": community.slug}
+    g._menu_kwargs = {**(getattr(g, "_menu_kwargs", None) or {}), "pid_value": community.slug}  # noqa: SLF001
 
     community_result = current_communities.service.result_item(
         current_communities.service,
@@ -263,7 +258,7 @@ def collection_detail(tree_slug: str, collection_slug: str) -> ResponseReturnVal
         community=community_result,
         community_ui=community_ui,
         collection=collection_ui,
-        tree=collection._collection.collection_tree,
+        tree=collection._collection.collection_tree,  # noqa: SLF001 - same as invenio-app-rdm; CollectionItem has no public tree accessor
         logo=logo,
         permissions=community_result.has_permissions_to(HEADER_PERMISSIONS),
     )
