@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-FileCopyrightText: 2026 CESNET z.s.p.o
 # SPDX-License-Identifier: MIT
 
 """Cross-repository ("global") collections built on a designated community.
