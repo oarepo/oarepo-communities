@@ -14,3 +14,17 @@ RDM_COMMUNITY_SUBMISSION_REQUEST_CLS = CommunitySubmission
 # Use the RDM subcommunity request type (adds the self_html link that the
 # request timeline UI needs); the bare invenio_communities class has links_item={}.
 COMMUNITIES_SUB_REQUEST_CLS = RDMSubCommunityRequest
+
+COLLECTIONS_COMMUNITY_SLUG = "global"
+"""Slug of the community that holds cross-repository ("global") collection trees.
+
+Set to ``None`` in deployment config to disable this behavior.
+"""
+
+COLLECTIONS_UI_URL_PREFIX = "/collections"
+"""URL prefix of the global collections UI pages."""
+
+RDM_COMMUNITY_COLLECTIONS_RECORDS_SERVICE_CLASS = (
+    "oarepo_communities.collections.services:GlobalCollectionsRecordsService"
+)
+"""Collections records service that searches all records for the global community."""
